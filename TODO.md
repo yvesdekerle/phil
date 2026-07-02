@@ -44,8 +44,9 @@ Roadmap détaillée du projet, organisée par catégorie. Chaque ticket a un ID 
 ### [x] PHIL-A01 — Bootstrap projet Next.js
 Initialiser un projet Next.js 16 avec App Router, TypeScript en mode strict, Tailwind CSS, ESLint, et Prettier. Configurer la structure de dossiers : `app/` pour les routes, `components/` pour les composants partagés, `lib/` pour la logique métier, `db/` pour les schémas et migrations, `types/` pour les types TypeScript globaux. Initialiser un repo Git, créer une branche `main` et `develop`. Configurer Biome ou ESLint+Prettier pour le formatage automatique au commit (lefthook ou husky).
 
-### [ ] PHIL-A02 — Création projet Vercel et premier déploiement
+### [x] PHIL-A02 — Création projet Vercel et premier déploiement *(fait le 2026-07-02)*
 Créer un compte Vercel, lier le repo GitHub, déployer une page d'accueil minimale pour valider l'URL `phil.vercel.app` (ou variante si déjà prise). Configurer les environnements (production sur main, preview sur les autres branches). Vérifier que HTTPS fonctionne et que l'URL est stable.
+> Note : `phil.vercel.app` était pris — URL de production : `https://phil-phi-nine.vercel.app` (alias auto-assigné, une variante type `phil-app.vercel.app` reste possible plus tard via `vercel domains add`). Repo GitHub `yvesdekerle/phil` poussé (main + develop) et connecté à Vercel : production sur `main`, preview sur les autres branches. Premier déploiement vérifié en HTTPS.
 
 ### [ ] PHIL-A03 — Création projet Supabase
 Créer un compte Supabase, créer un projet en région européenne (Frankfurt ou Paris), récupérer les clés API (anon key publique et service role key privée). Stocker les clés dans les variables d'environnement Vercel (jamais en dur dans le code). Tester la connexion depuis Next.js avec une requête simple.
