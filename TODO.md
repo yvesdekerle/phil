@@ -56,8 +56,9 @@ Créer un compte Supabase, créer un projet en région européenne (Frankfurt ou
 Activer le provider Google dans Supabase Auth. Créer un projet Google Cloud, configurer OAuth consent screen et identifiants OAuth 2.0, déclarer les redirect URIs (Supabase callback URL + URL Vercel). Implémenter les pages `/login` et `/auth/callback` côté Next.js. Vérifier qu'on peut se connecter et qu'un utilisateur est créé dans `auth.users` Supabase.
 > Note : projet Google Cloud `Phil` (nouvelle UI Google Auth Platform), client OAuth web `phil-supabase`, consent screen External. Flow PKCE : `/login` (page client minimale, l'UI soignée arrive en C01) → Google → `{supabase}/auth/v1/callback` → `/auth/callback` (échange code/session) → `/`. Redirect URLs Supabase : localhost, prod, wildcard previews. Login vérifié en local, user créé dans `auth.users` (provider google). Page d'accueil affiche l'état de session.
 
-### [ ] PHIL-A05 — Setup variables d'environnement
+### [x] PHIL-A05 — Setup variables d'environnement *(fait le 2026-07-03)*
 Lister toutes les variables nécessaires : Supabase URL, Supabase anon key, Supabase service role key, Resend API key. Créer un fichier `.env.example` documenté. Configurer les variables dans Vercel pour les trois environnements (development, preview, production).
+> Note : `.env.example` réécrit et documenté. Supabase (3 vars) sur les 3 envs Vercel ; `NEXT_PUBLIC_APP_URL` sur production + development seulement (les URLs preview varient par branche — à traiter si besoin en Phase 7 invitations). Resend différé à K01, Upstash à J02, Sentry retiré (backlog). Google OAuth vit dans Supabase, pas en env applicative.
 
 ---
 
