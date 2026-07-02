@@ -46,3 +46,6 @@ next-env.d.ts
 
 # IDE
 .idea/
+
+# supabase CLI
+supabase/.temp/

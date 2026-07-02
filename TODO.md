@@ -48,8 +48,9 @@ Initialiser un projet Next.js 16 avec App Router, TypeScript en mode strict, Tai
 Créer un compte Vercel, lier le repo GitHub, déployer une page d'accueil minimale pour valider l'URL `phil.vercel.app` (ou variante si déjà prise). Configurer les environnements (production sur main, preview sur les autres branches). Vérifier que HTTPS fonctionne et que l'URL est stable.
 > Note : `phil.vercel.app` était pris — URL de production : `https://phil-phi-nine.vercel.app` (alias auto-assigné, une variante type `phil-app.vercel.app` reste possible plus tard via `vercel domains add`). Repo GitHub `yvesdekerle/phil` poussé (main + develop) et connecté à Vercel : production sur `main`, preview sur les autres branches. Premier déploiement vérifié en HTTPS.
 
-### [ ] PHIL-A03 — Création projet Supabase
+### [x] PHIL-A03 — Création projet Supabase *(fait le 2026-07-02)*
 Créer un compte Supabase, créer un projet en région européenne (Frankfurt ou Paris), récupérer les clés API (anon key publique et service role key privée). Stocker les clés dans les variables d'environnement Vercel (jamais en dur dans le code). Tester la connexion depuis Next.js avec une requête simple.
+> Note : projet `phil` (ref `xinbuahgscaydpkcamsl`) créé via le dashboard en région **eu-west-1 Ireland** (écart : Frankfurt/Paris prévu — reste dans l'UE, RGPD OK). Postgres 17. Clés legacy anon/service_role utilisées (cohérence avec le nommage CLAUDE.md). Env vars posées sur les 3 environnements Vercel + `.env.local`. Clients `@supabase/ssr` dans `lib/supabase/` (client.ts / server.ts) et route de test `/api/health`. CLI `supabase` en devDependency.
 
 ### [ ] PHIL-A04 — Setup Supabase Auth avec Google SSO
 Activer le provider Google dans Supabase Auth. Créer un projet Google Cloud, configurer OAuth consent screen et identifiants OAuth 2.0, déclarer les redirect URIs (Supabase callback URL + URL Vercel). Implémenter les pages `/login` et `/auth/callback` côté Next.js. Vérifier qu'on peut se connecter et qu'un utilisateur est créé dans `auth.users` Supabase.
