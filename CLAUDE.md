@@ -21,6 +21,17 @@ Le ton général du produit doit refléter cet esprit : organisé sans être rig
 - **Offline lecture** : consultation des données voyage et documents marqués offline même sans réseau.
 - **Coût zéro en v1** : tous les services utilisés sont en free tier.
 
+## Workflow de développement avec Claude Code
+
+Le développement suit un cycle strict par ticket, piloté par `TODO.md` (source de vérité de l'avancement). Le prompt de session complet est dans `PROMPT.md`. L'essentiel :
+
+1. Reprendre le ticket `[~]` en cours s'il existe, sinon le premier `[ ]` dans l'ordre des phases (les tickets hors phases attendent la fin de projet ou une demande explicite)
+2. Marquer `[~]`, annoncer le plan avant de coder, implémenter
+3. `npm run build` + `npm run lint` doivent passer avant toute suite
+4. Marquer `[x]` avec la date + note éventuelle dans TODO.md
+5. **Un commit par ticket** (TODO.md inclus dans le commit) : `feat(scope): description (PHIL-XXX)`
+6. Les travaux découverts en cours de route deviennent de **nouveaux tickets** dans TODO.md, jamais du code non tracé
+
 ## Stack technique
 
 | Couche | Techno | Rôle |
@@ -37,15 +48,16 @@ Le ton général du produit doit refléter cet esprit : organisé sans être rig
 | Email | Resend + React Email | Invitations, alertes |
 | PWA / offline | Serwist | Service worker, cache |
 | Cache local | Dexie.js (IndexedDB) | Stockage offline des données voyage |
-| Monitoring | Sentry | Erreurs production |
 | Validation | Zod | Validation entrées API et formulaires |
 | Formulaires | React Hook Form + Zod | Gestion des formulaires |
 | Dates | date-fns + date-fns-tz | Manipulations et fuseaux horaires |
-| Tests | Vitest + Playwright | Unitaires et end-to-end |
+| Vérification RLS | Script manuel (SQL ou tsx) | Sécurité des politiques d'accès, sans CI |
+
+**Différé volontairement (voir Backlog dans TODO.md)** : Sentry (les logs Vercel suffisent pour un cercle d'amis), CI GitHub Actions (Vercel builde déjà chaque push/PR), tests automatisés Vitest/Playwright (à introduire quand le projet ou l'équipe grossit).
 
 ## Pourquoi ces choix
 
-**Next.js monolithique plutôt que front/back séparés** : pour un projet personnel, séparer un backend Spring Boot d'un frontend React doublerait l'effort. Next.js 16 permet d'avoir tout dans un seul projet, déployé en une commande sur Vercel. On bénéficie en plus du dev startup ultra rapide (~400% plus rapide), de Turbopack par défaut, et du Server Fast Refresh.
+**Next.js monolithique plutôt que front/back séparés** : pour un projet personnel, séparer un backend Spring Boot d'un frontend React doublerait l'effort. Next.js permet d'avoir tout dans un seul projet, déployé en une commande sur Vercel.
 
 **Supabase plutôt que Neon + Auth.js + R2** : Supabase regroupe Postgres, auth Google, storage et RLS dans un seul service free tier. Une seule intégration au lieu de trois.
 
@@ -54,6 +66,8 @@ Le ton général du produit doit refléter cet esprit : organisé sans être rig
 **WebAuthn plutôt qu'un PIN** : la clé privée ne quitte jamais l'appareil, plus sûr qu'un PIN, gratuit, natif au navigateur, déclenche Face ID/Touch ID automatiquement.
 
 **Vercel + domaine `.vercel.app`** : HTTPS gratuit (requis pour WebAuthn), déploiement par git push, free tier suffisant. Domaine perso ajoutable plus tard sans rien casser. URL prévue : `phil.vercel.app` (ou variante si déjà prise, par exemple `phil-app.vercel.app`, `getphil.vercel.app`, `heyphil.vercel.app`).
+
+**Pas de CI ni de Sentry en v1** : Vercel builde et déploie chaque push avec preview par branche ; les erreurs de type sortent au build, le lint tourne dans l'IDE et en local. Les utilisateurs sont des amis qui signalent les bugs directement. Ces outils seront ajoutés quand un second contributeur arrive ou que la base de tests le justifie.
 
 ## Identité visuelle et ton
 
@@ -89,7 +103,7 @@ Tables principales :
 
 ## Règles de partage critiques
 
-Ces règles sont implémentées en Row Level Security et **doivent** être testées exhaustivement :
+Ces règles sont implémentées en Row Level Security et **doivent** être vérifiées exhaustivement (script de vérification RLS, ticket PHIL-B12) :
 
 1. Un document `scope=VAULT` est visible **uniquement** par son propriétaire, sauf s'il existe une ligne `document_shares` pour un voyage dont le visiteur est participant.
 2. Un document `scope=TRIP` est visible par **tous** les participants du voyage référencé.
@@ -118,9 +132,7 @@ lib/                    # Logique métier et helpers
   auth/                 # Helpers d'authentification
   encryption/           # Chiffrement et filigrane
   offline/              # Cache et sync offline
-db/                     # Schémas et migrations
-  migrations/
-  schema.ts             # Si Drizzle
+scripts/                # Scripts utilitaires (vérification RLS, etc.)
 types/                  # Types TypeScript globaux
 supabase/               # Config Supabase CLI
   migrations/           # SQL versionné
@@ -142,6 +154,7 @@ supabase/               # Config Supabase CLI
 - Toute entrée utilisateur validée par Zod avant traitement
 - Toute opération sur le coffre passe par un endpoint qui logge dans `vault_access_log`
 - Pas d'URL signée long-lived pour les documents : toujours via API authentifiée
+- Toute table exposée a ses politiques RLS actives avant utilisation côté front
 
 **Fuseaux horaires** :
 - Tous les `*_at` stockés en UTC (`timestamptz` Postgres)
@@ -154,10 +167,10 @@ supabase/               # Config Supabase CLI
 - Pas de modification via le dashboard Supabase en dehors du dev local
 - Les migrations sont commitées et appliquées via le CLI Supabase
 
-**Tests** :
-- Tests RLS exhaustifs sur les politiques de partage : critique
-- Tests Playwright sur les parcours principaux (login, créer voyage, upload doc, partager, déverrouiller coffre)
-- CI bloque les PR sans tests sur les fonctionnalités critiques
+**Vérification de sécurité (sans CI en v1)** :
+- Script `scripts/verify-rls.ts` (ou SQL) exécutable manuellement : simule plusieurs users et vérifie les règles de partage critiques
+- À lancer obligatoirement après toute migration touchant aux politiques RLS, et avant tout déploiement d'une évolution du modèle documents/partage
+- `npm audit` à lancer régulièrement en local ; Dependabot activé sur GitHub (natif, sans CI)
 
 ## Variables d'environnement
 
@@ -176,10 +189,6 @@ GOOGLE_OAUTH_CLIENT_SECRET=
 RESEND_API_KEY=
 RESEND_FROM_EMAIL=                  # ex: phil@phil.app ou onboarding@resend.dev en dev
 
-# Monitoring
-NEXT_PUBLIC_SENTRY_DSN=
-SENTRY_AUTH_TOKEN=                  # Pour les sourcemaps
-
 # Rate limiting (optionnel)
 UPSTASH_REDIS_REST_URL=
 UPSTASH_REDIS_REST_TOKEN=
@@ -187,10 +196,9 @@ UPSTASH_REDIS_REST_TOKEN=
 
 ## Free tiers à respecter
 
-- **Vercel Hobby** : 100 Go bande passante/mois, fonctions max 10s
+- **Vercel Hobby** : 100 Go bande passante/mois, fonctions max 10s, 2 cron jobs
 - **Supabase Free** : 500 Mo base, 1 Go storage, projet pause après 7 jours d'inactivité
 - **Resend Free** : 3000 emails/mois, 100/jour, domaine vérifié obligatoire pour envoi externe
-- **Sentry Free** : 5000 erreurs/mois
 - **Upstash Redis** (si utilisé) : 10k commandes/jour
 
 ## Workflow Git
@@ -198,47 +206,38 @@ UPSTASH_REDIS_REST_TOKEN=
 - Branche `main` = production, déployée automatiquement par Vercel
 - Branche `develop` = intégration, preview Vercel automatique
 - Features sur `feature/PHIL-XXX-description-courte`
-- Commit messages en français ou anglais, format conventional commits recommandé : `feat(scope): description`, `fix(scope): description`, `chore: description`
-- Référencer l'ID du ticket PHIL-XXX dans les commits
-
-## Outillage
-
-- **Package manager** : pnpm
-- **Linter + formatter** : Biome (remplace ESLint + Prettier)
-- **Git hooks** : Husky (pre-commit : `lint:fix` + `type-check`)
-- **Dev server** : Turbopack (via `next dev --turbopack`)
+- Un commit par ticket, TODO.md mis à jour dans le même commit
+- Format conventional commits : `feat(scope): description (PHIL-XXX)`, `fix(scope): description (PHIL-XXX)`, `chore: description`
 
 ## Commandes utiles
 
 ```bash
 # Dev local
-pnpm dev
+npm run dev
 
-# Build
-pnpm build
+# Build (obligatoire avant chaque commit de ticket)
+npm run build
 
-# Tests
-pnpm test               # Vitest unitaires
-pnpm test:e2e           # Playwright
+# Lint et type-check (obligatoire avant chaque commit de ticket)
+npm run lint
+npm run type-check
 
-# Lint, format, type-check
-pnpm lint               # Biome check (erreurs sans fix)
-pnpm lint:fix           # Biome check + auto-fix
-pnpm format             # Biome format
-pnpm type-check         # tsc --noEmit
+# Vérification RLS (après toute migration touchant aux politiques)
+npx tsx scripts/verify-rls.ts
 
 # Migrations Supabase
-pnpm exec supabase migration new <nom>
-pnpm exec supabase db push
-pnpm exec supabase db reset   # Local seulement
+npx supabase migration new <nom>
+npx supabase db push
+npx supabase db reset   # Local seulement
 
 # Génération des types depuis le schéma
-pnpm exec supabase gen types typescript --local > types/database.ts
+npx supabase gen types typescript --local > types/database.ts
 ```
 
 ## Ressources
 
 - Roadmap et tickets : voir `TODO.md`
+- Prompt de développement : voir `PROMPT.md`
 - Documentation Supabase : https://supabase.com/docs
 - Documentation Next.js : https://nextjs.org/docs
 - WebAuthn guide : https://webauthn.guide/
