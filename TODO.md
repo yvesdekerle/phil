@@ -111,8 +111,9 @@ Utiliser le CLI Supabase pour gérer les migrations en SQL versionné dans le re
 UI minimale avec un bouton "Se connecter avec Google". Au clic, redirection vers OAuth Google via Supabase. Gestion du callback et redirection vers `/trips` après succès. Affichage d'une erreur claire en cas d'échec. Microcopy dans l'esprit Phil : "Bienvenue à bord" plutôt que "Login".
 > Note : fondations d'identité visuelle posées dans ce ticket — palette Phil en tokens Tailwind (parchemin/papier/encre/bordeaux/laiton), typos **Bodoni Moda** (display, didone XIXe) + **Figtree** (corps) via next/font. Login = carte "billet d'embarquement" (encoches, filet perforé, itinéraire de Fogg). Redirection post-login vers `/trips` (page stub créée, la vraie arrive en D01). Erreur affichée via `?error=auth`. shadcn/ui sera initialisé au premier ticket à formulaires (C03).
 
-### [ ] PHIL-C02 — Middleware d'authentification Next.js
+### [x] PHIL-C02 — Middleware d'authentification Next.js *(fait le 2026-07-03)*
 Middleware qui protège toutes les routes sauf `/`, `/login`, `/auth/*`, et les invitations publiques. Redirection vers `/login` si non authentifié. Récupération du user serveur-side via les helpers Supabase pour SSR.
+> Note : Next 16 a renommé middleware en **`proxy.ts`** (export `proxy`, runtime nodejs) — c'est la convention utilisée. Helper `updateSession` dans `lib/supabase/middleware.ts` (pattern officiel @supabase/ssr : refresh session + protection). Publics : `/`, `/login`, `/auth/*`, `/invitations/*` (préparé pour D06), `/api/health`. Bonus : user connecté sur `/login` → redirigé `/trips`. Vérifié : /trips et /profile → 307 /login sans session, publics → 200.
 
 ### [ ] PHIL-C03 — Page profil utilisateur
 Vue du profil : nom, email, avatar, langue, timezone par défaut. Possibilité de modifier nom et préférences. Pas de modification d'email (lié au SSO Google). Bouton "Se déconnecter".

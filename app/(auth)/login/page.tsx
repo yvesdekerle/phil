@@ -31,14 +31,9 @@ export default async function LoginPage({
             </p>
           </header>
 
-          <div
-            aria-hidden="true"
-            className="my-7 border-t border-dashed border-laiton-clair"
-          />
+          <div aria-hidden="true" className="my-7 border-t border-dashed border-laiton-clair" />
 
-          <h1 className="text-center font-display text-2xl text-encre italic">
-            Bienvenue à bord
-          </h1>
+          <h1 className="text-center font-display text-2xl text-encre italic">Bienvenue à bord</h1>
           <p className="mt-2 mb-7 text-center text-sm text-encre-douce">
             Connecte-toi pour préparer le prochain départ.
           </p>
