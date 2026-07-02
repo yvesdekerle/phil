@@ -8,18 +8,26 @@ export default async function Home() {
   } = await supabase.auth.getUser();
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-center">
-      <h1 className="text-4xl font-bold tracking-tight">Phil</h1>
-      <p className="mt-4 text-lg text-zinc-500">Ton compagnon de voyage, bientôt prêt à partir.</p>
+    <main className="flex flex-1 flex-col items-center justify-center px-4 text-center">
+      <h1 className="font-display text-6xl text-encre">Phil</h1>
+      <p className="mt-4 text-lg text-encre-douce">
+        Ton compagnon de voyage, bientôt prêt à partir.
+      </p>
       {user ? (
-        <p className="mt-8 text-sm text-zinc-600">
-          Connecté : <span className="font-medium">{user.email}</span>
-        </p>
+        <Link
+          href="/trips"
+          className="mt-8 text-sm text-bordeaux underline underline-offset-4 hover:text-bordeaux-fonce"
+        >
+          Continuer vers tes voyages
+        </Link>
       ) : (
-        <Link href="/login" className="mt-8 text-sm text-zinc-600 underline underline-offset-4">
-          Se connecter
+        <Link
+          href="/login"
+          className="mt-8 text-sm text-bordeaux underline underline-offset-4 hover:text-bordeaux-fonce"
+        >
+          Embarquer
         </Link>
       )}
-    </div>
+    </main>
   );
 }
