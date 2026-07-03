@@ -409,7 +409,7 @@ Aller au-delà du vote +1 sur les idées : permettre des avis qualitatifs ("Vaut
 Sur l'écran "Coffre verrouillé" et au déverrouillage : animation d'une porte de coffre-fort de banque ancienne, **ronde**, avec les barres/branches de la roue **couleur or** (laiton Phil). Ouverture : la roue tourne, puis la porte pivote et s'ouvre. Fermeture (verrouillage/expiration de session) : la porte se referme, puis la roue tourne. SVG + CSS animations (pas de lib lourde), `prefers-reduced-motion` respecté.
 > Note : `VaultDoor` (SVG + keyframes CSS inline) — porte encre, roue 6 branches laiton, 12 rivets, charnières, intérieur révélé en perspective (rotateY, pivot côté charnières). Arrivée sur l'écran : porte se rabat puis roue verrouille ; déverrouillage réussi : roue tourne (sens inverse) puis porte pivote, titre "Bienvenue dans ton coffre", entrée après 1,8 s. `prefers-reduced-motion` : porte statique. Fix au passage : coordonnées des rivets figées (mismatch d'hydratation flottant serveur/client).
 
-### [ ] PHIL-M02 — États de chargement sur le thème Jules Verne
+### [x] PHIL-M02 — États de chargement sur le thème Jules Verne *(fait le 2026-07-03)*
 Remplacer les loaders génériques par une petite collection d'animations tirées au sort, dans la palette Phil :
 - **Montgolfière** rouge et blanche, nacelle en osier — traverse de gauche à droite en montant/descendant légèrement et en se balançant (*Cinq semaines en ballon*)
 - **Éléphant** qui marche (la traversée de l'Inde de Phileas)
@@ -417,6 +417,7 @@ Remplacer les loaders génériques par une petite collection d'animations tirée
 - **Sous-marin** style Nautilus avec hublots (*Vingt mille lieues sous les mers*)
 - Autres pistes validables au moment du ticket : **locomotive à vapeur** (le train de Bombay à Calcutta), **traîneau à voile** (l'épisode des plaines américaines du roman), **obus lunaire** (*De la Terre à la Lune*)
 SVG animés en CSS, composant `<PhilLoader />` réutilisable, tirage aléatoire, `prefers-reduced-motion` → état statique.
+> Note : 4 scènes livrées — montgolfière (traversée + balancement + nacelle osier), éléphant (pattes alternées, trompe, tapis bordeaux), vapeur (tangage, vagues 2 plans, fumée), Nautilus (éperon, hublots laiton, hélice, bulles) — chacune avec sa microcopy ("Phil traverse l'Inde à dos d'éléphant…"). Tirage au mount côté client (pas de mismatch), branché en fallback global `app/(app)/loading.tsx`. Locomotive/traîneau/obus gardés en réserve dans le ticket d'origine. Vérifié visuellement (4 scènes).
 
 ---
 
