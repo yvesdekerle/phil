@@ -370,6 +370,61 @@ export type Database = {
           },
         ]
       }
+      vault_access_log: {
+        Row: {
+          accessed_at: string
+          accessed_by: string
+          action: Database["public"]["Enums"]["vault_action"]
+          document_id: string | null
+          document_owner_id: string
+          id: string
+          ip_address: unknown
+          user_agent: string | null
+        }
+        Insert: {
+          accessed_at?: string
+          accessed_by: string
+          action: Database["public"]["Enums"]["vault_action"]
+          document_id?: string | null
+          document_owner_id: string
+          id?: string
+          ip_address?: unknown
+          user_agent?: string | null
+        }
+        Update: {
+          accessed_at?: string
+          accessed_by?: string
+          action?: Database["public"]["Enums"]["vault_action"]
+          document_id?: string | null
+          document_owner_id?: string
+          id?: string
+          ip_address?: unknown
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vault_access_log_accessed_by_fkey"
+            columns: ["accessed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vault_access_log_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vault_access_log_document_owner_id_fkey"
+            columns: ["document_owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -390,6 +445,14 @@ export type Database = {
       document_scope: "VAULT" | "TRIP"
       event_type: "TRANSPORT" | "LODGING" | "ACTIVITY"
       trip_role: "OWNER" | "EDITOR" | "VIEWER"
+      vault_action:
+        | "UPLOAD"
+        | "VIEW"
+        | "DOWNLOAD"
+        | "UPDATE"
+        | "DELETE"
+        | "SHARE"
+        | "UNSHARE"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -533,6 +596,15 @@ export const Constants = {
       document_scope: ["VAULT", "TRIP"],
       event_type: ["TRANSPORT", "LODGING", "ACTIVITY"],
       trip_role: ["OWNER", "EDITOR", "VIEWER"],
+      vault_action: [
+        "UPLOAD",
+        "VIEW",
+        "DOWNLOAD",
+        "UPDATE",
+        "DELETE",
+        "SHARE",
+        "UNSHARE",
+      ],
     },
   },
 } as const

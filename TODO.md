@@ -87,8 +87,9 @@ Table `trip_events` : `id`, `trip_id`, `type` (`TRANSPORT` / `LODGING` / `ACTIVI
 ### [ ] PHIL-B06 — Schéma table `trip_ideas`
 Table : `id`, `trip_id`, `title`, `description`, `external_url`, `location_name`, `location_lat`, `location_lng`, `estimated_duration_minutes`, `estimated_cost`, `cost_currency`, `tags` (text array), `status` (`POOL` / `SCHEDULED` / `DISMISSED`), `scheduled_event_id` (nullable), `created_by`, `created_at`. Permet la conversion idée → événement.
 
-### [ ] PHIL-B07 — Schéma table `vault_access_log`
+### [x] PHIL-B07 — Schéma table `vault_access_log` *(fait le 2026-07-03)*
 Table d'audit : `id`, `document_id`, `accessed_by`, `action` (`VIEW` / `DOWNLOAD` / `SHARE` / `UNSHARE`), `accessed_at`, `ip_address`, `user_agent`. Toute opération sur un document du coffre y est tracée dès la Phase 3 (upload, consultation, modification, suppression). Pas de RLS pour modification, écriture uniquement via service role. La page de consultation du log (E08) arrive en Phase 9.
+> Note : migration `20260703084956_vault_access_log.sql`. Enum élargi à 7 actions (UPLOAD/UPDATE/DELETE en plus, exigés par le texte du ticket). Deux ajouts au schéma prévu : `document_owner_id` **dénormalisé** (le propriétaire garde la trace même après suppression du doc, et la policy SELECT E08 s'en sert sans jointure) et `document_id` en **on delete set null** (l'audit survit au document). Écriture service role uniquement, immuable — vérifié (anon 401).
 
 ### [ ] PHIL-B08 — Schéma table `trip_invitations`
 Table : `id`, `trip_id`, `invited_email`, `invited_by`, `token` (UUID unique), `role`, `created_at`, `accepted_at`, `expires_at`. Permet d'inviter par email avec un lien magique avant que la personne n'ait un compte.
