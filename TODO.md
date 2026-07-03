@@ -226,8 +226,9 @@ Vue détaillée d'une journée avec une grille horaire. Affichage des événemen
 ### [ ] PHIL-F03 — Vue timeline du voyage
 Vue horizontale type Gantt qui montre la durée totale du voyage avec tous les événements. Surtout utile pour les transports et les hébergements qui couvrent plusieurs jours.
 
-### [ ] PHIL-F04 — Création d'un événement TRANSPORT
+### [x] PHIL-F04 — Création d'un événement TRANSPORT *(fait le 2026-07-03)*
 Formulaire : type de transport (train, plane, bus, car, ferry, autre), titre auto-suggéré, gare/aéroport départ et arrivée, dates et heures (avec timezone), numéro de réservation, transporteur. Possibilité d'attacher un document immédiatement (upload ou pick depuis docs du voyage). Validation : `ends_at >= starts_at`.
+> Note : page `/trips/[id]/events/new` avec sélecteur de type (pastilles) — LODGING/ACTIVITY en placeholder jusqu'à F05/F06. Titre auto-suggéré ("Avion Nice → Bastia") tant que non modifié. Heures saisies en local + fuseau → converties UTC via `fromZonedTime` côté serveur. `metadata` : transport_mode/from/to/booking_reference/carrier ; `location_name` = lieu de départ. **Deux écarts** : un seul fuseau par événement (celui du départ — vols transfrontaliers v2), attache de document renvoyée à F10 (picker réutilisable). Vérifié en réel : création + conversion Maurice OK.
 
 ### [ ] PHIL-F05 — Création d'un événement LODGING
 Formulaire : nom de l'hébergement, adresse, check-in date+heure, check-out date+heure, numéro de réservation, plateforme (Booking, Airbnb, autre), nombre de personnes, notes. Possibilité d'attacher un document.
