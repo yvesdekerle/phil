@@ -11,11 +11,12 @@ export default async function TripIdeasPage({
   searchParams,
 }: {
   params: Promise<{ tripId: string }>;
-  searchParams: Promise<{ sort?: string; tag?: string }>;
+  searchParams: Promise<{ sort?: string; tag?: string; dismissed?: string }>;
 }) {
   const { tripId } = await params;
-  const { sort, tag } = await searchParams;
+  const { sort, tag, dismissed } = await searchParams;
   const sortBy = sort === "recent" ? "recent" : "votes";
+  const showDismissed = dismissed === "1";
 
   const supabase = await createClient();
   const {
@@ -32,7 +33,7 @@ export default async function TripIdeasPage({
         "*, profiles!trip_ideas_created_by_fkey(display_name), idea_votes(user_id), trip_events!trip_ideas_scheduled_event_id_fkey(id, starts_at, timezone)",
       )
       .eq("trip_id", tripId)
-      .in("status", ["POOL", "SCHEDULED"])
+      .in("status", showDismissed ? ["DISMISSED"] : ["POOL", "SCHEDULED"])
       .order("created_at", { ascending: false }),
     supabase
       .from("trip_participants")
@@ -63,10 +64,11 @@ export default async function TripIdeasPage({
     ideas = [...ideas].sort((a, b) => b.voteCount - a.voteCount);
   }
 
-  const filterHref = (s: string | null, t: string | null) => {
+  const filterHref = (s: string | null, t: string | null, d = showDismissed) => {
     const p = new URLSearchParams();
     if (s && s !== "votes") p.set("sort", s);
     if (t) p.set("tag", t);
+    if (d) p.set("dismissed", "1");
     const qs = p.toString();
     return `/trips/${tripId}/ideas${qs ? `?${qs}` : ""}`;
   };
@@ -122,6 +124,18 @@ export default async function TripIdeasPage({
             #{t}
           </Link>
         ))}
+        <span className="flex-1" />
+        <Link
+          href={filterHref(sortBy === "recent" ? "recent" : null, tag ?? null, !showDismissed)}
+          className={cn(
+            "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+            showDismissed
+              ? "border-encre bg-encre text-papier"
+              : "border-laiton-clair bg-papier text-encre-douce hover:text-encre",
+          )}
+        >
+          {showDismissed ? "← Retour aux idées" : "Voir les écartées"}
+        </Link>
       </div>
 
       {ideas.length === 0 ? (

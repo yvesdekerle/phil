@@ -10,6 +10,35 @@ import { areUuids } from "@/lib/validation";
  * La PK (idea_id, user_id) + les policies RLS garantissent une voix max
  * par participant, et le retrait de sa propre voix uniquement.
  */
+/** Écarte une idée du pool (PHIL-H05) ou la ressort des écartées. */
+export async function setIdeaDismissed(
+  tripId: string,
+  ideaId: string,
+  dismissed: boolean,
+): Promise<void> {
+  if (!areUuids(tripId, ideaId)) {
+    return;
+  }
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    redirect("/login");
+  }
+
+  // La RLS UPDATE (OWNER/EDITOR du voyage) porte le droit ; on ne touche
+  // qu'aux idées non planifiées.
+  await supabase
+    .from("trip_ideas")
+    .update({ status: dismissed ? "DISMISSED" : "POOL" })
+    .eq("id", ideaId)
+    .eq("trip_id", tripId)
+    .neq("status", "SCHEDULED");
+
+  revalidatePath(`/trips/${tripId}/ideas`);
+}
+
 export async function toggleVote(tripId: string, ideaId: string): Promise<void> {
   if (!areUuids(tripId, ideaId)) {
     return;

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { formatInTimezone } from "@/lib/events/datetime";
 import type { IdeaWithMeta } from "@/lib/ideas/types";
 import { cn } from "@/lib/utils";
+import { DismissButton } from "./dismiss-button";
 import { VoteButton } from "./vote-button";
 
 export function IdeaCard({
@@ -58,6 +59,13 @@ export function IdeaCard({
               <CalendarPlus className="size-4" aria-hidden="true" />
               Planifier
             </Link>
+          ) : null}
+          {canPlan && idea.status !== "SCHEDULED" ? (
+            <DismissButton
+              tripId={tripId}
+              ideaId={idea.id}
+              dismissed={idea.status === "DISMISSED"}
+            />
           ) : null}
           <VoteButton
             tripId={tripId}
