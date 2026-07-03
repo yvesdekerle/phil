@@ -211,8 +211,9 @@ Sur un document, action "Modifier" (renommage, changement de catégorie, mise à
 Sur un document du coffre, bouton "Partager avec un voyage" qui ouvre une modale avec la liste de mes voyages actifs. Sélection du voyage → création d'une ligne `document_shares`. Le document devient visible des autres participants du voyage sans changer de scope. Affichage clair "Partagé avec : Voyage Mauritius nov 2026" sous le document. Possibilité de retirer le partage. Actions logguées (`SHARE` / `UNSHARE`).
 > Note : section "Partages" sur `/vault/[id]` (`share-manager.tsx`) — modale des voyages actifs (non archivés, via RLS), état "Privé — toi seul…" sinon. La sécurité du partage est portée par la policy RLS B10 (propriétaire seul, doc VAULT seul, voyage où il participe). Actions SHARE/UNSHARE logguées. Vérifié en réel : partage → badge visible → retrait → audit UNSHARE, base nettoyée.
 
-### [ ] PHIL-E06 — Filigrane dynamique PDF
+### [x] PHIL-E06 — Filigrane dynamique PDF *(fait le 2026-07-03)*
 Service côté serveur qui prend un PDF en entrée et applique un filigrane diagonal avec : email du visualiseur, timestamp, et "Confidentiel - Ne pas diffuser". Implémenté avec pdf-lib. Pour les images (JPG/PNG), conversion en PDF d'abord puis filigrane. Performance cible : moins de 200ms par document.
+> Note : `lib/vault/watermark.ts` — diagonales répétées couvrant toute la page (bordeaux, opacité 18 %), horodatage UTC. Perf mesurée : **52 ms** pour un PDF 3 pages, 5 ms pour une image (cible 200 ms large). **Limitation** : HEIC/HEIF non convertibles par pdf-lib → `canWatermark()` l'exclut, E03b servira ces fichiers tels quels (à réévaluer si besoin avec une conversion sharp côté serveur). Vérifié visuellement sur échantillon.
 
 ### [ ] PHIL-E07 — Alerte expiration documents
 Cron job (Vercel Cron, gratuit sur Hobby avec 2 jobs) qui scanne quotidiennement les `expires_at` et envoie un email Resend aux propriétaires à J-180, J-90, J-30 et J-7. Badge "Expire bientôt" affiché dans l'UI du coffre quand `expires_at < now + 90 jours`.
