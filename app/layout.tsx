@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Bodoni_Moda, Figtree } from "next/font/google";
 import "./globals.css";
+import { CookieNotice } from "@/components/cookie-notice";
 import { OfflineBanner } from "@/components/offline/offline-banner";
 import { ServiceWorkerRegister } from "@/components/pwa/sw-register";
 import { cn } from "@/lib/utils";
@@ -46,6 +47,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col font-sans">
         <ServiceWorkerRegister />
         <OfflineBanner />
+        <CookieNotice />
         {children}
         <footer className="border-t border-laiton-clair/50 px-4 py-4 text-center text-xs text-encre-douce">
           Phil — carnet de voyage entre amis ·{" "}

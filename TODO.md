@@ -354,8 +354,9 @@ Tout input utilisateur (formulaires, paramètres URL, body API) validé par un s
 Pages `/privacy` et `/legal` avec : finalité du traitement, données collectées, durée de conservation, droits RGPD (accès, rectification, suppression, portabilité), contact. Lien dans le footer.
 > Note : pages publiques (proxy), ton Phil (privé, non commercial, pas de tracking), stockage UE (Supabase Irlande) mentionné, droits RGPD renvoyant vers l'export/suppression du profil (C06/C07, tickets suivants de la phase). Footer global discret dans le layout racine. Vérifié en rendu réel.
 
-### [ ] PHIL-J05 — Bannière cookies / consentement
+### [x] PHIL-J05 — Bannière cookies / consentement *(fait le 2026-07-03)*
 Bannière minimaliste au premier visite : pas de tracking analytics par défaut, donc pas de bannière "accepter / refuser" complexe. Mention "Ce site utilise des cookies techniques nécessaires à l'authentification" sans bouton.
+> Note : bandeau informatif à la première visite (cookies techniques uniquement, aucun tracking), bouton "Compris" mémorisé en localStorage, lien /privacy. Pas de recueil de consentement : rien d'optionnel ni de traçant. Vérifié en réel : affichée, disparaît, ne revient pas.
 
 ### [ ] PHIL-J06 — Audit de dépendances
 Activation de Dependabot ou Renovate sur le repo GitHub pour les MAJ de sécurité automatiques (fonctionnalité GitHub native, sans CI). `npm audit` à lancer régulièrement en local, et systématiquement avant un déploiement important.
