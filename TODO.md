@@ -200,7 +200,7 @@ Composant drag & drop ou file picker. Validation côté client : mime type autor
 Endpoint API `/api/documents/{id}/view` qui : (1) vérifie que l'user a le droit (RLS), (2) récupère le fichier depuis Supabase Storage, (3) le streame avec `Content-Disposition: inline`. Affichage dans un viewer PDF côté client (PDF.js intégré ou iframe), images affichées directement. Chaque consultation d'un document `scope=VAULT` est logguée dans `vault_access_log` (action `VIEW`). Pas de filigrane ni de durcissement à ce stade : c'est l'objet de E03b et E06 en Phase 9. Ce viewer sert aussi aux documents du voyage (G03).
 > Note : droit vérifié par la RLS (SELECT via client de session), blob via service role (seul chemin de lecture possible, bucket sans policy SELECT), `Cache-Control: private, no-store` déjà posé (E03b n'aura que filigrane + session vault à ajouter). Viewer : iframe native pour PDF (PDF.js écarté en v1 — l'iframe suffit), `img` pour images. Page `/vault/[id]` avec détails (n°, expiration, taille) — E04 y ajoutera Modifier/Supprimer. Vérifié : VIEW loggé, sans session → redirection login.
 
-### [ ] PHIL-E03b — Durcissement de la visualisation
+### [~] PHIL-E03b — Durcissement de la visualisation
 Évolution du viewer E03a pour les documents `scope=VAULT` : application du filigrane dynamique via le service E06 sur chaque ouverture, headers `Cache-Control: private, no-store`, vérification systématique de la session "vault unlocked" (C05). Les documents `scope=TRIP` restent servis sans filigrane.
 
 ### [x] PHIL-E04 — Suppression et modification de document *(fait le 2026-07-03)*
