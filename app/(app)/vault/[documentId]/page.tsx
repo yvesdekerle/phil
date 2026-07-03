@@ -6,6 +6,7 @@ import { CategoryIcon } from "@/components/vault/category-icon";
 import { createClient } from "@/lib/supabase/server";
 import { CATEGORY_LABELS } from "@/lib/vault/categories";
 import { DocumentActions } from "./document-actions";
+import { ShareManager } from "./share-manager";
 
 export default async function VaultDocumentPage({
   params,
@@ -21,16 +22,19 @@ export default async function VaultDocumentPage({
     redirect("/login");
   }
 
-  const { data: doc } = await supabase
-    .from("documents")
-    .select("*")
-    .eq("id", documentId)
-    .is("deleted_at", null)
-    .single();
+  const [{ data: doc }, { data: shareRows }] = await Promise.all([
+    supabase.from("documents").select("*").eq("id", documentId).is("deleted_at", null).single(),
+    supabase.from("document_shares").select("trip_id, trips(name)").eq("document_id", documentId),
+  ]);
 
   if (!doc) {
     notFound();
   }
+
+  const shares = (shareRows ?? []).map((s) => ({
+    tripId: s.trip_id,
+    tripName: s.trips?.name ?? "Voyage",
+  }));
 
   const viewUrl = `/api/documents/${doc.id}/view`;
   const isImage = doc.mime_type.startsWith("image/");
@@ -64,7 +68,8 @@ export default async function VaultDocumentPage({
         </div>
       </div>
 
-      <div className="mb-6">
+      <div className="mb-6 flex flex-col gap-4">
+        <ShareManager documentId={doc.id} shares={shares} />
         <DocumentActions
           documentId={doc.id}
           fileName={doc.file_name}

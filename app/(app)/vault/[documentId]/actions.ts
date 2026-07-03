@@ -79,6 +79,79 @@ export async function updateDocument(
   return { status: "success", message: "C'est noté dans le carnet." };
 }
 
+export async function shareDocument(
+  documentId: string,
+  tripId: string,
+): Promise<DocumentActionState> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    redirect("/login");
+  }
+
+  // La policy RLS d'insert vérifie : propriétaire du doc, doc VAULT,
+  // et partage vers un voyage dont je suis participant.
+  const { error } = await supabase.from("document_shares").insert({
+    document_id: documentId,
+    trip_id: tripId,
+    shared_by: user.id,
+  });
+
+  if (error) {
+    return {
+      status: "error",
+      message: error.message.includes("duplicate")
+        ? "Déjà partagé avec ce voyage."
+        : "Le partage a échoué.",
+    };
+  }
+
+  await logVaultAccess({
+    action: "SHARE",
+    documentId,
+    accessedBy: user.id,
+    documentOwnerId: user.id,
+  });
+
+  revalidatePath(`/vault/${documentId}`);
+  return { status: "success", message: "Partagé avec l'équipage." };
+}
+
+export async function unshareDocument(
+  documentId: string,
+  tripId: string,
+): Promise<DocumentActionState> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { error, count } = await supabase
+    .from("document_shares")
+    .delete({ count: "exact" })
+    .eq("document_id", documentId)
+    .eq("trip_id", tripId);
+
+  if (error || count === 0) {
+    return { status: "error", message: "Le retrait du partage a échoué." };
+  }
+
+  await logVaultAccess({
+    action: "UNSHARE",
+    documentId,
+    accessedBy: user.id,
+    documentOwnerId: user.id,
+  });
+
+  revalidatePath(`/vault/${documentId}`);
+  return { status: "success", message: "Partage retiré — le document redevient privé." };
+}
+
 /**
  * Soft delete : deleted_at est posé, le blob Storage est conservé.
  * La purge définitive (blob + ligne) viendra avec la suppression de compte (C06)
