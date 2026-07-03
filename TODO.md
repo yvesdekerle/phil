@@ -64,8 +64,9 @@ Lister toutes les variables nécessaires : Supabase URL, Supabase anon key, Supa
 
 ## Catégorie B — Modèle de données & sécurité base
 
-### [ ] PHIL-B01 — Schéma table `profiles`
+### [x] PHIL-B01 — Schéma table `profiles` *(fait le 2026-07-03)*
 Table Supabase qui étend `auth.users` : `id` (UUID, FK vers auth.users), `display_name`, `avatar_url`, `locale`, `timezone`, `created_at`, `updated_at`. Trigger Postgres qui crée automatiquement un profil à chaque inscription. RLS : un user ne peut voir et modifier que son propre profil.
+> Note : migration `20260703065147_profiles.sql` appliquée via `supabase link` + `db push` (le gros de B13 est de fait en place). Triggers : `handle_new_user` (security definer, création auto + reprise des métadonnées Google) et `set_updated_at`. Backfill du user existant depuis `user_metadata` (migration C03 → table). Page profil basculée sur la table (`lib/supabase/profiles.ts`, typage manuel en attendant `gen types` en B13). Vérifié : RLS anon → vide, lecture/écriture via l'UI OK.
 
 ### [ ] PHIL-B02 — Schéma tables `trips` et `trip_participants`
 Table `trips` : `id`, `name`, `destination`, `start_date`, `end_date`, `cover_image_url`, `default_timezone`, `created_by`, `created_at`, `archived_at`. Table `trip_participants` : `trip_id`, `user_id`, `role` (`OWNER` / `EDITOR` / `VIEWER`), `joined_at`, `invited_by`. Index sur `(user_id)` pour lister rapidement les voyages d'un user.

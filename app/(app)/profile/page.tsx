@@ -2,6 +2,7 @@ import Image from "next/image";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { getOwnProfile } from "@/lib/supabase/profiles";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "./actions";
 import { ProfileForm } from "./profile-form";
@@ -16,9 +17,9 @@ export default async function ProfilePage() {
     redirect("/login");
   }
 
-  const meta = user.user_metadata as Record<string, string | undefined>;
-  const displayName = meta.display_name ?? meta.full_name ?? meta.name ?? "";
-  const avatarUrl = meta.avatar_url ?? meta.picture;
+  const profile = await getOwnProfile(supabase);
+  const displayName = profile?.display_name ?? "";
+  const avatarUrl = profile?.avatar_url ?? undefined;
 
   return (
     <main className="flex flex-1 flex-col items-center px-4 py-12">
@@ -52,8 +53,8 @@ export default async function ProfilePage() {
             <ProfileForm
               defaultValues={{
                 displayName,
-                locale: meta.locale === "en" ? "en" : "fr",
-                timezone: meta.timezone ?? "Europe/Paris",
+                locale: profile?.locale === "en" ? "en" : "fr",
+                timezone: profile?.timezone ?? "Europe/Paris",
               }}
             />
           </CardContent>

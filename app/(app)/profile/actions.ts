@@ -44,15 +44,14 @@ export async function updateProfile(
     redirect("/login");
   }
 
-  // En attendant la table `profiles` (PHIL-B01), les préférences vivent
-  // dans user_metadata de Supabase Auth.
-  const { error } = await supabase.auth.updateUser({
-    data: {
+  const { error } = await supabase
+    .from("profiles")
+    .update({
       display_name: parsed.data.displayName,
       locale: parsed.data.locale,
       timezone: parsed.data.timezone,
-    },
-  });
+    })
+    .eq("id", user.id);
 
   if (error) {
     return { status: "error", message: "L'enregistrement a échoué. Réessaie dans un instant." };
