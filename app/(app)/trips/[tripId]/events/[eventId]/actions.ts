@@ -87,6 +87,106 @@ export async function updateEvent(
   redirect(`/trips/${d.tripId}/events/${d.eventId}`);
 }
 
+/**
+ * Attache un document à un événement (PHIL-F10).
+ * Si le document vient du coffre (VAULT) et n'est pas encore partagé avec le
+ * voyage, le partage est créé automatiquement (uniquement par son propriétaire)
+ * et loggé SHARE dans vault_access_log.
+ */
+export async function attachDocument(
+  tripId: string,
+  eventId: string,
+  documentId: string,
+): Promise<EventActionState> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    redirect("/login");
+  }
+
+  // RLS : si le doc n'est pas visible (ni à moi, ni au voyage), single() échoue.
+  const { data: doc } = await supabase
+    .from("documents")
+    .select("id, scope, owner_id, trip_id")
+    .eq("id", documentId)
+    .is("deleted_at", null)
+    .single();
+
+  if (!doc) {
+    return { status: "error", message: "Document introuvable." };
+  }
+
+  if (doc.scope === "VAULT") {
+    const { data: existingShare } = await supabase
+      .from("document_shares")
+      .select("id")
+      .eq("document_id", documentId)
+      .eq("trip_id", tripId)
+      .maybeSingle();
+
+    if (!existingShare) {
+      if (doc.owner_id !== user.id) {
+        return {
+          status: "error",
+          message: "Seul le propriétaire peut partager ce document avec le voyage.",
+        };
+      }
+      const { error: shareError } = await supabase.from("document_shares").insert({
+        document_id: documentId,
+        trip_id: tripId,
+        shared_by: user.id,
+      });
+      if (shareError) {
+        return { status: "error", message: "Le partage vers le voyage a échoué." };
+      }
+      const { logVaultAccess } = await import("@/lib/vault/audit");
+      await logVaultAccess({
+        action: "SHARE",
+        documentId,
+        accessedBy: user.id,
+        documentOwnerId: doc.owner_id,
+      });
+    }
+  } else if (doc.trip_id !== tripId) {
+    return { status: "error", message: "Ce document appartient à un autre voyage." };
+  }
+
+  const { error } = await supabase
+    .from("event_documents")
+    .insert({ event_id: eventId, document_id: documentId });
+
+  if (error && !error.message.includes("duplicate")) {
+    return { status: "error", message: "L'attache a échoué." };
+  }
+
+  const { revalidatePath } = await import("next/cache");
+  revalidatePath(`/trips/${tripId}/events/${eventId}`);
+  return { status: "idle" };
+}
+
+export async function detachDocument(
+  tripId: string,
+  eventId: string,
+  documentId: string,
+): Promise<EventActionState> {
+  const supabase = await createClient();
+  const { error, count } = await supabase
+    .from("event_documents")
+    .delete({ count: "exact" })
+    .eq("event_id", eventId)
+    .eq("document_id", documentId);
+
+  if (error || count === 0) {
+    return { status: "error", message: "Le détachement a échoué." };
+  }
+
+  const { revalidatePath } = await import("next/cache");
+  revalidatePath(`/trips/${tripId}/events/${eventId}`);
+  return { status: "idle" };
+}
+
 export async function deleteEvent(tripId: string, eventId: string): Promise<EventActionState> {
   const supabase = await createClient();
   const {

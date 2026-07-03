@@ -2,6 +2,7 @@ import { ExternalLink, MapPin } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { EventTypeIcon } from "@/components/calendar/event-type-icon";
+import { DocumentPicker } from "@/components/documents/document-picker";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatInTimezone } from "@/lib/events/datetime";
@@ -9,6 +10,7 @@ import { LODGING_PLATFORM_LABELS, type LodgingPlatform } from "@/lib/events/lodg
 import { TRANSPORT_MODE_LABELS, type TransportMode } from "@/lib/events/transport";
 import { EVENT_TYPE_LABELS } from "@/lib/events/types";
 import { createClient } from "@/lib/supabase/server";
+import { attachDocument, detachDocument } from "./actions";
 import { EventActions } from "./event-actions";
 
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
@@ -150,23 +152,47 @@ export default async function EventDetailPage({
       ) : null}
 
       <section>
-        <h2 className="mb-2 text-sm font-medium text-encre-douce">Documents attachés</h2>
+        <div className="mb-2 flex items-center justify-between">
+          <h2 className="text-sm font-medium text-encre-douce">Documents attachés</h2>
+          {canEdit ? (
+            <DocumentPicker
+              tripId={tripId}
+              attachedIds={documents.map((d) => d.id)}
+              onAttach={attachDocument.bind(null, tripId, eventId)}
+            />
+          ) : null}
+        </div>
         {documents.length === 0 ? (
           <p className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-4 py-6 text-center text-sm text-encre-douce">
-            Aucun document attaché — le picker arrive avec PHIL-F10.
+            Aucun document attaché pour l'instant.
           </p>
         ) : (
           <ul className="flex flex-col gap-2">
             {documents.map((doc) => (
-              <li key={doc.id}>
+              <li
+                key={doc.id}
+                className="flex items-center gap-2 rounded-lg border border-laiton-clair bg-papier px-4 py-2.5"
+              >
                 <a
                   href={`/api/documents/${doc.id}/view`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block rounded-lg border border-laiton-clair bg-papier px-4 py-3 text-sm font-medium text-encre transition-shadow hover:shadow-[0_2px_12px_rgba(31,42,68,0.1)]"
+                  className="min-w-0 flex-1 truncate text-sm font-medium text-encre hover:underline"
                 >
                   {doc.file_name}
                 </a>
+                {canEdit ? (
+                  <form
+                    action={async () => {
+                      "use server";
+                      await detachDocument(tripId, eventId, doc.id);
+                    }}
+                  >
+                    <Button type="submit" variant="ghost" size="sm">
+                      Détacher
+                    </Button>
+                  </form>
+                ) : null}
               </li>
             ))}
           </ul>

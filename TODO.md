@@ -250,8 +250,9 @@ Affichage de toutes les infos saisies, des documents attachés (ouverture en un 
 Tous les `starts_at` / `ends_at` stockés en UTC. Le champ `timezone` IANA est obligatoire et pré-rempli avec le timezone par défaut du voyage. Affichage des heures dans le timezone de l'événement avec mention explicite ("18h00 heure locale Maurice"). Helper `formatInTimezone` à utiliser partout dans l'UI.
 > Note : exigences déjà portées par F01/F04-F08 (UTC en base, `timezone` NOT NULL pré-rempli du voyage, helper central `lib/events/datetime.ts`, mention "heure locale {fuseau}" sur le détail). Ce ticket ajoute la mention sur la vue liste et un audit de conformité : zéro `toLocaleString`, `date-fns-tz` hors helper limité à `fromZonedTime` (chemin d'écriture des actions). Les dates pures (voyages, coffre) restent en `date-fns` sans tz — pas d'heure en jeu.
 
-### [ ] PHIL-F10 — Attacher un document à un événement
+### [x] PHIL-F10 — Attacher un document à un événement *(fait le 2026-07-03)*
 Composant réutilisable "Document picker" : onglet 1 "Documents du voyage" (liste), onglet 2 "Mon coffre" (liste filtrée à mes documents personnels, partage automatique au voyage si sélectionné), onglet 3 "Uploader un nouveau". À la sélection, création de la ligne `event_documents` (et `document_shares` si nécessaire).
+> Note : `components/documents/document-picker.tsx` (Dialog + Tabs shadcn, listes chargées côté client via RLS). Coffre → **partage auto** `document_shares` (propriétaire uniquement) + log `SHARE`, puis liaison `event_documents`. Détachement possible (liaison seulement, le partage reste — retrait en E05). **Écart** : onglet "Uploader un nouveau" différé à G02 (upload direct voyage) — lien vers `/vault/new` en attendant. Vérifié en réel : attache depuis le coffre = partage + liaison + audit SHARE.
 
 ---
 
