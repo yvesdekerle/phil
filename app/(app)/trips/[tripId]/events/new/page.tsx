@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import type { EventType } from "@/lib/events/types";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
+import { ActivityForm } from "./activity-form";
 import { LodgingForm } from "./lodging-form";
 import { TransportForm } from "./transport-form";
 
@@ -76,9 +77,7 @@ export default async function NewEventPage({
           ) : activeType === "LODGING" ? (
             <LodgingForm tripId={trip.id} defaultTimezone={trip.default_timezone} />
           ) : (
-            <p className="py-8 text-center text-sm text-encre-douce">
-              Le formulaire activité arrive avec PHIL-F06.
-            </p>
+            <ActivityForm tripId={trip.id} defaultTimezone={trip.default_timezone} />
           )}
         </CardContent>
       </Card>

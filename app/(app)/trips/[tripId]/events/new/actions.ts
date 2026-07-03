@@ -55,6 +55,100 @@ const lodgingSchema = z
     path: ["checkOutLocal"],
   });
 
+const activitySchema = z.object({
+  tripId: z.string().uuid(),
+  title: z.string().trim().min(1, "Donne un titre à cette activité.").max(150),
+  description: z.string().trim().max(2000).optional(),
+  locationName: z.string().trim().max(150).optional(),
+  startsAtLocal: z.string().regex(DATETIME_LOCAL, "Date et heure de début requises."),
+  timezone: z.string().refine((tz) => Intl.supportedValuesOf("timeZone").includes(tz), {
+    message: "Fuseau horaire inconnu.",
+  }),
+  durationMinutes: z
+    .union([
+      z.literal(""),
+      z.coerce
+        .number()
+        .int()
+        .min(5)
+        .max(60 * 24 * 7),
+    ])
+    .optional(),
+  cost: z.union([z.literal(""), z.coerce.number().min(0).max(1000000)]).optional(),
+  costCurrency: z.string().trim().max(3).optional(),
+  externalUrl: z.union([z.literal(""), z.string().url("Lien invalide.")]).optional(),
+});
+
+export async function createActivityEvent(
+  _prev: CreateEventState,
+  formData: FormData,
+): Promise<CreateEventState> {
+  const parsed = activitySchema.safeParse({
+    tripId: formData.get("tripId"),
+    title: formData.get("title"),
+    description: formData.get("description") ?? "",
+    locationName: formData.get("locationName") ?? "",
+    startsAtLocal: formData.get("startsAtLocal"),
+    timezone: formData.get("timezone"),
+    durationMinutes: formData.get("durationMinutes") ?? "",
+    cost: formData.get("cost") ?? "",
+    costCurrency: formData.get("costCurrency") ?? "",
+    externalUrl: formData.get("externalUrl") ?? "",
+  });
+
+  if (!parsed.success) {
+    return { status: "error", message: parsed.error.issues[0]?.message ?? "Saisie invalide." };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    redirect("/login");
+  }
+
+  const d = parsed.data;
+  const startsAt = fromZonedTime(d.startsAtLocal, d.timezone);
+  const endsAt = d.durationMinutes
+    ? new Date(startsAt.getTime() + d.durationMinutes * 60_000).toISOString()
+    : null;
+
+  const metadata: Record<string, string | number> = {};
+  if (d.durationMinutes) {
+    metadata.duration_minutes = d.durationMinutes;
+  }
+  if (d.cost !== "" && d.cost !== undefined) {
+    metadata.cost = d.cost;
+    metadata.cost_currency = d.costCurrency || "EUR";
+  }
+  if (d.externalUrl) {
+    metadata.external_url = d.externalUrl;
+  }
+
+  const { error } = await supabase.from("trip_events").insert({
+    trip_id: d.tripId,
+    type: "ACTIVITY",
+    title: d.title,
+    starts_at: startsAt.toISOString(),
+    ends_at: endsAt,
+    timezone: d.timezone,
+    location_name: d.locationName || null,
+    notes: d.description || null,
+    metadata,
+    created_by: user.id,
+  });
+
+  if (error) {
+    return {
+      status: "error",
+      message: "La création a échoué — il faut être capitaine ou éditeur du voyage.",
+    };
+  }
+
+  redirect(`/trips/${d.tripId}`);
+}
+
 export async function createLodgingEvent(
   _prev: CreateEventState,
   formData: FormData,
