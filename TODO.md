@@ -288,8 +288,9 @@ Bouton "Ajouter un document" qui upload directement avec `scope=TRIP` et `trip_i
 Réutilise le viewer E03a. Pas de filigrane sur les documents `scope=TRIP` (ce sont des documents partagés du voyage, pas des pièces d'identité). Après la Phase 9, le filigrane s'applique uniquement aux docs `scope=VAULT` même quand on les visualise via un voyage.
 > Note : couvert par le viewer E03a, conçu pour (accès par RLS quel que soit le scope, log VIEW conditionné à `scope=VAULT`). Vérifié : doc TRIP servi en 200 `application/pdf` + `private, no-store`, **zéro entrée d'audit ajoutée** (réservé au coffre). E03b n'aura à toucher que la branche VAULT.
 
-### [ ] PHIL-G04 — Suppression d'un document du voyage
+### [x] PHIL-G04 — Suppression d'un document du voyage *(fait le 2026-07-03)*
 Possible par : (a) le propriétaire du document, (b) un OWNER du voyage. Confirmation requise. Loggué.
+> Note : bouton corbeille sur les lignes de documents TRIP (visible si propriétaire ou capitaine — la policy RLS `documents_delete_owner_or_trip_owner` de B10 porte le droit), AlertDialog de confirmation, suppression ligne + blob storage, DELETE loggué dans `vault_access_log`. Les docs du coffre partagés au voyage n'ont pas ce bouton : leur cycle de vie se gère depuis le coffre (partage/retrait). Vérifié en réel : dialog → suppression → disparu de la liste et de la base, log DELETE écrit.
 
 ---
 

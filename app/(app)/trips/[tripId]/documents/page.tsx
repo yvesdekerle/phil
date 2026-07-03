@@ -8,6 +8,7 @@ import { CategoryIcon } from "@/components/vault/category-icon";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 import { CATEGORIES, CATEGORY_LABELS, isDocumentCategory } from "@/lib/vault/categories";
+import { DeleteDocButton } from "./delete-doc-button";
 
 type TripDocument = {
   id: string;
@@ -16,6 +17,7 @@ type TripDocument = {
   uploaded_at: string;
   scope: "VAULT" | "TRIP";
   ownerName: string;
+  canDelete: boolean;
 };
 
 export default async function TripDocumentsPage({
@@ -40,7 +42,7 @@ export default async function TripDocumentsPage({
   const [{ data: tripDocs }, { data: sharedRows }, { data: me }] = await Promise.all([
     supabase
       .from("documents")
-      .select("id, file_name, category, uploaded_at, scope, profiles(display_name)")
+      .select("id, file_name, category, uploaded_at, scope, owner_id, profiles(display_name)")
       .eq("trip_id", tripId)
       .eq("scope", "TRIP")
       .is("deleted_at", null),
@@ -60,6 +62,7 @@ export default async function TripDocumentsPage({
 
   const canUpload = me?.role === "OWNER" || me?.role === "EDITOR";
 
+  const isTripOwner = me?.role === "OWNER";
   const fromTrip: TripDocument[] = (tripDocs ?? []).map((d) => ({
     id: d.id,
     file_name: d.file_name,
@@ -67,6 +70,7 @@ export default async function TripDocumentsPage({
     uploaded_at: d.uploaded_at,
     scope: "TRIP" as const,
     ownerName: d.profiles?.display_name ?? "Voyageur",
+    canDelete: isTripOwner || d.owner_id === user.id,
   }));
 
   const fromVault: TripDocument[] = (sharedRows ?? [])
@@ -79,6 +83,7 @@ export default async function TripDocumentsPage({
       uploaded_at: d.uploaded_at,
       scope: "VAULT" as const,
       ownerName: d.profiles?.display_name ?? "Voyageur",
+      canDelete: false, // un doc du coffre partagé se gère depuis le coffre
     }));
 
   const owners = [...new Set([...fromTrip, ...fromVault].map((d) => d.ownerName))].sort();
@@ -216,6 +221,9 @@ export default async function TripDocumentsPage({
                   : `Ajouté par ${doc.ownerName}`}
               </span>
               <OfflineDocToggle documentId={doc.id} fileName={doc.file_name} />
+              {doc.canDelete ? (
+                <DeleteDocButton tripId={tripId} documentId={doc.id} fileName={doc.file_name} />
+              ) : null}
             </li>
           ))}
         </ul>
