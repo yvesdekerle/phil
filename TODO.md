@@ -310,8 +310,9 @@ Bouton "Pas pour ce voyage" qui passe l'idée en statut `DISMISSED`. Filtre par 
 Installer Serwist, configurer le manifest PWA (nom "Phil", icônes, theme color, display standalone). Vérifier que l'application est installable depuis Safari iOS et Chrome Android via "Ajouter à l'écran d'accueil".
 > Note : **écart technique** — `@serwist/next` est incompatible avec Turbopack (Next 16, issue serwist#54) : le SW utilise la **runtime Serwist** mais est bundlé par esbuild (`npm run build:sw`, chaîné dans `build`), sans précache injecté (cache au fil de l'eau, suffisant — I02 affine). Manifest via `app/manifest.ts` (standalone, parchemin), icônes monogramme "P" générées (192/512/apple-touch, SVG→PNG via sharp), enregistrement SW en prod seulement. Manifest/sw/icônes ajoutés aux chemins publics du proxy (sinon redirigés vers login !). Vérifié sur build prod : manifest 200 standalone, sw.js 200, icônes 200. Installabilité réelle iOS/Android à confirmer sur téléphone après déploiement.
 
-### [ ] PHIL-I02 — Stratégie de cache des assets statiques
+### [x] PHIL-I02 — Stratégie de cache des assets statiques *(fait le 2026-07-03)*
 Cache-first pour les assets Next.js (JS, CSS, fonts, images). Network-first avec fallback cache pour les pages HTML. Update du service worker en arrière-plan avec notification utilisateur "Nouvelle version disponible".
+> Note : 3 caches avec ExpirationPlugin — `phil-static` (JS/CSS/fonts hashés, cache-first 30 j), `phil-images` (`/_next/image` + icônes, 7 j / 100 entrées), `phil-pages` (network-first, timeout 4 s, repli cache). Mise à jour : `skipWaiting` désactivé, bannière "Nouvelle version disponible" → `SKIP_WAITING` → reload sur `controllerchange`. Le flow complet de mise à jour se vérifiera naturellement entre deux déploiements prod.
 
 ### [ ] PHIL-I03 — Cache offline des données voyage
 Setup Dexie.js (wrapper IndexedDB). Tables locales : `trips`, `events`, `documents_metadata`, `ideas`. Quand l'user ouvre un voyage en ligne, sync automatique des données dans IndexedDB. Bouton explicite "Préparer pour offline" qui force la synchro complète.
