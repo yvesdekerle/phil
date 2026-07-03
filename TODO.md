@@ -405,8 +405,9 @@ Aller au-delà du vote +1 sur les idées : permettre des avis qualitatifs ("Vaut
 
 ## Catégorie M — Animations & délices visuels (à traiter en fin de projet, demandé le 2026-07-03)
 
-### [ ] PHIL-M01 — Animation d'ouverture/fermeture du coffre
+### [x] PHIL-M01 — Animation d'ouverture/fermeture du coffre *(fait le 2026-07-03)*
 Sur l'écran "Coffre verrouillé" et au déverrouillage : animation d'une porte de coffre-fort de banque ancienne, **ronde**, avec les barres/branches de la roue **couleur or** (laiton Phil). Ouverture : la roue tourne, puis la porte pivote et s'ouvre. Fermeture (verrouillage/expiration de session) : la porte se referme, puis la roue tourne. SVG + CSS animations (pas de lib lourde), `prefers-reduced-motion` respecté.
+> Note : `VaultDoor` (SVG + keyframes CSS inline) — porte encre, roue 6 branches laiton, 12 rivets, charnières, intérieur révélé en perspective (rotateY, pivot côté charnières). Arrivée sur l'écran : porte se rabat puis roue verrouille ; déverrouillage réussi : roue tourne (sens inverse) puis porte pivote, titre "Bienvenue dans ton coffre", entrée après 1,8 s. `prefers-reduced-motion` : porte statique. Fix au passage : coordonnées des rivets figées (mismatch d'hydratation flottant serveur/client).
 
 ### [ ] PHIL-M02 — États de chargement sur le thème Jules Verne
 Remplacer les loaders génériques par une petite collection d'animations tirées au sort, dans la palette Phil :
