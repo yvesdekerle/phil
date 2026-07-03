@@ -12,6 +12,7 @@ export function SignInButton({ next = "/trips" }: { next?: string }) {
     setError(null);
     // La destination post-login passe par un cookie : un query param sur la
     // callback la ferait sortir de la liste blanche Supabase (retour Site URL prod).
+    // biome-ignore lint/suspicious/noDocumentCookie: la Cookie Store API n'est pas supportée par Safari
     document.cookie = `phil_next=${encodeURIComponent(next)}; path=/; max-age=600; samesite=lax`;
     const supabase = createClient();
     const { error: signInError } = await supabase.auth.signInWithOAuth({
