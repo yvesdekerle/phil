@@ -339,8 +339,9 @@ Quand le réseau revient, refetch automatique des données voyage en cours. Noti
 
 ## Catégorie J — Sécurité, RGPD & qualité
 
-### [ ] PHIL-J01 — Headers de sécurité
+### [x] PHIL-J01 — Headers de sécurité *(fait le 2026-07-03)*
 Configuration Next.js (`next.config.js` ou middleware) : Content-Security-Policy stricte, Strict-Transport-Security, X-Frame-Options DENY, X-Content-Type-Options nosniff, Referrer-Policy strict-origin-when-cross-origin, Permissions-Policy pour limiter les API navigateur.
+> Note : `headers()` dans `next.config.ts`. CSP : `script-src 'self' 'unsafe-inline'` (requis par l'hydratation Next sans infra de nonces — durcissement possible plus tard), `connect-src` limité à l'origine Supabase, `img-src https:` (couvertures URL libre), `frame-src 'self' blob:` (viewer PDF + offline), `frame-ancestors 'none'`, `object-src 'none'`. HSTS 2 ans + sous-domaines. Vérifié sur build prod : les 6 headers présents, app fonctionnelle sous CSP.
 
 ### [ ] PHIL-J02 — Rate limiting sur les endpoints critiques
 Limitation par IP et par user sur : login, upload de document, accès à un document, création d'invitation. Implémentation avec Upstash Redis (free tier 10k commandes/jour) ou via les headers Vercel Edge Config.
