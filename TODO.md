@@ -164,8 +164,9 @@ Layout avec onglets : Calendrier (par défaut), Documents, Idées, Participants,
 Page paramètres du voyage : modifier nom, dates, destination, image, timezone. Bouton "Archiver" (visible uniquement OWNER) qui passe le voyage en archive sans le supprimer. Bouton "Supprimer" qui demande confirmation forte et purge tout (events, documents du voyage, idées, invitations).
 > Note : onglet Paramètres complet. Édition = OWNER/EDITOR (RLS + message d'erreur si 0 ligne touchée) ; VIEWER voit le formulaire désactivé. "Zone du capitaine" (OWNER seulement) : Archiver/Désarchiver — restriction OWNER faite **côté applicatif** (la policy RLS UPDATE ne distingue pas les colonnes) — et Supprimer avec AlertDialog de confirmation forte. La purge couvre aujourd'hui les participants (cascade) ; les tables events/idées/documents/invitations devront porter `on delete cascade` à leur création (B05/B06/B03/B08). Vérifié en réel : renommage, archivage, suppression.
 
-### [ ] PHIL-D05 — Invitation par email
+### [x] PHIL-D05 — Invitation par email *(fait le 2026-07-03)*
 Sur la page Participants, formulaire pour inviter par email avec choix du rôle (EDITOR par défaut). Génération d'un token unique, création d'une ligne dans `trip_invitations`, envoi d'un email via Resend avec un lien `https://phil.vercel.app/invitations/{token}`.
+> Note : formulaire OWNER/EDITOR (rôle EDITOR par défaut, OWNER non proposable), token généré en base, **lien copiable immédiatement** (secours WhatsApp tant que le domaine d'envoi n'est pas vérifié), liste des invitations en attente (non expirées) avec annulation. L'envoi de l'email est branché au ticket suivant (K02). Doublons bloqués par la contrainte unique.
 
 ### [ ] PHIL-D06 — Acceptation d'invitation
 Page `/invitations/{token}` qui affiche les infos du voyage et un bouton "Rejoindre". Si l'user n'est pas connecté, le rediriger vers login et revenir sur la page après. À l'acceptation, création de la ligne `trip_participants` et marquage de l'invitation comme acceptée. Gestion des invitations expirées (30 jours) ou déjà acceptées.

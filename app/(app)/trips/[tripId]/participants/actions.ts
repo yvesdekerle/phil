@@ -146,6 +146,87 @@ export async function transferOwnership(
   return { status: "success", message: "La barre est transmise." };
 }
 
+const inviteSchema = z.object({
+  tripId: z.string().uuid(),
+  email: z.string().trim().toLowerCase().email("Adresse email invalide."),
+  role: z.enum(["EDITOR", "VIEWER"]),
+});
+
+export type InviteState = {
+  status: "idle" | "success" | "error";
+  message?: string;
+  inviteUrl?: string;
+};
+
+export async function createInvitation(
+  _prev: InviteState,
+  formData: FormData,
+): Promise<InviteState> {
+  const parsed = inviteSchema.safeParse({
+    tripId: formData.get("tripId"),
+    email: formData.get("email"),
+    role: formData.get("role"),
+  });
+
+  if (!parsed.success) {
+    return { status: "error", message: parsed.error.issues[0]?.message ?? "Saisie invalide." };
+  }
+
+  const { supabase, user } = await requireUser();
+  const d = parsed.data;
+
+  // Déjà participant ? (comparaison via le profil de l'email impossible côté RLS,
+  // on laisse la contrainte unique gérer les doublons d'invitation.)
+  const { data: invitation, error } = await supabase
+    .from("trip_invitations")
+    .insert({
+      trip_id: d.tripId,
+      invited_email: d.email,
+      invited_by: user.id,
+      role: d.role,
+    })
+    .select("token")
+    .single();
+
+  if (error || !invitation) {
+    return {
+      status: "error",
+      message: error?.message.includes("duplicate")
+        ? "Une invitation est déjà en attente pour cette adresse."
+        : "L'invitation a échoué — il faut être capitaine ou éditeur.",
+    };
+  }
+
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const inviteUrl = `${baseUrl}/invitations/${invitation.token}`;
+
+  revalidatePath(`/trips/${d.tripId}/participants`);
+  return {
+    status: "success",
+    message: "Invitation créée — partage le lien, ou l'email s'en chargera.",
+    inviteUrl,
+  };
+}
+
+export async function cancelInvitation(
+  tripId: string,
+  invitationId: string,
+): Promise<ParticipantActionState> {
+  const { supabase } = await requireUser();
+  const { error, count } = await supabase
+    .from("trip_invitations")
+    .delete({ count: "exact" })
+    .eq("id", invitationId)
+    .eq("trip_id", tripId);
+
+  if (error || count === 0) {
+    return { status: "error", message: "L'annulation a échoué." };
+  }
+
+  revalidatePath(`/trips/${tripId}/participants`);
+  return { status: "success", message: "Invitation annulée." };
+}
+
 export async function leaveTrip(tripId: string): Promise<ParticipantActionState> {
   const { supabase, user } = await requireUser();
 

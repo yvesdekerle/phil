@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { InviteSection } from "./invite-form";
 import { LeaveTripButton, ParticipantRowActions } from "./participant-actions";
 
 const ROLE_LABELS: Record<string, string> = {
@@ -23,16 +24,28 @@ export default async function TripParticipantsPage({
     redirect("/login");
   }
 
-  const { data } = await supabase
-    .from("trip_participants")
-    .select(
-      "user_id, role, joined_at, profiles!trip_participants_user_id_fkey(display_name, avatar_url)",
-    )
-    .eq("trip_id", tripId)
-    .order("joined_at", { ascending: true });
+  const [{ data }, { data: invitations }] = await Promise.all([
+    supabase
+      .from("trip_participants")
+      .select(
+        "user_id, role, joined_at, profiles!trip_participants_user_id_fkey(display_name, avatar_url)",
+      )
+      .eq("trip_id", tripId)
+      .order("joined_at", { ascending: true }),
+    supabase
+      .from("trip_invitations")
+      .select("id, invited_email, role, token, expires_at")
+      .eq("trip_id", tripId)
+      .is("accepted_at", null)
+      .gt("expires_at", new Date().toISOString())
+      .order("created_at", { ascending: true }),
+  ]);
 
   const participants = data ?? [];
   const iAmOwner = participants.some((p) => p.user_id === user.id && p.role === "OWNER");
+  const myRole = participants.find((p) => p.user_id === user.id)?.role;
+  const canInvite = myRole === "OWNER" || myRole === "EDITOR";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
   return (
     <div className="flex flex-col gap-5">
@@ -78,9 +91,12 @@ export default async function TripParticipantsPage({
         })}
       </ul>
 
-      <div className="flex items-center justify-between">
+      {canInvite ? (
+        <InviteSection tripId={tripId} pending={invitations ?? []} baseUrl={baseUrl} />
+      ) : null}
+
+      <div>
         <LeaveTripButton tripId={tripId} />
-        <p className="text-xs text-encre-douce">L'invitation par email arrive avec PHIL-D05.</p>
       </div>
     </div>
   );
