@@ -78,8 +78,9 @@ Table avec : `id`, `owner_id`, `scope` (`VAULT` ou `TRIP`), `trip_id` (nullable,
 ### [ ] PHIL-B04 — Schéma table `document_shares`
 Table de liaison : `id`, `document_id`, `trip_id`, `shared_at`, `shared_by`. Permet à un user de partager explicitement un document de son coffre vers un voyage donné. Contrainte unique sur `(document_id, trip_id)`.
 
-### [ ] PHIL-B05 — Schéma tables `trip_events` et `event_documents`
+### [x] PHIL-B05 — Schéma tables `trip_events` et `event_documents` *(fait le 2026-07-03)*
 Table `trip_events` : `id`, `trip_id`, `type` (`TRANSPORT` / `LODGING` / `ACTIVITY`), `title`, `starts_at` (UTC), `ends_at` (UTC), `timezone` (IANA), `location_name`, `location_address`, `location_lat`, `location_lng`, `notes`, `metadata` (JSONB pour champs spécifiques par type), `created_by`, `created_at`. Table `event_documents` : `event_id`, `document_id`. Index sur `(trip_id, starts_at)`.
+> Note : migration `20260703083204_trip_events.sql`. Enum `event_type`, contrainte `ends_at >= starts_at` (nullable), cascade sur trips. **`event_documents.document_id` sans FK pour l'instant** : la table `documents` n'existe qu'en B03 — la migration B03 devra ajouter `alter table event_documents add constraint ... references documents(id) on delete cascade`. RLS activée sans policies jusqu'à B11. Types régénérés.
 
 ### [ ] PHIL-B06 — Schéma table `trip_ideas`
 Table : `id`, `trip_id`, `title`, `description`, `external_url`, `location_name`, `location_lat`, `location_lng`, `estimated_duration_minutes`, `estimated_cost`, `cost_currency`, `tags` (text array), `status` (`POOL` / `SCHEDULED` / `DISMISSED`), `scheduled_event_id` (nullable), `created_by`, `created_at`. Permet la conversion idée → événement.
