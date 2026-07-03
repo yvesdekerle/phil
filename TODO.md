@@ -258,8 +258,9 @@ Composant réutilisable "Document picker" : onglet 1 "Documents du voyage" (list
 
 ## Catégorie G — Documents partagés du voyage
 
-### [ ] PHIL-G01 — Page documents du voyage
+### [x] PHIL-G01 — Page documents du voyage *(fait le 2026-07-03)*
 Onglet "Documents" du voyage. Liste tous les documents `scope=TRIP` du voyage + ceux partagés depuis les coffres via `document_shares`. Filtres par type, par propriétaire. Indique clairement quels documents viennent d'un coffre personnel (badge "Partagé par X").
+> Note : fusion des deux sources triée par date, badges "Partagé par X" (laiton, coffre) vs "Ajouté par X" (neutre, voyage), filtres catégorie + voyageur en query params (le filtre voyageur n'apparaît qu'à partir de 2 propriétaires). Ouverture directe via le viewer E03a. Docs soft-deleted exclus des deux sources.
 
 ### [ ] PHIL-G02 — Upload direct dans le voyage
 Bouton "Ajouter un document" qui upload directement avec `scope=TRIP` et `trip_id` rempli. Visible immédiatement par tous les participants. Catégorisation au moment de l'upload.
