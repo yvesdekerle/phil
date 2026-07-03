@@ -28,7 +28,7 @@ export default async function TripIdeasPage({
   const [{ data: ideasData }, { data: me }] = await Promise.all([
     supabase
       .from("trip_ideas")
-      .select("*, profiles(display_name), idea_votes(user_id)")
+      .select("*, profiles!trip_ideas_created_by_fkey(display_name), idea_votes(user_id)")
       .eq("trip_id", tripId)
       .in("status", ["POOL", "SCHEDULED"])
       .order("created_at", { ascending: false }),
@@ -136,7 +136,7 @@ export default async function TripIdeasPage({
       ) : (
         <div className="flex flex-col gap-3">
           {ideas.map((idea) => (
-            <IdeaCard key={idea.id} idea={idea} />
+            <IdeaCard key={idea.id} idea={idea} tripId={tripId} />
           ))}
         </div>
       )}
