@@ -167,6 +167,56 @@ export async function attachDocument(
   return { status: "idle" };
 }
 
+/**
+ * Inscrit ou retire un participant d'un événement (PHIL-F11).
+ * La RLS porte les droits : soi-même si membre du voyage, n'importe quel
+ * membre si OWNER/EDITOR.
+ */
+export async function toggleEventParticipant(
+  tripId: string,
+  eventId: string,
+  userId: string,
+  present: boolean,
+): Promise<EventActionState> {
+  if (!areUuids(tripId, eventId, userId)) {
+    return { status: "error", message: "Identifiants invalides." };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { revalidatePath } = await import("next/cache");
+
+  if (present) {
+    const { error } = await supabase
+      .from("event_participants")
+      .upsert({ event_id: eventId, user_id: userId }, { onConflict: "event_id,user_id" });
+    if (error) {
+      return {
+        status: "error",
+        message: "Inscription refusée — seuls capitaines et éditeurs inscrivent les autres.",
+      };
+    }
+  } else {
+    const { error, count } = await supabase
+      .from("event_participants")
+      .delete({ count: "exact" })
+      .eq("event_id", eventId)
+      .eq("user_id", userId);
+    if (error || count === 0) {
+      return { status: "error", message: "Retrait refusé." };
+    }
+  }
+
+  revalidatePath(`/trips/${tripId}/events/${eventId}`);
+  return { status: "idle" };
+}
+
 export async function detachDocument(
   tripId: string,
   eventId: string,

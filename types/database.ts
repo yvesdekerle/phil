@@ -172,6 +172,39 @@ export type Database = {
           },
         ];
       };
+      event_participants: {
+        Row: {
+          added_at: string;
+          event_id: string;
+          user_id: string;
+        };
+        Insert: {
+          added_at?: string;
+          event_id: string;
+          user_id: string;
+        };
+        Update: {
+          added_at?: string;
+          event_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "event_participants_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "trip_events";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "event_participants_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       idea_votes: {
         Row: {
           created_at: string;

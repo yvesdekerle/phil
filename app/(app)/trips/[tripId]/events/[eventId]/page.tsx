@@ -12,6 +12,7 @@ import { EVENT_TYPE_LABELS } from "@/lib/events/types";
 import { createClient } from "@/lib/supabase/server";
 import { attachDocument, detachDocument } from "./actions";
 import { EventActions } from "./event-actions";
+import { EventParticipants } from "./event-participants";
 
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -36,7 +37,13 @@ export default async function EventDetailPage({
     redirect("/login");
   }
 
-  const [{ data: event }, { data: attachedDocs }, { data: me }] = await Promise.all([
+  const [
+    { data: event },
+    { data: attachedDocs },
+    { data: me },
+    { data: members },
+    { data: signedUp },
+  ] = await Promise.all([
     supabase.from("trip_events").select("*").eq("id", eventId).eq("trip_id", tripId).single(),
     supabase
       .from("event_documents")
@@ -48,6 +55,12 @@ export default async function EventDetailPage({
       .eq("trip_id", tripId)
       .eq("user_id", user.id)
       .single(),
+    supabase
+      .from("trip_participants")
+      .select("user_id, profiles!trip_participants_user_id_fkey(display_name, avatar_url)")
+      .eq("trip_id", tripId)
+      .order("joined_at", { ascending: true }),
+    supabase.from("event_participants").select("user_id").eq("event_id", eventId),
   ]);
 
   if (!event) {
@@ -56,6 +69,15 @@ export default async function EventDetailPage({
 
   const canEdit = me?.role === "OWNER" || me?.role === "EDITOR";
   const canDelete = me?.role === "OWNER" || event.created_by === user.id;
+
+  const signedUpIds = new Set((signedUp ?? []).map((s) => s.user_id));
+  const participantOptions = (members ?? []).map((m) => ({
+    userId: m.user_id,
+    name: m.user_id === user.id ? "Toi" : (m.profiles?.display_name ?? "Voyageur"),
+    avatarUrl: m.profiles?.avatar_url ?? null,
+    isIn: signedUpIds.has(m.user_id),
+    canToggle: canEdit || m.user_id === user.id,
+  }));
 
   const meta = (event.metadata ?? {}) as Record<string, string | number>;
   const documents = (attachedDocs ?? [])
@@ -150,6 +172,8 @@ export default async function EventDetailPage({
       {canEdit || canDelete ? (
         <EventActions tripId={tripId} eventId={event.id} eventTitle={event.title} />
       ) : null}
+
+      <EventParticipants tripId={tripId} eventId={event.id} options={participantOptions} />
 
       <section>
         <div className="mb-2 flex items-center justify-between">

@@ -272,6 +272,10 @@ Tous les `starts_at` / `ends_at` stockés en UTC. Le champ `timezone` IANA est o
 Composant réutilisable "Document picker" : onglet 1 "Documents du voyage" (liste), onglet 2 "Mon coffre" (liste filtrée à mes documents personnels, partage automatique au voyage si sélectionné), onglet 3 "Uploader un nouveau". À la sélection, création de la ligne `event_documents` (et `document_shares` si nécessaire).
 > Note : `components/documents/document-picker.tsx` (Dialog + Tabs shadcn, listes chargées côté client via RLS). Coffre → **partage auto** `document_shares` (propriétaire uniquement) + log `SHARE`, puis liaison `event_documents`. Détachement possible (liaison seulement, le partage reste — retrait en E05). **Écart** : onglet "Uploader un nouveau" différé à G02 (upload direct voyage) — lien vers `/vault/new` en attendant. Vérifié en réel : attache depuis le coffre = partage + liaison + audit SHARE.
 
+### [x] PHIL-F11 — Participants d'un événement *(demandé et fait le 2026-07-04)*
+Sur un événement (activité, transport, hébergement), pouvoir indiquer **qui participe** (optionnel — à 9, tout le monde ne plonge pas). Table `event_participants` (event_id, user_id). Chacun peut s'inscrire/se retirer lui-même ; OWNER/EDITOR peuvent cocher les autres. Affichage : avatars/noms sur la page de l'événement, compteur. Sans inscription = événement pour tout le groupe (comportement par défaut inchangé).
+> Note : migration `20260703230708`, RLS — lecture pour tout membre du voyage, inscription/retrait pour soi-même ou par OWNER/EDITOR pour n'importe quel membre. Section "Qui est de la partie ?" sur la page événement : puces avatar+nom cliquables (✓ bordeaux = inscrit), compteur, "Tout le groupe" si personne d'inscrit. Vérifié en réel : inscription de soi + d'Amelie par le capitaine, 2 lignes en base.
+
 ---
 
 ## Catégorie G — Documents partagés du voyage
