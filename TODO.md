@@ -196,8 +196,9 @@ Endpoint API `/api/documents/{id}/view` qui : (1) vérifie que l'user a le droit
 ### [ ] PHIL-E03b — Durcissement de la visualisation
 Évolution du viewer E03a pour les documents `scope=VAULT` : application du filigrane dynamique via le service E06 sur chaque ouverture, headers `Cache-Control: private, no-store`, vérification systématique de la session "vault unlocked" (C05). Les documents `scope=TRIP` restent servis sans filigrane.
 
-### [ ] PHIL-E04 — Suppression et modification de document
+### [x] PHIL-E04 — Suppression et modification de document *(fait le 2026-07-03)*
 Sur un document, action "Modifier" (renommage, changement de catégorie, mise à jour métadonnées) et "Supprimer" (confirmation, suppression du blob storage et de la ligne en base, soft delete d'abord). Loggué dans `vault_access_log`.
+> Note : édition inline (nom, catégorie, expiration, numéro) avec Zod + RLS owner. Suppression = **soft delete** (`deleted_at`, blob conservé) conformément au "soft delete d'abord" — la purge définitive blob+ligne viendra avec C06 ou un nettoyage périodique (à créer le moment venu). Actions logguées UPDATE/DELETE. Vérifié en réel : piste d'audit complète UPLOAD → VIEW → UPDATE → DELETE, deleted_at posé, blob conservé, doc absent de la liste et du viewer.
 
 ### [ ] PHIL-E05 — Partage d'un document du coffre vers un voyage
 Sur un document du coffre, bouton "Partager avec un voyage" qui ouvre une modale avec la liste de mes voyages actifs. Sélection du voyage → création d'une ligne `document_shares`. Le document devient visible des autres participants du voyage sans changer de scope. Affichage clair "Partagé avec : Voyage Mauritius nov 2026" sous le document. Possibilité de retirer le partage. Actions logguées (`SHARE` / `UNSHARE`).

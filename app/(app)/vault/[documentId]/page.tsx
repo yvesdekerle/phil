@@ -5,6 +5,7 @@ import { notFound, redirect } from "next/navigation";
 import { CategoryIcon } from "@/components/vault/category-icon";
 import { createClient } from "@/lib/supabase/server";
 import { CATEGORY_LABELS } from "@/lib/vault/categories";
+import { DocumentActions } from "./document-actions";
 
 export default async function VaultDocumentPage({
   params,
@@ -61,6 +62,16 @@ export default async function VaultDocumentPage({
             {metadata.document_number ? ` · N° ${metadata.document_number}` : ""}
           </p>
         </div>
+      </div>
+
+      <div className="mb-6">
+        <DocumentActions
+          documentId={doc.id}
+          fileName={doc.file_name}
+          category={doc.category}
+          expiresAt={doc.expires_at ?? ""}
+          documentNumber={metadata.document_number ?? ""}
+        />
       </div>
 
       <div className="overflow-hidden rounded-lg border border-laiton-clair bg-papier">
