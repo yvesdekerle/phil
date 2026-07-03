@@ -10,11 +10,14 @@ export function SignInButton({ next = "/trips" }: { next?: string }) {
   async function signInWithGoogle() {
     setLoading(true);
     setError(null);
+    // La destination post-login passe par un cookie : un query param sur la
+    // callback la ferait sortir de la liste blanche Supabase (retour Site URL prod).
+    document.cookie = `phil_next=${encodeURIComponent(next)}; path=/; max-age=600; samesite=lax`;
     const supabase = createClient();
     const { error: signInError } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
+        redirectTo: `${window.location.origin}/auth/callback`,
       },
     });
     if (signInError) {

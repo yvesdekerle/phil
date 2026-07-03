@@ -527,6 +527,50 @@ export type Database = {
           },
         ];
       };
+      user_passkeys: {
+        Row: {
+          counter: number;
+          created_at: string;
+          credential_id: string;
+          device_name: string | null;
+          id: string;
+          last_used_at: string | null;
+          public_key: string;
+          transports: string[];
+          user_id: string;
+        };
+        Insert: {
+          counter?: number;
+          created_at?: string;
+          credential_id: string;
+          device_name?: string | null;
+          id?: string;
+          last_used_at?: string | null;
+          public_key: string;
+          transports?: string[];
+          user_id: string;
+        };
+        Update: {
+          counter?: number;
+          created_at?: string;
+          credential_id?: string;
+          device_name?: string | null;
+          id?: string;
+          last_used_at?: string | null;
+          public_key?: string;
+          transports?: string[];
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "user_passkeys_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       vault_access_log: {
         Row: {
           accessed_at: string;

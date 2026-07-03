@@ -54,6 +54,10 @@ export async function updateSession(request: NextRequest) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/login";
     loginUrl.search = "";
+    // Retour sur la page demandée après connexion (sauf appels API).
+    if (!pathname.startsWith("/api/")) {
+      loginUrl.searchParams.set("next", pathname);
+    }
     return NextResponse.redirect(loginUrl);
   }
 

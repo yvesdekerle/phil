@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -60,11 +61,16 @@ export default async function ProfilePage() {
           </CardContent>
         </Card>
 
-        <form action={signOut} className="mt-6 text-center">
-          <Button type="submit" variant="outline">
-            Se déconnecter
+        <div className="mt-6 flex items-center justify-center gap-4">
+          <Button asChild variant="outline">
+            <Link href="/security">Sécurité du coffre</Link>
           </Button>
-        </form>
+          <form action={signOut}>
+            <Button type="submit" variant="outline">
+              Se déconnecter
+            </Button>
+          </form>
+        </div>
       </div>
     </main>
   );

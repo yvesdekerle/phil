@@ -132,7 +132,7 @@ Middleware qui protège toutes les routes sauf `/`, `/login`, `/auth/*`, et les 
 Vue du profil : nom, email, avatar, langue, timezone par défaut. Possibilité de modifier nom et préférences. Pas de modification d'email (lié au SSO Google). Bouton "Se déconnecter".
 > Note : la table `profiles` n'existant qu'en B01, les préférences (display_name, locale, timezone) vivent pour l'instant dans `user_metadata` Supabase Auth — **B01 devra migrer ces valeurs vers `profiles`**. shadcn/ui initialisé (preset nova, base radix) avec tokens remappés sur la palette Phil ; composants button/input/label/select/card. Formulaire RHF + Zod + Server Action (validation Zod aussi côté serveur). Avatar Google via next/image (remotePatterns lh3.googleusercontent.com). Vérifié : enregistrement OK, métadonnées persistées.
 
-### [ ] PHIL-C04 — Enregistrement passkey WebAuthn
+### [~] PHIL-C04 — Enregistrement passkey WebAuthn
 Page "Sécurité" avec bouton "Activer Face ID / Touch ID pour le coffre". Implémentation du flow WebAuthn registration : challenge serveur, création du credential côté client, stockage de la public key en base. Table `user_passkeys` : `id`, `user_id`, `credential_id`, `public_key`, `device_name`, `created_at`, `last_used_at`.
 
 ### [ ] PHIL-C05 — Authentification passkey à l'ouverture du coffre
