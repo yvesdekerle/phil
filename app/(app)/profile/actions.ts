@@ -67,6 +67,34 @@ export async function signOut() {
   redirect("/login");
 }
 
+/** Préférences de notification (PHIL-K04). */
+export async function updateNotificationPreferences(raw: unknown): Promise<ProfileFormState> {
+  const { notificationPreferencesSchema } = await import("@/lib/notifications/preferences");
+  const parsed = notificationPreferencesSchema.safeParse(raw);
+  if (!parsed.success) {
+    return { status: "error", message: "Préférences invalides." };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({ notification_preferences: parsed.data })
+    .eq("id", user.id);
+
+  if (error) {
+    return { status: "error", message: "Enregistrement impossible." };
+  }
+  revalidatePath("/profile");
+  return { status: "success" };
+}
+
 /** Suppression de compte RGPD (PHIL-C06) — confirmation forte côté client. */
 export async function deleteMyAccount(
   _prev: ProfileFormState,

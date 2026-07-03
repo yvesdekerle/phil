@@ -3,10 +3,12 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { parsePreferences } from "@/lib/notifications/preferences";
 import { getOwnProfile } from "@/lib/supabase/profiles";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "./actions";
 import { DeleteAccountSection } from "./delete-account";
+import { NotificationPreferencesForm } from "./notification-preferences";
 import { ProfileForm } from "./profile-form";
 
 export default async function ProfilePage() {
@@ -58,6 +60,17 @@ export default async function ProfilePage() {
                 locale: profile?.locale === "en" ? "en" : "fr",
                 timezone: profile?.timezone ?? "Europe/Paris",
               }}
+            />
+          </CardContent>
+        </Card>
+
+        <Card className="mt-6">
+          <CardHeader>
+            <p className="text-sm font-medium text-encre">Notifications par email</p>
+          </CardHeader>
+          <CardContent>
+            <NotificationPreferencesForm
+              initial={parsePreferences(profile?.notification_preferences)}
             />
           </CardContent>
         </Card>

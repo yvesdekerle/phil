@@ -213,6 +213,7 @@ export type Database = {
           id: string;
           last_export_at: string | null;
           locale: string;
+          notification_preferences: Json;
           timezone: string;
           updated_at: string;
         };
@@ -223,6 +224,7 @@ export type Database = {
           id: string;
           last_export_at?: string | null;
           locale?: string;
+          notification_preferences?: Json;
           timezone?: string;
           updated_at?: string;
         };
@@ -233,6 +235,7 @@ export type Database = {
           id?: string;
           last_export_at?: string | null;
           locale?: string;
+          notification_preferences?: Json;
           timezone?: string;
           updated_at?: string;
         };

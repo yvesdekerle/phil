@@ -384,8 +384,9 @@ Template clair : nom de l'inviteur, nom du voyage, dates, destination, bouton "R
 ### [ ] PHIL-K03 — Email d'alerte expiration document
 Envoyé par le cron job d'expiration. Template : "Votre passeport expire dans X jours". Lien vers le coffre. Possibilité de désactiver ces alertes dans les préférences.
 
-### [ ] PHIL-K04 — Préférences de notification
+### [x] PHIL-K04 — Préférences de notification *(fait le 2026-07-03)*
 Page dans le profil pour activer/désactiver chaque type d'email (invitations, alertes expiration, rappels événements). Stockage dans `profiles.notification_preferences` (JSONB).
+> Note : JSONB `notification_preferences` (défaut tout activé), schéma Zod + parse tolérant (`lib/notifications/preferences.ts`), 3 interrupteurs dans le profil avec sauvegarde immédiate et rollback si échec. E07/K03 lisent `expiry_alerts` avant envoi. Vérifié en réel : toggle → JSONB mis à jour en base.
 
 ---
 
