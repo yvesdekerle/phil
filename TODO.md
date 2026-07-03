@@ -168,8 +168,9 @@ Page paramètres du voyage : modifier nom, dates, destination, image, timezone. 
 Sur la page Participants, formulaire pour inviter par email avec choix du rôle (EDITOR par défaut). Génération d'un token unique, création d'une ligne dans `trip_invitations`, envoi d'un email via Resend avec un lien `https://phil.vercel.app/invitations/{token}`.
 > Note : formulaire OWNER/EDITOR (rôle EDITOR par défaut, OWNER non proposable), token généré en base, **lien copiable immédiatement** (secours WhatsApp tant que le domaine d'envoi n'est pas vérifié), liste des invitations en attente (non expirées) avec annulation. L'envoi de l'email est branché au ticket suivant (K02). Doublons bloqués par la contrainte unique.
 
-### [ ] PHIL-D06 — Acceptation d'invitation
+### [x] PHIL-D06 — Acceptation d'invitation *(fait le 2026-07-03)*
 Page `/invitations/{token}` qui affiche les infos du voyage et un bouton "Rejoindre". Si l'user n'est pas connecté, le rediriger vers login et revenir sur la page après. À l'acceptation, création de la ligne `trip_participants` et marquage de l'invitation comme acceptée. Gestion des invitations expirées (30 jours) ou déjà acceptées.
+> Note : page carte "invitation au voyage" résolue via service role (invité hors RLS), états invalide/annulée/expirée/déjà utilisée. Login avec retour : `/login?next=…` (validation anti open-redirect) → `signInWithOAuth` → callback `?next=`. Acceptation : vérifs token puis insert participant (rôle de l'invitation) + `accepted_at` via service role ; participant existant → redirection directe. Pas de contrôle d'email : le lien EST la capacité (lien magique assumé, cercle d'amis). Vérifié : page, branche déjà-participant en réel, acceptation user B simulée → B voit le voyage via RLS.
 
 ### [x] PHIL-D07 — Gestion des participants *(fait le 2026-07-03)*
 Liste des participants avec leur rôle. OWNER peut : changer le rôle de quelqu'un, retirer un participant, transférer la propriété (passer OWNER à quelqu'un d'autre, devenir EDITOR). Un user peut quitter un voyage de lui-même (sauf le dernier OWNER qui doit transférer avant).
@@ -359,8 +360,9 @@ Document `INCIDENT.md` avec : que faire en cas de fuite de données, contacts CN
 Créer un compte Resend, vérifier un domaine (au début, on utilise leur domaine de test, plus tard un domaine perso). Setup React Email pour des templates en JSX. Templates de base : invitation voyage, alerte expiration document, rappel événement J-1. Signature des emails : "À bientôt sur la route, Phil".
 > Note : compte Resend créé, clé API en `.env.local` + Vercel (scripts fournis). Expéditeur `onboarding@resend.dev` (mode test : envois limités à l'adresse du compte) — **domaine vérifié à prévoir avant Maurice** pour envoyer aux amis ; D05 affichera aussi le lien d'invitation à copier en secours. Templates React Email aux couleurs Phil (`lib/email/templates/` : shell commun + invitation, expiration, rappel J-1). Envoi réel testé et reçu.
 
-### [ ] PHIL-K02 — Email d'invitation à un voyage
+### [x] PHIL-K02 — Email d'invitation à un voyage *(fait le 2026-07-03)*
 Template clair : nom de l'inviteur, nom du voyage, dates, destination, bouton "Rejoindre le voyage", lien de fallback. Envoi via Resend API depuis l'endpoint d'invitation.
+> Note : envoi branché dans `createInvitation` (template K01). **Échec d'envoi non bloquant** : en mode test Resend (adresses hors compte refusées), l'invitation reste valide et le message oriente vers le lien copiable. Vérifié en réel : email reçu avec le vrai token.
 
 ### [ ] PHIL-K03 — Email d'alerte expiration document
 Envoyé par le cron job d'expiration. Template : "Votre passeport expire dans X jours". Lien vers le coffre. Possibilité de désactiver ces alertes dans les préférences.

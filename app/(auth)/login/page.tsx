@@ -5,9 +5,11 @@ const ROUTE_FOGG = "Londres — Bombay — Yokohama — Londres";
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; next?: string }>;
 }) {
-  const { error } = await searchParams;
+  const { error, next } = await searchParams;
+  // Anti open-redirect : uniquement des chemins internes.
+  const safeNext = next?.startsWith("/") && !next.startsWith("//") ? next : "/trips";
 
   return (
     <main className="flex flex-1 flex-col items-center justify-center px-4 py-12">
@@ -38,7 +40,7 @@ export default async function LoginPage({
             Connecte-toi pour préparer le prochain départ.
           </p>
 
-          <SignInButton />
+          <SignInButton next={safeNext} />
 
           {error === "auth" ? (
             <p role="alert" className="mt-4 text-center text-sm text-bordeaux">

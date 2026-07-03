@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-export function SignInButton() {
+export function SignInButton({ next = "/trips" }: { next?: string }) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -13,7 +13,9 @@ export function SignInButton() {
     const supabase = createClient();
     const { error: signInError } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback?next=/trips` },
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
+      },
     });
     if (signInError) {
       setError("L'embarquement n'a pas abouti. Réessaie dans un instant.");

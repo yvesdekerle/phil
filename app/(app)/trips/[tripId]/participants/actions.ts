@@ -200,10 +200,54 @@ export async function createInvitation(
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
   const inviteUrl = `${baseUrl}/invitations/${invitation.token}`;
 
+  // PHIL-K02 : envoi de l'email d'invitation. Un échec d'envoi (mode test
+  // Resend : seules les adresses du compte sont autorisées) n'invalide pas
+  // l'invitation — le lien copiable prend le relais.
+  let emailSent = false;
+  try {
+    const [{ data: trip }, { data: inviter }] = await Promise.all([
+      supabase
+        .from("trips")
+        .select("name, destination, start_date, end_date")
+        .eq("id", d.tripId)
+        .single(),
+      supabase.from("profiles").select("display_name").eq("id", user.id).single(),
+    ]);
+
+    if (trip) {
+      const { createResendClient, fromEmail } = await import("@/lib/email/resend");
+      const { TripInvitationEmail } = await import("@/lib/email/templates/trip-invitation");
+      const { formatDateRange } = await import("@/lib/trips/format");
+
+      const resend = createResendClient();
+      const inviterName = inviter?.display_name ?? "Un compagnon de route";
+      const { error: sendError } = await resend.emails.send({
+        from: `Phil <${fromEmail()}>`,
+        to: d.email,
+        subject: `${inviterName} t'invite à rejoindre « ${trip.name} »`,
+        react: TripInvitationEmail({
+          inviterName,
+          tripName: trip.name,
+          destination: trip.destination,
+          dates: formatDateRange(trip.start_date, trip.end_date),
+          inviteUrl,
+        }),
+      });
+      emailSent = !sendError;
+      if (sendError) {
+        console.error("Envoi invitation échoué:", sendError.message);
+      }
+    }
+  } catch (e) {
+    console.error("Envoi invitation impossible:", e);
+  }
+
   revalidatePath(`/trips/${d.tripId}/participants`);
   return {
     status: "success",
-    message: "Invitation créée — partage le lien, ou l'email s'en chargera.",
+    message: emailSent
+      ? "Invitation envoyée par email — et voici le lien si besoin."
+      : "Invitation créée. L'email n'est pas parti (domaine non vérifié) : partage le lien.",
     inviteUrl,
   };
 }
