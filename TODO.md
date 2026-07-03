@@ -246,8 +246,9 @@ Affichage de toutes les infos saisies, des documents attachés (ouverture en un 
 Édition inline ou modale. Suppression avec confirmation. Loggé pour audit. Si l'événement avait des documents attachés, ils ne sont pas supprimés (juste la liaison `event_documents`).
 > Note : page `/events/[id]/edit` pré-remplie en heure locale (champs communs : titre, horaires, fuseau, lieu, adresse, notes). **Écarts** : les métadonnées spécifiques par type (n° résa, trajet…) ne sont pas éditables en v1 (mention affichée) ; pas de table d'audit événements — trace `console.log` visible dans les logs Vercel. Boutons selon rôle : Modifier = OWNER/EDITOR, Supprimer = OWNER ou créateur (RLS + UI). Liaisons documents en cascade, documents intacts. Vérifié en réel : édition + suppression.
 
-### [ ] PHIL-F09 — Gestion des fuseaux horaires
+### [x] PHIL-F09 — Gestion des fuseaux horaires *(fait le 2026-07-03)*
 Tous les `starts_at` / `ends_at` stockés en UTC. Le champ `timezone` IANA est obligatoire et pré-rempli avec le timezone par défaut du voyage. Affichage des heures dans le timezone de l'événement avec mention explicite ("18h00 heure locale Maurice"). Helper `formatInTimezone` à utiliser partout dans l'UI.
+> Note : exigences déjà portées par F01/F04-F08 (UTC en base, `timezone` NOT NULL pré-rempli du voyage, helper central `lib/events/datetime.ts`, mention "heure locale {fuseau}" sur le détail). Ce ticket ajoute la mention sur la vue liste et un audit de conformité : zéro `toLocaleString`, `date-fns-tz` hors helper limité à `fromZonedTime` (chemin d'écriture des actions). Les dates pures (voyages, coffre) restent en `date-fns` sans tz — pas d'heure en jeu.
 
 ### [ ] PHIL-F10 — Attacher un document à un événement
 Composant réutilisable "Document picker" : onglet 1 "Documents du voyage" (liste), onglet 2 "Mon coffre" (liste filtrée à mes documents personnels, partage automatique au voyage si sélectionné), onglet 3 "Uploader un nouveau". À la sélection, création de la ligne `event_documents` (et `document_shares` si nécessaire).

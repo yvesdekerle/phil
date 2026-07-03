@@ -52,6 +52,12 @@ export default async function TripCalendarPage({
         </div>
       ) : null}
 
+      {days.length > 0 ? (
+        <p className="-mb-3 text-right text-xs text-encre-douce">
+          Heures affichées en heure locale de chaque événement.
+        </p>
+      ) : null}
+
       {days.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-6 py-14 text-center">
           <p className="font-display text-xl text-encre italic">Aucun événement pour l'instant</p>
