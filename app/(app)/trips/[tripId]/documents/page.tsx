@@ -2,6 +2,7 @@ import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { OfflineDocToggle } from "@/components/offline/offline-doc-toggle";
 import { Button } from "@/components/ui/button";
 import { CategoryIcon } from "@/components/vault/category-icon";
 import { createClient } from "@/lib/supabase/server";
@@ -181,12 +182,15 @@ export default async function TripDocumentsPage({
       ) : (
         <ul className="flex flex-col gap-2">
           {documents.map((doc) => (
-            <li key={doc.id}>
+            <li
+              key={doc.id}
+              className="flex items-center gap-3 rounded-lg border border-laiton-clair bg-papier px-4 py-3"
+            >
               <a
                 href={`/api/documents/${doc.id}/view`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-4 rounded-lg border border-laiton-clair bg-papier px-4 py-3 transition-shadow hover:shadow-[0_2px_12px_rgba(31,42,68,0.1)]"
+                className="flex min-w-0 flex-1 items-center gap-4"
               >
                 <CategoryIcon category={doc.category} />
                 <span className="min-w-0 flex-1">
@@ -198,19 +202,20 @@ export default async function TripDocumentsPage({
                     {format(parseISO(doc.uploaded_at), "d MMM yyyy", { locale: fr })}
                   </span>
                 </span>
-                <span
-                  className={cn(
-                    "shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium",
-                    doc.scope === "VAULT"
-                      ? "bg-laiton/15 text-laiton"
-                      : "bg-encre-douce/10 text-encre-douce",
-                  )}
-                >
-                  {doc.scope === "VAULT"
-                    ? `Partagé par ${doc.ownerName}`
-                    : `Ajouté par ${doc.ownerName}`}
-                </span>
               </a>
+              <span
+                className={cn(
+                  "shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium",
+                  doc.scope === "VAULT"
+                    ? "bg-laiton/15 text-laiton"
+                    : "bg-encre-douce/10 text-encre-douce",
+                )}
+              >
+                {doc.scope === "VAULT"
+                  ? `Partagé par ${doc.ownerName}`
+                  : `Ajouté par ${doc.ownerName}`}
+              </span>
+              <OfflineDocToggle documentId={doc.id} fileName={doc.file_name} />
             </li>
           ))}
         </ul>

@@ -318,8 +318,9 @@ Cache-first pour les assets Next.js (JS, CSS, fonts, images). Network-first avec
 Setup Dexie.js (wrapper IndexedDB). Tables locales : `trips`, `events`, `documents_metadata`, `ideas`. Quand l'user ouvre un voyage en ligne, sync automatique des données dans IndexedDB. Bouton explicite "Préparer pour offline" qui force la synchro complète.
 > Note : base `phil-offline` (Dexie v1) + table `sync_meta` (horodatage et compteurs par voyage). `syncTrip()` lit via le client de session — **la RLS borne ce qui peut être caché**. Synchro silencieuse au montage du layout voyage (si en ligne) + bouton "Préparer pour offline" dans Paramètres avec horodatage. `documents_meta` inclut les docs TRIP et les partagés du coffre (métadonnées seulement — les fichiers, c'est I04). Vérifié en réel : ouverture du voyage → IndexedDB peuplé (trip, events, idées, méta).
 
-### [ ] PHIL-I04 — Cache offline des documents
+### [x] PHIL-I04 — Cache offline des documents *(fait le 2026-07-03)*
 Sur un document, bouton "Disponible offline". Téléchargement du fichier tel que servi par le viewer au moment du téléchargement (avec filigrane pour les docs du coffre une fois E03b en place). Stockage dans IndexedDB. Indicateur visuel "Offline" sur les documents disponibles. Limite de stockage configurable (par défaut 100 Mo).
+> Note : Dexie v2 (`document_blobs`), téléchargement **via le viewer authentifié** (audit VIEW compris, filigrane automatique après E03b). Limite 100 Mo contrôlée avant écriture avec message. Toggle `OfflineDocToggle` sur la fiche coffre et les lignes de documents du voyage, badge "Offline", ouverture par object URL depuis `/offline` ("Ouvrir (offline)" / "non téléchargé"). Vérifié en réel : toggle → blob en IndexedDB → ouvrable hors ligne.
 
 ### [x] PHIL-I05 — Mode lecture offline *(fait le 2026-07-03)*
 Détection de l'absence de réseau via `navigator.onLine` + ping périodique. Bandeau "Mode offline" affiché. Toutes les pages voyages, événements, documents marqués offline restent accessibles. Les actions d'écriture sont désactivées avec message "Reconnectez-vous pour modifier".

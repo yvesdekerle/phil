@@ -6,6 +6,7 @@ import { eventTime, groupEventsByDay } from "@/lib/events/datetime";
 import type { TripEvent } from "@/lib/events/types";
 import type { TripIdea } from "@/lib/ideas/types";
 import { type OfflineDocumentMeta, offlineDb, type SyncMeta } from "@/lib/offline/db";
+import { openOfflineDocument } from "@/lib/offline/documents";
 import { formatDateRange } from "@/lib/trips/format";
 import type { Trip } from "@/lib/trips/status";
 
@@ -23,9 +24,12 @@ type OfflineTrip = {
  */
 export default function OfflinePage() {
   const [trips, setTrips] = useState<OfflineTrip[] | null>(null);
+  const [offlineDocIds, setOfflineDocIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     (async () => {
+      const blobIds = await offlineDb.document_blobs.toCollection().primaryKeys();
+      setOfflineDocIds(new Set(blobIds as string[]));
       const allTrips = await offlineDb.trips.toArray();
       const loaded = await Promise.all(
         allTrips.map(async (trip) => ({
@@ -118,9 +122,22 @@ export default function OfflinePage() {
                   <h3 className="mb-1.5 text-xs font-medium text-encre-douce">Documents</h3>
                   <ul className="flex flex-col gap-1 text-sm text-encre">
                     {documents.map((doc) => (
-                      <li key={doc.id} className="truncate">
-                        {doc.file_name}{" "}
-                        <span className="text-xs text-encre-douce">— {doc.owner_name}</span>
+                      <li key={doc.id} className="flex items-center gap-2">
+                        <span className="min-w-0 flex-1 truncate">
+                          {doc.file_name}{" "}
+                          <span className="text-xs text-encre-douce">— {doc.owner_name}</span>
+                        </span>
+                        {offlineDocIds.has(doc.id) ? (
+                          <button
+                            type="button"
+                            onClick={() => void openOfflineDocument(doc.id)}
+                            className="shrink-0 rounded-full border border-laiton-clair px-2.5 py-0.5 text-xs font-medium text-encre transition-colors hover:bg-parchemin"
+                          >
+                            Ouvrir (offline)
+                          </button>
+                        ) : (
+                          <span className="shrink-0 text-xs text-encre-douce">non téléchargé</span>
+                        )}
                       </li>
                     ))}
                   </ul>

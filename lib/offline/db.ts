@@ -21,6 +21,15 @@ export type SyncMeta = {
   ideaCount: number;
 };
 
+export type OfflineDocumentBlob = {
+  id: string;
+  file_name: string;
+  mime_type: string;
+  size_bytes: number;
+  blob: Blob;
+  savedAt: string;
+};
+
 /** Base locale IndexedDB pour la lecture offline (PHIL-I03/I05). */
 export const offlineDb = new Dexie("phil-offline") as Dexie & {
   trips: EntityTable<Trip, "id">;
@@ -28,6 +37,7 @@ export const offlineDb = new Dexie("phil-offline") as Dexie & {
   documents_meta: EntityTable<OfflineDocumentMeta, "id">;
   ideas: EntityTable<TripIdea, "id">;
   sync_meta: EntityTable<SyncMeta, "key">;
+  document_blobs: EntityTable<OfflineDocumentBlob, "id">;
 };
 
 offlineDb.version(1).stores({
@@ -36,4 +46,9 @@ offlineDb.version(1).stores({
   documents_meta: "id, trip_id",
   ideas: "id, trip_id",
   sync_meta: "key",
+});
+
+// PHIL-I04 : fichiers disponibles offline
+offlineDb.version(2).stores({
+  document_blobs: "id",
 });
