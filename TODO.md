@@ -279,8 +279,9 @@ Possible par : (a) le propriétaire du document, (b) un OWNER du voyage. Confirm
 
 ## Catégorie H — Idées d'activités
 
-### [ ] PHIL-H01 — Page idées d'activités
+### [x] PHIL-H01 — Page idées d'activités *(fait le 2026-07-03)*
 Onglet "Idées" du voyage. Liste des idées en pool avec : titre, description tronquée, lieu, durée estimée, coût estimé, tags, créateur, nombre de votes. Filtres et tri (par votes, par création, par tags).
+> Note : cards `components/ideas/idea-card.tsx` (description en line-clamp, lieu/durée/coût/lien avec icônes, tags en pastilles, "proposé par X"). Tri "plus votées" (défaut) / "plus récentes" + filtre par tag en query params, tags découverts dynamiquement. Idées SCHEDULED affichées estompées avec badge "Planifié" (H04). Compteur de voix statique — le vote interactif est H03. Bouton "Proposer" pour OWNER/EDITOR (aligné sur la policy B06).
 
 ### [ ] PHIL-H02 — Création d'une idée
 Formulaire : titre, description, lien externe optionnel, lieu optionnel, durée et coût estimés, tags. Pas de date à ce stade.
