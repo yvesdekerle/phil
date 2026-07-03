@@ -32,6 +32,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               >
                 Coffre
               </Link>
+              <Link
+                href="/friends"
+                className="text-encre-douce transition-colors hover:text-encre focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-laiton"
+              >
+                Amis
+              </Link>
             </nav>
           </div>
           <Link

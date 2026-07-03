@@ -180,8 +180,9 @@ Page `/invitations/{token}` qui affiche les infos du voyage et un bouton "Rejoin
 Liste des participants avec leur rôle. OWNER peut : changer le rôle de quelqu'un, retirer un participant, transférer la propriété (passer OWNER à quelqu'un d'autre, devenir EDITOR). Un user peut quitter un voyage de lui-même (sauf le dernier OWNER qui doit transférer avant).
 > Note : sélecteur de rôle (Éditeur/Lecteur — passer OWNER = uniquement via "Passer capitaine"), transfert en deux updates ordonnés (promotion de l'autre PUIS rétrogradation, pour rester couvert par la policy OWNER), retrait avec confirmation, "Quitter le voyage" pour tous avec garde-fou dernier-capitaine (vérifié en réel). Vérifs applicatives doublées par la RLS B09.
 
-### [ ] PHIL-D08 — Carnet d'amis
+### [x] PHIL-D08 — Carnet d'amis *(fait le 2026-07-03)*
 Page qui liste les personnes avec qui l'user a déjà voyagé (extrait des `trip_participants`). Permet de les ré-inviter en un clic sur un nouveau voyage. Pas de social, juste un cache pratique.
+> Note : page `/friends` (nav "Amis") — compagnons dédupliqués, tri par nombre de voyages partagés, ré-invitation : sélecteur (voyages OWNER/EDITOR) → invitation D05/K02 (rôle EDITOR, email en test → repli lien copiable sur Participants). **Bug majeur découvert et corrigé** : `profiles` n'était lisible que par soi-même (RLS `select_own` seule) → tous les noms de co-équipiers retombaient sur le fallback partout (participants, idées, "Ajouté par") — passé inaperçu car les tests E2E étaient mono-utilisateur. Migration `20260703170135` : policy `profiles_select_cotravelers` via `private.shares_trip_with()` (security definer). Effet de bord corrigé : `getOwnProfile` faisait `.single()` sans filtre. `verify:rls` repassé : 24/24. Vérifié en réel (Amelie, user démo, visible et ré-invitée).
 
 ### [ ] PHIL-D09 — Upload d'image de couverture de voyage
 Découvert en D02 (traité en URL seulement) : permettre l'upload d'une image de couverture vers un bucket Supabase Storage public-aux-membres (bucket dédié `covers`, policies RLS storage, redimensionnement/limite de taille). À traiter en Phase 5 avec les documents du voyage, ou à la demande.
