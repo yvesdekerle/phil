@@ -12,12 +12,28 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     <>
       <header className="border-b border-laiton-clair/60">
         <div className="mx-auto flex h-14 w-full max-w-5xl items-center justify-between px-4">
-          <Link
-            href="/trips"
-            className="font-display text-2xl text-encre focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-laiton"
-          >
-            Phil
-          </Link>
+          <div className="flex items-center gap-6">
+            <Link
+              href="/trips"
+              className="font-display text-2xl text-encre focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-laiton"
+            >
+              Phil
+            </Link>
+            <nav className="flex items-center gap-4 text-sm">
+              <Link
+                href="/trips"
+                className="text-encre-douce transition-colors hover:text-encre focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-laiton"
+              >
+                Voyages
+              </Link>
+              <Link
+                href="/vault"
+                className="text-encre-douce transition-colors hover:text-encre focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-laiton"
+              >
+                Coffre
+              </Link>
+            </nav>
+          </div>
           <Link
             href="/profile"
             aria-label="Ton profil"
