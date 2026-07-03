@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Bodoni_Moda, Figtree } from "next/font/google";
 import "./globals.css";
+import { OfflineBanner } from "@/components/offline/offline-banner";
 import { ServiceWorkerRegister } from "@/components/pwa/sw-register";
 import { cn } from "@/lib/utils";
 
@@ -44,6 +45,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col font-sans">
         <ServiceWorkerRegister />
+        <OfflineBanner />
         {children}
       </body>
     </html>

@@ -321,8 +321,9 @@ Setup Dexie.js (wrapper IndexedDB). Tables locales : `trips`, `events`, `documen
 ### [ ] PHIL-I04 — Cache offline des documents
 Sur un document, bouton "Disponible offline". Téléchargement du fichier tel que servi par le viewer au moment du téléchargement (avec filigrane pour les docs du coffre une fois E03b en place). Stockage dans IndexedDB. Indicateur visuel "Offline" sur les documents disponibles. Limite de stockage configurable (par défaut 100 Mo).
 
-### [ ] PHIL-I05 — Mode lecture offline
+### [x] PHIL-I05 — Mode lecture offline *(fait le 2026-07-03)*
 Détection de l'absence de réseau via `navigator.onLine` + ping périodique. Bandeau "Mode offline" affiché. Toutes les pages voyages, événements, documents marqués offline restent accessibles. Les actions d'écriture sont désactivées avec message "Reconnectez-vous pour modifier".
+> Note : hook `useOnlineStatus` (événements + ping /api/health 30 s), bandeau global encre "consultation seulement" avec lien vers **`/offline`** — vue 100 % client depuis Dexie (programme par jour, docs, idées, horodatage), précachée par le SW et servie en **fallback de navigation** hors cache. Pages déjà visitées : servies par `phil-pages`. **Écart v1** : pas de désactivation bouton par bouton — le bandeau porte le message, et les actions serveur échouent naturellement hors ligne. Vérifié : /offline rend les données locales, bandeau apparaît/disparaît aux événements réseau.
 
 ### [ ] PHIL-I06 — Resync à la reconnexion
 Quand le réseau revient, refetch automatique des données voyage en cours. Notification discrète "Données synchronisées". Pas de gestion de conflit puisque l'écriture offline n'est pas supportée en v1.

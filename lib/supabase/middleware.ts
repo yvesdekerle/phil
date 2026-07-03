@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 
 /** Pages publiques exactes. */
-const PUBLIC_PATHS = ["/", "/login", "/manifest.webmanifest", "/sw.js"];
+const PUBLIC_PATHS = ["/", "/login", "/manifest.webmanifest", "/sw.js", "/offline"];
 /** Préfixes publics : callback OAuth, invitations (D06), health check, assets PWA. */
 const PUBLIC_PREFIXES = ["/auth/", "/invitations/", "/api/health", "/icons/"];
 

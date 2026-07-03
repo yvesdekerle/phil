@@ -6,7 +6,16 @@ import { CacheFirst, ExpirationPlugin, NetworkFirst, Serwist } from "serwist";
 declare const self: ServiceWorkerGlobalScope;
 
 const serwist = new Serwist({
-  precacheEntries: [],
+  // /offline est précachée à l'installation : c'est la vue de secours (I05).
+  precacheEntries: [{ url: "/offline", revision: "phil-2" }],
+  fallbacks: {
+    entries: [
+      {
+        url: "/offline",
+        matcher: ({ request }) => request.mode === "navigate",
+      },
+    ],
+  },
   // Pas de skipWaiting automatique : la nouvelle version attend que
   // l'utilisateur accepte la bannière « Nouvelle version disponible ».
   skipWaiting: false,
