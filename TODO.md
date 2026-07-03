@@ -140,8 +140,9 @@ Page "Sécurité" avec bouton "Activer Face ID / Touch ID pour le coffre". Impl�
 À chaque accès à une page du coffre, déclencher un flow WebAuthn authentication. Si l'user n'a pas de passkey enregistrée, fallback sur une re-authentification Google. La validation passkey crée une session "vault unlocked" valide 15 minutes.
 > Note : gate dans `app/(app)/vault/layout.tsx` — passkey présente + session absente → écran "Coffre verrouillé". Session = cookie httpOnly signé HMAC (secret dérivé de la service role key, 15 min), vérification à temps constant. Le déverrouillage met à jour `counter` (anti-clonage) et `last_used_at`. **Écart** : sans passkey, accès par la session standard + activation proposée sur /security (la re-auth Google du spec ajouterait une redirection complète pour une session que le proxy vient de valider). E03b étendra l'exigence de session au viewer. Vérifié en réel avec Touch ID.
 
-### [ ] PHIL-C06 — Suppression de compte (RGPD)
+### [x] PHIL-C06 — Suppression de compte (RGPD) *(fait le 2026-07-03)*
 Bouton dans le profil "Supprimer mon compte". Confirmation forte. Job qui supprime : participants des voyages, documents (storage + base), idées créées, log d'audit. Pour les voyages dont l'user est OWNER unique : transfert au plus ancien EDITOR ou suppression du voyage si seul. Délai de grâce de 30 jours optionnel.
+> Note : "Zone dangereuse" du profil, AlertDialog avec confirmation tapée (SUPPRIMER). `lib/account/deletion.ts` (service role) : docs+storage purgés, voyage solo supprimé, sinon transfert au plus ancien EDITOR (à défaut plus ancien participant) avec réassignation `created_by` (trips + events — FK RESTRICT, le programme appartient au groupe), idées et invitations créées supprimées, puis suppression auth (cascade profil/votes/passkeys/audit). **Écart** : pas de délai de grâce (optionnel au spec) — suppression immédiate, cercle d'amis. Testé en réel sur users jetables : les 7 vérifications passent (voyage solo disparu, successeur promu, event réassigné, blobs purgés, auth supprimé).
 
 ### [ ] PHIL-C07 — Export de données personnelles (RGPD)
 Endpoint qui génère un ZIP avec : profil, liste des voyages, événements créés, documents (en clair, déchiffrés), idées. Téléchargement unique avec lien expirant. Limite à un export par 24h pour éviter les abus.
@@ -394,6 +395,22 @@ Permettre de saisir plusieurs options d'hébergement pour un même créneau avan
 
 ### [ ] PHIL-L02 — Avis qualitatifs et aide à la décision
 Aller au-delà du vote +1 sur les idées : permettre des avis qualitatifs ("Vaut le coup", "Optionnel", "Trop cher") sur les activités et hébergements candidats. Inspiration : les colonnes "Vaut le coup ?" et "Choix 1/2" du spreadsheet Islande. Analyser le bon format (tags prédéfinis, commentaires libres, notation 1-5, etc.).
+
+---
+
+## Catégorie M — Animations & délices visuels (à traiter en fin de projet, demandé le 2026-07-03)
+
+### [ ] PHIL-M01 — Animation d'ouverture/fermeture du coffre
+Sur l'écran "Coffre verrouillé" et au déverrouillage : animation d'une porte de coffre-fort de banque ancienne, **ronde**, avec les barres/branches de la roue **couleur or** (laiton Phil). Ouverture : la roue tourne, puis la porte pivote et s'ouvre. Fermeture (verrouillage/expiration de session) : la porte se referme, puis la roue tourne. SVG + CSS animations (pas de lib lourde), `prefers-reduced-motion` respecté.
+
+### [ ] PHIL-M02 — États de chargement sur le thème Jules Verne
+Remplacer les loaders génériques par une petite collection d'animations tirées au sort, dans la palette Phil :
+- **Montgolfière** rouge et blanche, nacelle en osier — traverse de gauche à droite en montant/descendant légèrement et en se balançant (*Cinq semaines en ballon*)
+- **Éléphant** qui marche (la traversée de l'Inde de Phileas)
+- **Bateau à vapeur** qui avance sur des vagues (le Mongolia / l'Henrietta)
+- **Sous-marin** style Nautilus avec hublots (*Vingt mille lieues sous les mers*)
+- Autres pistes validables au moment du ticket : **locomotive à vapeur** (le train de Bombay à Calcutta), **traîneau à voile** (l'épisode des plaines américaines du roman), **obus lunaire** (*De la Terre à la Lune*)
+SVG animés en CSS, composant `<PhilLoader />` réutilisable, tirage aléatoire, `prefers-reduced-motion` → état statique.
 
 ---
 

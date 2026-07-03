@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { getOwnProfile } from "@/lib/supabase/profiles";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "./actions";
+import { DeleteAccountSection } from "./delete-account";
 import { ProfileForm } from "./profile-form";
 
 export default async function ProfilePage() {
@@ -71,6 +72,8 @@ export default async function ProfilePage() {
             </Button>
           </form>
         </div>
+
+        <DeleteAccountSection />
       </div>
     </main>
   );

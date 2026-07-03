@@ -66,3 +66,35 @@ export async function signOut() {
   await supabase.auth.signOut();
   redirect("/login");
 }
+
+/** Suppression de compte RGPD (PHIL-C06) — confirmation forte côté client. */
+export async function deleteMyAccount(
+  _prev: ProfileFormState,
+  formData: FormData,
+): Promise<ProfileFormState> {
+  if (formData.get("confirmation") !== "SUPPRIMER") {
+    return { status: "error", message: "Écris SUPPRIMER pour confirmer." };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { deleteAccount } = await import("@/lib/account/deletion");
+  try {
+    await supabase.auth.signOut();
+    await deleteAccount(user.id);
+  } catch (e) {
+    console.error("Suppression de compte échouée:", e);
+    return {
+      status: "error",
+      message: "La suppression a échoué — contacte yves.dekerle@gmail.com.",
+    };
+  }
+
+  redirect("/");
+}
