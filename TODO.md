@@ -287,8 +287,9 @@ Onglet "Idées" du voyage. Liste des idées en pool avec : titre, description tr
 Formulaire : titre, description, lien externe optionnel, lieu optionnel, durée et coût estimés, tags. Pas de date à ce stade.
 > Note : tags saisis en texte libre séparés par virgules, normalisés (minuscules, `#` retiré, max 10). Devise EUR par défaut si coût renseigné. RLS insert = OWNER/EDITOR (B06).
 
-### [ ] PHIL-H03 — Vote / like sur une idée
+### [x] PHIL-H03 — Vote / like sur une idée *(fait le 2026-07-03)*
 Bouton de vote (heart ou +1) par participant, max 1 vote par user et par idée. Compteur visible. Permet d'identifier les favorites du groupe sans débat.
+> Note : bouton cœur toggle (`vote-button.tsx` + action `toggleVote`) — 1 voix max garantie par la PK `(idea_id, user_id)` et les policies de B06, retrait de sa propre voix uniquement, VIEWER peut voter. État voté = cœur plein bordeaux. Vérifié en réel : toggle aller-retour.
 
 ### [ ] PHIL-H04 — Conversion idée → événement planifié
 Sur une idée, bouton "Planifier". Ouvre le formulaire de création d'événement ACTIVITY pré-rempli avec les infos de l'idée. À la création, l'idée passe en statut `SCHEDULED` et garde une référence vers l'événement. Restera visible dans la liste des idées avec un badge "Planifié le X".

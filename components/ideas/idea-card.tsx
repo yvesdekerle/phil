@@ -1,8 +1,9 @@
-import { Clock, Coins, ExternalLink, Heart, MapPin } from "lucide-react";
+import { Clock, Coins, ExternalLink, MapPin } from "lucide-react";
 import type { IdeaWithMeta } from "@/lib/ideas/types";
 import { cn } from "@/lib/utils";
+import { VoteButton } from "./vote-button";
 
-export function IdeaCard({ idea }: { idea: IdeaWithMeta }) {
+export function IdeaCard({ idea, tripId }: { idea: IdeaWithMeta; tripId: string }) {
   return (
     <article
       className={cn(
@@ -24,11 +25,12 @@ export function IdeaCard({ idea }: { idea: IdeaWithMeta }) {
             <p className="mt-1 line-clamp-2 text-sm text-encre-douce">{idea.description}</p>
           ) : null}
         </div>
-        {/* Compteur de voix — le vote interactif arrive avec PHIL-H03 */}
-        <span className="flex shrink-0 items-center gap-1.5 rounded-full border border-laiton-clair bg-papier px-3 py-1.5 text-sm font-medium text-encre-douce">
-          <Heart className="size-4" aria-hidden="true" />
-          {idea.voteCount}
-        </span>
+        <VoteButton
+          tripId={tripId}
+          ideaId={idea.id}
+          count={idea.voteCount}
+          hasVoted={idea.hasVoted}
+        />
       </div>
 
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-encre-douce">
