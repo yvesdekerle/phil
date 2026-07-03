@@ -1,4 +1,4 @@
-import { format, parseISO } from "date-fns";
+import { addDays, format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -115,9 +115,20 @@ export default async function VaultPage({
                   </span>
                 </span>
                 {doc.expires_at ? (
-                  <span className="shrink-0 text-xs text-encre-douce">
-                    Expire le {format(parseISO(doc.expires_at), "d MMM yyyy", { locale: fr })}
-                  </span>
+                  parseISO(doc.expires_at) < new Date() ? (
+                    <span className="shrink-0 rounded-full bg-bordeaux/10 px-2.5 py-0.5 text-xs font-medium text-bordeaux">
+                      Expiré
+                    </span>
+                  ) : parseISO(doc.expires_at) < addDays(new Date(), 90) ? (
+                    <span className="shrink-0 rounded-full bg-laiton/20 px-2.5 py-0.5 text-xs font-medium text-laiton">
+                      Expire bientôt —{" "}
+                      {format(parseISO(doc.expires_at), "d MMM yyyy", { locale: fr })}
+                    </span>
+                  ) : (
+                    <span className="shrink-0 text-xs text-encre-douce">
+                      Expire le {format(parseISO(doc.expires_at), "d MMM yyyy", { locale: fr })}
+                    </span>
+                  )
                 ) : null}
               </Link>
             </li>

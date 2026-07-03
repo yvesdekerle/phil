@@ -218,8 +218,9 @@ Sur un document du coffre, bouton "Partager avec un voyage" qui ouvre une modale
 Service côté serveur qui prend un PDF en entrée et applique un filigrane diagonal avec : email du visualiseur, timestamp, et "Confidentiel - Ne pas diffuser". Implémenté avec pdf-lib. Pour les images (JPG/PNG), conversion en PDF d'abord puis filigrane. Performance cible : moins de 200ms par document.
 > Note : `lib/vault/watermark.ts` — diagonales répétées couvrant toute la page (bordeaux, opacité 18 %), horodatage UTC. Perf mesurée : **52 ms** pour un PDF 3 pages, 5 ms pour une image (cible 200 ms large). **Limitation** : HEIC/HEIF non convertibles par pdf-lib → `canWatermark()` l'exclut, E03b servira ces fichiers tels quels (à réévaluer si besoin avec une conversion sharp côté serveur). Vérifié visuellement sur échantillon.
 
-### [ ] PHIL-E07 — Alerte expiration documents
+### [x] PHIL-E07 — Alerte expiration documents *(fait le 2026-07-03)*
 Cron job (Vercel Cron, gratuit sur Hobby avec 2 jobs) qui scanne quotidiennement les `expires_at` et envoie un email Resend aux propriétaires à J-180, J-90, J-30 et J-7. Badge "Expire bientôt" affiché dans l'UI du coffre quand `expires_at < now + 90 jours`.
+> Note : `vercel.json` cron 6 h UTC → `/api/cron/document-expiry` protégé par `CRON_SECRET` (généré, en `.env.local` ; **à pousser sur Vercel via `tmp/set-vercel-cron-secret.sh`**), route publique côté proxy (auto-protégée). Match exact `expires_at = today+N` pour N∈{180,90,30,7} → une alerte par seuil sans table d'état. Respecte `expiry_alerts` (K04). Badges coffre : "Expiré" (bordeaux) / "Expire bientôt" (< 90 j, laiton). Vérifié en réel : 401 sans secret, envoi J-30 reçu.
 
 ### [x] PHIL-E08 — Page audit log du coffre *(fait le 2026-07-03)*
 Vue "Activité de mon coffre" qui affiche les dernières entrées de `vault_access_log` filtrées sur les documents de l'user. Permet de voir qui a consulté quoi et quand. Filtres par document, par action, par date. Le log est alimenté depuis la Phase 3 (B07) : la page révèle l'historique complet.
@@ -381,8 +382,9 @@ Créer un compte Resend, vérifier un domaine (au début, on utilise leur domain
 Template clair : nom de l'inviteur, nom du voyage, dates, destination, bouton "Rejoindre le voyage", lien de fallback. Envoi via Resend API depuis l'endpoint d'invitation.
 > Note : envoi branché dans `createInvitation` (template K01). **Échec d'envoi non bloquant** : en mode test Resend (adresses hors compte refusées), l'invitation reste valide et le message oriente vers le lien copiable. Vérifié en réel : email reçu avec le vrai token.
 
-### [ ] PHIL-K03 — Email d'alerte expiration document
+### [x] PHIL-K03 — Email d'alerte expiration document *(fait le 2026-07-03)*
 Envoyé par le cron job d'expiration. Template : "Votre passeport expire dans X jours". Lien vers le coffre. Possibilité de désactiver ces alertes dans les préférences.
+> Note : template `DocumentExpiryEmail` (K01) branché dans le cron E07 — nom du document, catégorie, jours restants, bouton "Ouvrir mon coffre". Désactivable via `expiry_alerts` (K04), vérifié avant chaque envoi. Envoi réel testé et reçu (J-30).
 
 ### [x] PHIL-K04 — Préférences de notification *(fait le 2026-07-03)*
 Page dans le profil pour activer/désactiver chaque type d'email (invitations, alertes expiration, rappels événements). Stockage dans `profiles.notification_preferences` (JSONB).

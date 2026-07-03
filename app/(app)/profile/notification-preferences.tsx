@@ -33,11 +33,7 @@ export function NotificationPreferencesForm({ initial }: { initial: Notification
           className="flex cursor-pointer items-center justify-between gap-4"
         >
           <span className="text-sm text-encre">{PREFERENCE_LABELS[key]}</span>
-          <Switch
-            id={`pref-${key}`}
-            checked={prefs[key]}
-            onCheckedChange={(v) => toggle(key, v)}
-          />
+          <Switch id={`pref-${key}`} checked={prefs[key]} onCheckedChange={(v) => toggle(key, v)} />
         </label>
       ))}
       {error ? <p className="text-xs text-bordeaux">{error}</p> : null}
