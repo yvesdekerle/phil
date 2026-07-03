@@ -39,6 +39,52 @@ export type Database = {
   }
   public: {
     Tables: {
+      document_shares: {
+        Row: {
+          document_id: string
+          id: string
+          shared_at: string
+          shared_by: string
+          trip_id: string
+        }
+        Insert: {
+          document_id: string
+          id?: string
+          shared_at?: string
+          shared_by: string
+          trip_id: string
+        }
+        Update: {
+          document_id?: string
+          id?: string
+          shared_at?: string
+          shared_by?: string
+          trip_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_shares_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_shares_shared_by_fkey"
+            columns: ["shared_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_shares_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       documents: {
         Row: {
           category: Database["public"]["Enums"]["document_category"]

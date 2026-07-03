@@ -76,8 +76,9 @@ Table `trips` : `id`, `name`, `destination`, `start_date`, `end_date`, `cover_im
 Table avec : `id`, `owner_id`, `scope` (`VAULT` ou `TRIP`), `trip_id` (nullable, requis si scope=TRIP), `file_name`, `mime_type`, `size_bytes`, `storage_path`, `category` (passport, id_card, driving_license, ticket, voucher, lodging, insurance, other), `expires_at` (nullable), `metadata` (JSONB pour champs spécifiques type numéro de passeport), `uploaded_at`, `deleted_at`. Index sur `(owner_id, scope)` et `(trip_id)`.
 > Note : migration `20260703084613_documents.sql`. Contrainte : `scope=TRIP` ⇒ `trip_id` requis, `scope=VAULT` ⇒ `trip_id` null (partage via `document_shares` uniquement) — vérifiée en base. `storage_path` unique, cascade trip/owner. **FK `event_documents.document_id` posée** (dette B05 soldée). RLS deny all jusqu'à B10. Bucket Storage : à créer en E02. Types régénérés.
 
-### [ ] PHIL-B04 — Schéma table `document_shares`
+### [x] PHIL-B04 — Schéma table `document_shares` *(fait le 2026-07-03)*
 Table de liaison : `id`, `document_id`, `trip_id`, `shared_at`, `shared_by`. Permet à un user de partager explicitement un document de son coffre vers un voyage donné. Contrainte unique sur `(document_id, trip_id)`.
+> Note : migration `20260703084814_document_shares.sql`. Cascade sur document et trip (retirer l'un retire le partage), index `trip_id`, RLS deny all jusqu'à B10. Types régénérés.
 
 ### [x] PHIL-B05 — Schéma tables `trip_events` et `event_documents` *(fait le 2026-07-03)*
 Table `trip_events` : `id`, `trip_id`, `type` (`TRANSPORT` / `LODGING` / `ACTIVITY`), `title`, `starts_at` (UTC), `ends_at` (UTC), `timezone` (IANA), `location_name`, `location_address`, `location_lat`, `location_lng`, `notes`, `metadata` (JSONB pour champs spécifiques par type), `created_by`, `created_at`. Table `event_documents` : `event_id`, `document_id`. Index sur `(trip_id, starts_at)`.
