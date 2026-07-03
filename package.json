@@ -12,7 +12,8 @@
     "type-check": "tsc --noEmit",
     "prepare": "husky",
     "db:push": "supabase db push",
-    "db:types": "supabase gen types typescript --linked > types/database.ts"
+    "db:types": "supabase gen types typescript --linked > types/database.ts",
+    "verify:rls": "tsx scripts/verify-rls.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
@@ -41,6 +42,7 @@
     "husky": "^9.1.7",
     "supabase": "^2.109.0",
     "tailwindcss": "^4",
+    "tsx": "^4.22.5",
     "typescript": "^5"
   }
 }

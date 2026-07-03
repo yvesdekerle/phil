@@ -106,8 +106,9 @@ Activer RLS. Politique SELECT : un user peut voir un document si (a) il en est p
 Politique SELECT : participant du voyage. Politique INSERT/UPDATE : OWNER ou EDITOR. Politique DELETE : OWNER ou créateur de l'item.
 > Note : migration `20260703083446_rls_trip_events.sql`. Couvre `trip_events` (+ anti-usurpation `created_by = auth.uid()` à l'insert) et `event_documents` (helper `private.event_trip_id`). **`trip_ideas` sera couverte par la migration B06** (la table n'existe pas encore — Phase 6). Vérifié par script croisé 2 users : 8/8 (étranger aveugle, VIEWER lecture seule, EDITOR crée et ne supprime que les siens).
 
-### [ ] PHIL-B12 — Script de vérification des politiques RLS
+### [x] PHIL-B12 — Script de vérification des politiques RLS *(fait le 2026-07-03)*
 Script exécutable manuellement (`scripts/verify-rls.ts` via `npx tsx`, ou SQL) qui simule plusieurs users et vérifie qu'aucun ne peut accéder aux données des autres. Cas critiques : (1) user A ne voit pas le coffre de user B, (2) user A invité sur voyage X ne voit pas le voyage Y, (3) un document partagé via `document_shares` redevient invisible quand on retire le partage. À lancer obligatoirement après toute migration touchant aux politiques RLS et avant tout déploiement d'une évolution du modèle documents/partage. Pas de CI en v1 : la discipline d'exécution manuelle fait partie du workflow.
+> Note : `scripts/verify-rls.ts` + script npm `verify:rls` (tsx en devDependency). **24 vérifications** en 3 sections (voyages B09, événements B11, documents B10), 2 users jetables auto-nettoyés, exit code 1 si échec. Les 3 cas critiques du ticket sont nommés explicitement dans la sortie. Lancé : 24/24.
 
 ### [x] PHIL-B13 — Setup migrations Supabase *(fait le 2026-07-03)*
 Utiliser le CLI Supabase pour gérer les migrations en SQL versionné dans le repo (`supabase/migrations/`). Toute modification de schéma passe par une nouvelle migration commitée. Pas de modifications via le dashboard Supabase en dehors du dev local.
