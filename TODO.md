@@ -143,8 +143,9 @@ Endpoint qui génère un ZIP avec : profil, liste des voyages, événements cré
 Vue principale après login. Cards par voyage avec : image de couverture, nom, destination, dates, nombre de participants, statut (à venir / en cours / passé / archivé). Tri chronologique avec les voyages en cours et à venir en premier. Bouton "Créer un voyage". État vide : "Phil est prêt à partir, où va-t-on ?"
 > Note : helpers `lib/trips/status.ts` (statut + tri) et `format.ts` (plages de dates fr via date-fns). Cards avec placeholder monogramme laiton sur fond encre si pas de couverture ; badge statut ; voyages passés/archivés estompés. Layout `(app)` ajouté : header commun (wordmark → /trips, avatar → /profile). `next/image` ouvert aux couvertures HTTPS externes (wildcard). Le bouton "Créer un voyage" pointe vers `/trips/new` (D02, ticket suivant). Vérifié visuellement avec 3 voyages de test (3 statuts), données nettoyées.
 
-### [ ] PHIL-D02 — Création d'un voyage
+### [x] PHIL-D02 — Création d'un voyage *(fait le 2026-07-03)*
 Formulaire : nom, destination, dates de début et fin, image de couverture optionnelle (upload ou URL), timezone par défaut (auto-suggéré depuis la destination via une lib comme `tz-lookup`). Validation Zod. À la création, l'utilisateur devient automatiquement OWNER.
+> Note : deux écarts. (1) Couverture par **URL https uniquement** — l'upload nécessite un bucket Storage, extrait en ticket **D09**. (2) Pas d'auto-suggestion `tz-lookup` : la lib attend lat/lng, pas un nom de ville — sans géocodage, select IANA avec défaut = timezone du profil (l'auto-suggestion viendra avec la carte v2 si besoin). Server Action avec Zod des deux côtés, UUID généré serveur + insert sans RETURNING (contrainte B09), OWNER via trigger B02. Vérifié en réel dans le navigateur (création + card + suppression de l'essai).
 
 ### [ ] PHIL-D03 — Page détail voyage
 Layout avec onglets : Calendrier (par défaut), Documents, Idées, Participants, Paramètres. Header avec image de couverture, dates, destination, et bouton de partage rapide.
@@ -163,6 +164,9 @@ Liste des participants avec leur rôle. OWNER peut : changer le rôle de quelqu'
 
 ### [ ] PHIL-D08 — Carnet d'amis
 Page qui liste les personnes avec qui l'user a déjà voyagé (extrait des `trip_participants`). Permet de les ré-inviter en un clic sur un nouveau voyage. Pas de social, juste un cache pratique.
+
+### [ ] PHIL-D09 — Upload d'image de couverture de voyage
+Découvert en D02 (traité en URL seulement) : permettre l'upload d'une image de couverture vers un bucket Supabase Storage public-aux-membres (bucket dédié `covers`, policies RLS storage, redimensionnement/limite de taille). À traiter en Phase 5 avec les documents du voyage, ou à la demande.
 
 ---
 
