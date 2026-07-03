@@ -92,8 +92,9 @@ Table : `id`, `trip_id`, `title`, `description`, `external_url`, `location_name`
 Table d'audit : `id`, `document_id`, `accessed_by`, `action` (`VIEW` / `DOWNLOAD` / `SHARE` / `UNSHARE`), `accessed_at`, `ip_address`, `user_agent`. Toute opération sur un document du coffre y est tracée dès la Phase 3 (upload, consultation, modification, suppression). Pas de RLS pour modification, écriture uniquement via service role. La page de consultation du log (E08) arrive en Phase 9.
 > Note : migration `20260703084956_vault_access_log.sql`. Enum élargi à 7 actions (UPLOAD/UPDATE/DELETE en plus, exigés par le texte du ticket). Deux ajouts au schéma prévu : `document_owner_id` **dénormalisé** (le propriétaire garde la trace même après suppression du doc, et la policy SELECT E08 s'en sert sans jointure) et `document_id` en **on delete set null** (l'audit survit au document). Écriture service role uniquement, immuable — vérifié (anon 401).
 
-### [ ] PHIL-B08 — Schéma table `trip_invitations`
+### [x] PHIL-B08 — Schéma table `trip_invitations` *(fait le 2026-07-03)*
 Table : `id`, `trip_id`, `invited_email`, `invited_by`, `token` (UUID unique), `role`, `created_at`, `accepted_at`, `expires_at`. Permet d'inviter par email avec un lien magique avant que la personne n'ait un compte.
+> Note : migration `20260703112724_trip_invitations.sql`. Expiration à 30 jours par défaut, contrainte unique `(trip_id, invited_email)`. RLS : select participant, insert/delete OWNER-EDITOR (règle 4) ; **pas d'UPDATE côté client** — l'acceptation (D06) résout le token via service role car l'invité n'est pas encore participant. Types régénérés.
 
 ### [x] PHIL-B09 — Politiques RLS sur `trips` et `trip_participants` *(fait le 2026-07-03)*
 Activer RLS sur les deux tables. Politique `trips` : un user peut SELECT un voyage si et seulement s'il est dans `trip_participants` pour ce voyage. Politique INSERT : tout user authentifié peut créer un voyage. Politique UPDATE : seul OWNER et EDITOR peuvent modifier. Politique DELETE : seul OWNER. Politiques équivalentes sur `trip_participants`.
