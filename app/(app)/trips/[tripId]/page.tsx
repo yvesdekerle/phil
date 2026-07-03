@@ -80,7 +80,13 @@ export default async function TripCalendarPage({
                   day.dayKey === todayKey ? "text-bordeaux" : "text-encre-douce",
                 )}
               >
-                {day.label}
+                <Link
+                  href={`/trips/${tripId}/day/${day.dayKey}`}
+                  className="underline-offset-4 hover:underline"
+                  title="Voir la journée heure par heure"
+                >
+                  {day.label}
+                </Link>
                 {day.dayKey === todayKey ? (
                   <span className="rounded-full bg-bordeaux px-2 py-0.5 text-[0.65rem] font-medium text-papier uppercase">
                     Aujourd'hui

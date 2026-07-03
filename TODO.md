@@ -235,8 +235,9 @@ Vue "Activité de mon coffre" qui affiche les dernières entrées de `vault_acce
 Vue par défaut sur mobile et probablement la plus utilisée. Événements groupés par jour, dans l'ordre chronologique. Affichage compact : heure, type (icône), titre, lieu. Tap sur un événement → page détail. Bandeau "Aujourd'hui" si on est dans la période du voyage.
 > Note : `date-fns-tz` installé, helper central `formatInTimezone` posé dès maintenant dans `lib/events/datetime.ts` (F09 n'aura qu'à généraliser). Groupement par jour **dans le fuseau de chaque événement**, badge "Aujourd'hui" calculé dans le fuseau du voyage. Icônes lucide par type (avion/lit/boussole). Bouton "Ajouter" visible OWNER/EDITOR seulement, pointe vers `/events/new` (F04-F06). Vérifié en réel : conversion UTC→Maurice exacte, groupement 2 jours, badge Aujourd'hui.
 
-### [ ] PHIL-F02 — Vue jour du calendrier
+### [x] PHIL-F02 — Vue jour du calendrier *(fait le 2026-07-03)*
 Vue détaillée d'une journée avec une grille horaire. Affichage des événements positionnés sur leurs créneaux. Utile pour les journées chargées.
+> Note : `/trips/[tripId]/day/[date]` — grille 6 h → minuit, événements positionnés en heure locale (couleur par type), multi-jours coupés à minuit, accessible en cliquant l'en-tête d'un jour du calendrier. Limitation v1 : les événements qui se chevauchent se superposent (pas de colonnes parallèles). Vérifié en réel sur le 5 nov de la démo.
 
 ### [ ] PHIL-F03 — Vue timeline du voyage
 Vue horizontale type Gantt qui montre la durée totale du voyage avec tous les événements. Surtout utile pour les transports et les hébergements qui couvrent plusieurs jours.
