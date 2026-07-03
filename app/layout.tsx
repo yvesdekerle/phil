@@ -1,16 +1,17 @@
 import type { Metadata } from "next";
 import { Bodoni_Moda, Figtree } from "next/font/google";
 import "./globals.css";
+import { cn } from "@/lib/utils";
+
+const figtree = Figtree({
+  variable: "--font-figtree",
+  subsets: ["latin"],
+});
 
 const bodoni = Bodoni_Moda({
   variable: "--font-bodoni",
   subsets: ["latin"],
   style: ["normal", "italic"],
-});
-
-const figtree = Figtree({
-  variable: "--font-figtree",
-  subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
@@ -24,7 +25,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" className={`${bodoni.variable} ${figtree.variable} h-full antialiased`}>
+    <html
+      lang="fr"
+      className={cn("h-full antialiased font-sans", figtree.variable, bodoni.variable)}
+    >
       <body className="min-h-full flex flex-col font-sans">{children}</body>
     </html>
   );
