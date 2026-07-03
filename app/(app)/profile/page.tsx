@@ -66,6 +66,11 @@ export default async function ProfilePage() {
           <Button asChild variant="outline">
             <Link href="/security">Sécurité du coffre</Link>
           </Button>
+          <Button asChild variant="outline">
+            <a href="/api/export" download>
+              Exporter mes données
+            </a>
+          </Button>
           <form action={signOut}>
             <Button type="submit" variant="outline">
               Se déconnecter

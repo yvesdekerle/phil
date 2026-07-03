@@ -144,8 +144,9 @@ Page "Sécurité" avec bouton "Activer Face ID / Touch ID pour le coffre". Impl�
 Bouton dans le profil "Supprimer mon compte". Confirmation forte. Job qui supprime : participants des voyages, documents (storage + base), idées créées, log d'audit. Pour les voyages dont l'user est OWNER unique : transfert au plus ancien EDITOR ou suppression du voyage si seul. Délai de grâce de 30 jours optionnel.
 > Note : "Zone dangereuse" du profil, AlertDialog avec confirmation tapée (SUPPRIMER). `lib/account/deletion.ts` (service role) : docs+storage purgés, voyage solo supprimé, sinon transfert au plus ancien EDITOR (à défaut plus ancien participant) avec réassignation `created_by` (trips + events — FK RESTRICT, le programme appartient au groupe), idées et invitations créées supprimées, puis suppression auth (cascade profil/votes/passkeys/audit). **Écart** : pas de délai de grâce (optionnel au spec) — suppression immédiate, cercle d'amis. Testé en réel sur users jetables : les 7 vérifications passent (voyage solo disparu, successeur promu, event réassigné, blobs purgés, auth supprimé).
 
-### [ ] PHIL-C07 — Export de données personnelles (RGPD)
+### [x] PHIL-C07 — Export de données personnelles (RGPD) *(fait le 2026-07-03)*
 Endpoint qui génère un ZIP avec : profil, liste des voyages, événements créés, documents (en clair, déchiffrés), idées. Téléchargement unique avec lien expirant. Limite à un export par 24h pour éviter les abus.
+> Note : `/api/export` (authentifié, lectures via RLS) → **JSON** téléchargé en direct : profil, voyages, participations, événements/idées créés, métadonnées documents, journal d'audit. Limite 1/24 h via `profiles.last_export_at` (429 sinon). **Écarts** : JSON direct plutôt que ZIP + lien expirant — embarquer les fichiers dépasserait les limites Vercel free (10 s / mémoire) ; ils restent téléchargeables individuellement, et le lien expirant n'a pas d'objet en téléchargement direct authentifié. Bouton "Exporter mes données" dans le profil. Vérifié en réel : export 200 complet puis 429.
 
 ---
 
