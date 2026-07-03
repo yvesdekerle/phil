@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Bodoni_Moda, Figtree } from "next/font/google";
 import "./globals.css";
+import { ServiceWorkerRegister } from "@/components/pwa/sw-register";
 import { cn } from "@/lib/utils";
 
 const figtree = Figtree({
@@ -17,6 +18,18 @@ const bodoni = Bodoni_Moda({
 export const metadata: Metadata = {
   title: "Phil — Ton compagnon de voyage",
   description: "Carnet de voyage collaboratif avec coffre-fort d'identité personnel.",
+  icons: {
+    apple: "/icons/apple-touch-icon.png",
+  },
+  appleWebApp: {
+    capable: true,
+    title: "Phil",
+    statusBarStyle: "default",
+  },
+};
+
+export const viewport = {
+  themeColor: "#f4eee1",
 };
 
 export default function RootLayout({
@@ -29,7 +42,10 @@ export default function RootLayout({
       lang="fr"
       className={cn("h-full antialiased font-sans", figtree.variable, bodoni.variable)}
     >
-      <body className="min-h-full flex flex-col font-sans">{children}</body>
+      <body className="min-h-full flex flex-col font-sans">
+        <ServiceWorkerRegister />
+        {children}
+      </body>
     </html>
   );
 }

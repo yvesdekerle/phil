@@ -306,8 +306,9 @@ Bouton "Pas pour ce voyage" qui passe l'idée en statut `DISMISSED`. Filtre par 
 
 ## Catégorie I — Mode offline & PWA
 
-### [ ] PHIL-I01 — Configuration PWA avec Serwist
+### [x] PHIL-I01 — Configuration PWA avec Serwist *(fait le 2026-07-03)*
 Installer Serwist, configurer le manifest PWA (nom "Phil", icônes, theme color, display standalone). Vérifier que l'application est installable depuis Safari iOS et Chrome Android via "Ajouter à l'écran d'accueil".
+> Note : **écart technique** — `@serwist/next` est incompatible avec Turbopack (Next 16, issue serwist#54) : le SW utilise la **runtime Serwist** mais est bundlé par esbuild (`npm run build:sw`, chaîné dans `build`), sans précache injecté (cache au fil de l'eau, suffisant — I02 affine). Manifest via `app/manifest.ts` (standalone, parchemin), icônes monogramme "P" générées (192/512/apple-touch, SVG→PNG via sharp), enregistrement SW en prod seulement. Manifest/sw/icônes ajoutés aux chemins publics du proxy (sinon redirigés vers login !). Vérifié sur build prod : manifest 200 standalone, sw.js 200, icônes 200. Installabilité réelle iOS/Android à confirmer sur téléphone après déploiement.
 
 ### [ ] PHIL-I02 — Stratégie de cache des assets statiques
 Cache-first pour les assets Next.js (JS, CSS, fonts, images). Network-first avec fallback cache pour les pages HTML. Update du service worker en arrière-plan avec notification utilisateur "Nouvelle version disponible".

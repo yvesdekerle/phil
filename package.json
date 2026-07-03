@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build",
+    "build": "npm run build:sw && next build",
     "start": "next start",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
@@ -13,7 +13,8 @@
     "prepare": "husky",
     "db:push": "supabase db push",
     "db:types": "supabase gen types typescript --linked > types/database.ts",
-    "verify:rls": "tsx scripts/verify-rls.ts"
+    "verify:rls": "tsx scripts/verify-rls.ts",
+    "build:sw": "esbuild app/sw.ts --bundle --minify --outfile=public/sw.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
@@ -42,7 +43,10 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "esbuild": "^0.28.1",
     "husky": "^9.1.7",
+    "serwist": "^9.5.11",
+    "sharp": "^0.35.3",
     "supabase": "^2.109.0",
     "tailwindcss": "^4",
     "tsx": "^4.22.5",

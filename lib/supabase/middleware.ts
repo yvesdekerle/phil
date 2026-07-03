@@ -2,9 +2,9 @@ import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 
 /** Pages publiques exactes. */
-const PUBLIC_PATHS = ["/", "/login"];
-/** Préfixes publics : callback OAuth, invitations à venir (D06), health check. */
-const PUBLIC_PREFIXES = ["/auth/", "/invitations/", "/api/health"];
+const PUBLIC_PATHS = ["/", "/login", "/manifest.webmanifest", "/sw.js"];
+/** Préfixes publics : callback OAuth, invitations (D06), health check, assets PWA. */
+const PUBLIC_PREFIXES = ["/auth/", "/invitations/", "/api/health", "/icons/"];
 
 function isPublicPath(pathname: string): boolean {
   return PUBLIC_PATHS.includes(pathname) || PUBLIC_PREFIXES.some((p) => pathname.startsWith(p));

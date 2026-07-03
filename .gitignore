@@ -49,3 +49,8 @@ next-env.d.ts
 
 # supabase CLI
 supabase/.temp/
+
+# serwist (généré au build)
+public/sw.js
+public/sw.js.map
+public/swe-worker*.js
