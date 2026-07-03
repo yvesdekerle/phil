@@ -266,8 +266,9 @@ Onglet "Documents" du voyage. Liste tous les documents `scope=TRIP` du voyage + 
 Bouton "Ajouter un document" qui upload directement avec `scope=TRIP` et `trip_id` rempli. Visible immédiatement par tous les participants. Catégorisation au moment de l'upload.
 > Note : formulaire d'upload **factorisé** en `components/documents/upload-form.tsx` (partagé coffre/voyage, action et libellés en props) — la dette "onglet upload du picker F10" est de fait soldable en y branchant ce composant si besoin. Action `createTripDocument` : scope=TRIP, RLS insert = OWNER/EDITOR, rollback du blob si échec, pas de log vault (réservé au coffre). Catégorie par défaut "Billet". Vérifié en réel : upload → visible dans l'onglet avec badge "Ajouté par".
 
-### [ ] PHIL-G03 — Visualisation des documents du voyage
+### [x] PHIL-G03 — Visualisation des documents du voyage *(fait le 2026-07-03)*
 Réutilise le viewer E03a. Pas de filigrane sur les documents `scope=TRIP` (ce sont des documents partagés du voyage, pas des pièces d'identité). Après la Phase 9, le filigrane s'applique uniquement aux docs `scope=VAULT` même quand on les visualise via un voyage.
+> Note : couvert par le viewer E03a, conçu pour (accès par RLS quel que soit le scope, log VIEW conditionné à `scope=VAULT`). Vérifié : doc TRIP servi en 200 `application/pdf` + `private, no-store`, **zéro entrée d'audit ajoutée** (réservé au coffre). E03b n'aura à toucher que la branche VAULT.
 
 ### [ ] PHIL-G04 — Suppression d'un document du voyage
 Possible par : (a) le propriétaire du document, (b) un OWNER du voyage. Confirmation requise. Loggué.
