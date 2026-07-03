@@ -15,13 +15,30 @@ import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { CATEGORIES, CATEGORY_LABELS, type DocumentCategory } from "@/lib/vault/categories";
 import { extensionFor, validateFile } from "@/lib/vault/upload";
-import { type CreateDocumentState, createDocument } from "./actions";
 
 const ID_CATEGORIES: DocumentCategory[] = ["passport", "id_card", "driving_license"];
 
-export function UploadForm({ userId }: { userId: string }) {
+export type UploadActionState = { status: "idle" | "error"; message?: string };
+
+type Props = {
+  userId: string;
+  action: (prev: UploadActionState, formData: FormData) => Promise<UploadActionState>;
+  defaultCategory?: DocumentCategory;
+  tripId?: string;
+  submitLabel: string;
+  pendingLabel: string;
+};
+
+export function UploadForm({
+  userId,
+  action,
+  defaultCategory = "passport",
+  tripId,
+  submitLabel,
+  pendingLabel,
+}: Props) {
   const [file, setFile] = useState<File | null>(null);
-  const [category, setCategory] = useState<DocumentCategory>("passport");
+  const [category, setCategory] = useState<DocumentCategory>(defaultCategory);
   const [expiresAt, setExpiresAt] = useState("");
   const [documentNumber, setDocumentNumber] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -77,9 +94,12 @@ export function UploadForm({ userId }: { userId: string }) {
     formData.set("category", category);
     formData.set("expiresAt", expiresAt);
     formData.set("documentNumber", documentNumber);
+    if (tripId) {
+      formData.set("tripId", tripId);
+    }
 
     startTransition(async () => {
-      const result: CreateDocumentState = await createDocument({ status: "idle" }, formData);
+      const result: UploadActionState = await action({ status: "idle" }, formData);
       setPhase("idle");
       if (result.status === "error") {
         setError(result.message ?? "Une erreur est survenue.");
@@ -184,7 +204,7 @@ export function UploadForm({ userId }: { userId: string }) {
 
       <div className="flex items-center gap-4">
         <Button type="submit" disabled={busy || !file}>
-          {busy ? "Phil range ton document…" : "Ajouter au coffre"}
+          {busy ? pendingLabel : submitLabel}
         </Button>
         {error ? <p className="text-sm text-bordeaux">{error}</p> : null}
       </div>

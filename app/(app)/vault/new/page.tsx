@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
+import { UploadForm } from "@/components/documents/upload-form";
 import { Card, CardContent } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
-import { UploadForm } from "./upload-form";
+import { createDocument } from "./actions";
 
 export default async function NewDocumentPage() {
   const supabase = await createClient();
@@ -20,7 +21,12 @@ export default async function NewDocumentPage() {
       </p>
       <Card>
         <CardContent>
-          <UploadForm userId={user.id} />
+          <UploadForm
+            userId={user.id}
+            action={createDocument}
+            submitLabel="Ajouter au coffre"
+            pendingLabel="Phil range ton document…"
+          />
         </CardContent>
       </Card>
     </main>
