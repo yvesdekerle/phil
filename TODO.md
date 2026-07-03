@@ -326,8 +326,9 @@ Sur un document, bouton "Disponible offline". Téléchargement du fichier tel qu
 Détection de l'absence de réseau via `navigator.onLine` + ping périodique. Bandeau "Mode offline" affiché. Toutes les pages voyages, événements, documents marqués offline restent accessibles. Les actions d'écriture sont désactivées avec message "Reconnectez-vous pour modifier".
 > Note : hook `useOnlineStatus` (événements + ping /api/health 30 s), bandeau global encre "consultation seulement" avec lien vers **`/offline`** — vue 100 % client depuis Dexie (programme par jour, docs, idées, horodatage), précachée par le SW et servie en **fallback de navigation** hors cache. Pages déjà visitées : servies par `phil-pages`. **Écart v1** : pas de désactivation bouton par bouton — le bandeau porte le message, et les actions serveur échouent naturellement hors ligne. Vérifié : /offline rend les données locales, bandeau apparaît/disparaît aux événements réseau.
 
-### [ ] PHIL-I06 — Resync à la reconnexion
+### [x] PHIL-I06 — Resync à la reconnexion *(fait le 2026-07-03)*
 Quand le réseau revient, refetch automatique des données voyage en cours. Notification discrète "Données synchronisées". Pas de gestion de conflit puisque l'écriture offline n'est pas supportée en v1.
+> Note : dans `TripOfflineSync` — événement `online` → `router.refresh()` (données serveur) + `syncTrip()` (cache Dexie) + toast "Données synchronisées" auto-effacé (4 s). Vérifié en réel (événement simulé).
 
 ---
 
