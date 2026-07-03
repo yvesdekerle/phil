@@ -44,13 +44,16 @@ export default async function TripCalendarPage({
 
   return (
     <div className="flex flex-col gap-6">
-      {canEdit ? (
-        <div className="flex justify-end">
+      <div className="flex items-center justify-end gap-3">
+        <Button asChild variant="outline">
+          <Link href={`/trips/${tripId}/timeline`}>Timeline</Link>
+        </Button>
+        {canEdit ? (
           <Button asChild>
             <Link href={`/trips/${tripId}/events/new`}>Ajouter un événement</Link>
           </Button>
-        </div>
-      ) : null}
+        ) : null}
+      </div>
 
       {days.length > 0 ? (
         <p className="-mb-3 text-right text-xs text-encre-douce">

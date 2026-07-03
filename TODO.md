@@ -239,8 +239,9 @@ Vue par défaut sur mobile et probablement la plus utilisée. Événements group
 Vue détaillée d'une journée avec une grille horaire. Affichage des événements positionnés sur leurs créneaux. Utile pour les journées chargées.
 > Note : `/trips/[tripId]/day/[date]` — grille 6 h → minuit, événements positionnés en heure locale (couleur par type), multi-jours coupés à minuit, accessible en cliquant l'en-tête d'un jour du calendrier. Limitation v1 : les événements qui se chevauchent se superposent (pas de colonnes parallèles). Vérifié en réel sur le 5 nov de la démo.
 
-### [ ] PHIL-F03 — Vue timeline du voyage
+### [x] PHIL-F03 — Vue timeline du voyage *(fait le 2026-07-03)*
 Vue horizontale type Gantt qui montre la durée totale du voyage avec tous les événements. Surtout utile pour les transports et les hébergements qui couvrent plusieurs jours.
+> Note : `/trips/[tripId]/timeline` (bouton "Timeline" sur le calendrier) — colonnes par jour (axe élargi aux événements qui débordent du voyage, ex. vol aller la veille), sections Transport/Hébergement/Activité, une ligne par événement, barres colorées cliquables, défilement horizontal. Vérifié en réel sur la démo Maurice (hébergements multi-jours parfaits).
 
 ### [x] PHIL-F04 — Création d'un événement TRANSPORT *(fait le 2026-07-03)*
 Formulaire : type de transport (train, plane, bus, car, ferry, autre), titre auto-suggéré, gare/aéroport départ et arrivée, dates et heures (avec timezone), numéro de réservation, transporteur. Possibilité d'attacher un document immédiatement (upload ou pick depuis docs du voyage). Validation : `ends_at >= starts_at`.
