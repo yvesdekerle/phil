@@ -19,12 +19,12 @@ export default async function NewEventPage({
   searchParams,
 }: {
   params: Promise<{ tripId: string }>;
-  searchParams: Promise<{ type?: string }>;
+  searchParams: Promise<{ type?: string; ideaId?: string }>;
 }) {
   const { tripId } = await params;
-  const { type } = await searchParams;
+  const { type, ideaId } = await searchParams;
   const activeType: EventType =
-    type === "LODGING" || type === "ACTIVITY" ? (type as EventType) : "TRANSPORT";
+    ideaId || type === "ACTIVITY" ? "ACTIVITY" : type === "LODGING" ? "LODGING" : "TRANSPORT";
 
   const supabase = await createClient();
   const {
@@ -41,6 +41,31 @@ export default async function NewEventPage({
     .single();
   if (!trip) {
     notFound();
+  }
+
+  // Conversion depuis une idée (PHIL-H04) : formulaire ACTIVITY pré-rempli.
+  let prefill: import("./activity-form").ActivityPrefill | undefined;
+  if (ideaId) {
+    const { data: idea } = await supabase
+      .from("trip_ideas")
+      .select("*")
+      .eq("id", ideaId)
+      .eq("trip_id", tripId)
+      .single();
+    if (idea) {
+      prefill = {
+        ideaId: idea.id,
+        title: idea.title,
+        description: idea.description ?? "",
+        locationName: idea.location_name ?? "",
+        durationMinutes: idea.estimated_duration_minutes
+          ? String(idea.estimated_duration_minutes)
+          : "",
+        cost: idea.estimated_cost !== null ? String(idea.estimated_cost) : "",
+        costCurrency: idea.cost_currency ?? "",
+        externalUrl: idea.external_url ?? "",
+      };
+    }
   }
 
   return (
@@ -77,7 +102,11 @@ export default async function NewEventPage({
           ) : activeType === "LODGING" ? (
             <LodgingForm tripId={trip.id} defaultTimezone={trip.default_timezone} />
           ) : (
-            <ActivityForm tripId={trip.id} defaultTimezone={trip.default_timezone} />
+            <ActivityForm
+              tripId={trip.id}
+              defaultTimezone={trip.default_timezone}
+              prefill={prefill}
+            />
           )}
         </CardContent>
       </Card>

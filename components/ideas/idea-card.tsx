@@ -1,9 +1,19 @@
-import { Clock, Coins, ExternalLink, MapPin } from "lucide-react";
+import { CalendarPlus, Clock, Coins, ExternalLink, MapPin } from "lucide-react";
+import Link from "next/link";
+import { formatInTimezone } from "@/lib/events/datetime";
 import type { IdeaWithMeta } from "@/lib/ideas/types";
 import { cn } from "@/lib/utils";
 import { VoteButton } from "./vote-button";
 
-export function IdeaCard({ idea, tripId }: { idea: IdeaWithMeta; tripId: string }) {
+export function IdeaCard({
+  idea,
+  tripId,
+  canPlan,
+}: {
+  idea: IdeaWithMeta;
+  tripId: string;
+  canPlan: boolean;
+}) {
   return (
     <article
       className={cn(
@@ -16,21 +26,46 @@ export function IdeaCard({ idea, tripId }: { idea: IdeaWithMeta; tripId: string 
           <h3 className="flex flex-wrap items-center gap-2 text-sm font-medium text-encre">
             {idea.title}
             {idea.status === "SCHEDULED" ? (
-              <span className="rounded-full bg-laiton px-2 py-0.5 text-[0.65rem] font-medium text-papier uppercase">
-                Planifié
-              </span>
+              idea.scheduledEvent ? (
+                <Link
+                  href={`/trips/${tripId}/events/${idea.scheduledEvent.id}`}
+                  className="rounded-full bg-laiton px-2 py-0.5 text-[0.65rem] font-medium text-papier uppercase hover:bg-laiton/80"
+                >
+                  Planifié le{" "}
+                  {formatInTimezone(
+                    idea.scheduledEvent.starts_at,
+                    idea.scheduledEvent.timezone,
+                    "d MMM",
+                  )}
+                </Link>
+              ) : (
+                <span className="rounded-full bg-laiton px-2 py-0.5 text-[0.65rem] font-medium text-papier uppercase">
+                  Planifié
+                </span>
+              )
             ) : null}
           </h3>
           {idea.description ? (
             <p className="mt-1 line-clamp-2 text-sm text-encre-douce">{idea.description}</p>
           ) : null}
         </div>
-        <VoteButton
-          tripId={tripId}
-          ideaId={idea.id}
-          count={idea.voteCount}
-          hasVoted={idea.hasVoted}
-        />
+        <div className="flex shrink-0 items-center gap-2">
+          {canPlan && idea.status === "POOL" ? (
+            <Link
+              href={`/trips/${tripId}/events/new?ideaId=${idea.id}`}
+              className="flex items-center gap-1.5 rounded-full border border-laiton-clair bg-papier px-3 py-1.5 text-sm font-medium text-encre-douce transition-colors hover:text-encre focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-laiton"
+            >
+              <CalendarPlus className="size-4" aria-hidden="true" />
+              Planifier
+            </Link>
+          ) : null}
+          <VoteButton
+            tripId={tripId}
+            ideaId={idea.id}
+            count={idea.voteCount}
+            hasVoted={idea.hasVoted}
+          />
+        </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-encre-douce">

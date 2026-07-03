@@ -28,7 +28,9 @@ export default async function TripIdeasPage({
   const [{ data: ideasData }, { data: me }] = await Promise.all([
     supabase
       .from("trip_ideas")
-      .select("*, profiles!trip_ideas_created_by_fkey(display_name), idea_votes(user_id)")
+      .select(
+        "*, profiles!trip_ideas_created_by_fkey(display_name), idea_votes(user_id), trip_events!trip_ideas_scheduled_event_id_fkey(id, starts_at, timezone)",
+      )
       .eq("trip_id", tripId)
       .in("status", ["POOL", "SCHEDULED"])
       .order("created_at", { ascending: false }),
@@ -49,6 +51,7 @@ export default async function TripIdeasPage({
       voteCount: votes.length,
       hasVoted: votes.some((v) => v.user_id === user.id),
       creatorName: row.profiles?.display_name ?? "Voyageur",
+      scheduledEvent: row.trip_events ?? null,
     };
   });
 
@@ -136,7 +139,7 @@ export default async function TripIdeasPage({
       ) : (
         <div className="flex flex-col gap-3">
           {ideas.map((idea) => (
-            <IdeaCard key={idea.id} idea={idea} tripId={tripId} />
+            <IdeaCard key={idea.id} idea={idea} tripId={tripId} canPlan={canPropose} />
           ))}
         </div>
       )}

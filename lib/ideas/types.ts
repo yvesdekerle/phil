@@ -7,4 +7,5 @@ export type IdeaWithMeta = TripIdea & {
   voteCount: number;
   hasVoted: boolean;
   creatorName: string;
+  scheduledEvent: { id: string; starts_at: string; timezone: string } | null;
 };

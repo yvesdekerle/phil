@@ -291,8 +291,9 @@ Formulaire : titre, description, lien externe optionnel, lieu optionnel, durée 
 Bouton de vote (heart ou +1) par participant, max 1 vote par user et par idée. Compteur visible. Permet d'identifier les favorites du groupe sans débat.
 > Note : bouton cœur toggle (`vote-button.tsx` + action `toggleVote`) — 1 voix max garantie par la PK `(idea_id, user_id)` et les policies de B06, retrait de sa propre voix uniquement, VIEWER peut voter. État voté = cœur plein bordeaux. Vérifié en réel : toggle aller-retour.
 
-### [ ] PHIL-H04 — Conversion idée → événement planifié
+### [x] PHIL-H04 — Conversion idée → événement planifié *(fait le 2026-07-03)*
 Sur une idée, bouton "Planifier". Ouvre le formulaire de création d'événement ACTIVITY pré-rempli avec les infos de l'idée. À la création, l'idée passe en statut `SCHEDULED` et garde une référence vers l'événement. Restera visible dans la liste des idées avec un badge "Planifié le X".
+> Note : bouton "Planifier" (OWNER/EDITOR, idées POOL) → `/events/new?ideaId=…`, formulaire ACTIVITY pré-rempli (titre, description, lieu, durée, coût, lien). À la création : idée → SCHEDULED + `scheduled_event_id`. Badge **"Planifié le {date}"** (dans le fuseau de l'événement) cliquable vers l'événement. Vérifié en réel : conversion complète, vote conservé, bouton Planifier retiré.
 
 ### [ ] PHIL-H05 — Rejet ou archivage d'une idée
 Bouton "Pas pour ce voyage" qui passe l'idée en statut `DISMISSED`. Filtre par défaut masque les dismissed mais on peut les afficher.

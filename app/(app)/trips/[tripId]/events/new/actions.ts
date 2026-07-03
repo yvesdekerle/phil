@@ -77,6 +77,7 @@ const activitySchema = z.object({
   cost: z.union([z.literal(""), z.coerce.number().min(0).max(1000000)]).optional(),
   costCurrency: z.string().trim().max(3).optional(),
   externalUrl: z.union([z.literal(""), z.string().url("Lien invalide.")]).optional(),
+  ideaId: z.union([z.literal(""), z.string().uuid()]).optional(),
 });
 
 export async function createActivityEvent(
@@ -94,6 +95,7 @@ export async function createActivityEvent(
     cost: formData.get("cost") ?? "",
     costCurrency: formData.get("costCurrency") ?? "",
     externalUrl: formData.get("externalUrl") ?? "",
+    ideaId: formData.get("ideaId") ?? "",
   });
 
   if (!parsed.success) {
@@ -126,7 +128,9 @@ export async function createActivityEvent(
     metadata.external_url = d.externalUrl;
   }
 
+  const eventId = crypto.randomUUID();
   const { error } = await supabase.from("trip_events").insert({
+    id: eventId,
     trip_id: d.tripId,
     type: "ACTIVITY",
     title: d.title,
@@ -144,6 +148,16 @@ export async function createActivityEvent(
       status: "error",
       message: "La création a échoué — il faut être capitaine ou éditeur du voyage.",
     };
+  }
+
+  // Conversion depuis une idée (PHIL-H04) : l'idée passe en SCHEDULED
+  // et garde la référence vers l'événement créé.
+  if (d.ideaId) {
+    await supabase
+      .from("trip_ideas")
+      .update({ status: "SCHEDULED", scheduled_event_id: eventId })
+      .eq("id", d.ideaId)
+      .eq("trip_id", d.tripId);
   }
 
   redirect(`/trips/${d.tripId}`);
