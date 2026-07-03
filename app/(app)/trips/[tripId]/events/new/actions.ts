@@ -3,6 +3,7 @@
 import { fromZonedTime } from "date-fns-tz";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { LODGING_PLATFORMS } from "@/lib/events/lodging";
 import { TRANSPORT_MODES } from "@/lib/events/transport";
 import { createClient } from "@/lib/supabase/server";
 
@@ -33,6 +34,88 @@ export type CreateEventState = {
   status: "idle" | "error";
   message?: string;
 };
+
+const lodgingSchema = z
+  .object({
+    tripId: z.string().uuid(),
+    name: z.string().trim().min(1, "Quel est le nom de l'hébergement ?").max(150),
+    address: z.string().trim().max(300).optional(),
+    checkInLocal: z.string().regex(DATETIME_LOCAL, "Date et heure de check-in requises."),
+    checkOutLocal: z.string().regex(DATETIME_LOCAL, "Date et heure de check-out requises."),
+    timezone: z.string().refine((tz) => Intl.supportedValuesOf("timeZone").includes(tz), {
+      message: "Fuseau horaire inconnu.",
+    }),
+    platform: z.enum(LODGING_PLATFORMS),
+    bookingReference: z.string().trim().max(100).optional(),
+    guests: z.union([z.literal(""), z.coerce.number().int().min(1).max(50)]).optional(),
+    notes: z.string().trim().max(2000).optional(),
+  })
+  .refine((v) => v.checkOutLocal >= v.checkInLocal, {
+    message: "Le check-out ne peut pas précéder le check-in.",
+    path: ["checkOutLocal"],
+  });
+
+export async function createLodgingEvent(
+  _prev: CreateEventState,
+  formData: FormData,
+): Promise<CreateEventState> {
+  const parsed = lodgingSchema.safeParse({
+    tripId: formData.get("tripId"),
+    name: formData.get("name"),
+    address: formData.get("address") ?? "",
+    checkInLocal: formData.get("checkInLocal"),
+    checkOutLocal: formData.get("checkOutLocal"),
+    timezone: formData.get("timezone"),
+    platform: formData.get("platform"),
+    bookingReference: formData.get("bookingReference") ?? "",
+    guests: formData.get("guests") ?? "",
+    notes: formData.get("notes") ?? "",
+  });
+
+  if (!parsed.success) {
+    return { status: "error", message: parsed.error.issues[0]?.message ?? "Saisie invalide." };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    redirect("/login");
+  }
+
+  const d = parsed.data;
+  const metadata: Record<string, string | number> = { platform: d.platform };
+  if (d.bookingReference) {
+    metadata.booking_reference = d.bookingReference;
+  }
+  if (d.guests) {
+    metadata.guests = d.guests;
+  }
+
+  const { error } = await supabase.from("trip_events").insert({
+    trip_id: d.tripId,
+    type: "LODGING",
+    title: d.name,
+    starts_at: fromZonedTime(d.checkInLocal, d.timezone).toISOString(),
+    ends_at: fromZonedTime(d.checkOutLocal, d.timezone).toISOString(),
+    timezone: d.timezone,
+    location_name: d.name,
+    location_address: d.address || null,
+    notes: d.notes || null,
+    metadata,
+    created_by: user.id,
+  });
+
+  if (error) {
+    return {
+      status: "error",
+      message: "La création a échoué — il faut être capitaine ou éditeur du voyage.",
+    };
+  }
+
+  redirect(`/trips/${d.tripId}`);
+}
 
 export async function createTransportEvent(
   _prev: CreateEventState,

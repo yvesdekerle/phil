@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import type { EventType } from "@/lib/events/types";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
+import { LodgingForm } from "./lodging-form";
 import { TransportForm } from "./transport-form";
 
 const TYPE_TABS: { type: EventType; label: string }[] = [
@@ -72,11 +73,11 @@ export default async function NewEventPage({
         <CardContent>
           {activeType === "TRANSPORT" ? (
             <TransportForm tripId={trip.id} defaultTimezone={trip.default_timezone} />
+          ) : activeType === "LODGING" ? (
+            <LodgingForm tripId={trip.id} defaultTimezone={trip.default_timezone} />
           ) : (
             <p className="py-8 text-center text-sm text-encre-douce">
-              {activeType === "LODGING"
-                ? "Le formulaire hébergement arrive avec PHIL-F05."
-                : "Le formulaire activité arrive avec PHIL-F06."}
+              Le formulaire activité arrive avec PHIL-F06.
             </p>
           )}
         </CardContent>

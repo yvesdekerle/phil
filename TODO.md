@@ -230,8 +230,9 @@ Vue horizontale type Gantt qui montre la durée totale du voyage avec tous les �
 Formulaire : type de transport (train, plane, bus, car, ferry, autre), titre auto-suggéré, gare/aéroport départ et arrivée, dates et heures (avec timezone), numéro de réservation, transporteur. Possibilité d'attacher un document immédiatement (upload ou pick depuis docs du voyage). Validation : `ends_at >= starts_at`.
 > Note : page `/trips/[id]/events/new` avec sélecteur de type (pastilles) — LODGING/ACTIVITY en placeholder jusqu'à F05/F06. Titre auto-suggéré ("Avion Nice → Bastia") tant que non modifié. Heures saisies en local + fuseau → converties UTC via `fromZonedTime` côté serveur. `metadata` : transport_mode/from/to/booking_reference/carrier ; `location_name` = lieu de départ. **Deux écarts** : un seul fuseau par événement (celui du départ — vols transfrontaliers v2), attache de document renvoyée à F10 (picker réutilisable). Vérifié en réel : création + conversion Maurice OK.
 
-### [ ] PHIL-F05 — Création d'un événement LODGING
+### [x] PHIL-F05 — Création d'un événement LODGING *(fait le 2026-07-03)*
 Formulaire : nom de l'hébergement, adresse, check-in date+heure, check-out date+heure, numéro de réservation, plateforme (Booking, Airbnb, autre), nombre de personnes, notes. Possibilité d'attacher un document.
+> Note : check-in/check-out obligatoires (starts_at/ends_at), cohérence validée. `metadata` : platform (booking/airbnb/hotel/other), booking_reference, guests. `location_name` = nom, `location_address` = adresse. Attache de document : F10, comme F04.
 
 ### [ ] PHIL-F06 — Création d'un événement ACTIVITY
 Formulaire : titre, description, lieu, date+heure début, durée estimée, coût optionnel avec devise, lien externe. Possibilité d'attacher un document (e.g. ticket, voucher).
