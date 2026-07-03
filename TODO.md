@@ -103,8 +103,9 @@ Politique SELECT : participant du voyage. Politique INSERT/UPDATE : OWNER ou EDI
 ### [ ] PHIL-B12 — Script de vérification des politiques RLS
 Script exécutable manuellement (`scripts/verify-rls.ts` via `npx tsx`, ou SQL) qui simule plusieurs users et vérifie qu'aucun ne peut accéder aux données des autres. Cas critiques : (1) user A ne voit pas le coffre de user B, (2) user A invité sur voyage X ne voit pas le voyage Y, (3) un document partagé via `document_shares` redevient invisible quand on retire le partage. À lancer obligatoirement après toute migration touchant aux politiques RLS et avant tout déploiement d'une évolution du modèle documents/partage. Pas de CI en v1 : la discipline d'exécution manuelle fait partie du workflow.
 
-### [ ] PHIL-B13 — Setup migrations Supabase
+### [x] PHIL-B13 — Setup migrations Supabase *(fait le 2026-07-03)*
 Utiliser le CLI Supabase pour gérer les migrations en SQL versionné dans le repo (`supabase/migrations/`). Toute modification de schéma passe par une nouvelle migration commitée. Pas de modifications via le dashboard Supabase en dehors du dev local.
+> Note : flow opérationnel depuis B01 (`supabase init` + `link` + `db push`, CLI en devDependency). Ce ticket ajoute : `types/database.ts` généré depuis le schéma distant (`--linked`, pas de stack Docker locale), clients Supabase typés `<Database>`, type `Profile` dérivé du schéma, scripts npm `db:push` et `db:types`, CLAUDE.md mis à jour. À chaque migration : `db push` puis `db:types`.
 
 ---
 

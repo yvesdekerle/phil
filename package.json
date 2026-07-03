@@ -10,7 +10,9 @@
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
     "type-check": "tsc --noEmit",
-    "prepare": "husky"
+    "prepare": "husky",
+    "db:push": "supabase db push",
+    "db:types": "supabase gen types typescript --linked > types/database.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",

@@ -230,8 +230,8 @@ npx supabase migration new <nom>
 npx supabase db push
 npx supabase db reset   # Local seulement
 
-# Génération des types depuis le schéma
-npx supabase gen types typescript --local > types/database.ts
+# Génération des types depuis le schéma (projet distant linké, pas de stack locale)
+npm run db:types
 ```
 
 ## Ressources
