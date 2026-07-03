@@ -90,8 +90,9 @@ Table d'audit : `id`, `document_id`, `accessed_by`, `action` (`VIEW` / `DOWNLOAD
 ### [ ] PHIL-B08 — Schéma table `trip_invitations`
 Table : `id`, `trip_id`, `invited_email`, `invited_by`, `token` (UUID unique), `role`, `created_at`, `accepted_at`, `expires_at`. Permet d'inviter par email avec un lien magique avant que la personne n'ait un compte.
 
-### [ ] PHIL-B09 — Politiques RLS sur `trips` et `trip_participants`
+### [x] PHIL-B09 — Politiques RLS sur `trips` et `trip_participants` *(fait le 2026-07-03)*
 Activer RLS sur les deux tables. Politique `trips` : un user peut SELECT un voyage si et seulement s'il est dans `trip_participants` pour ce voyage. Politique INSERT : tout user authentifié peut créer un voyage. Politique UPDATE : seul OWNER et EDITOR peuvent modifier. Politique DELETE : seul OWNER. Politiques équivalentes sur `trip_participants`.
+> Note : migration `20260703075238_rls_trips.sql`. Helpers `security definer` dans le schéma **`private`** (non exposé) pour éviter la récursion des policies : `is_trip_participant`, `trip_role`. `trip_participants` : insert/update = OWNER, delete = OWNER ou soi-même (quitter). Vérifié par script croisé à 2 users jetables : 12/12 OK. **⚠️ Pour D02** : l'INSERT d'un trip doit se faire avec un `id` généré côté client + `return=minimal` (le RETURNING évalue la policy SELECT avant le trigger AFTER qui crée la ligne participant), puis re-SELECT.
 
 ### [ ] PHIL-B10 — Politiques RLS sur `documents`
 Activer RLS. Politique SELECT : un user peut voir un document si (a) il en est propriétaire, OU (b) le document a `scope=TRIP` et l'user est participant du voyage, OU (c) le document a `scope=VAULT` et il existe une ligne dans `document_shares` pour un voyage dont l'user est participant. Politique INSERT : un user ne peut créer que ses propres documents. Politique UPDATE/DELETE : owner uniquement. C'est la politique la plus critique du projet, à vérifier exhaustivement.
