@@ -72,8 +72,9 @@ Table Supabase qui étend `auth.users` : `id` (UUID, FK vers auth.users), `displ
 Table `trips` : `id`, `name`, `destination`, `start_date`, `end_date`, `cover_image_url`, `default_timezone`, `created_by`, `created_at`, `archived_at`. Table `trip_participants` : `trip_id`, `user_id`, `role` (`OWNER` / `EDITOR` / `VIEWER`), `joined_at`, `invited_by`. Index sur `(user_id)` pour lister rapidement les voyages d'un user.
 > Note : migration `20260703073542_trips.sql`. Enum `trip_role`, FK vers `profiles`, contrainte `end_date >= start_date`, PK composite `(trip_id, user_id)`. **RLS activée sans policies** (deny all) jusqu'à B09. Trigger `handle_new_trip` (security definer) : le créateur devient OWNER automatiquement — évite le problème d'œuf-et-poule des policies. Vérifié : trigger OWNER + cascade delete OK, anon bloqué.
 
-### [ ] PHIL-B03 — Schéma table `documents`
+### [x] PHIL-B03 — Schéma table `documents` *(fait le 2026-07-03)*
 Table avec : `id`, `owner_id`, `scope` (`VAULT` ou `TRIP`), `trip_id` (nullable, requis si scope=TRIP), `file_name`, `mime_type`, `size_bytes`, `storage_path`, `category` (passport, id_card, driving_license, ticket, voucher, lodging, insurance, other), `expires_at` (nullable), `metadata` (JSONB pour champs spécifiques type numéro de passeport), `uploaded_at`, `deleted_at`. Index sur `(owner_id, scope)` et `(trip_id)`.
+> Note : migration `20260703084613_documents.sql`. Contrainte : `scope=TRIP` ⇒ `trip_id` requis, `scope=VAULT` ⇒ `trip_id` null (partage via `document_shares` uniquement) — vérifiée en base. `storage_path` unique, cascade trip/owner. **FK `event_documents.document_id` posée** (dette B05 soldée). RLS deny all jusqu'à B10. Bucket Storage : à créer en E02. Types régénérés.
 
 ### [ ] PHIL-B04 — Schéma table `document_shares`
 Table de liaison : `id`, `document_id`, `trip_id`, `shared_at`, `shared_by`. Permet à un user de partager explicitement un document de son coffre vers un voyage donné. Contrainte unique sur `(document_id, trip_id)`.
