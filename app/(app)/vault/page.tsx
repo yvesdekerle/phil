@@ -45,9 +45,14 @@ export default async function VaultPage({
     <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="font-display text-3xl text-encre">Ton coffre</h1>
-        <Button asChild>
-          <Link href="/vault/new">Ajouter un document</Link>
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button asChild variant="outline">
+            <Link href="/vault/activity">Activité</Link>
+          </Button>
+          <Button asChild>
+            <Link href="/vault/new">Ajouter un document</Link>
+          </Button>
+        </div>
       </div>
 
       <div className="mb-6 flex flex-wrap gap-2">

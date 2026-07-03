@@ -219,8 +219,9 @@ Service côté serveur qui prend un PDF en entrée et applique un filigrane diag
 ### [ ] PHIL-E07 — Alerte expiration documents
 Cron job (Vercel Cron, gratuit sur Hobby avec 2 jobs) qui scanne quotidiennement les `expires_at` et envoie un email Resend aux propriétaires à J-180, J-90, J-30 et J-7. Badge "Expire bientôt" affiché dans l'UI du coffre quand `expires_at < now + 90 jours`.
 
-### [ ] PHIL-E08 — Page audit log du coffre
+### [x] PHIL-E08 — Page audit log du coffre *(fait le 2026-07-03)*
 Vue "Activité de mon coffre" qui affiche les dernières entrées de `vault_access_log` filtrées sur les documents de l'user. Permet de voir qui a consulté quoi et quand. Filtres par document, par action, par date. Le log est alimenté depuis la Phase 3 (B07) : la page révèle l'historique complet.
+> Note : `/vault/activity` — donc derrière le verrou passkey du layout (vérifié : écran "Coffre verrouillé" avant Touch ID). Lecture RLS (`document_owner_id`), embed nom du document (« Document supprimé » si purgé — l'audit survit, FK set null) et auteur de l'accès, filtres par action / période (7 j, 30 j, tout) / document via l'URL, 200 dernières entrées. Vérifié en réel : historique complet de la journée affiché avec filtres.
 
 ---
 
