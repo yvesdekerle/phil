@@ -9,6 +9,7 @@ import { LODGING_PLATFORM_LABELS, type LodgingPlatform } from "@/lib/events/lodg
 import { TRANSPORT_MODE_LABELS, type TransportMode } from "@/lib/events/transport";
 import { EVENT_TYPE_LABELS } from "@/lib/events/types";
 import { createClient } from "@/lib/supabase/server";
+import { EventActions } from "./event-actions";
 
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -33,17 +34,26 @@ export default async function EventDetailPage({
     redirect("/login");
   }
 
-  const [{ data: event }, { data: attachedDocs }] = await Promise.all([
+  const [{ data: event }, { data: attachedDocs }, { data: me }] = await Promise.all([
     supabase.from("trip_events").select("*").eq("id", eventId).eq("trip_id", tripId).single(),
     supabase
       .from("event_documents")
       .select("documents(id, file_name, mime_type)")
       .eq("event_id", eventId),
+    supabase
+      .from("trip_participants")
+      .select("role")
+      .eq("trip_id", tripId)
+      .eq("user_id", user.id)
+      .single(),
   ]);
 
   if (!event) {
     notFound();
   }
+
+  const canEdit = me?.role === "OWNER" || me?.role === "EDITOR";
+  const canDelete = me?.role === "OWNER" || event.created_by === user.id;
 
   const meta = (event.metadata ?? {}) as Record<string, string | number>;
   const documents = (attachedDocs ?? [])
@@ -134,6 +144,10 @@ export default async function EventDetailPage({
           </Button>
         ) : null}
       </div>
+
+      {canEdit || canDelete ? (
+        <EventActions tripId={tripId} eventId={event.id} eventTitle={event.title} />
+      ) : null}
 
       <section>
         <h2 className="mb-2 text-sm font-medium text-encre-douce">Documents attachés</h2>
