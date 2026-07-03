@@ -18,7 +18,8 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline'",
+      // 'unsafe-eval' en dev uniquement : requis par React pour le debug (jamais en prod)
+      `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : ""}`,
       "style-src 'self' 'unsafe-inline'",
       // Avatars Google + couvertures de voyage (URL libre) + blobs offline
       "img-src 'self' data: blob: https:",
