@@ -216,8 +216,9 @@ Vue "Activité de mon coffre" qui affiche les dernières entrées de `vault_acce
 
 ## Catégorie F — Calendrier & événements de voyage
 
-### [ ] PHIL-F01 — Vue liste du calendrier
+### [x] PHIL-F01 — Vue liste du calendrier *(fait le 2026-07-03)*
 Vue par défaut sur mobile et probablement la plus utilisée. Événements groupés par jour, dans l'ordre chronologique. Affichage compact : heure, type (icône), titre, lieu. Tap sur un événement → page détail. Bandeau "Aujourd'hui" si on est dans la période du voyage.
+> Note : `date-fns-tz` installé, helper central `formatInTimezone` posé dès maintenant dans `lib/events/datetime.ts` (F09 n'aura qu'à généraliser). Groupement par jour **dans le fuseau de chaque événement**, badge "Aujourd'hui" calculé dans le fuseau du voyage. Icônes lucide par type (avion/lit/boussole). Bouton "Ajouter" visible OWNER/EDITOR seulement, pointe vers `/events/new` (F04-F06). Vérifié en réel : conversion UTC→Maurice exacte, groupement 2 jours, badge Aujourd'hui.
 
 ### [ ] PHIL-F02 — Vue jour du calendrier
 Vue détaillée d'une journée avec une grille horaire. Affichage des événements positionnés sur leurs créneaux. Utile pour les journées chargées.
