@@ -1,10 +1,51 @@
-import { TabPlaceholder } from "@/components/trips/tab-placeholder";
+import { notFound } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { TripSettingsForm } from "./settings-form";
 
-export default function TripSettingsPage() {
+export default async function TripSettingsPage({
+  params,
+}: {
+  params: Promise<{ tripId: string }>;
+}) {
+  const { tripId } = await params;
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const { data: trip } = await supabase.from("trips").select("*").eq("id", tripId).single();
+
+  if (!trip || !user) {
+    notFound();
+  }
+
+  const { data: me } = await supabase
+    .from("trip_participants")
+    .select("role")
+    .eq("trip_id", tripId)
+    .eq("user_id", user.id)
+    .single();
+
+  const isOwner = me?.role === "OWNER";
+  const canEdit = me?.role === "OWNER" || me?.role === "EDITOR";
+
   return (
-    <TabPlaceholder
-      title="Les paramètres arrivent bientôt"
-      hint="Modifier, archiver ou transmettre le voyage : c'est pour très bientôt. (PHIL-D04)"
-    />
+    <div className="mx-auto max-w-lg">
+      <TripSettingsForm
+        tripId={trip.id}
+        tripName={trip.name}
+        isOwner={isOwner}
+        isArchived={trip.archived_at !== null}
+        canEdit={canEdit}
+        defaultValues={{
+          name: trip.name,
+          destination: trip.destination,
+          startDate: trip.start_date,
+          endDate: trip.end_date,
+          coverImageUrl: trip.cover_image_url ?? "",
+          timezone: trip.default_timezone,
+        }}
+      />
+    </div>
   );
 }
