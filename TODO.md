@@ -238,8 +238,9 @@ Formulaire : nom de l'hébergement, adresse, check-in date+heure, check-out date
 Formulaire : titre, description, lieu, date+heure début, durée estimée, coût optionnel avec devise, lien externe. Possibilité d'attacher un document (e.g. ticket, voucher).
 > Note : durée estimée → `ends_at` calculé (et `metadata.duration_minutes` conservé pour H04). Coût/devise (EUR par défaut) et lien externe dans `metadata`. Description → `notes`. Attache de document : F10. Ce formulaire servira de base pré-remplie à la conversion idée → événement (H04).
 
-### [ ] PHIL-F07 — Page détail événement
+### [x] PHIL-F07 — Page détail événement *(fait le 2026-07-03)*
 Affichage de toutes les infos saisies, des documents attachés (ouverture en un tap), bouton "Modifier" et "Supprimer" (selon rôle). Pour les transports, lien rapide "Itinéraire" qui ouvre Google Maps avec l'adresse de départ ou d'arrivée.
+> Note : fiche complète par type (trajet, transporteur, plateforme, voyageurs, durée, coût, résa…), horaires "heure locale {fuseau}", documents attachés ouvrables via le viewer E03a, lien Itinéraire Google Maps (adresse > lieu > destination du trajet), lien externe pour les activités. Les boutons Modifier/Supprimer arrivent avec F08 (ticket suivant).
 
 ### [ ] PHIL-F08 — Modification et suppression d'événement
 Édition inline ou modale. Suppression avec confirmation. Loggé pour audit. Si l'événement avait des documents attachés, ils ne sont pas supprimés (juste la liaison `event_documents`).
