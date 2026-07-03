@@ -147,8 +147,9 @@ Vue principale après login. Cards par voyage avec : image de couverture, nom, d
 Formulaire : nom, destination, dates de début et fin, image de couverture optionnelle (upload ou URL), timezone par défaut (auto-suggéré depuis la destination via une lib comme `tz-lookup`). Validation Zod. À la création, l'utilisateur devient automatiquement OWNER.
 > Note : deux écarts. (1) Couverture par **URL https uniquement** — l'upload nécessite un bucket Storage, extrait en ticket **D09**. (2) Pas d'auto-suggestion `tz-lookup` : la lib attend lat/lng, pas un nom de ville — sans géocodage, select IANA avec défaut = timezone du profil (l'auto-suggestion viendra avec la carte v2 si besoin). Server Action avec Zod des deux côtés, UUID généré serveur + insert sans RETURNING (contrainte B09), OWNER via trigger B02. Vérifié en réel dans le navigateur (création + card + suppression de l'essai).
 
-### [ ] PHIL-D03 — Page détail voyage
+### [x] PHIL-D03 — Page détail voyage *(fait le 2026-07-03)*
 Layout avec onglets : Calendrier (par défaut), Documents, Idées, Participants, Paramètres. Header avec image de couverture, dates, destination, et bouton de partage rapide.
+> Note : layout `/trips/[tripId]` (RLS : non-participant → 404) avec header couverture/monogramme + badge statut + onglets. Calendrier/Documents/Idées/Paramètres = états vides Phil en attendant F01/G01/H01/D04. **Participants affiche déjà la liste réelle en lecture seule** (rôles francisés : Capitaine/Éditeur/Lecteur) — D07 ajoutera la gestion. Le bouton de partage rapide attend D05 (invitations). Embed PostgREST avec hint `!trip_participants_user_id_fkey` (deux FK vers profiles).
 
 ### [ ] PHIL-D04 — Modification et archivage d'un voyage
 Page paramètres du voyage : modifier nom, dates, destination, image, timezone. Bouton "Archiver" (visible uniquement OWNER) qui passe le voyage en archive sans le supprimer. Bouton "Supprimer" qui demande confirmation forte et purge tout (events, documents du voyage, idées, invitations).
