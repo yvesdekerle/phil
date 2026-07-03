@@ -94,6 +94,36 @@ export async function updateTrip(
   return { status: "success", message: "C'est noté dans le carnet." };
 }
 
+/** Enregistre la couverture téléversée (PHIL-D09) : URL construite côté serveur. */
+export async function setCoverFromUpload(
+  tripId: string,
+  storagePath: string,
+): Promise<TripSettingsState> {
+  const pathSchema = z
+    .string()
+    .regex(/^[0-9a-f-]{36}\/[0-9a-f-]{36}\.(jpg|png|webp)$/, "Chemin invalide.");
+  const parsed = pathSchema.safeParse(storagePath);
+  if (!parsed.success || !storagePath.startsWith(`${tripId}/`)) {
+    return { status: "error", message: "Chemin de fichier invalide." };
+  }
+
+  const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const url = `${base}/storage/v1/object/public/covers/${parsed.data}`;
+
+  const supabase = await createClient();
+  const { error, count } = await supabase
+    .from("trips")
+    .update({ cover_image_url: url }, { count: "exact" })
+    .eq("id", tripId);
+
+  if (error || count === 0) {
+    return { status: "error", message: "Impossible d'enregistrer la couverture." };
+  }
+
+  revalidatePath(`/trips/${tripId}`);
+  return { status: "success", message: "Couverture mise à jour." };
+}
+
 export async function setTripArchived(
   tripId: string,
   archived: boolean,

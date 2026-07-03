@@ -184,8 +184,9 @@ Liste des participants avec leur rôle. OWNER peut : changer le rôle de quelqu'
 Page qui liste les personnes avec qui l'user a déjà voyagé (extrait des `trip_participants`). Permet de les ré-inviter en un clic sur un nouveau voyage. Pas de social, juste un cache pratique.
 > Note : page `/friends` (nav "Amis") — compagnons dédupliqués, tri par nombre de voyages partagés, ré-invitation : sélecteur (voyages OWNER/EDITOR) → invitation D05/K02 (rôle EDITOR, email en test → repli lien copiable sur Participants). **Bug majeur découvert et corrigé** : `profiles` n'était lisible que par soi-même (RLS `select_own` seule) → tous les noms de co-équipiers retombaient sur le fallback partout (participants, idées, "Ajouté par") — passé inaperçu car les tests E2E étaient mono-utilisateur. Migration `20260703170135` : policy `profiles_select_cotravelers` via `private.shares_trip_with()` (security definer). Effet de bord corrigé : `getOwnProfile` faisait `.single()` sans filtre. `verify:rls` repassé : 24/24. Vérifié en réel (Amelie, user démo, visible et ré-invitée).
 
-### [ ] PHIL-D09 — Upload d'image de couverture de voyage
+### [x] PHIL-D09 — Upload d'image de couverture de voyage *(fait le 2026-07-03)*
 Découvert en D02 (traité en URL seulement) : permettre l'upload d'une image de couverture vers un bucket Supabase Storage public-aux-membres (bucket dédié `covers`, policies RLS storage, redimensionnement/limite de taille). À traiter en Phase 5 avec les documents du voyage, ou à la demande.
+> Note : bucket `covers` **lecture publique** (écart vs "public-aux-membres" : image non sensible, chemin `{trip_id}/{uuid}` non devinable — le privé aurait imposé URL signées ou endpoint, interdits/lourds pour une image de héros). Écriture/suppression réservées OWNER/EDITOR du voyage du préfixe (`private.trip_role`), 3 Mo max, JPG/PNG/WebP (limites aussi côté bucket). Upload direct navigateur + action `setCoverFromUpload` (chemin validé par regex, URL construite côté serveur). Pas de redimensionnement serveur (la limite 3 Mo suffit en v1). Vérifié : upload participant 200, voyage étranger 400, lecture publique 200.
 
 ---
 
