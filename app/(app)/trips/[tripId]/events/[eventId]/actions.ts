@@ -4,6 +4,7 @@ import { fromZonedTime } from "date-fns-tz";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { areUuids } from "@/lib/validation";
 
 const DATETIME_LOCAL = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
 
@@ -171,6 +172,9 @@ export async function detachDocument(
   eventId: string,
   documentId: string,
 ): Promise<EventActionState> {
+  if (!areUuids(tripId, eventId, documentId)) {
+    return { status: "error", message: "Identifiants invalides." };
+  }
   const supabase = await createClient();
   const { error, count } = await supabase
     .from("event_documents")

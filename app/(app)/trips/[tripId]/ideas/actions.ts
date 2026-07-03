@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { areUuids } from "@/lib/validation";
 
 /**
  * Ajoute ou retire ma voix sur une idée (PHIL-H03).
@@ -10,6 +11,9 @@ import { createClient } from "@/lib/supabase/server";
  * par participant, et le retrait de sa propre voix uniquement.
  */
 export async function toggleVote(tripId: string, ideaId: string): Promise<void> {
+  if (!areUuids(tripId, ideaId)) {
+    return;
+  }
   const supabase = await createClient();
   const {
     data: { user },

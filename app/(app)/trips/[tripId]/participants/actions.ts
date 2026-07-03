@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { areUuids } from "@/lib/validation";
 
 export type ParticipantActionState = {
   status: "idle" | "success" | "error";
@@ -256,6 +257,9 @@ export async function cancelInvitation(
   tripId: string,
   invitationId: string,
 ): Promise<ParticipantActionState> {
+  if (!areUuids(tripId, invitationId)) {
+    return { status: "error", message: "Identifiants invalides." };
+  }
   const { supabase } = await requireUser();
   const { error, count } = await supabase
     .from("trip_invitations")

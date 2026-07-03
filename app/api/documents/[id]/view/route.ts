@@ -1,5 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { areUuids } from "@/lib/validation";
 import { logVaultAccess } from "@/lib/vault/audit";
 import { canWatermark, watermarkImage, watermarkPdf } from "@/lib/vault/watermark";
 import { isVaultUnlocked } from "@/lib/webauthn/vault-session";
@@ -17,6 +18,9 @@ import { isVaultUnlocked } from "@/lib/webauthn/vault-session";
  */
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  if (!areUuids(id)) {
+    return Response.json({ error: "Identifiant invalide" }, { status: 400 });
+  }
 
   const supabase = await createClient();
   const {

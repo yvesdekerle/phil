@@ -9,6 +9,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { areUuids } from "@/lib/validation";
 import { CHALLENGE_COOKIE, getRpConfig } from "@/lib/webauthn/config";
 
 export type SecurityActionState = {
@@ -117,6 +118,9 @@ export async function verifyRegistration(
 }
 
 export async function deletePasskey(passkeyId: string): Promise<SecurityActionState> {
+  if (!areUuids(passkeyId)) {
+    return { status: "error", message: "Identifiant invalide." };
+  }
   const { supabase } = await requireUser();
   const { error, count } = await supabase
     .from("user_passkeys")

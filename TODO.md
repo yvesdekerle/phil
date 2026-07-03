@@ -346,8 +346,9 @@ Configuration Next.js (`next.config.js` ou middleware) : Content-Security-Policy
 ### [ ] PHIL-J02 — Rate limiting sur les endpoints critiques
 Limitation par IP et par user sur : login, upload de document, accès à un document, création d'invitation. Implémentation avec Upstash Redis (free tier 10k commandes/jour) ou via les headers Vercel Edge Config.
 
-### [ ] PHIL-J03 — Validation Zod sur tous les endpoints
+### [x] PHIL-J03 — Validation Zod sur tous les endpoints *(fait le 2026-07-03)*
 Tout input utilisateur (formulaires, paramètres URL, body API) validé par un schéma Zod avant traitement. Erreurs renvoyées avec messages clairs côté client.
+> Note : audit complet des 15 fichiers d'actions + routes API. Les formulaires étaient déjà tous sous schéma Zod ; trous comblés sur les **IDs passés bruts** via `lib/validation.ts` (`areUuids`) : `toggleVote`, `detachDocument`, `cancelInvitation`, `deletePasskey`, route viewer (400). Les réponses WebAuthn sont validées cryptographiquement par simplewebauthn (leur schéma Zod serait redondant). SearchParams (filtres) : listes blanches déjà en place (E08, E02).
 
 ### [ ] PHIL-J04 — Politique de confidentialité et mentions légales
 Pages `/privacy` et `/legal` avec : finalité du traitement, données collectées, durée de conservation, droits RGPD (accès, rectification, suppression, portabilité), contact. Lien dans le footer.
