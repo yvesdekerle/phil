@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import { TripOfflineSync } from "@/components/offline/trip-sync";
 import { TripTabs } from "@/components/trips/trip-tabs";
 import { createClient } from "@/lib/supabase/server";
 import { formatDateRange } from "@/lib/trips/format";
@@ -33,6 +34,7 @@ export default async function TripLayout({
 
   return (
     <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6">
+      <TripOfflineSync tripId={trip.id} />
       <header className="overflow-hidden rounded-lg border border-laiton-clair bg-papier">
         <div className="relative h-40 bg-encre sm:h-52">
           {trip.cover_image_url ? (

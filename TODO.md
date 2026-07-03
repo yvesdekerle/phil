@@ -314,8 +314,9 @@ Installer Serwist, configurer le manifest PWA (nom "Phil", icônes, theme color,
 Cache-first pour les assets Next.js (JS, CSS, fonts, images). Network-first avec fallback cache pour les pages HTML. Update du service worker en arrière-plan avec notification utilisateur "Nouvelle version disponible".
 > Note : 3 caches avec ExpirationPlugin — `phil-static` (JS/CSS/fonts hashés, cache-first 30 j), `phil-images` (`/_next/image` + icônes, 7 j / 100 entrées), `phil-pages` (network-first, timeout 4 s, repli cache). Mise à jour : `skipWaiting` désactivé, bannière "Nouvelle version disponible" → `SKIP_WAITING` → reload sur `controllerchange`. Le flow complet de mise à jour se vérifiera naturellement entre deux déploiements prod.
 
-### [ ] PHIL-I03 — Cache offline des données voyage
+### [x] PHIL-I03 — Cache offline des données voyage *(fait le 2026-07-03)*
 Setup Dexie.js (wrapper IndexedDB). Tables locales : `trips`, `events`, `documents_metadata`, `ideas`. Quand l'user ouvre un voyage en ligne, sync automatique des données dans IndexedDB. Bouton explicite "Préparer pour offline" qui force la synchro complète.
+> Note : base `phil-offline` (Dexie v1) + table `sync_meta` (horodatage et compteurs par voyage). `syncTrip()` lit via le client de session — **la RLS borne ce qui peut être caché**. Synchro silencieuse au montage du layout voyage (si en ligne) + bouton "Préparer pour offline" dans Paramètres avec horodatage. `documents_meta` inclut les docs TRIP et les partagés du coffre (métadonnées seulement — les fichiers, c'est I04). Vérifié en réel : ouverture du voyage → IndexedDB peuplé (trip, events, idées, méta).
 
 ### [ ] PHIL-I04 — Cache offline des documents
 Sur un document, bouton "Disponible offline". Téléchargement du fichier tel que servi par le viewer au moment du téléchargement (avec filigrane pour les docs du coffre une fois E03b en place). Stockage dans IndexedDB. Indicateur visuel "Offline" sur les documents disponibles. Limite de stockage configurable (par défaut 100 Mo).

@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { PrepareOfflineButton } from "@/components/offline/prepare-offline-button";
 import { createClient } from "@/lib/supabase/server";
 import { TripSettingsForm } from "./settings-form";
 
@@ -30,7 +31,8 @@ export default async function TripSettingsPage({
   const canEdit = me?.role === "OWNER" || me?.role === "EDITOR";
 
   return (
-    <div className="mx-auto max-w-lg">
+    <div className="mx-auto flex max-w-lg flex-col gap-6">
+      <PrepareOfflineButton tripId={trip.id} />
       <TripSettingsForm
         tripId={trip.id}
         tripName={trip.name}
