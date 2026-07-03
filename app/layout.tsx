@@ -47,6 +47,16 @@ export default function RootLayout({
         <ServiceWorkerRegister />
         <OfflineBanner />
         {children}
+        <footer className="border-t border-laiton-clair/50 px-4 py-4 text-center text-xs text-encre-douce">
+          Phil — carnet de voyage entre amis ·{" "}
+          <a href="/privacy" className="underline underline-offset-4 hover:text-encre">
+            Confidentialité
+          </a>{" "}
+          ·{" "}
+          <a href="/legal" className="underline underline-offset-4 hover:text-encre">
+            Mentions légales
+          </a>
+        </footer>
       </body>
     </html>
   );

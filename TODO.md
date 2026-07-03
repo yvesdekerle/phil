@@ -350,8 +350,9 @@ Limitation par IP et par user sur : login, upload de document, accès à un docu
 Tout input utilisateur (formulaires, paramètres URL, body API) validé par un schéma Zod avant traitement. Erreurs renvoyées avec messages clairs côté client.
 > Note : audit complet des 15 fichiers d'actions + routes API. Les formulaires étaient déjà tous sous schéma Zod ; trous comblés sur les **IDs passés bruts** via `lib/validation.ts` (`areUuids`) : `toggleVote`, `detachDocument`, `cancelInvitation`, `deletePasskey`, route viewer (400). Les réponses WebAuthn sont validées cryptographiquement par simplewebauthn (leur schéma Zod serait redondant). SearchParams (filtres) : listes blanches déjà en place (E08, E02).
 
-### [ ] PHIL-J04 — Politique de confidentialité et mentions légales
+### [x] PHIL-J04 — Politique de confidentialité et mentions légales *(fait le 2026-07-03)*
 Pages `/privacy` et `/legal` avec : finalité du traitement, données collectées, durée de conservation, droits RGPD (accès, rectification, suppression, portabilité), contact. Lien dans le footer.
+> Note : pages publiques (proxy), ton Phil (privé, non commercial, pas de tracking), stockage UE (Supabase Irlande) mentionné, droits RGPD renvoyant vers l'export/suppression du profil (C06/C07, tickets suivants de la phase). Footer global discret dans le layout racine. Vérifié en rendu réel.
 
 ### [ ] PHIL-J05 — Bannière cookies / consentement
 Bannière minimaliste au premier visite : pas de tracking analytics par défaut, donc pas de bannière "accepter / refuser" complexe. Mention "Ce site utilise des cookies techniques nécessaires à l'authentification" sans bouton.
