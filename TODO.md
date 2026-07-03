@@ -354,8 +354,9 @@ Document `INCIDENT.md` avec : que faire en cas de fuite de données, contacts CN
 
 ## Catégorie K — Notifications & emails
 
-### [ ] PHIL-K01 — Setup Resend et templates de base
+### [x] PHIL-K01 — Setup Resend et templates de base *(fait le 2026-07-03)*
 Créer un compte Resend, vérifier un domaine (au début, on utilise leur domaine de test, plus tard un domaine perso). Setup React Email pour des templates en JSX. Templates de base : invitation voyage, alerte expiration document, rappel événement J-1. Signature des emails : "À bientôt sur la route, Phil".
+> Note : compte Resend créé, clé API en `.env.local` + Vercel (scripts fournis). Expéditeur `onboarding@resend.dev` (mode test : envois limités à l'adresse du compte) — **domaine vérifié à prévoir avant Maurice** pour envoyer aux amis ; D05 affichera aussi le lien d'invitation à copier en secours. Templates React Email aux couleurs Phil (`lib/email/templates/` : shell commun + invitation, expiration, rappel J-1). Envoi réel testé et reçu.
 
 ### [ ] PHIL-K02 — Email d'invitation à un voyage
 Template clair : nom de l'inviteur, nom du voyage, dates, destination, bouton "Rejoindre le voyage", lien de fallback. Envoi via Resend API depuis l'endpoint d'invitation.
