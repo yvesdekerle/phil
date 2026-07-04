@@ -324,6 +324,101 @@ export type Database = {
           },
         ];
       };
+      expense_beneficiaries: {
+        Row: {
+          expense_id: string;
+          user_id: string;
+        };
+        Insert: {
+          expense_id: string;
+          user_id: string;
+        };
+        Update: {
+          expense_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "expense_beneficiaries_expense_id_fkey";
+            columns: ["expense_id"];
+            isOneToOne: false;
+            referencedRelation: "expenses";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "expense_beneficiaries_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      expenses: {
+        Row: {
+          amount: number;
+          created_at: string;
+          created_by: string;
+          currency: string;
+          event_id: string | null;
+          id: string;
+          paid_by: string;
+          title: string;
+          trip_id: string;
+        };
+        Insert: {
+          amount: number;
+          created_at?: string;
+          created_by: string;
+          currency?: string;
+          event_id?: string | null;
+          id?: string;
+          paid_by: string;
+          title: string;
+          trip_id: string;
+        };
+        Update: {
+          amount?: number;
+          created_at?: string;
+          created_by?: string;
+          currency?: string;
+          event_id?: string | null;
+          id?: string;
+          paid_by?: string;
+          title?: string;
+          trip_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "expenses_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "expenses_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "trip_events";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "expenses_paid_by_fkey";
+            columns: ["paid_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "expenses_trip_id_fkey";
+            columns: ["trip_id"];
+            isOneToOne: false;
+            referencedRelation: "trips";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       idea_votes: {
         Row: {
           created_at: string;
