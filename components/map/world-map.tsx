@@ -35,6 +35,10 @@ export function WorldMap({ visited }: { visited: string[] }) {
     if (!el) {
       return;
     }
+    // Le double montage StrictMode (dev) démonte l'effet avant que le fetch
+    // ne résolve : sans ce garde, `.addTo(map)` s'exécute sur une carte déjà
+    // détruite → « Cannot read properties of undefined (reading 'appendChild') ».
+    let cancelled = false;
     const map = L.map(el, {
       zoomControl: true,
       attributionControl: false,
@@ -48,6 +52,9 @@ export function WorldMap({ visited }: { visited: string[] }) {
     fetch("/geo/countries.geojson")
       .then((r) => r.json())
       .then((geojson) => {
+        if (cancelled) {
+          return;
+        }
         const styleOf = (code: string): L.PathOptions =>
           visitedRef.current.has(code)
             ? { fillColor: colorFor(code), fillOpacity: 0.85, color: "#f7f1e3", weight: 0.7 }
@@ -72,9 +79,13 @@ export function WorldMap({ visited }: { visited: string[] }) {
             });
           },
         }).addTo(map);
+      })
+      .catch(() => {
+        // fetch annulé ou GeoJSON indisponible : la carte reste vide, pas de crash
       });
 
     return () => {
+      cancelled = true;
       layer?.remove();
       map.remove();
     };

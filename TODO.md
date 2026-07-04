@@ -672,6 +672,28 @@ Remplacer le bandeau du calendrier (Q24) par une **page Horloges** hors voyage :
 ### [x] PHIL-Q30 — Fix : aperçu des documents du coffre bloqué par la CSP *(fait le 2026-07-05, livré dans le commit Q28)*
 Retour Yves : viewer cassé malgré des PDF valides (diagnostic mené jusque dans Chrome : réponse 200 `application/pdf` correcte). Cause : `X-Frame-Options: DENY`, `frame-ancestors 'none'` et `object-src 'none'` (PHIL-J01) appliqués **à la réponse PDF elle-même** → Chrome refuse de l'afficher (iframe et pleine page). Fix : `/api/documents/:id/view` exclu de la CSP globale dans `next.config.ts`, avec ses propres headers (`frame-ancestors 'self'`, `X-Frame-Options: SAMEORIGIN`, `object-src 'self'`, nosniff).
 
+### [~] PHIL-Q31 — Navigation : liens principaux + menu du profil
+Retours Yves (2026-07-05) : mettre **Horloges** et **Conseils** dans le menu principal tout en haut (à côté de Voyages/Coffre/Amis) ; l'avatar ouvre un **menu déroulant** (Profil / Exploration / Déconnexion) au lieu d'un lien direct.
+
+### [x] PHIL-Q32 — Fix : crash de la carte du monde (Exploration) *(fait le 2026-07-05)*
+`Cannot read properties of undefined (reading 'appendChild')` dans `world-map.tsx:74` (`.addTo(map)`) : le GeoJSON est chargé en async et le cleanup de l'effet détruit la carte avant l'arrivée des données (double montage StrictMode). Garde d'annulation.
+> Note : flag `cancelled` posé dans le cleanup, testé avant `.addTo(map)`, `.catch()` sur le fetch. **Vérifié dans Chrome** : `/explorer` charge sans overlay d'erreur, mappemonde dessinée (France/Espagne/Italie/Grèce/Maroc colorés), console vierge.
+
+### [ ] PHIL-Q33 — Valise : vêtements Haut/Bas, coupe-vent & manteau, catégorie libre plus claire
+Séparer la catégorie "Vêtements" en **Haut** / **Bas** ; ajouter **coupe-vent** et **manteau** ; rendre évident qu'on peut **créer sa propre catégorie** (le champ existe déjà mais n'est pas visible comme tel).
+
+### [ ] PHIL-Q34 — Coffre : carte Vitale, carte européenne, libellé libre
+Ajouter au coffre **carte Vitale** et **carte européenne d'assurance maladie** ; plutôt que la catégorie "Autre", permettre de **saisir le libellé à la main** (réutiliser `documents.label`).
+
+### [ ] PHIL-Q35 — Recherche calendrier en direct (debounce)
+La recherche du calendrier recharge la page (form GET) : la passer en **live avec micro-délai** (debounce ~200 ms), filtrage côté client, sans rechargement.
+
+### [ ] PHIL-Q36 — Timeline : colonne fixe, séparateurs de jours, jours plus larges, bascule mémorisée
+Retours Yves : colonne des noms (transports/activités) **fixe** au scroll horizontal ; **séparateurs verticaux** légers entre les jours ; **jours plus larges** ; **bascule Calendrier ⇄ Timeline mémorisée** (on retrouve sa vue préférée en rouvrant un voyage).
+
+### [ ] PHIL-Q37 — i18n : français / anglais (traduire toute l'app)
+Le profil a déjà le choix FR/EN (`profiles.locale`) mais rien n'est traduit. Mettre en place l'infrastructure i18n et traduire l'ensemble de l'UI (gros chantier, à cadrer). Conserver la microcopy Verne dans les deux langues.
+
 ### [x] PHIL-Q24 — Horloges du voyage (heure de chez soi + heure locale) *(fait le 2026-07-05)*
 Comme les horloges monde d'un téléphone : afficher côte à côte l'heure de Paris (fuseau de l'utilisateur) et l'heure de la destination, en direct, sur la page du voyage.
 > Note : bandeau 🕐 "14:32 Paris · 17:32 Île Maurice (+3 h)" en tête du calendrier — fuseau de chez soi = celui du profil, tick toutes les 15 s, décalage affiché ; masqué quand les deux fuseaux sont identiques (voyage en France).
