@@ -1,11 +1,13 @@
 import { fr } from "date-fns/locale";
 import { formatInTimeZone } from "date-fns-tz";
+import { Navigation } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { EventTypeIcon } from "@/components/calendar/event-type-icon";
 import { WeatherLine } from "@/components/trips/trip-weather";
 import { eventDayKey, eventTime, formatInTimezone } from "@/lib/events/datetime";
 import type { TripEvent } from "@/lib/events/types";
+import { directionsUrl } from "@/lib/geo/directions";
 import { ensureTripCoords } from "@/lib/geo/locate";
 import { formatMinutes, getTravelMinutes } from "@/lib/geo/travel-time";
 import { suggestVisitOrder } from "@/lib/geo/visit-order";
@@ -105,11 +107,17 @@ export default async function DayViewPage({
       ) {
         return null;
       }
-      const minutes = await getTravelMinutes(
-        { lat: e.location_lat, lng: e.location_lng },
-        { lat: next.location_lat, lng: next.location_lng },
-      );
-      return minutes === null || minutes < 3 ? null : { from: e.title, to: next.title, minutes };
+      const origin = { lat: e.location_lat, lng: e.location_lng };
+      const destination = { lat: next.location_lat, lng: next.location_lng };
+      const minutes = await getTravelMinutes(origin, destination);
+      return minutes === null || minutes < 3
+        ? null
+        : {
+            from: e.title,
+            to: next.title,
+            minutes,
+            url: directionsUrl(origin, destination),
+          };
     }),
   );
   const travelLegs = legs.filter((l): l is NonNullable<typeof l> => l !== null);
@@ -180,6 +188,15 @@ export default async function DayViewPage({
             <p key={`${leg.from}-${leg.to}`} className="text-xs text-encre-douce">
               {leg.from} → {leg.to} :{" "}
               <span className="text-encre">{formatMinutes(leg.minutes)}</span>
+              {" · "}
+              <a
+                href={leg.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-0.5 text-bordeaux underline underline-offset-2 hover:opacity-80"
+              >
+                <Navigation className="size-3" aria-hidden="true" /> Itinéraire
+              </a>
             </p>
           ))}
         </div>

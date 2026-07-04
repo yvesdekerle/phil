@@ -6,6 +6,7 @@ import { WeatherLine, WeatherStrip } from "@/components/trips/trip-weather";
 import { Button } from "@/components/ui/button";
 import { eventDayKey, eventTime, groupEventsByDay } from "@/lib/events/datetime";
 import type { TripEvent } from "@/lib/events/types";
+import { navigateUrl } from "@/lib/geo/directions";
 import { ensureTripCoords } from "@/lib/geo/locate";
 import { formatMinutes, getTravelMinutes } from "@/lib/geo/travel-time";
 import { createClient } from "@/lib/supabase/server";
@@ -104,6 +105,14 @@ export default async function TripCalendarPage({
       travelToNext = `${formatMinutes(minutes)} de route`;
     }
   }
+  // PHIL-Q13 : lancer la navigation vers le prochain RDV (départ = position actuelle)
+  const navigateToNext = nextEvent
+    ? nextEvent.location_lat !== null && nextEvent.location_lng !== null
+      ? navigateUrl({ lat: nextEvent.location_lat, lng: nextEvent.location_lng })
+      : nextEvent.location_address || nextEvent.location_name
+        ? navigateUrl((nextEvent.location_address ?? nextEvent.location_name) as string)
+        : null
+    : null;
 
   return (
     <div className="flex flex-col gap-6">
@@ -115,6 +124,7 @@ export default async function TripCalendarPage({
           dayKey={todayKey}
           weather={todayWeather ? <WeatherLine day={todayWeather} /> : undefined}
           travelToNext={travelToNext}
+          navigateToNext={navigateToNext}
         />
       ) : null}
       {trip ? <WeatherStrip days={weatherDays} destination={trip.destination} /> : null}

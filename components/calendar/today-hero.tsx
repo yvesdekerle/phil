@@ -1,5 +1,6 @@
 "use client";
 
+import { Navigation } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { EventTypeIcon } from "@/components/calendar/event-type-icon";
@@ -21,6 +22,7 @@ export function TodayHero({
   dayKey,
   weather,
   travelToNext,
+  navigateToNext,
 }: {
   tripId: string;
   current: HeroEvent | null;
@@ -30,6 +32,8 @@ export function TodayHero({
   weather?: React.ReactNode;
   /** "≈ 35 min de route" entre l'événement en cours et le prochain (PHIL-P05). */
   travelToNext?: string | null;
+  /** Lien Google Maps vers le prochain RDV (PHIL-Q13). */
+  navigateToNext?: string | null;
 }) {
   const [countdown, setCountdown] = useState<string | null>(null);
 
@@ -95,28 +99,41 @@ export function TodayHero({
           </Link>
         ) : null}
         {next ? (
-          <Link
-            href={`/trips/${tripId}/events/${next.id}`}
-            className="flex items-center gap-3 rounded-md border border-laiton-clair bg-papier px-3 py-2.5"
-          >
-            <EventTypeIcon type={next.type} className="size-8" />
-            <span className="min-w-0 flex-1">
-              <span className="block text-xs font-medium text-laiton uppercase">
-                Prochain départ {countdown ? `— ${countdown}` : ""}
-              </span>
-              <span className="block truncate text-sm font-medium text-encre">
-                {next.time} · {next.title}
-              </span>
-              {next.location ? (
-                <span className="block truncate text-xs text-encre-douce">
-                  RDV : {next.location}
-                  {travelToNext ? ` · ${travelToNext}` : ""}
+          <div className="flex items-center gap-3 rounded-md border border-laiton-clair bg-papier px-3 py-2.5">
+            <Link
+              href={`/trips/${tripId}/events/${next.id}`}
+              className="flex min-w-0 flex-1 items-center gap-3"
+            >
+              <EventTypeIcon type={next.type} className="size-8" />
+              <span className="min-w-0 flex-1">
+                <span className="block text-xs font-medium text-laiton uppercase">
+                  Prochain départ {countdown ? `— ${countdown}` : ""}
                 </span>
-              ) : travelToNext ? (
-                <span className="block text-xs text-encre-douce">{travelToNext}</span>
-              ) : null}
-            </span>
-          </Link>
+                <span className="block truncate text-sm font-medium text-encre">
+                  {next.time} · {next.title}
+                </span>
+                {next.location ? (
+                  <span className="block truncate text-xs text-encre-douce">
+                    RDV : {next.location}
+                    {travelToNext ? ` · ${travelToNext}` : ""}
+                  </span>
+                ) : travelToNext ? (
+                  <span className="block text-xs text-encre-douce">{travelToNext}</span>
+                ) : null}
+              </span>
+            </Link>
+            {navigateToNext ? (
+              <a
+                href={navigateToNext}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex shrink-0 items-center gap-1.5 rounded-full border border-bordeaux/40 bg-bordeaux/5 px-3 py-1.5 text-xs font-medium text-bordeaux transition-colors hover:bg-bordeaux hover:text-papier"
+                aria-label="Lancer la navigation Google Maps"
+              >
+                <Navigation className="size-3.5" aria-hidden="true" /> Y aller
+              </a>
+            ) : null}
+          </div>
         ) : null}
       </div>
     </section>

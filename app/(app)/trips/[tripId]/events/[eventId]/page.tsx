@@ -10,6 +10,7 @@ import { formatInTimezone } from "@/lib/events/datetime";
 import { LODGING_PLATFORM_LABELS, type LodgingPlatform } from "@/lib/events/lodging";
 import { TRANSPORT_MODE_LABELS, type TransportMode } from "@/lib/events/transport";
 import { EVENT_TYPE_LABELS } from "@/lib/events/types";
+import { navigateUrl } from "@/lib/geo/directions";
 import { createClient } from "@/lib/supabase/server";
 import { attachDocument, detachDocument } from "./actions";
 import { EventActions } from "./event-actions";
@@ -111,8 +112,11 @@ export default async function EventDetailPage({
   const start = formatInTimezone(event.starts_at, event.timezone, timeFormat);
   const end = event.ends_at ? formatInTimezone(event.ends_at, event.timezone, timeFormat) : null;
 
-  const mapsQuery =
-    event.location_address || event.location_name || (meta.to ? String(meta.to) : null);
+  // PHIL-Q13 : coordonnées précises si géocodé, sinon l'adresse en texte
+  const navTarget =
+    event.location_lat !== null && event.location_lng !== null
+      ? { lat: event.location_lat, lng: event.location_lng }
+      : (event.location_address ?? event.location_name ?? (meta.to ? String(meta.to) : null));
 
   return (
     <div className="mx-auto flex max-w-lg flex-col gap-5">
@@ -172,13 +176,9 @@ export default async function EventDetailPage({
       </Card>
 
       <div className="flex flex-wrap items-center gap-3">
-        {mapsQuery ? (
+        {navTarget ? (
           <Button asChild variant="outline">
-            <a
-              href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(mapsQuery)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <a href={navigateUrl(navTarget)} target="_blank" rel="noopener noreferrer">
               <MapPin aria-hidden="true" /> Itinéraire
             </a>
           </Button>
