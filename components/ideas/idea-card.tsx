@@ -1,5 +1,6 @@
 import { CalendarPlus, Clock, Coins, ExternalLink, MapPin } from "lucide-react";
 import Link from "next/link";
+import { Linkify } from "@/components/ui/linkify";
 import { formatInTimezone } from "@/lib/events/datetime";
 import type { IdeaWithMeta } from "@/lib/ideas/types";
 import { cn } from "@/lib/utils";
@@ -47,7 +48,9 @@ export function IdeaCard({
             ) : null}
           </h3>
           {idea.description ? (
-            <p className="mt-1 line-clamp-2 text-sm text-encre-douce">{idea.description}</p>
+            <p className="mt-1 line-clamp-2 text-sm text-encre-douce">
+              <Linkify text={idea.description} />
+            </p>
           ) : null}
         </div>
         <div className="flex shrink-0 items-center gap-2">

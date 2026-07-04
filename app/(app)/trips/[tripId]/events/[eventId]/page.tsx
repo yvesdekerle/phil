@@ -5,6 +5,7 @@ import { EventTypeIcon } from "@/components/calendar/event-type-icon";
 import { DocumentPicker } from "@/components/documents/document-picker";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Linkify } from "@/components/ui/linkify";
 import { formatInTimezone } from "@/lib/events/datetime";
 import { LODGING_PLATFORM_LABELS, type LodgingPlatform } from "@/lib/events/lodging";
 import { TRANSPORT_MODE_LABELS, type TransportMode } from "@/lib/events/transport";
@@ -166,7 +167,7 @@ export default async function EventDetailPage({
           ) : null}
           {event.location_name ? <Row label="Lieu" value={event.location_name} /> : null}
           {event.location_address ? <Row label="Adresse" value={event.location_address} /> : null}
-          {event.notes ? <Row label="Notes" value={event.notes} /> : null}
+          {event.notes ? <Row label="Notes" value={<Linkify text={event.notes} />} /> : null}
         </CardContent>
       </Card>
 

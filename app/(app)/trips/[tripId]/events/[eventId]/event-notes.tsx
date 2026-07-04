@@ -5,6 +5,7 @@ import { fr } from "date-fns/locale";
 import { Trash2 } from "lucide-react";
 import { useActionState, useRef, useTransition } from "react";
 import { Button } from "@/components/ui/button";
+import { Linkify } from "@/components/ui/linkify";
 import { addEventNote, deleteEventNote, type NoteState } from "./note-actions";
 
 export type EventNote = {
@@ -77,7 +78,9 @@ export function EventNotes({
                   ) : null}
                 </span>
               </div>
-              <p className="mt-1 whitespace-pre-wrap text-sm text-encre">{note.body}</p>
+              <p className="mt-1 whitespace-pre-wrap text-sm text-encre">
+                <Linkify text={note.body} />
+              </p>
             </li>
           ))}
         </ul>
