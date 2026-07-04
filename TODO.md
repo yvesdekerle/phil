@@ -574,8 +574,9 @@ Sur la page Valise : encart "Phil te souffle" avec des suggestions contextuelles
 Composant `PlaceInput` réutilisable (formulaires activité, hébergement, édition, idées) : recherche de lieu avec suggestions (Photon/komoot, gratuit, basé OSM) via une route proxy `/api/geo/search` (CSP oblige), sélection → adresse + coordonnées propres stockées directement (fiabilise la carte N01 et les temps de trajet P05 ; le géocodage Nominatim best-effort reste le fallback si saisie libre).
 > Note : proxy authentifié (pas de relais public), cache 24 h, ≥ 3 caractères, debounce 350 ms, validé en réel sur Photon ("flic en flac" → 3 résultats). Branché sur : lieu d'activité, **nom d'hébergement** (la sélection remplit aussi le champ adresse), lieu d'idée — la sélection pose `location_lat/lng` directement et court-circuite Nominatim ; toute modification manuelle du texte invalide les coordonnées (re-géocodage serveur). **Écart** : pas branché sur le formulaire d'édition (champ lieu simple conservé — le re-géocodage à l'édition couvre le besoin) ni sur les champs from/to des transports (texte libre voulu).
 
-### [ ] PHIL-P08 — Journal de bord par jour
+### [x] PHIL-P08 — Journal de bord par jour *(fait le 2026-07-04)*
 Pendant (ou après) le voyage : quelques lignes par jour et par voyageur, visibles de l'équipage — section "Journal de bord" dans la vue jour. Table `journal_entries` (trip, jour, auteur, texte). C'est la matière première du futur PDF souvenir (backlog).
+> Note : PK (trip, jour, auteur) = **une entrée par personne et par jour, modifiable** (upsert) et effaçable par son auteur ; RLS lecture équipage / écriture own. Section en pied de vue jour : entrées des autres en cartes, la mienne dans un textarea pré-rempli ("Écrire dans le journal" / "Mettre à jour mon entrée"). `verify:rls` 30/30.
 
 ### [ ] PHIL-P09 — Stats de l'explorateur
 Page personnelle "Explorateur" : nombre de voyages, jours en voyage, pays visités, activités faites, km parcourus (haversine entre événements géolocalisés consécutifs), photos. Ton Jules Verne assumé ("tu as bouclé 0,8 tour du monde"). Sert de socle aux badges P12 et héberge la carte P13.

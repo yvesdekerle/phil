@@ -11,6 +11,7 @@ import { formatMinutes, getTravelMinutes } from "@/lib/geo/travel-time";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 import { type DailyForecast, getDailyForecast } from "@/lib/weather/open-meteo";
+import { DayJournal, type JournalEntry } from "./day-journal";
 
 const HOUR_START = 6;
 const HOUR_END = 24;
@@ -58,7 +59,7 @@ export default async function DayViewPage({
     redirect("/login");
   }
 
-  const [{ data: events }, { data: trip }] = await Promise.all([
+  const [{ data: events }, { data: trip }, { data: journalRows }] = await Promise.all([
     supabase
       .from("trip_events")
       .select("*")
@@ -69,6 +70,12 @@ export default async function DayViewPage({
       .select("id, destination, destination_lat, destination_lng, default_timezone")
       .eq("id", tripId)
       .single(),
+    supabase
+      .from("journal_entries")
+      .select("author_id, body, profiles!journal_entries_author_id_fkey(display_name)")
+      .eq("trip_id", tripId)
+      .eq("day", date)
+      .order("updated_at", { ascending: true }),
   ]);
 
   const dayEvents = (events ?? []).filter(
@@ -192,6 +199,19 @@ export default async function DayViewPage({
           </div>
         </div>
       )}
+
+      <DayJournal
+        tripId={tripId}
+        day={date}
+        entries={(journalRows ?? []).map(
+          (r): JournalEntry => ({
+            authorId: r.author_id,
+            authorName: r.profiles?.display_name ?? "Voyageur",
+            body: r.body,
+          }),
+        )}
+        myId={user.id}
+      />
     </div>
   );
 }
