@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 
 const TYPE_COLORS: Record<string, string> = {
   TRANSPORT: "#1f2a44",
-  LODGING: "#a98a54",
+  LODGING: "#3f6e5a", // vert wagon : les hébergements se repèrent au premier coup d'œil
   ACTIVITY: "#6e1f2e",
 };
 
@@ -80,7 +80,8 @@ export default async function TripMapPage({
         lng: lodgingOfDay.location_lng as number,
         title: lodgingOfDay.title,
         subtitle: "Hébergement",
-        color: "#a98a54",
+        color: "#3f6e5a",
+        house: true,
       });
     }
   } else {
@@ -89,6 +90,8 @@ export default async function TripMapPage({
       : allEvents;
     const located = filtered.filter((e) => e.location_lat != null && e.location_lng != null);
     missing = filtered.length - located.length;
+    // PHIL-Q15 : numérotation chronologique (les hébergements gardent leur maison)
+    let step = 0;
     markers = located.map((e, idx) => ({
       id: e.id,
       lat: e.location_lat as number,
@@ -98,6 +101,8 @@ export default async function TripMapPage({
       href: `/trips/${tripId}/events/${e.id}`,
       color: TYPE_COLORS[e.type] ?? "#6e1f2e",
       order: idx,
+      house: e.type === "LODGING",
+      label: e.type === "LODGING" ? undefined : String(++step),
     }));
   }
 

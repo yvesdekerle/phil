@@ -13,17 +13,26 @@ export type MapMarker = {
   href?: string;
   color: string; // couleur du pion (type d'événement / idée)
   order?: number; // ordre chronologique pour le tracé
+  /** Numéro affiché dans la pastille (ordre du jour, façon Polarsteps). */
+  label?: string;
+  /** Pastille maison (hébergements). */
+  house?: boolean;
+  /** Pastille photo ronde (vignette). */
+  thumbUrl?: string;
 };
 
-/** Carte Leaflet + OSM (PHIL-N01). Pions colorés, tracé chronologique optionnel. */
+/** Carte Leaflet + OSM (PHIL-N01, style Polarsteps PHIL-Q15). */
 export function TripMap({
   markers,
   drawPath,
   distanceFrom,
+  focusId,
 }: {
   markers: MapMarker[];
   drawPath?: boolean;
   distanceFrom?: { lat: number; lng: number; label: string } | null;
+  /** Centre la carte et ouvre le popup de ce marqueur (PHIL-Q14). */
+  focusId?: string | null;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
@@ -50,14 +59,46 @@ export function TripMap({
       return;
     }
     const layer = L.layerGroup().addTo(map);
+    const byId = new Map<string, L.Marker>();
 
     const sorted = [...markers].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+
+    // Tracé façon Polarsteps : liseré clair sous un trait plein arrondi
+    if (drawPath && sorted.length > 1) {
+      const pathMarkers = sorted.filter((m) => !m.thumbUrl);
+      const points = pathMarkers.map((m) => [m.lat, m.lng] as [number, number]);
+      if (points.length > 1) {
+        L.polyline(points, {
+          color: "#fbf8f1",
+          weight: 7,
+          opacity: 0.9,
+          lineJoin: "round",
+          lineCap: "round",
+        }).addTo(layer);
+        L.polyline(points, {
+          color: "#6e1f2e",
+          weight: 3.5,
+          opacity: 0.9,
+          lineJoin: "round",
+          lineCap: "round",
+        }).addTo(layer);
+      }
+    }
+
     for (const m of sorted) {
+      // Pastille ronde (numéro / maison / vignette photo), bord clair + ombre
+      const base = `border-radius:9999px;border:2.5px solid #fbf8f1;box-shadow:0 2px 8px rgba(31,42,68,.45);display:flex;align-items:center;justify-content:center;`;
+      const html = m.thumbUrl
+        ? `<div style="${base}width:44px;height:44px;background:#fbf8f1 url('${m.thumbUrl}') center/cover"></div>`
+        : m.house
+          ? `<div style="${base}width:28px;height:28px;background:${m.color};color:#fbf8f1"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></svg></div>`
+          : `<div style="${base}width:26px;height:26px;background:${m.color};color:#fbf8f1;font:700 12px/1 system-ui">${m.label ? escapeHtml(m.label) : ""}</div>`;
+      const size = m.thumbUrl ? 44 : m.house ? 28 : 26;
       const icon = L.divIcon({
         className: "",
-        html: `<div style="width:22px;height:22px;border-radius:9999px 9999px 9999px 2px;transform:rotate(-45deg);background:${m.color};border:2px solid #fbf8f1;box-shadow:0 1px 6px rgba(31,42,68,.4)"></div>`,
-        iconSize: [22, 22],
-        iconAnchor: [11, 20],
+        html,
+        iconSize: [size, size],
+        iconAnchor: [size / 2, size / 2],
       });
       const distance =
         distanceFrom && (m.lat !== distanceFrom.lat || m.lng !== distanceFrom.lng)
@@ -66,18 +107,12 @@ export function TripMap({
       const link = m.href
         ? `<br/><a href="${m.href}" style="color:#6e1f2e">Voir la fiche →</a>`
         : "";
-      L.marker([m.lat, m.lng], { icon })
+      const marker = L.marker([m.lat, m.lng], { icon })
         .bindPopup(
           `<strong>${escapeHtml(m.title)}</strong>${m.subtitle ? `<br/>${escapeHtml(m.subtitle)}` : ""}${distance}${link}`,
         )
         .addTo(layer);
-    }
-
-    if (drawPath && sorted.length > 1) {
-      L.polyline(
-        sorted.map((m) => [m.lat, m.lng]),
-        { color: "#6e1f2e", weight: 2.5, opacity: 0.7, dashArray: "6 8" },
-      ).addTo(layer);
+      byId.set(m.id, marker);
     }
 
     if (sorted.length > 0) {
@@ -89,10 +124,20 @@ export function TripMap({
       map.setView([0, 0], 2);
     }
 
+    // PHIL-Q14 : focus demandé depuis la grille de photos
+    if (focusId) {
+      const target = byId.get(focusId);
+      const m = markers.find((x) => x.id === focusId);
+      if (target && m) {
+        map.setView([m.lat, m.lng], Math.max(map.getZoom(), 13));
+        target.openPopup();
+      }
+    }
+
     return () => {
       layer.remove();
     };
-  }, [markers, drawPath, distanceFrom]);
+  }, [markers, drawPath, distanceFrom, focusId]);
 
   return (
     <div

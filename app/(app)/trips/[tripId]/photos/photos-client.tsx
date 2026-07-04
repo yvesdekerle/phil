@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, Trash2, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, MapPin, Trash2, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import type { MapMarker } from "@/components/map/trip-map";
 import { TripMapLazy } from "@/components/map/trip-map-lazy";
@@ -55,9 +55,10 @@ export function PhotosClient({
   const captionRef = useRef<HTMLInputElement>(null);
   const eventRef = useRef<HTMLSelectElement>(null);
 
-  // PHIL-Q12 : bascule grille / carte
-  const [view, setView] = useState<"grid" | "map">("grid");
+  // PHIL-Q12/Q14 : carte au-dessus de la grille, focus depuis une vignette
   const located = photos.filter((p) => p.lat !== null && p.lng !== null);
+  const [focusId, setFocusId] = useState<string | null>(null);
+  const mapSectionRef = useRef<HTMLDivElement>(null);
 
   // PHIL-Q02 : visionneuse
   const [lightbox, setLightbox] = useState<number | null>(null);
@@ -157,42 +158,45 @@ export function PhotosClient({
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="text-sm text-encre-douce">
-          <span className="font-medium text-encre">
-            {photos.length}/{quota} photos
-          </span>{" "}
-          · {formatBytes(usedBytes)} — qualité d&apos;origine conservée, nombre limité.
-        </div>
-        <Button
-          type="button"
-          disabled={remaining <= 0 || progress !== null}
-          onClick={() => inputRef.current?.click()}
-        >
-          {progress ?? (remaining <= 0 ? "Quota atteint" : "Ajouter des photos")}
-        </Button>
+      <div className="text-sm text-encre-douce">
+        <span className="font-medium text-encre">
+          {photos.length}/{quota} photos
+        </span>{" "}
+        · {formatBytes(usedBytes)} — qualité d&apos;origine conservée, nombre limité.
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 text-sm">
-        <Input
-          ref={captionRef}
-          placeholder="Légende (optionnelle, appliquée à l'envoi)"
-          maxLength={300}
-          className="h-8 max-w-xs text-sm"
-        />
-        <select
-          ref={eventRef}
-          defaultValue=""
-          className="h-8 rounded border border-laiton-clair bg-papier px-2 text-sm text-encre-douce"
-          aria-label="Événement lié"
-        >
-          <option value="">Sans événement</option>
-          {events.map((ev) => (
-            <option key={ev.id} value={ev.id}>
-              {ev.title}
-            </option>
-          ))}
-        </select>
+      <div className="flex flex-col gap-2 rounded-lg border border-laiton-clair bg-papier px-4 py-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            type="button"
+            disabled={remaining <= 0 || progress !== null}
+            onClick={() => inputRef.current?.click()}
+          >
+            {progress ?? (remaining <= 0 ? "Quota atteint" : "Ajouter des photos")}
+          </Button>
+          <Input
+            ref={captionRef}
+            placeholder="Légende commune (optionnel)"
+            maxLength={300}
+            className="h-9 min-w-40 flex-1 text-sm"
+          />
+          <select
+            ref={eventRef}
+            defaultValue=""
+            className="h-9 rounded border border-laiton-clair bg-papier px-2 text-sm text-encre-douce"
+            aria-label="Rattacher à un événement"
+          >
+            <option value="">Rattacher à un événement (optionnel)</option>
+            {events.map((ev) => (
+              <option key={ev.id} value={ev.id}>
+                {ev.title}
+              </option>
+            ))}
+          </select>
+        </div>
+        <p className="text-xs text-encre-douce">
+          La légende et l&apos;événement choisis s&apos;appliquent aux photos du prochain envoi.
+        </p>
       </div>
 
       <input
@@ -206,41 +210,10 @@ export function PhotosClient({
 
       {error ? <p className="text-sm text-bordeaux">{error}</p> : null}
 
-      {photos.length > 0 ? (
-        <nav className="flex gap-1 text-sm" aria-label="Vues des photos">
-          <button
-            type="button"
-            onClick={() => setView("grid")}
-            className={
-              view === "grid"
-                ? "rounded-full bg-bordeaux px-3 py-1 font-medium text-papier"
-                : "rounded-full px-3 py-1 text-encre-douce hover:bg-laiton/10 hover:text-encre"
-            }
-          >
-            Grille
-          </button>
-          <button
-            type="button"
-            onClick={() => setView("map")}
-            className={
-              view === "map"
-                ? "rounded-full bg-bordeaux px-3 py-1 font-medium text-papier"
-                : "rounded-full px-3 py-1 text-encre-douce hover:bg-laiton/10 hover:text-encre"
-            }
-          >
-            Carte ({located.length})
-          </button>
-        </nav>
-      ) : null}
-
-      {view === "map" && photos.length > 0 ? (
-        located.length === 0 ? (
-          <p className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-4 py-8 text-center text-sm text-encre-douce">
-            Aucune photo géolocalisée — la position GPS est lue automatiquement dans les photos
-            (JPEG) qui en contiennent.
-          </p>
-        ) : (
+      {located.length > 0 ? (
+        <div ref={mapSectionRef}>
           <TripMapLazy
+            focusId={focusId}
             markers={located.map(
               (p): MapMarker => ({
                 id: p.id,
@@ -249,13 +222,19 @@ export function PhotosClient({
                 title: p.caption ?? "Photo",
                 subtitle: p.uploaderName,
                 color: "#6e1f2e",
+                thumbUrl: `/api/photos/${p.id}/view${p.hasThumb ? "?thumb=1" : ""}`,
               }),
             )}
           />
-        )
+          <p className="mt-1 text-xs text-encre-douce">
+            {located.length}/{photos.length} photo{located.length > 1 ? "s" : ""} géolocalisée
+            {located.length > 1 ? "s" : ""} — la position GPS est lue automatiquement dans les
+            photos qui en contiennent.
+          </p>
+        </div>
       ) : null}
 
-      {view === "map" ? null : photos.length === 0 ? (
+      {photos.length === 0 ? (
         <div className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-6 py-14 text-center">
           <p className="font-display text-xl text-encre italic">Aucune photo pour l&apos;instant</p>
           <p className="mt-2 text-sm text-encre-douce">
@@ -286,7 +265,23 @@ export function PhotosClient({
                   {p.caption}
                 </p>
               ) : null}
-              <p className="text-[0.65rem] text-encre-douce/70">{p.uploaderName}</p>
+              <p className="flex items-center gap-1.5 text-[0.65rem] text-encre-douce/70">
+                {p.uploaderName}
+                {p.lat !== null && p.lng !== null ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFocusId(p.id);
+                      mapSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }}
+                    className="text-laiton hover:text-bordeaux"
+                    title="Voir sur la carte"
+                    aria-label="Voir cette photo sur la carte"
+                  >
+                    <MapPin className="size-3.5" aria-hidden="true" />
+                  </button>
+                ) : null}
+              </p>
               {p.uploadedBy === myId || isOwner ? (
                 <button
                   type="button"
