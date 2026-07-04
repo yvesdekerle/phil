@@ -637,8 +637,9 @@ Bouton "Exporter (CSV)" sur l'onglet Budget : titre, montant, devise, montant co
 La racine `/` affichait encore le splash de la phase 1 ("bientôt prêt à partir"). Demande Yves : connecté → `/trips`, sinon → `/login`.
 > Note : `redirect()` côté serveur, plus aucune page intermédiaire.
 
-### [ ] PHIL-Q08 — Seed démo complet (Maurice novembre 2026)
+### [x] PHIL-Q08 — Seed démo complet (Maurice novembre 2026) *(fait le 2026-07-04)*
 Peupler le voyage démo avec le vrai séjour (5→21 nov, Tamarin puis Blue Bay) : 7 nouveaux comptes démo (Alexandre, Audrey, Adé, Mathieu, Quentin, Chloé, Julie), vol Julie & Quentin le 6 nov 9h, activités piochées dans le guide Maurice d'Yves (yallah/activites-maurice.md), et des données dans **toutes** les fonctionnalités : idées + votes, sondages, candidats + avis, valise (+ à-emporter), budget multi-devises + remboursement, journal, notes, fiches d'urgence, documents PDF, photos basse qualité, brouillon d'import email, WhatsApp. Script `scripts/seed-demo-maurice.ts` (service role, réinitialise les données du voyage démo uniquement).
+> Note : **exécuté avec succès** — 9 participants (7 comptes créés, EDITOR), 20 événements géocodés (2 vols aller dont Julie & Quentin arrivée 6 nov 9h avec `event_participants`, 2 villas, 15 activités du guide avec notes/prix/liens, vol retour), 7 idées votées, 2 sondages, 3 candidats Blue Bay (retenu→événement / en lice / écarté) avec avis pondérés et citations, 12 items de valise (4 rattachés snorkeling/Morne), 10 transactions budget (EUR+MUR, catégories, dépense liée au catamaran, remboursement réglé), 3 pages de journal, 3 notes d'équipage, 3 fiches d'urgence, 3 PDF générés par pdf-lib et attachés, 6 photos picsum basse qualité (vignettes incluses), 1 brouillon d'import email PENDING (testable sans clé Gemini !), 6 pays visités, WhatsApp profils + groupe, devises EUR/MUR. Relançable (purge et régénère les données du voyage démo uniquement).
 
 ### [ ] PHIL-Q09 — Documentation complète des fonctionnalités
 `docs/FONCTIONNALITES.md` : toutes les fonctionnalités par catégorie, à jour des vagues 1 à 5.
