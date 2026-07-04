@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { LODGING_PLATFORMS } from "@/lib/events/lodging";
 import { TRANSPORT_MODES } from "@/lib/events/transport";
+import { geolocateEvent } from "@/lib/geo/locate";
 import { createClient } from "@/lib/supabase/server";
 
 const DATETIME_LOCAL = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
@@ -160,6 +161,8 @@ export async function createActivityEvent(
       .eq("trip_id", d.tripId);
   }
 
+  await geolocateEvent(supabase, d.tripId, eventId, d.locationName);
+
   redirect(`/trips/${d.tripId}`);
 }
 
@@ -201,7 +204,9 @@ export async function createLodgingEvent(
     metadata.guests = d.guests;
   }
 
+  const eventId = crypto.randomUUID();
   const { error } = await supabase.from("trip_events").insert({
+    id: eventId,
     trip_id: d.tripId,
     type: "LODGING",
     title: d.name,
@@ -221,6 +226,8 @@ export async function createLodgingEvent(
       message: "La création a échoué — il faut être capitaine ou éditeur du voyage.",
     };
   }
+
+  await geolocateEvent(supabase, d.tripId, eventId, d.address || d.name);
 
   redirect(`/trips/${d.tripId}`);
 }
@@ -268,7 +275,9 @@ export async function createTransportEvent(
     metadata.carrier = d.carrier;
   }
 
+  const eventId = crypto.randomUUID();
   const { error } = await supabase.from("trip_events").insert({
+    id: eventId,
     trip_id: d.tripId,
     type: "TRANSPORT",
     title: d.title,
@@ -287,6 +296,8 @@ export async function createTransportEvent(
       message: "La création a échoué — il faut être capitaine ou éditeur du voyage.",
     };
   }
+
+  await geolocateEvent(supabase, d.tripId, eventId, d.to || d.from);
 
   redirect(`/trips/${d.tripId}`);
 }

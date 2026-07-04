@@ -46,6 +46,9 @@ export default async function TripCalendarPage({
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-end gap-3">
         <Button asChild variant="outline">
+          <Link href={`/trips/${tripId}/map`}>Carte</Link>
+        </Button>
+        <Button asChild variant="outline">
           <Link href={`/trips/${tripId}/timeline`}>Timeline</Link>
         </Button>
         {canEdit ? (

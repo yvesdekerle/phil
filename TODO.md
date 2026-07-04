@@ -433,11 +433,12 @@ Aller au-delà du vote +1 sur les idées : permettre des avis qualitatifs ("Vaut
 Ordre de réalisation : N01 → N02 → N03 → N07 → N08 → N04 → N05 → N06 → N11 → N12 → N10 → N09.
 Écartés pour l'instant : météo (backlog, fiabilité à vérifier), commentaires (plus tard), galerie photos (non), PDF souvenir (plus tard), rappels J-1 par email (remplacés par push).
 
-### [ ] PHIL-N01 — Cartes du voyage (jour par jour + activités)
+### [x] PHIL-N01 — Cartes du voyage (jour par jour + activités) *(fait le 2026-07-04)*
 Deux cartes Leaflet + OpenStreetMap (gratuit, sans clé), esprit Polarsteps :
 1. **Carte du programme** (onglet du voyage) : les événements épinglés (couleur par type), tracé chronologique jour par jour, popup → lien fiche événement. Sélecteur de jour pour filtrer.
 2. **Carte des idées** : les idées géolocalisées du pool, pour juger les distances entre elles et avec l'hébergement.
 Les colonnes `location_lat/lng` existent déjà (events et ideas) mais ne sont pas saisies : ajouter le **géocodage Nominatim** (gratuit, 1 req/s) du champ lieu à la création/édition (+ correction manuelle en déplaçant le marqueur). Distances à vol d'oiseau affichées depuis l'hébergement du moment.
+> Note : page `/trips/[tripId]/map` (bouton "Carte" au calendrier) — vues Programme (pions colorés par type, tracé chronologique pointillé, filtre par jour) et Idées (+ hébergement en repère laiton). Distances haversine depuis l'hébergement couvrant le jour filtré, popups avec lien fiche. Leaflet + OSM, chargement client (`ssr:false`), pions `divIcon` colorés (pas d'assets). Géocodage **serveur** Nominatim (`lib/geo/locate.ts`, contextualisé par la destination, best-effort jamais bloquant) branché sur la création d'événements (3 types, ids désormais pré-générés) et d'idées. **Écarts** : pas de correction manuelle du marqueur en v1 (re-géocodage via édition du lieu) ; géocodage non branché sur l'édition. Démo Maurice géocodée (17 lieux). Vérifié en réel : carte du 7 nov (plongée), carte des idées (7 pions).
 
 ### [ ] PHIL-N02 — Export calendrier iCal
 Flux iCal par voyage (`/api/trips/{id}/calendar.ics?token=…`, token propre au participant, révocable) à abonner dans Google Calendar/Apple Calendar. Chaque événement exporte : titre, horaires **avec timezone**, lieu, notes/description, et **liens vers les documents attachés** (URL de la fiche événement Phil — les fichiers eux-mêmes restent derrière l'authentification).

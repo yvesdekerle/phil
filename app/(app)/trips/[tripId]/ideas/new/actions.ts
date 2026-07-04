@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { geolocateIdea } from "@/lib/geo/locate";
 import { createClient } from "@/lib/supabase/server";
 
 const ideaSchema = z.object({
@@ -65,7 +66,9 @@ export async function createIdea(
     .filter((t) => t.length > 0)
     .slice(0, 10);
 
+  const ideaId = crypto.randomUUID();
   const { error } = await supabase.from("trip_ideas").insert({
+    id: ideaId,
     trip_id: d.tripId,
     title: d.title,
     description: d.description || null,
@@ -84,6 +87,8 @@ export async function createIdea(
       message: "La création a échoué — il faut être capitaine ou éditeur du voyage.",
     };
   }
+
+  await geolocateIdea(supabase, d.tripId, ideaId, d.locationName);
 
   redirect(`/trips/${d.tripId}/ideas`);
 }
