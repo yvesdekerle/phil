@@ -12,6 +12,7 @@ import {
   deleteChecklistItem,
   toggleChecklistItem,
 } from "./actions";
+import { WardrobeCatalog } from "./wardrobe-catalog";
 
 export type ChecklistItem = {
   id: string;
@@ -40,6 +41,7 @@ export function ChecklistClient({
   myId,
   isOwner,
   suggestions = [],
+  nights = 7,
 }: {
   tripId: string;
   items: ChecklistItem[];
@@ -48,6 +50,8 @@ export function ChecklistClient({
   isOwner: boolean;
   /** PHIL-P06 : suggestions contextuelles "Phil te souffle". */
   suggestions?: { title: string; reason: string }[];
+  /** PHIL-Q10 : durée du séjour pour les quantités de la garde-robe. */
+  nights?: number;
 }) {
   const [, formAction] = useActionState<ChecklistState, FormData>(addChecklistItem, {
     status: "idle",
@@ -68,6 +72,7 @@ export function ChecklistClient({
 
   return (
     <div className="flex flex-col gap-6">
+      <WardrobeCatalog tripId={tripId} items={items} nights={nights} />
       {suggestions.length > 0 ? (
         <section className="rounded-lg border border-laiton-clair bg-gradient-to-br from-papier to-parchemin px-4 py-3">
           <h2 className="mb-2 font-display text-sm text-encre italic">

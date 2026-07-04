@@ -80,6 +80,17 @@ export default async function ChecklistPage({ params }: { params: Promise<{ trip
       myId={user.id}
       isOwner={me?.role === "OWNER"}
       suggestions={suggestions}
+      nights={
+        trip
+          ? Math.max(
+              1,
+              Math.round(
+                (new Date(trip.end_date).getTime() - new Date(trip.start_date).getTime()) /
+                  86_400_000,
+              ),
+            )
+          : 7
+      }
     />
   );
 }

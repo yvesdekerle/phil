@@ -645,8 +645,9 @@ Peupler le voyage démo avec le vrai séjour (5→21 nov, Tamarin puis Blue Bay)
 `docs/FONCTIONNALITES.md` : toutes les fonctionnalités par catégorie, à jour des vagues 1 à 5.
 > Note : 17 catégories (comptes, voyages/équipage, calendrier, imports, coffre, documents, idées/décisions, valise, budget, photos, journal/souvenirs, cartes, météo, notifications, partage extérieur, offline, sécurité) + tableau des configurations en attente (🔑) + comptes de démo. À maintenir au fil des tickets.
 
-### [~] PHIL-Q10 — Valise : garde-robe type avec quantités
+### [x] PHIL-Q10 — Valise : garde-robe type avec quantités *(fait le 2026-07-04)*
 Demande Yves (2026-07-04) : proposer les affaires qu'on retrouve dans tous les voyages (t-shirts, pantalons, shorts, maillots, brosse à dents, lunettes de soleil, crème solaire…), **rangées par catégorie** (vêtements, trousse de toilette, indispensables…), **avec des quantités** (calculées d'après la durée du séjour, ajustables). Les items non sélectionnés restent "à sélectionner" avec un bouton **+ Ajouter** ; les items déjà dans la valise ont un bouton **Retirer**.
+> Note : `lib/trips/packing-catalog.ts` — 26 items en 4 catégories (Vêtements, Chaussures, Trousse de toilette, Indispensables), quantités fonction des nuits (t-shirts ≈ nuits plafonné à 10, sous-vêtements nuits+1, etc.), champ quantité modifiable avant l'ajout. Panneau repliable "Garde-robe type (x/26)" en tête de la Valise : pending en pointillé + "+ Ajouter", sélectionnés en laiton avec ✓ et "Retirer" ; l'ajout crée un item "T-shirts ×12" en "À emporter" (correspondance insensible aux accents et au suffixe ×n). Aucune migration.
 
 ### [x] PHIL-Q11 — La carte devient un onglet du voyage *(fait le 2026-07-04)*
 La carte (N01) existe mais n'est accessible que par un bouton sur le calendrier — demande Yves : l'ajouter aux onglets du voyage.
