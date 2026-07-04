@@ -70,22 +70,25 @@
 
 ## 8. Valise (checklist partagée)
 
-- **Trois sections** : avant le départ / à emporter / sur place. Items cochables, **assignables** ("Enceinte — Amelie"), barre de progression.
+- **Trois sections** : avant le départ / à emporter / sur place. Items cochables, **assignables** ("Enceinte — Amelie"), **échéance optionnelle** ("vaccins avant le 5 octobre"), barre de progression.
+- **Catalogue intégré** : dans chaque section, les affaires et préparatifs classiques (vaccins, t-shirts ×10 selon la durée, trousse de toilette, e-SIM…) attendent en pointillé — un tap pour les sélectionner, quantités ajustables.
 - **"À emporter" par activité** : "snorkeling → maillot" — visible sur la fiche de l'activité ET dans la Valise avec un badge.
-- **Phil te souffle** : suggestions automatiques d'après la **météo prévue** (pluie → k-way), les **activités planifiées** (rando → chaussures) et la durée du séjour — à ajouter d'un tap.
+- **Phil te souffle** : suggestions automatiques d'après la **météo prévue** (pluie → k-way), les **activités planifiées** (rando → chaussures) et la durée du séjour.
 - Pré-remplie par les templates de voyage.
 
-## 9. Budget partagé
+## 9. La Bourse (dépenses partagées, façon Tricount)
 
-- **Équilibre (le "tricount")** : dépenses avec payeur et bénéficiaires (par défaut : les inscrits de l'événement, sinon tout le groupe), soldes par personne, **règlements simplifiés** ("Yves doit 42 € à Amelie") et bouton **"Marquer comme réglé"**.
-- **Suivi des dépenses** : répartition par **catégorie** (transport, logement, activités, restos, courses) et par phase **avant / pendant / après**, en double lecture "le voyage" et "mes dépenses".
+- **Dépenses** : liste groupée par date, compteurs "Mes dépenses / Dépenses totales", **recherche tolérante**, ajout avec division **Également / En parts / Montants exacts** (part de chacun affichée en direct), export CSV.
+- **Équilibre** : "🤑 On te doit X €" / "Tu dois X €", soldes colorés par personne, **règlements simplifiés** + "Marquer comme réglé", et **"la prochaine dépense devrait être payée par X"**.
+- **Clore la Bourse** (Capitaine) : quelques semaines après le voyage, une fois tout saisi — l'ajout est gelé, tout le monde atterrit sur l'Équilibre, réouvrable.
+- **Suivi** : répartition par **catégorie** et par phase **avant / pendant / après**, en double lecture "le voyage" et "mes dépenses".
 - **Multi-devises** : chaque dépense garde sa devise (8 400 MUR de courses), tout est converti et affiché en devise principale + secondaire en dessous.
-- Dépense **rattachable à un événement** (elle en hérite la catégorie), date de dépense distincte de la date de saisie.
-- **Export CSV** (format Excel français), mise à jour **en temps réel**.
+- Dépense **rattachable à un événement** (elle en hérite la catégorie), mise à jour **en temps réel**.
 
 ## 10. Photos
 
 - **Galerie par voyage** avec **quota strict** (40 photos/voyage — qualité d'origine conservée, c'est le nombre qui est limité, pas la qualité).
+- **Carte en tête, façon Polarsteps** : les photos géolocalisées (position GPS lue dans l'EXIF à l'envoi) apparaissent en vignettes rondes sur la carte ; icône 📍 sous chaque photo pour la retrouver sur la carte.
 - **Vignettes générées dans le navigateur** : la grille est légère, l'original ne se charge qu'à l'ouverture.
 - **Visionneuse plein écran** : flèches, clavier, légendes.
 - Légende et rattachement à un événement, suppression par l'auteur ou le Capitaine.
