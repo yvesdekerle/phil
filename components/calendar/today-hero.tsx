@@ -20,6 +20,7 @@ export function TodayHero({
   next,
   dayKey,
   weather,
+  travelToNext,
 }: {
   tripId: string;
   current: HeroEvent | null;
@@ -27,6 +28,8 @@ export function TodayHero({
   dayKey: string;
   /** Ligne météo du jour (PHIL-O02), rendue côté serveur. */
   weather?: React.ReactNode;
+  /** "≈ 35 min de route" entre l'événement en cours et le prochain (PHIL-P05). */
+  travelToNext?: string | null;
 }) {
   const [countdown, setCountdown] = useState<string | null>(null);
 
@@ -107,7 +110,10 @@ export function TodayHero({
               {next.location ? (
                 <span className="block truncate text-xs text-encre-douce">
                   RDV : {next.location}
+                  {travelToNext ? ` · ${travelToNext}` : ""}
                 </span>
+              ) : travelToNext ? (
+                <span className="block text-xs text-encre-douce">{travelToNext}</span>
               ) : null}
             </span>
           </Link>

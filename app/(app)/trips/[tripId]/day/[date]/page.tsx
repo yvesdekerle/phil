@@ -7,6 +7,7 @@ import { WeatherLine } from "@/components/trips/trip-weather";
 import { eventDayKey, eventTime, formatInTimezone } from "@/lib/events/datetime";
 import type { TripEvent } from "@/lib/events/types";
 import { ensureTripCoords } from "@/lib/geo/locate";
+import { formatMinutes, getTravelMinutes } from "@/lib/geo/travel-time";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 import { type DailyForecast, getDailyForecast } from "@/lib/weather/open-meteo";
@@ -84,6 +85,27 @@ export default async function DayViewPage({
     }
   }
 
+  // PHIL-P05 : temps de trajet entre événements consécutifs géolocalisés
+  const legs = await Promise.all(
+    dayEvents.slice(0, -1).map(async (e, i) => {
+      const next = dayEvents[i + 1];
+      if (
+        e.location_lat === null ||
+        e.location_lng === null ||
+        next.location_lat === null ||
+        next.location_lng === null
+      ) {
+        return null;
+      }
+      const minutes = await getTravelMinutes(
+        { lat: e.location_lat, lng: e.location_lng },
+        { lat: next.location_lat, lng: next.location_lng },
+      );
+      return minutes === null || minutes < 3 ? null : { from: e.title, to: next.title, minutes };
+    }),
+  );
+  const travelLegs = legs.filter((l): l is NonNullable<typeof l> => l !== null);
+
   const label = formatInTimeZone(`${date}T12:00:00Z`, "UTC", "EEEE d MMMM yyyy", { locale: fr });
   const hours = Array.from({ length: HOUR_END - HOUR_START }, (_, i) => HOUR_START + i);
 
@@ -100,6 +122,19 @@ export default async function DayViewPage({
         <p className="mt-1">
           <WeatherLine day={dayWeather} />
         </p>
+      ) : null}
+      {travelLegs.length > 0 ? (
+        <div className="mt-2 rounded-md border border-laiton-clair/60 bg-papier px-3 py-2">
+          <p className="mb-0.5 text-[0.65rem] font-medium text-laiton uppercase tracking-wide">
+            Trajets de la journée (en voiture)
+          </p>
+          {travelLegs.map((leg) => (
+            <p key={`${leg.from}-${leg.to}`} className="text-xs text-encre-douce">
+              {leg.from} → {leg.to} :{" "}
+              <span className="text-encre">{formatMinutes(leg.minutes)}</span>
+            </p>
+          ))}
+        </div>
       ) : null}
       <div className="mb-4" />
 

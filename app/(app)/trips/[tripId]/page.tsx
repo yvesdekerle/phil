@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { eventDayKey, eventTime, groupEventsByDay } from "@/lib/events/datetime";
 import type { TripEvent } from "@/lib/events/types";
 import { ensureTripCoords } from "@/lib/geo/locate";
+import { formatMinutes, getTravelMinutes } from "@/lib/geo/travel-time";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 import { type DailyForecast, getDailyForecast } from "@/lib/weather/open-meteo";
@@ -84,6 +85,25 @@ export default async function TripCalendarPage({
   }
   const todayWeather = weatherDays.find((d) => d.date === todayKey) ?? null;
 
+  // PHIL-P05 : temps de route entre l'événement en cours et le prochain départ
+  let travelToNext: string | null = null;
+  if (
+    currentEvent &&
+    nextEvent &&
+    currentEvent.location_lat !== null &&
+    currentEvent.location_lng !== null &&
+    nextEvent.location_lat !== null &&
+    nextEvent.location_lng !== null
+  ) {
+    const minutes = await getTravelMinutes(
+      { lat: currentEvent.location_lat, lng: currentEvent.location_lng },
+      { lat: nextEvent.location_lat, lng: nextEvent.location_lng },
+    );
+    if (minutes !== null && minutes >= 3) {
+      travelToNext = `${formatMinutes(minutes)} de route`;
+    }
+  }
+
   return (
     <div className="flex flex-col gap-6">
       {tripOngoing && todayKey ? (
@@ -93,6 +113,7 @@ export default async function TripCalendarPage({
           next={nextEvent ? heroOf(nextEvent) : null}
           dayKey={todayKey}
           weather={todayWeather ? <WeatherLine day={todayWeather} /> : undefined}
+          travelToNext={travelToNext}
         />
       ) : null}
       {trip ? <WeatherStrip days={weatherDays} destination={trip.destination} /> : null}
