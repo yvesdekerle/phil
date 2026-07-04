@@ -240,6 +240,17 @@ export function UploadForm({
               ))}
             </SelectContent>
           </Select>
+          {/* PHIL-Q34 : "Autre" → libellé libre saisi à la main */}
+          {category === "other" ? (
+            <Input
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+              placeholder="Précise le type (ex : carte de mutuelle)"
+              maxLength={60}
+              autoComplete="off"
+              aria-label="Libellé du document"
+            />
+          ) : null}
         </div>
       )}
 

@@ -65,7 +65,7 @@ export default async function VaultDocumentPage({
         <div className="min-w-0 flex-1">
           <h1 className="truncate font-display text-2xl text-encre">{doc.file_name}</h1>
           <p className="mt-1 text-sm text-encre-douce">
-            {CATEGORY_LABELS[doc.category]} · ajouté le{" "}
+            {doc.label ?? CATEGORY_LABELS[doc.category]} · ajouté le{" "}
             {format(parseISO(doc.uploaded_at), "d MMMM yyyy", { locale: fr })} ·{" "}
             {(doc.size_bytes / 1024 / 1024).toFixed(1)} Mo
           </p>

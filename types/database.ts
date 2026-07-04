@@ -1399,7 +1399,9 @@ export type Database = {
         | "voucher"
         | "lodging"
         | "insurance"
-        | "other";
+        | "other"
+        | "health_card"
+        | "european_health_card";
       document_scope: "VAULT" | "TRIP";
       event_type: "TRANSPORT" | "LODGING" | "ACTIVITY";
       idea_status: "POOL" | "SCHEDULED" | "DISMISSED";
@@ -1542,6 +1544,8 @@ export const Constants = {
         "lodging",
         "insurance",
         "other",
+        "health_card",
+        "european_health_card",
       ],
       document_scope: ["VAULT", "TRIP"],
       event_type: ["TRANSPORT", "LODGING", "ACTIVITY"],

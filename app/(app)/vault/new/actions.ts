@@ -17,6 +17,8 @@ const createDocumentSchema = z.object({
   category: z.enum(VAULT_CATEGORIES as [string, ...string[]]),
   expiresAt: z.union([z.literal(""), z.string().regex(/^\d{4}-\d{2}-\d{2}$/)]).optional(),
   documentNumber: z.string().trim().max(100).optional(),
+  // PHIL-Q34 : "Autre" → libellé libre saisi à la main
+  label: z.string().trim().max(60).optional(),
 });
 
 export type CreateDocumentState = {
@@ -42,6 +44,7 @@ export async function createDocument(
     category: formData.get("category"),
     expiresAt: formData.get("expiresAt") ?? "",
     documentNumber: formData.get("documentNumber") ?? "",
+    label: formData.get("label") ?? "",
   });
 
   if (!parsed.success) {
@@ -76,6 +79,8 @@ export async function createDocument(
     size_bytes: parsed.data.sizeBytes,
     storage_path: parsed.data.storagePath,
     category: parsed.data.category as (typeof VAULT_CATEGORIES)[number],
+    // Libellé libre seulement quand la catégorie est "Autre" (sinon le libellé de catégorie suffit)
+    label: parsed.data.category === "other" ? parsed.data.label || null : null,
     expires_at: parsed.data.expiresAt || null,
     metadata,
   });

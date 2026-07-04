@@ -7,6 +7,8 @@ export const CATEGORY_LABELS: Record<DocumentCategory, string> = {
   passport: "Passeport",
   id_card: "Carte d'identité",
   driving_license: "Permis de conduire",
+  health_card: "Carte Vitale",
+  european_health_card: "Carte européenne d'assurance maladie",
   ticket: "Billet",
   voucher: "Voucher",
   lodging: "Hébergement",
@@ -29,6 +31,8 @@ export const VAULT_CATEGORIES: DocumentCategory[] = [
   "passport",
   "id_card",
   "driving_license",
+  "health_card",
+  "european_health_card",
   "insurance",
   "other",
 ];

@@ -684,8 +684,9 @@ Retours Yves (2026-07-05) : mettre **Horloges** et **Conseils** dans le menu pri
 Séparer la catégorie "Vêtements" en **Haut** / **Bas** ; ajouter **coupe-vent** et **manteau** ; rendre évident qu'on peut **créer sa propre catégorie** (le champ existe déjà mais n'est pas visible comme tel).
 > Note : catalogue scindé en "Vêtements — Haut" (avec coupe-vent + manteau), "Vêtements — Bas", "Sous-vêtements & nuit". Formulaire d'ajout encadré avec titre explicite "Ajouter ton propre élément — tape une catégorie existante ou invente-en une nouvelle" et placeholders parlants ("Catégorie (ex : Plongée)"). La création de catégorie marchait déjà (champ libre + datalist) mais n'était pas identifiable comme telle.
 
-### [ ] PHIL-Q34 — Coffre : carte Vitale, carte européenne, libellé libre
+### [x] PHIL-Q34 — Coffre : carte Vitale, carte européenne, libellé libre *(fait le 2026-07-05)*
 Ajouter au coffre **carte Vitale** et **carte européenne d'assurance maladie** ; plutôt que la catégorie "Autre", permettre de **saisir le libellé à la main** (réutiliser `documents.label`).
+> Note : deux valeurs d'enum `document_category` (`health_card`, `european_health_card`) ajoutées par migration (icônes HeartPulse / Stethoscope) ; `VAULT_CATEGORIES` + `CATEGORY_LABELS` étendus. Sur "Autre", un champ libellé libre apparaît (upload coffre) → stocké dans `documents.label`, affiché en priorité sur la liste et la fiche du coffre. Aucune policy RLS touchée.
 
 ### [ ] PHIL-Q35 — Recherche calendrier en direct (debounce)
 La recherche du calendrier recharge la page (form GET) : la passer en **live avec micro-délai** (debounce ~200 ms), filtrage côté client, sans rechargement.

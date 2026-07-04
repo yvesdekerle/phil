@@ -110,7 +110,7 @@ export default async function VaultPage({
                     {doc.file_name}
                   </span>
                   <span className="block text-xs text-encre-douce">
-                    {CATEGORY_LABELS[doc.category]} · ajouté le{" "}
+                    {doc.label ?? CATEGORY_LABELS[doc.category]} · ajouté le{" "}
                     {format(parseISO(doc.uploaded_at), "d MMM yyyy", { locale: fr })}
                   </span>
                 </span>
