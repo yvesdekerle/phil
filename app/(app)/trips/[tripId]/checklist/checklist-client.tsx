@@ -39,12 +39,15 @@ export function ChecklistClient({
   members,
   myId,
   isOwner,
+  suggestions = [],
 }: {
   tripId: string;
   items: ChecklistItem[];
   members: Member[];
   myId: string;
   isOwner: boolean;
+  /** PHIL-P06 : suggestions contextuelles "Phil te souffle". */
+  suggestions?: { title: string; reason: string }[];
 }) {
   const [, formAction] = useActionState<ChecklistState, FormData>(addChecklistItem, {
     status: "idle",
@@ -53,8 +56,39 @@ export function ChecklistClient({
 
   const doneCount = items.filter((i) => i.done).length;
 
+  const addSuggestion = (title: string) => {
+    const formData = new FormData();
+    formData.set("tripId", tripId);
+    formData.set("section", "a_emporter");
+    formData.set("title", title);
+    startTransition(async () => {
+      await addChecklistItem({ status: "idle" }, formData);
+    });
+  };
+
   return (
     <div className="flex flex-col gap-6">
+      {suggestions.length > 0 ? (
+        <section className="rounded-lg border border-laiton-clair bg-gradient-to-br from-papier to-parchemin px-4 py-3">
+          <h2 className="mb-2 font-display text-sm text-encre italic">
+            Phil te souffle, d'après la météo et le programme…
+          </h2>
+          <div className="flex flex-wrap gap-1.5">
+            {suggestions.map((s) => (
+              <button
+                key={s.title}
+                type="button"
+                disabled={pending}
+                onClick={() => addSuggestion(s.title)}
+                title={`Suggéré car ${s.reason}`}
+                className="rounded-full border border-laiton-clair bg-papier px-3 py-1 text-xs text-encre transition-colors hover:border-bordeaux hover:text-bordeaux"
+              >
+                + {s.title}
+              </button>
+            ))}
+          </div>
+        </section>
+      ) : null}
       {items.length > 0 ? (
         <div className="flex items-center gap-3">
           <div className="h-2 flex-1 overflow-hidden rounded-full bg-laiton-clair/40">
