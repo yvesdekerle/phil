@@ -657,6 +657,12 @@ La carte (N01) existe mais n'est accessible que par un bouton sur le calendrier 
 Demande Yves (2026-07-04) : à côté des distances, un lien qui ouvre l'app de conduite (Google Maps retenu — ses liens universels ouvrent l'app native sur mobile). Sur : chaque trajet de la vue jour (origine → destination en coordonnées) et le Prochain départ du mode Aujourd'hui (destination seule → Google part de la position actuelle). La fiche événement avait déjà son bouton Itinéraire.
 > Note : `lib/geo/directions.ts` (`directionsUrl` origine→destination, `navigateUrl` destination seule, `travelmode=driving`, coordonnées à 6 décimales). Vue jour : lien "🧭 Itinéraire" sur chaque trajet. Mode Aujourd'hui : bouton **"Y aller"** bordeaux sur la carte Prochain départ (coordonnées si géocodé, sinon adresse texte). Le bouton Itinéraire de la fiche événement utilise désormais les coordonnées précises quand elles existent. Waze écarté (préférence Yves : Google Maps ; ses liens s'ouvrent dans l'app installée).
 
+### [~] PHIL-Q27 — Valise : onglets, catégories, sélection ligne à ligne
+Retours Yves (2026-07-05) : supprimer le bloc "Phil te souffle" ; **3 onglets** (À emporter / Avant le départ / Sur place) ; dans chaque onglet, **la liste** (items sélectionnés) puis en dessous **ce qu'on peut encore sélectionner**, chaque objet **sur sa propre ligne** avec bouton Ajouter/Supprimer ; plus de préfixe "À sélectionner —", juste le nom de la **catégorie** ; items groupés par catégorie ; pouvoir **ajouter ses éléments** dans n'importe quel onglet **et créer ses catégories** (colonne `category` sur les items).
+
+### [ ] PHIL-Q28 — Voyageurs triés par ordre alphabétique
+Partout où l'équipage est listé (participants, sélecteurs d'assignation, Bourse…).
+
 ### [x] PHIL-Q24 — Horloges du voyage (heure de chez soi + heure locale) *(fait le 2026-07-05)*
 Comme les horloges monde d'un téléphone : afficher côte à côte l'heure de Paris (fuseau de l'utilisateur) et l'heure de la destination, en direct, sur la page du voyage.
 > Note : bandeau 🕐 "14:32 Paris · 17:32 Île Maurice (+3 h)" en tête du calendrier — fuseau de chez soi = celui du profil, tick toutes les 15 s, décalage affiché ; masqué quand les deux fuseaux sont identiques (voyage en France).

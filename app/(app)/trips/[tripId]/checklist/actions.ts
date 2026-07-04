@@ -17,6 +17,8 @@ const addSchema = z.object({
   eventId: z.union([z.literal(""), z.string().uuid()]).optional(),
   // PHIL-Q20 : échéance optionnelle
   dueDate: z.union([z.literal(""), z.string().regex(/^\d{4}-\d{2}-\d{2}$/)]).optional(),
+  // PHIL-Q27 : catégorie de rangement libre
+  category: z.string().trim().max(40).optional(),
 });
 
 export type ChecklistState = { status: "idle" | "error"; message?: string };
@@ -42,6 +44,7 @@ export async function addChecklistItem(
     title: formData.get("title"),
     eventId: formData.get("eventId") ?? "",
     dueDate: formData.get("dueDate") ?? "",
+    category: formData.get("category") ?? "",
   });
   if (!parsed.success) {
     return { status: "error", message: "Saisie invalide." };
@@ -53,6 +56,7 @@ export async function addChecklistItem(
     title: parsed.data.title,
     event_id: parsed.data.eventId || null,
     due_date: parsed.data.dueDate || null,
+    category: parsed.data.category || null,
     created_by: user.id,
   });
   if (error) {
