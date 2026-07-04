@@ -19,7 +19,7 @@ export default async function BudgetPage({ params }: { params: Promise<{ tripId:
       supabase
         .from("expenses")
         .select(
-          "id, title, amount, currency, paid_by, created_by, category, event_id, spent_on, expense_beneficiaries(user_id)",
+          "id, title, amount, currency, paid_by, created_by, category, event_id, spent_on, is_settlement, expense_beneficiaries(user_id)",
         )
         .eq("trip_id", tripId)
         .order("created_at", { ascending: false }),
@@ -49,6 +49,7 @@ export default async function BudgetPage({ params }: { params: Promise<{ tripId:
     paid_by: e.paid_by,
     created_by: e.created_by,
     category: e.category,
+    isSettlement: e.is_settlement,
     beneficiaries: (e.expense_beneficiaries ?? []).map((b) => b.user_id),
   }));
 
@@ -57,7 +58,9 @@ export default async function BudgetPage({ params }: { params: Promise<{ tripId:
     const balances = computeBalances(expenses, currency);
     return {
       currency,
-      total: expenses.filter((e) => e.currency === currency).reduce((sum, e) => sum + e.amount, 0),
+      total: expenses
+        .filter((e) => e.currency === currency && !e.isSettlement)
+        .reduce((sum, e) => sum + e.amount, 0),
       balances,
       settlements: computeSettlements(balances),
     };

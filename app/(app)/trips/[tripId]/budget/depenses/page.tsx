@@ -58,7 +58,8 @@ export default async function ExpenseTrackingPage({
     supabase
       .from("expenses")
       .select("amount, currency, category, spent_on, paid_by, expense_beneficiaries(user_id)")
-      .eq("trip_id", tripId),
+      .eq("trip_id", tripId)
+      .eq("is_settlement", false),
     supabase.from("trips").select("start_date, end_date").eq("id", tripId).single(),
   ]);
 

@@ -12,7 +12,7 @@ import {
   EXPENSE_CATEGORIES,
   type ExpenseCategory,
 } from "@/lib/budget/categories";
-import { addExpense, deleteExpense, type ExpenseState } from "./actions";
+import { addExpense, deleteExpense, type ExpenseState, markSettled } from "./actions";
 
 export type ExpenseRow = {
   id: string;
@@ -22,6 +22,7 @@ export type ExpenseRow = {
   paid_by: string;
   created_by: string;
   category: string;
+  isSettlement: boolean;
   beneficiaries: string[];
 };
 type Member = { userId: string; name: string };
@@ -218,8 +219,24 @@ export function BudgetClient({
             <div className="mt-3 border-t border-laiton-clair/50 pt-2">
               <p className="mb-1 text-xs font-medium text-laiton uppercase">Pour s'équilibrer</p>
               {settlements.map((s) => (
-                <p key={`${s.from}-${s.to}`} className="text-sm text-encre">
-                  {nameOf(s.from)} doit {fmt(s.amount, currency)} à {nameOf(s.to)}
+                <p
+                  key={`${s.from}-${s.to}`}
+                  className="flex items-center justify-between gap-2 text-sm text-encre"
+                >
+                  <span>
+                    {nameOf(s.from)} doit {fmt(s.amount, currency)} à {nameOf(s.to)}
+                  </span>
+                  <button
+                    type="button"
+                    disabled={pending}
+                    onClick={() =>
+                      startTransition(() => markSettled(tripId, s.from, s.to, s.amount, currency))
+                    }
+                    className="shrink-0 rounded-full border border-laiton-clair px-2.5 py-0.5 text-xs text-encre-douce transition-colors hover:border-bordeaux hover:text-bordeaux"
+                    title="Enregistre le remboursement et remet les soldes à jour"
+                  >
+                    Marquer comme réglé
+                  </button>
                 </p>
               ))}
             </div>
@@ -240,13 +257,22 @@ export function BudgetClient({
               className="flex items-center gap-3 rounded-md border border-laiton-clair/60 bg-papier px-3 py-2 text-sm"
             >
               <span className="min-w-0 flex-1 truncate text-encre">
+                {e.isSettlement ? "↩ " : ""}
                 {e.title}
-                <span className="ml-1.5 rounded-full bg-laiton/15 px-2 py-0.5 text-[0.65rem] text-laiton">
-                  {CATEGORY_LABELS[e.category as ExpenseCategory] ?? e.category}
-                </span>
+                {e.isSettlement ? (
+                  <span className="ml-1.5 rounded-full bg-encre/10 px-2 py-0.5 text-[0.65rem] text-encre-douce">
+                    entre voyageurs
+                  </span>
+                ) : (
+                  <span className="ml-1.5 rounded-full bg-laiton/15 px-2 py-0.5 text-[0.65rem] text-laiton">
+                    {CATEGORY_LABELS[e.category as ExpenseCategory] ?? e.category}
+                  </span>
+                )}
               </span>
               <span className="shrink-0 text-xs text-encre-douce">
-                {nameOf(e.paid_by)} · pour {e.beneficiaries.length}
+                {e.isSettlement
+                  ? `${nameOf(e.paid_by)} → ${nameOf(e.beneficiaries[0] ?? "")}`
+                  : `${nameOf(e.paid_by)} · pour ${e.beneficiaries.length}`}
               </span>
               <span className="shrink-0 font-medium text-encre">{fmt(e.amount, e.currency)}</span>
               {e.created_by === myId || e.paid_by === myId || isOwner ? (

@@ -451,6 +451,7 @@ export type Database = {
           currency: string;
           event_id: string | null;
           id: string;
+          is_settlement: boolean;
           paid_by: string;
           spent_on: string;
           title: string;
@@ -464,6 +465,7 @@ export type Database = {
           currency?: string;
           event_id?: string | null;
           id?: string;
+          is_settlement?: boolean;
           paid_by: string;
           spent_on?: string;
           title: string;
@@ -477,6 +479,7 @@ export type Database = {
           currency?: string;
           event_id?: string | null;
           id?: string;
+          is_settlement?: boolean;
           paid_by?: string;
           spent_on?: string;
           title?: string;

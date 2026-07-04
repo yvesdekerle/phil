@@ -77,6 +77,61 @@ export async function addExpense(_prev: ExpenseState, formData: FormData): Promi
   return { status: "idle" };
 }
 
+const settlementSchema = z.object({
+  tripId: z.string().uuid(),
+  fromUserId: z.string().uuid(),
+  toUserId: z.string().uuid(),
+  amount: z.coerce.number().positive().max(1_000_000),
+  currency: z.string().trim().toUpperCase().length(3),
+});
+
+/** Marque un règlement comme effectué (PHIL-P04) : remboursement de from → to. */
+export async function markSettled(
+  tripId: string,
+  fromUserId: string,
+  toUserId: string,
+  amount: number,
+  currency: string,
+): Promise<void> {
+  const parsed = settlementSchema.safeParse({ tripId, fromUserId, toUserId, amount, currency });
+  if (!parsed.success || parsed.data.fromUserId === parsed.data.toUserId) {
+    return;
+  }
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    redirect("/login");
+  }
+
+  const d = parsed.data;
+  const expenseId = crypto.randomUUID();
+  const { error } = await supabase.from("expenses").insert({
+    id: expenseId,
+    trip_id: d.tripId,
+    title: "Remboursement",
+    amount: d.amount,
+    currency: d.currency,
+    paid_by: d.fromUserId,
+    category: "autre",
+    is_settlement: true,
+    created_by: user.id,
+  });
+  if (error) {
+    return;
+  }
+  const { error: benefError } = await supabase
+    .from("expense_beneficiaries")
+    .insert({ expense_id: expenseId, user_id: d.toUserId });
+  if (benefError) {
+    await supabase.from("expenses").delete().eq("id", expenseId);
+    return;
+  }
+  revalidatePath(`/trips/${d.tripId}/budget`);
+  revalidatePath(`/trips/${d.tripId}/budget/depenses`);
+}
+
 export async function deleteExpense(tripId: string, expenseId: string): Promise<void> {
   if (!areUuids(tripId, expenseId)) {
     return;

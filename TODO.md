@@ -557,8 +557,9 @@ La v2 de O01 : transférer l'email de confirmation à une adresse Phil → évé
 ### [ ] PHIL-P03 — Partage public d'un voyage en lecture seule (façon Polarsteps)
 Lien public révocable (token, activable par l'OWNER dans les Paramètres) vers une page **sans authentification** montrant uniquement : nom, destination, dates, **itinéraire jour par jour** et **carte** du voyage. **Jamais** : documents, budget, fiches d'urgence, notes d'équipage, participants (prénoms à trancher). Photos : désactivées par défaut, interrupteur "inclure les photos" — à trancher au ticket. Attention à la route : rendu via un layout public (pas le layout authentifié), token en RLS ou lecture service-role filtrée.
 
-### [ ] PHIL-P04 — Marquer les remboursements du tricount
+### [x] PHIL-P04 — Marquer les remboursements du tricount *(fait le 2026-07-04)*
 Le tricount calcule "Yves doit 42 € à Amelie" mais rien ne permet de dire "c'est réglé" : bouton **"Marquer comme réglé"** sur chaque règlement suggéré → enregistre un remboursement (transaction payée par le débiteur au seul bénéfice du créancier, flag `is_settlement`), ce qui remet les soldes à zéro naturellement. Les remboursements sont exclus du Suivi par catégories (ce n'est pas une dépense) et affichés à part dans la liste ("↩ Remboursement").
+> Note : colonne `expenses.is_settlement` (défaut false), action `markSettled` (insert "Remboursement" payé par le débiteur, bénéficiaire unique = créancier — la math de `computeBalances` remet les nets à zéro sans cas particulier). Liste : "↩ Remboursement · X → Y", badge "entre voyageurs" ; le **total** par devise et le Suivi excluent les remboursements. Tout membre peut marquer un règlement (RLS N09 inchangée) ; suppression possible comme toute transaction si erreur.
 
 ### [ ] PHIL-P05 — Temps de trajet entre les événements d'une journée
 Dans la vue jour et le mode Aujourd'hui : afficher "≈ 35 min de route" entre deux événements consécutifs géolocalisés. API OSRM publique (gratuite, même écosystème qu'OSM/Nominatim déjà utilisés), profil voiture en v1, cache 1 h, best-effort (pas de coordonnées → pas d'affichage).
