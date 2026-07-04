@@ -4,6 +4,7 @@ import { EventTypeIcon } from "@/components/calendar/event-type-icon";
 import { TodayHero } from "@/components/calendar/today-hero";
 import { SearchForm } from "@/components/search-form";
 import { WeatherLine, WeatherStrip } from "@/components/trips/trip-weather";
+import { WorldClocks } from "@/components/trips/world-clocks";
 import { Button } from "@/components/ui/button";
 import { eventDayKey, eventTime, groupEventsByDay } from "@/lib/events/datetime";
 import type { TripEvent } from "@/lib/events/types";
@@ -33,26 +34,32 @@ export default async function TripCalendarPage({
     redirect("/login");
   }
 
-  const [{ data: eventsData }, { data: me }, { data: trip }] = await Promise.all([
-    supabase
-      .from("trip_events")
-      .select("*")
-      .eq("trip_id", tripId)
-      .order("starts_at", { ascending: true }),
-    supabase
-      .from("trip_participants")
-      .select("role")
-      .eq("trip_id", tripId)
-      .eq("user_id", user.id)
-      .single(),
-    supabase
-      .from("trips")
-      .select(
-        "id, destination, destination_lat, destination_lng, default_timezone, start_date, end_date",
-      )
-      .eq("id", tripId)
-      .single(),
-  ]);
+  const [{ data: eventsData }, { data: me }, { data: trip }, { data: myProfile }] =
+    await Promise.all([
+      supabase
+        .from("trip_events")
+        .select("*")
+        .eq("trip_id", tripId)
+        .order("starts_at", { ascending: true }),
+      supabase
+        .from("trip_participants")
+        .select("role")
+        .eq("trip_id", tripId)
+        .eq("user_id", user.id)
+        .single(),
+      supabase
+        .from("trips")
+        .select(
+          "id, destination, destination_lat, destination_lng, default_timezone, start_date, end_date",
+        )
+        .eq("id", tripId)
+        .single(),
+      supabase.from("profiles").select("timezone").eq("id", user.id).single(),
+    ]);
+
+  // PHIL-Q24 : horloges chez-soi / destination
+  const homeTimezone = myProfile?.timezone ?? "Europe/Paris";
+  const homeLabel = homeTimezone.split("/").pop()?.replace(/_/g, " ") ?? homeTimezone;
 
   const events = (eventsData ?? []) as TripEvent[];
   const canEdit = me?.role === "OWNER" || me?.role === "EDITOR";
@@ -134,6 +141,14 @@ export default async function TripCalendarPage({
           weather={todayWeather ? <WeatherLine day={todayWeather} /> : undefined}
           travelToNext={travelToNext}
           navigateToNext={navigateToNext}
+        />
+      ) : null}
+      {trip ? (
+        <WorldClocks
+          homeTimezone={homeTimezone}
+          homeLabel={homeLabel}
+          tripTimezone={trip.default_timezone}
+          tripLabel={trip.destination}
         />
       ) : null}
       {trip ? <WeatherStrip days={weatherDays} destination={trip.destination} /> : null}
