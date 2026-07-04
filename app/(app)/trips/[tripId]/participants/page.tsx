@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { InviteSection } from "./invite-form";
@@ -95,8 +96,14 @@ export default async function TripParticipantsPage({
         <InviteSection tripId={tripId} pending={invitations ?? []} baseUrl={baseUrl} />
       ) : null}
 
-      <div>
+      <div className="flex items-center justify-between">
         <LeaveTripButton tripId={tripId} />
+        <Link
+          href={`/trips/${tripId}/emergency`}
+          className="text-sm text-encre-douce underline underline-offset-4 hover:text-encre"
+        >
+          Fiches d'urgence →
+        </Link>
       </div>
     </div>
   );

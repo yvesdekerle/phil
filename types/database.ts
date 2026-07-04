@@ -155,6 +155,57 @@ export type Database = {
           },
         ];
       };
+      emergency_sheets: {
+        Row: {
+          allergies: string | null;
+          blood_group: string | null;
+          emergency_contacts: string | null;
+          insurance_phone: string | null;
+          insurance_policy: string | null;
+          notes: string | null;
+          trip_id: string;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          allergies?: string | null;
+          blood_group?: string | null;
+          emergency_contacts?: string | null;
+          insurance_phone?: string | null;
+          insurance_policy?: string | null;
+          notes?: string | null;
+          trip_id: string;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          allergies?: string | null;
+          blood_group?: string | null;
+          emergency_contacts?: string | null;
+          insurance_phone?: string | null;
+          insurance_policy?: string | null;
+          notes?: string | null;
+          trip_id?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "emergency_sheets_trip_id_fkey";
+            columns: ["trip_id"];
+            isOneToOne: false;
+            referencedRelation: "trips";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "emergency_sheets_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       event_documents: {
         Row: {
           document_id: string;
