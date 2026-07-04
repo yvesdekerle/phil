@@ -578,8 +578,9 @@ Composant `PlaceInput` réutilisable (formulaires activité, hébergement, édit
 Pendant (ou après) le voyage : quelques lignes par jour et par voyageur, visibles de l'équipage — section "Journal de bord" dans la vue jour. Table `journal_entries` (trip, jour, auteur, texte). C'est la matière première du futur PDF souvenir (backlog).
 > Note : PK (trip, jour, auteur) = **une entrée par personne et par jour, modifiable** (upsert) et effaçable par son auteur ; RLS lecture équipage / écriture own. Section en pied de vue jour : entrées des autres en cartes, la mienne dans un textarea pré-rempli ("Écrire dans le journal" / "Mettre à jour mon entrée"). `verify:rls` 30/30.
 
-### [ ] PHIL-P09 — Stats de l'explorateur
+### [x] PHIL-P09 — Stats de l'explorateur *(fait le 2026-07-04)*
 Page personnelle "Explorateur" : nombre de voyages, jours en voyage, pays visités, activités faites, km parcourus (haversine entre événements géolocalisés consécutifs), photos. Ton Jules Verne assumé ("tu as bouclé 0,8 tour du monde"). Sert de socle aux badges P12 et héberge la carte P13.
+> Note : page `/explorer` (lien depuis le Profil) — 8 tuiles : voyages au carnet / bouclés, jours de voyage (planifiés compris), destinations distinctes, activités, **km à vol d'oiseau** (haversine entre étapes géolocalisées consécutives, par voyage, `lib/geo/distance.ts`), photos, pages de journal. Accroche "% d'un tour du monde (40 075 km)". Tout passe par la RLS (mes voyages seulement), aucun schéma ajouté. Les **pays visités** arrivent avec P13 (la tuile "destinations" compte les destinations textuelles distinctes en attendant) et les badges avec P12.
 
 ### [ ] PHIL-P10 — Ordre de visite suggéré pour une journée
 Sur la vue jour (si ≥ 3 activités géolocalisées sans horaires contraints) : suggestion d'un ordre de visite qui minimise les trajets (plus proche voisin depuis l'hébergement, pas de vrai TSP). Affichage indicatif, ne modifie rien tout seul. Le moins prioritaire de la vague — à faire en dernier.

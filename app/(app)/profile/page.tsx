@@ -29,7 +29,15 @@ export default async function ProfilePage() {
   return (
     <main className="flex flex-1 flex-col items-center px-4 py-12">
       <div className="w-full max-w-lg">
-        <h1 className="mb-6 text-center font-display text-3xl text-encre">Ton profil</h1>
+        <h1 className="mb-2 text-center font-display text-3xl text-encre">Ton profil</h1>
+        <p className="mb-6 text-center text-sm">
+          <Link
+            href="/explorer"
+            className="text-encre-douce underline underline-offset-4 hover:text-encre"
+          >
+            Carnet de l'explorateur →
+          </Link>
+        </p>
 
         <Card>
           <CardHeader className="flex flex-row items-center gap-4">
