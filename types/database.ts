@@ -583,6 +583,7 @@ export type Database = {
           notification_preferences: Json;
           timezone: string;
           updated_at: string;
+          whatsapp: string | null;
         };
         Insert: {
           avatar_url?: string | null;
@@ -594,6 +595,7 @@ export type Database = {
           notification_preferences?: Json;
           timezone?: string;
           updated_at?: string;
+          whatsapp?: string | null;
         };
         Update: {
           avatar_url?: string | null;
@@ -605,6 +607,7 @@ export type Database = {
           notification_preferences?: Json;
           timezone?: string;
           updated_at?: string;
+          whatsapp?: string | null;
         };
         Relationships: [];
       };
@@ -905,6 +908,7 @@ export type Database = {
           id: string;
           name: string;
           start_date: string;
+          whatsapp_group_url: string | null;
         };
         Insert: {
           archived_at?: string | null;
@@ -919,6 +923,7 @@ export type Database = {
           id?: string;
           name: string;
           start_date: string;
+          whatsapp_group_url?: string | null;
         };
         Update: {
           archived_at?: string | null;
@@ -933,6 +938,7 @@ export type Database = {
           id?: string;
           name?: string;
           start_date?: string;
+          whatsapp_group_url?: string | null;
         };
         Relationships: [
           {

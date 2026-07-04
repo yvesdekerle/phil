@@ -19,6 +19,15 @@ const tripUpdateSchema = z
         z.string().url("URL invalide.").startsWith("https://", "URL en https uniquement."),
       ])
       .optional(),
+    whatsappGroupUrl: z
+      .union([
+        z.literal(""),
+        z
+          .string()
+          .url("URL invalide.")
+          .startsWith("https://chat.whatsapp.com/", "Un lien d'invitation chat.whatsapp.com."),
+      ])
+      .optional(),
     timezone: z.string().refine((tz) => Intl.supportedValuesOf("timeZone").includes(tz), {
       message: "Fuseau horaire inconnu.",
     }),
@@ -61,6 +70,7 @@ export async function updateTrip(
     startDate: formData.get("startDate"),
     endDate: formData.get("endDate"),
     coverImageUrl: formData.get("coverImageUrl") ?? "",
+    whatsappGroupUrl: formData.get("whatsappGroupUrl") ?? "",
     timezone: formData.get("timezone"),
   });
 
@@ -92,6 +102,7 @@ export async function updateTrip(
         start_date: parsed.data.startDate,
         end_date: parsed.data.endDate,
         cover_image_url: parsed.data.coverImageUrl || null,
+        whatsapp_group_url: parsed.data.whatsappGroupUrl || null,
         default_timezone: parsed.data.timezone,
       },
       { count: "exact" },

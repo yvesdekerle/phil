@@ -39,6 +39,15 @@ const formSchema = z
         z.string().url("URL invalide.").startsWith("https://", "URL en https uniquement."),
       ])
       .optional(),
+    whatsappGroupUrl: z
+      .union([
+        z.literal(""),
+        z
+          .string()
+          .url("URL invalide.")
+          .startsWith("https://chat.whatsapp.com/", "Un lien d'invitation chat.whatsapp.com."),
+      ])
+      .optional(),
     timezone: z.string().min(1),
   })
   .refine((v) => !v.startDate || !v.endDate || v.endDate >= v.startDate, {
@@ -127,6 +136,20 @@ export function TripSettingsForm({
           <Input id="coverImageUrl" type="url" disabled={!canEdit} {...register("coverImageUrl")} />
           {errors.coverImageUrl ? (
             <p className="text-sm text-bordeaux">{errors.coverImageUrl.message}</p>
+          ) : null}
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="whatsappGroupUrl">Groupe WhatsApp du voyage (lien d'invitation)</Label>
+          <Input
+            id="whatsappGroupUrl"
+            type="url"
+            placeholder="https://chat.whatsapp.com/…"
+            disabled={!canEdit}
+            {...register("whatsappGroupUrl")}
+          />
+          {errors.whatsappGroupUrl ? (
+            <p className="text-sm text-bordeaux">{errors.whatsappGroupUrl.message}</p>
           ) : null}
         </div>
 

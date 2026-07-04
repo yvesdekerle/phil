@@ -54,6 +54,7 @@ export default async function TripSettingsPage({
           startDate: trip.start_date,
           endDate: trip.end_date,
           coverImageUrl: trip.cover_image_url ?? "",
+          whatsappGroupUrl: trip.whatsapp_group_url ?? "",
           timezone: trip.default_timezone,
         }}
       />

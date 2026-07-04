@@ -24,6 +24,11 @@ const formSchema = z.object({
     .max(80, "80 caractères maximum."),
   locale: z.enum(["fr", "en"]),
   timezone: z.string().min(1),
+  whatsapp: z
+    .string()
+    .trim()
+    .max(50, "50 caractères maximum.")
+    .regex(/^$|^\+?[\d\s.\-()]{6,20}$|^@?[\w.]{3,32}$/, "Un numéro (+33 6…) ou un @pseudo."),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -54,6 +59,7 @@ export function ProfileForm({ defaultValues }: { defaultValues: FormValues }) {
     formData.set("displayName", values.displayName);
     formData.set("locale", values.locale);
     formData.set("timezone", values.timezone);
+    formData.set("whatsapp", values.whatsapp);
     startTransition(async () => {
       setState(await updateProfile({ status: "idle" }, formData));
     });
@@ -102,6 +108,22 @@ export function ProfileForm({ defaultValues }: { defaultValues: FormValues }) {
             ))}
           </SelectContent>
         </Select>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="whatsapp">WhatsApp (numéro ou @pseudo)</Label>
+        <Input
+          id="whatsapp"
+          placeholder="+33 6 12 34 56 78 ou @phileas"
+          autoComplete="tel"
+          {...register("whatsapp")}
+        />
+        <p className="text-xs text-encre-douce">
+          Visible uniquement de tes co-voyageurs, pour te joindre en un tap.
+        </p>
+        {errors.whatsapp ? (
+          <p className="text-sm text-bordeaux">{errors.whatsapp.message}</p>
+        ) : null}
       </div>
 
       <div className="flex items-center gap-4">

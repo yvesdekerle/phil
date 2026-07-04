@@ -15,6 +15,11 @@ const profileSchema = z.object({
   timezone: z.string().refine((tz) => Intl.supportedValuesOf("timeZone").includes(tz), {
     message: "Fuseau horaire inconnu.",
   }),
+  whatsapp: z
+    .string()
+    .trim()
+    .max(50)
+    .regex(/^$|^\+?[\d\s.\-()]{6,20}$|^@?[\w.]{3,32}$/, "Un numéro (+33 6…) ou un @pseudo."),
 });
 
 export type ProfileFormState = {
@@ -30,6 +35,7 @@ export async function updateProfile(
     displayName: formData.get("displayName"),
     locale: formData.get("locale"),
     timezone: formData.get("timezone"),
+    whatsapp: formData.get("whatsapp") ?? "",
   });
 
   if (!parsed.success) {
@@ -50,6 +56,7 @@ export async function updateProfile(
       display_name: parsed.data.displayName,
       locale: parsed.data.locale,
       timezone: parsed.data.timezone,
+      whatsapp: parsed.data.whatsapp || null,
     })
     .eq("id", user.id);
 

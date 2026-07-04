@@ -22,12 +22,14 @@ export default async function EmergencyPage({ params }: { params: Promise<{ trip
     supabase.from("emergency_sheets").select("*").eq("trip_id", tripId),
     supabase
       .from("trip_participants")
-      .select("user_id, profiles!trip_participants_user_id_fkey(display_name)")
+      .select("user_id, profiles!trip_participants_user_id_fkey(display_name, whatsapp)")
       .eq("trip_id", tripId),
   ]);
 
   const nameOf = (id: string) =>
     members?.find((m) => m.user_id === id)?.profiles?.display_name ?? "Voyageur";
+  const whatsappOf = (id: string) =>
+    members?.find((m) => m.user_id === id)?.profiles?.whatsapp ?? null;
   const mySheet = sheets?.find((s) => s.user_id === user.id);
   const otherSheets = (sheets ?? []).filter((s) => s.user_id !== user.id);
 
@@ -89,6 +91,7 @@ export default async function EmergencyPage({ params }: { params: Promise<{ trip
                   {s.user_id === user.id ? " (toi)" : ""}
                 </h3>
                 <div className="flex flex-col gap-1">
+                  {row("WhatsApp", whatsappOf(s.user_id))}
                   {row("Urgence", s.emergency_contacts)}
                   {row("Assurance", s.insurance_policy)}
                   {row("Assisteur", s.insurance_phone)}

@@ -1,7 +1,10 @@
+import { MessageCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
+import { waContactLink } from "@/lib/whatsapp";
 import { InviteSection } from "./invite-form";
 import { LeaveTripButton, ParticipantRowActions } from "./participant-actions";
 
@@ -25,11 +28,11 @@ export default async function TripParticipantsPage({
     redirect("/login");
   }
 
-  const [{ data }, { data: invitations }] = await Promise.all([
+  const [{ data }, { data: invitations }, { data: trip }] = await Promise.all([
     supabase
       .from("trip_participants")
       .select(
-        "user_id, role, joined_at, profiles!trip_participants_user_id_fkey(display_name, avatar_url)",
+        "user_id, role, joined_at, profiles!trip_participants_user_id_fkey(display_name, avatar_url, whatsapp)",
       )
       .eq("trip_id", tripId)
       .order("joined_at", { ascending: true }),
@@ -40,6 +43,7 @@ export default async function TripParticipantsPage({
       .is("accepted_at", null)
       .gt("expires_at", new Date().toISOString())
       .order("created_at", { ascending: true }),
+    supabase.from("trips").select("whatsapp_group_url").eq("id", tripId).single(),
   ]);
 
   const participants = data ?? [];
@@ -50,6 +54,15 @@ export default async function TripParticipantsPage({
 
   return (
     <div className="flex flex-col gap-5">
+      {trip?.whatsapp_group_url ? (
+        <div>
+          <Button asChild variant="outline">
+            <a href={trip.whatsapp_group_url} target="_blank" rel="noopener noreferrer">
+              <MessageCircle aria-hidden="true" /> Groupe WhatsApp du voyage
+            </a>
+          </Button>
+        </div>
+      ) : null}
       <ul className="flex flex-col gap-2">
         {participants.map((p) => {
           const profile = p.profiles;
@@ -76,6 +89,24 @@ export default async function TripParticipantsPage({
               <span className="min-w-0 flex-1 text-sm font-medium text-encre">
                 {name}
                 {isMe ? <span className="text-encre-douce"> (toi)</span> : null}
+                {profile?.whatsapp ? (
+                  waContactLink(profile.whatsapp) ? (
+                    <a
+                      href={waContactLink(profile.whatsapp) ?? undefined}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-0.5 flex items-center gap-1 text-xs font-normal text-encre-douce hover:text-encre hover:underline"
+                    >
+                      <MessageCircle className="size-3.5" aria-hidden="true" />
+                      {profile.whatsapp}
+                    </a>
+                  ) : (
+                    <span className="mt-0.5 flex items-center gap-1 text-xs font-normal text-encre-douce">
+                      <MessageCircle className="size-3.5" aria-hidden="true" />
+                      {profile.whatsapp}
+                    </span>
+                  )
+                ) : null}
               </span>
               {iAmOwner && !isMe ? (
                 <ParticipantRowActions

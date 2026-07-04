@@ -60,6 +60,7 @@ export default async function ProfilePage() {
                 displayName,
                 locale: profile?.locale === "en" ? "en" : "fr",
                 timezone: profile?.timezone ?? "Europe/Paris",
+                whatsapp: profile?.whatsapp ?? "",
               }}
             />
           </CardContent>
