@@ -39,6 +39,7 @@ export type Database = {
           id: string;
           shared_at: string;
           shared_by: string;
+          shared_with: string | null;
           trip_id: string;
         };
         Insert: {
@@ -46,6 +47,7 @@ export type Database = {
           id?: string;
           shared_at?: string;
           shared_by: string;
+          shared_with?: string | null;
           trip_id: string;
         };
         Update: {
@@ -53,6 +55,7 @@ export type Database = {
           id?: string;
           shared_at?: string;
           shared_by?: string;
+          shared_with?: string | null;
           trip_id?: string;
         };
         Relationships: [
@@ -66,6 +69,13 @@ export type Database = {
           {
             foreignKeyName: "document_shares_shared_by_fkey";
             columns: ["shared_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "document_shares_shared_with_fkey";
+            columns: ["shared_with"];
             isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];

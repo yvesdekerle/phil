@@ -228,13 +228,14 @@ Cron job (Vercel Cron, gratuit sur Hobby avec 2 jobs) qui scanne quotidiennement
 Vue "Activité de mon coffre" qui affiche les dernières entrées de `vault_access_log` filtrées sur les documents de l'user. Permet de voir qui a consulté quoi et quand. Filtres par document, par action, par date. Le log est alimenté depuis la Phase 3 (B07) : la page révèle l'historique complet.
 > Note : `/vault/activity` — donc derrière le verrou passkey du layout (vérifié : écran "Coffre verrouillé" avant Touch ID). Lecture RLS (`document_owner_id`), embed nom du document (« Document supprimé » si purgé — l'audit survit, FK set null) et auteur de l'accès, filtres par action / période (7 j, 30 j, tout) / document via l'URL, 200 dernières entrées. Vérifié en réel : historique complet de la journée affiché avec filtres.
 
-### [ ] PHIL-E09 — Partage ciblé d'un document du coffre *(demandé le 2026-07-04)*
+### [x] PHIL-E09 — Partage ciblé d'un document du coffre *(demandé et fait le 2026-07-04)*
 Aujourd'hui, partager un document du coffre vers un voyage le rend visible de **tout l'équipage** (règle critique n°1). Cas d'usage : à 9 sur Maurice, prêter son permis au seul conducteur — pas aux 8 autres. Permettre de choisir, au moment du partage, **"Tout l'équipage" (défaut) ou une/des personnes précises** du voyage.
 - **Schéma** : colonne `shared_with uuid null references profiles` sur `document_shares` (NULL = tout le voyage, comportement actuel inchangé) ; contrainte d'unicité étendue `(document_id, trip_id, shared_with)`.
 - **RLS** : mise à jour du helper `private.is_document_shared_with_user` — le partage vaut si `shared_with IS NULL` ou `shared_with = auth.uid()`. Le propriétaire garde la main (création/retrait).
 - **UI** : dans "Partager avec un voyage" (fiche document du coffre), second sélecteur optionnel "Avec qui ?" (Tout l'équipage / participants cochables). Onglet Documents du voyage : badge "Partagé par X — pour toi" ; invisible pour les non-destinataires. Le document picker (F10, partage auto) reste en "tout l'équipage".
 - **Audit** : le log `SHARE`/`UNSHARE` mentionne la cible.
 - **Sécurité** : règle critique n°1 amendée dans CLAUDE.md + `verify-rls` étendu (3 vérifs : cible voit, autre participant ne voit pas, retrait ciblé n'affecte pas un partage équipage parallèle).
+> Note : migration `20260704081553` — colonne `shared_with` (NULL = équipage), unicité `nulls not distinct`, helper `is_document_shared_with_user` et policy select des partages mis à jour (un participant ne voit pas les lignes ciblées vers d'autres). Dialogue de partage en 2 étapes (voyage → "Tout l'équipage" ou "Seulement X"), liste des partages avec audience et retrait par ligne, badge "— pour toi" sur l'onglet Documents. Le partage auto du document picker (F10) reste équipage entier et ignore les partages ciblés existants. **Écarts** : cible non tracée dans l'audit (pas de colonne détail dans vault_access_log, à ajouter si besoin) ; une seule personne par ligne (partager à 2 personnes = 2 partages). `verify-rls` : **30/30** dont 6 nouvelles vérifs E09.
 
 ---
 
@@ -411,6 +412,12 @@ Page dans le profil pour activer/désactiver chaque type d'email (invitations, a
 ---
 
 ## Catégorie L — Évolutions futures (à creuser)
+
+### [ ] PHIL-L03 — Périmètre du coffre : catégories et rattachement aux voyages *(analyse demandée le 2026-07-04)*
+Question soulevée : pourquoi "Hébergement", "Billet" et "Voucher" apparaissent-ils dans les filtres du coffre, alors que la plongée (billet) vit dans les documents du voyage ? Réponse courte : l'enum `document_category` est **partagé** entre coffre et documents de voyage, et l'UI du coffre affiche toutes les catégories — un héritage technique, pas un choix produit. À analyser :
+- **Option A (recommandée a priori)** : restreindre le coffre aux catégories personnelles (passeport, CNI, permis, assurance, autre) ; billet/voucher/hébergement uniquement dans les documents de voyage. L'upload coffre ne propose plus ces catégories ; message d'orientation "ce document semble appartenir à un voyage → ajoute-le là-bas".
+- **Option B** : garder toutes les catégories au coffre mais permettre d'**associer un document du coffre à un voyage** dès l'upload (= pré-remplir un partage), avec comportements par défaut par catégorie : passeport/CNI/permis jamais partagés par défaut ; hébergement/location de voiture proposés au partage équipage.
+- Trancher avec l'usage réel : un "hébergement Maurice" a-t-il une raison d'être privé (confirmation nominative avec n° de carte ?) ou est-il par nature un document du groupe ?
 
 ### [ ] PHIL-L01 — Hébergements candidats (multi-options)
 Permettre de saisir plusieurs options d'hébergement pour un même créneau avant de faire un choix définitif. Cas d'usage : comparer 3 Booking pour une nuit (prix, conditions d'annulation, distance), voter en groupe, puis convertir le choix retenu en événement LODGING. Cas d'usage secondaire : prendre 2 logements simultanés pour un même groupe (ex : ski, groupe > capacité d'un seul logement). Analyser si on étend `trip_events` (statut `CANDIDATE` réutilisant le mécanisme votes/conversion des idées) ou si on crée un concept dédié de "candidats".

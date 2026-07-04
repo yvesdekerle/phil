@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { areUuids } from "@/lib/validation";
 import { logVaultAccess } from "@/lib/vault/audit";
 import { CATEGORIES } from "@/lib/vault/categories";
 
@@ -79,10 +80,18 @@ export async function updateDocument(
   return { status: "success", message: "C'est noté dans le carnet." };
 }
 
+/**
+ * Partage vers un voyage (PHIL-E05), ciblable vers une personne (PHIL-E09).
+ * sharedWith null = tout l'équipage.
+ */
 export async function shareDocument(
   documentId: string,
   tripId: string,
+  sharedWith: string | null = null,
 ): Promise<DocumentActionState> {
+  if (sharedWith !== null && !areUuids(sharedWith)) {
+    return { status: "error", message: "Destinataire invalide." };
+  }
   const supabase = await createClient();
   const {
     data: { user },
@@ -97,13 +106,14 @@ export async function shareDocument(
     document_id: documentId,
     trip_id: tripId,
     shared_by: user.id,
+    shared_with: sharedWith,
   });
 
   if (error) {
     return {
       status: "error",
       message: error.message.includes("duplicate")
-        ? "Déjà partagé avec ce voyage."
+        ? "Ce partage existe déjà."
         : "Le partage a échoué.",
     };
   }
@@ -116,13 +126,19 @@ export async function shareDocument(
   });
 
   revalidatePath(`/vault/${documentId}`);
-  return { status: "success", message: "Partagé avec l'équipage." };
+  return {
+    status: "success",
+    message: sharedWith ? "Partagé — avec cette personne uniquement." : "Partagé avec l'équipage.",
+  };
 }
 
 export async function unshareDocument(
   documentId: string,
-  tripId: string,
+  shareId: string,
 ): Promise<DocumentActionState> {
+  if (!areUuids(documentId, shareId)) {
+    return { status: "error", message: "Identifiants invalides." };
+  }
   const supabase = await createClient();
   const {
     data: { user },
@@ -134,8 +150,8 @@ export async function unshareDocument(
   const { error, count } = await supabase
     .from("document_shares")
     .delete({ count: "exact" })
-    .eq("document_id", documentId)
-    .eq("trip_id", tripId);
+    .eq("id", shareId)
+    .eq("document_id", documentId);
 
   if (error || count === 0) {
     return { status: "error", message: "Le retrait du partage a échoué." };
@@ -149,7 +165,7 @@ export async function unshareDocument(
   });
 
   revalidatePath(`/vault/${documentId}`);
-  return { status: "success", message: "Partage retiré — le document redevient privé." };
+  return { status: "success", message: "Partage retiré." };
 }
 
 /**

@@ -13,13 +13,26 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import { type DocumentActionState, shareDocument, unshareDocument } from "./actions";
 
-type Share = { tripId: string; tripName: string };
+type Share = {
+  shareId: string;
+  tripId: string;
+  tripName: string;
+  recipientName: string | null; // null = tout l'équipage
+};
 type Trip = { id: string; name: string; destination: string };
+type Member = { userId: string; name: string };
 
+/**
+ * Partages d'un document du coffre (PHIL-E05 + E09) :
+ * étape 1 choisir le voyage, étape 2 choisir l'audience
+ * (tout l'équipage, ou une personne précise).
+ */
 export function ShareManager({ documentId, shares }: { documentId: string; shares: Share[] }) {
   const [open, setOpen] = useState(false);
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
+  const [members, setMembers] = useState<Member[] | null>(null);
   const [state, setState] = useState<DocumentActionState>({ status: "idle" });
   const [pending, startTransition] = useTransition();
 
@@ -38,13 +51,35 @@ export function ShareManager({ documentId, shares }: { documentId: string; share
     if (open && !loaded) {
       void load();
     }
+    if (!open) {
+      setSelectedTrip(null);
+      setMembers(null);
+    }
   }, [open, loaded, load]);
 
-  const sharedTripIds = shares.map((s) => s.tripId);
+  async function pickTrip(trip: Trip) {
+    setSelectedTrip(trip);
+    setMembers(null);
+    const supabase = createClient();
+    const [{ data }, { data: auth }] = await Promise.all([
+      supabase
+        .from("trip_participants")
+        .select("user_id, profiles!trip_participants_user_id_fkey(display_name)")
+        .eq("trip_id", trip.id)
+        .order("joined_at", { ascending: true }),
+      supabase.auth.getUser(),
+    ]);
+    const myId = auth.user?.id;
+    setMembers(
+      (data ?? [])
+        .filter((m) => m.user_id !== myId)
+        .map((m) => ({ userId: m.user_id, name: m.profiles?.display_name ?? "Voyageur" })),
+    );
+  }
 
-  function share(tripId: string) {
+  function share(tripId: string, sharedWith: string | null) {
     startTransition(async () => {
-      const result = await shareDocument(documentId, tripId);
+      const result = await shareDocument(documentId, tripId, sharedWith);
       setState(result);
       if (result.status === "success") {
         setOpen(false);
@@ -52,11 +87,13 @@ export function ShareManager({ documentId, shares }: { documentId: string; share
     });
   }
 
-  function unshare(tripId: string) {
+  function unshare(shareId: string) {
     startTransition(async () => {
-      setState(await unshareDocument(documentId, tripId));
+      setState(await unshareDocument(documentId, shareId));
     });
   }
+
+  const crewShareTripIds = shares.filter((s) => !s.recipientName).map((s) => s.tripId);
 
   return (
     <section className="rounded-lg border border-laiton-clair bg-papier px-5 py-4">
@@ -70,40 +107,89 @@ export function ShareManager({ documentId, shares }: { documentId: string; share
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Partager avec un voyage</DialogTitle>
+              <DialogTitle>
+                {selectedTrip ? `${selectedTrip.name} — avec qui ?` : "Partager avec un voyage"}
+              </DialogTitle>
               <DialogDescription>
-                Le document restera dans ton coffre, mais les participants du voyage choisi pourront
-                le consulter.
+                {selectedTrip
+                  ? "Tout l'équipage, ou une seule personne (les autres ne verront rien)."
+                  : "Le document reste dans ton coffre ; tu choisis qui peut le consulter."}
               </DialogDescription>
             </DialogHeader>
-            <div className="flex max-h-72 flex-col gap-2 overflow-y-auto py-1">
-              {trips.length === 0 ? (
-                <p className="px-2 py-6 text-center text-sm text-encre-douce">
-                  {loaded ? "Aucun voyage actif." : "Chargement…"}
-                </p>
-              ) : (
-                trips.map((trip) => {
-                  const alreadyShared = sharedTripIds.includes(trip.id);
-                  return (
+
+            {!selectedTrip ? (
+              <div className="flex max-h-72 flex-col gap-2 overflow-y-auto py-1">
+                {trips.length === 0 ? (
+                  <p className="px-2 py-6 text-center text-sm text-encre-douce">
+                    {loaded ? "Aucun voyage actif." : "Chargement…"}
+                  </p>
+                ) : (
+                  trips.map((trip) => (
                     <button
                       key={trip.id}
                       type="button"
-                      disabled={pending || alreadyShared}
-                      onClick={() => share(trip.id)}
+                      disabled={pending}
+                      onClick={() => pickTrip(trip)}
                       className="flex items-center justify-between gap-3 rounded-md border border-laiton-clair bg-papier px-3 py-2.5 text-left text-sm transition-colors hover:bg-parchemin disabled:opacity-50"
                     >
                       <span className="min-w-0">
                         <span className="block truncate font-medium text-encre">{trip.name}</span>
                         <span className="text-xs text-encre-douce">{trip.destination}</span>
                       </span>
-                      <span className="shrink-0 text-xs text-encre-douce">
-                        {alreadyShared ? "Déjà partagé" : "Partager"}
-                      </span>
+                      <span className="shrink-0 text-xs text-encre-douce">Choisir →</span>
                     </button>
-                  );
-                })
-              )}
-            </div>
+                  ))
+                )}
+              </div>
+            ) : (
+              <div className="flex max-h-72 flex-col gap-2 overflow-y-auto py-1">
+                <button
+                  type="button"
+                  disabled={pending || crewShareTripIds.includes(selectedTrip.id)}
+                  onClick={() => share(selectedTrip.id, null)}
+                  className="flex items-center justify-between gap-3 rounded-md border border-bordeaux/40 bg-bordeaux/5 px-3 py-2.5 text-left text-sm transition-colors hover:bg-bordeaux/10 disabled:opacity-50"
+                >
+                  <span className="font-medium text-encre">Tout l'équipage</span>
+                  <span className="shrink-0 text-xs text-encre-douce">
+                    {crewShareTripIds.includes(selectedTrip.id) ? "Déjà partagé" : "Partager"}
+                  </span>
+                </button>
+                {members === null ? (
+                  <p className="px-2 py-4 text-center text-sm text-encre-douce">Chargement…</p>
+                ) : members.length === 0 ? (
+                  <p className="px-2 py-4 text-center text-sm text-encre-douce">
+                    Personne d'autre à bord pour l'instant.
+                  </p>
+                ) : (
+                  members.map((m) => {
+                    const already = shares.some(
+                      (s) => s.tripId === selectedTrip.id && s.recipientName === m.name,
+                    );
+                    return (
+                      <button
+                        key={m.userId}
+                        type="button"
+                        disabled={pending || already}
+                        onClick={() => share(selectedTrip.id, m.userId)}
+                        className="flex items-center justify-between gap-3 rounded-md border border-laiton-clair bg-papier px-3 py-2.5 text-left text-sm transition-colors hover:bg-parchemin disabled:opacity-50"
+                      >
+                        <span className="font-medium text-encre">Seulement {m.name}</span>
+                        <span className="shrink-0 text-xs text-encre-douce">
+                          {already ? "Déjà partagé" : "Partager"}
+                        </span>
+                      </button>
+                    );
+                  })
+                )}
+                <button
+                  type="button"
+                  onClick={() => setSelectedTrip(null)}
+                  className="mt-1 text-left text-xs text-encre-douce underline underline-offset-4"
+                >
+                  ← Changer de voyage
+                </button>
+              </div>
+            )}
           </DialogContent>
         </Dialog>
       </div>
@@ -114,18 +200,22 @@ export function ShareManager({ documentId, shares }: { documentId: string; share
         <ul className="mt-3 flex flex-col gap-2">
           {shares.map((s) => (
             <li
-              key={s.tripId}
+              key={s.shareId}
               className="flex items-center justify-between gap-3 rounded-md border border-laiton-clair/60 bg-parchemin/50 px-3 py-2 text-sm"
             >
-              <span className="text-encre">
-                Partagé avec : <span className="font-medium">{s.tripName}</span>
+              <span className="min-w-0 truncate text-encre">
+                <span className="font-medium">{s.tripName}</span>
+                <span className="text-encre-douce">
+                  {" — "}
+                  {s.recipientName ? `seulement ${s.recipientName}` : "tout l'équipage"}
+                </span>
               </span>
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
                 disabled={pending}
-                onClick={() => unshare(s.tripId)}
+                onClick={() => unshare(s.shareId)}
               >
                 Retirer
               </Button>

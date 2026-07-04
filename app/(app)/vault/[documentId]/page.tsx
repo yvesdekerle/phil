@@ -25,7 +25,12 @@ export default async function VaultDocumentPage({
 
   const [{ data: doc }, { data: shareRows }] = await Promise.all([
     supabase.from("documents").select("*").eq("id", documentId).is("deleted_at", null).single(),
-    supabase.from("document_shares").select("trip_id, trips(name)").eq("document_id", documentId),
+    supabase
+      .from("document_shares")
+      .select(
+        "id, trip_id, shared_with, trips(name), profiles!document_shares_shared_with_fkey(display_name)",
+      )
+      .eq("document_id", documentId),
   ]);
 
   if (!doc) {
@@ -33,8 +38,10 @@ export default async function VaultDocumentPage({
   }
 
   const shares = (shareRows ?? []).map((s) => ({
+    shareId: s.id,
     tripId: s.trip_id,
     tripName: s.trips?.name ?? "Voyage",
+    recipientName: s.shared_with ? (s.profiles?.display_name ?? "Un voyageur") : null,
   }));
 
   const viewUrl = `/api/documents/${doc.id}/view`;

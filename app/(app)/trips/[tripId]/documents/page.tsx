@@ -18,6 +18,7 @@ type TripDocument = {
   scope: "VAULT" | "TRIP";
   ownerName: string;
   canDelete: boolean;
+  forMeOnly?: boolean;
 };
 
 export default async function TripDocumentsPage({
@@ -49,7 +50,7 @@ export default async function TripDocumentsPage({
     supabase
       .from("document_shares")
       .select(
-        "documents(id, file_name, category, uploaded_at, scope, deleted_at, profiles(display_name))",
+        "shared_with, documents(id, file_name, category, uploaded_at, scope, deleted_at, profiles(display_name))",
       )
       .eq("trip_id", tripId),
     supabase
@@ -74,16 +75,19 @@ export default async function TripDocumentsPage({
   }));
 
   const fromVault: TripDocument[] = (sharedRows ?? [])
-    .map((r) => r.documents)
-    .filter((d): d is NonNullable<typeof d> => d !== null && d.deleted_at === null)
-    .map((d) => ({
-      id: d.id,
-      file_name: d.file_name,
-      category: d.category,
-      uploaded_at: d.uploaded_at,
+    .filter(
+      (r): r is typeof r & { documents: NonNullable<(typeof r)["documents"]> } =>
+        r.documents !== null && r.documents.deleted_at === null,
+    )
+    .map((r) => ({
+      id: r.documents.id,
+      file_name: r.documents.file_name,
+      category: r.documents.category,
+      uploaded_at: r.documents.uploaded_at,
       scope: "VAULT" as const,
-      ownerName: d.profiles?.display_name ?? "Voyageur",
+      ownerName: r.documents.profiles?.display_name ?? "Voyageur",
       canDelete: false, // un doc du coffre partagé se gère depuis le coffre
+      forMeOnly: r.shared_with === user.id, // E09 : partage ciblé
     }));
 
   const owners = [...new Set([...fromTrip, ...fromVault].map((d) => d.ownerName))].sort();
@@ -217,7 +221,7 @@ export default async function TripDocumentsPage({
                 )}
               >
                 {doc.scope === "VAULT"
-                  ? `Partagé par ${doc.ownerName}`
+                  ? `Partagé par ${doc.ownerName}${doc.forMeOnly ? " — pour toi" : ""}`
                   : `Ajouté par ${doc.ownerName}`}
               </span>
               <OfflineDocToggle documentId={doc.id} fileName={doc.file_name} />

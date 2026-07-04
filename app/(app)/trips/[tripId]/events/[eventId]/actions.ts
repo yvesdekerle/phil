@@ -120,11 +120,14 @@ export async function attachDocument(
   }
 
   if (doc.scope === "VAULT") {
+    // On cherche un partage équipage entier (E09 : un partage ciblé ne
+    // suffit pas pour attacher un doc visible de tous à un événement)
     const { data: existingShare } = await supabase
       .from("document_shares")
       .select("id")
       .eq("document_id", documentId)
       .eq("trip_id", tripId)
+      .is("shared_with", null)
       .maybeSingle();
 
     if (!existingShare) {

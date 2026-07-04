@@ -253,6 +253,67 @@ async function main(): Promise<void> {
       (await rows("documents?select=id", jwtB)).length === 0,
     );
 
+    // ================= partage ciblé (E09) =================
+    section("Partage ciblé (E09)");
+
+    // Troisième participant C, EDITOR de X, pour vérifier l'étanchéité
+    const idC = await createUser("verify-rls-c@phil-app.test");
+    const jwtC = await signIn("verify-rls-c@phil-app.test");
+    try {
+      await fetch(`${BASE}/rest/v1/trip_participants`, {
+        method: "POST",
+        headers: admin,
+        body: JSON.stringify({ trip_id: tripX, user_id: idC, role: "EDITOR" }),
+      });
+
+      r = await fetch(`${BASE}/rest/v1/document_shares`, {
+        method: "POST",
+        headers: as(jwtA),
+        body: JSON.stringify({
+          document_id: vaultDoc,
+          trip_id: tripX,
+          shared_by: idA,
+          shared_with: idB,
+        }),
+      });
+      check("A partage son doc VAULT ciblé vers B", r.status === 201);
+      check(
+        "E09 : B (destinataire) voit le doc ciblé",
+        (await rows("documents?select=id", jwtB)).length === 1,
+      );
+      check(
+        "E09 : C (autre participant) ne voit PAS le doc ciblé",
+        (await rows("documents?select=id", jwtC)).length === 0,
+      );
+      check(
+        "E09 : C ne voit même pas la ligne de partage ciblée",
+        (await rows(`document_shares?select=id&document_id=eq.${vaultDoc}`, jwtC)).length === 0,
+      );
+
+      // Partage équipage en parallèle, puis retrait du ciblé : l'équipage tient
+      await fetch(`${BASE}/rest/v1/document_shares`, {
+        method: "POST",
+        headers: as(jwtA),
+        body: JSON.stringify({ document_id: vaultDoc, trip_id: tripX, shared_by: idA }),
+      });
+      r = await fetch(
+        `${BASE}/rest/v1/document_shares?document_id=eq.${vaultDoc}&shared_with=eq.${idB}`,
+        { method: "DELETE", headers: { ...as(jwtA), Prefer: "return=representation" } },
+      );
+      check("A retire le partage ciblé", ((await r.json()) as unknown[]).length === 1);
+      check(
+        "E09 : le partage équipage parallèle survit (B et C voient)",
+        (await rows("documents?select=id", jwtB)).length === 1 &&
+          (await rows("documents?select=id", jwtC)).length === 1,
+      );
+      await fetch(`${BASE}/rest/v1/document_shares?document_id=eq.${vaultDoc}`, {
+        method: "DELETE",
+        headers: as(jwtA),
+      });
+    } finally {
+      await deleteUser(idC);
+    }
+
     const tripDoc = crypto.randomUUID();
     await fetch(`${BASE}/rest/v1/documents`, {
       method: "POST",
