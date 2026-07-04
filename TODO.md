@@ -665,8 +665,9 @@ Retours Yves (2026-07-05) : supprimer le bloc "Phil te souffle" ; **3 onglets** 
 Partout où l'équipage est listé (participants, sélecteurs d'assignation, Bourse…).
 > Note : tri `localeCompare("fr")` sur : page Participants, membres de la Bourse (Dépenses + Équilibre), inscrits d'un événement, assignation Valise.
 
-### [~] PHIL-Q29 — Page Horloges transversale
+### [x] PHIL-Q29 — Page Horloges transversale *(fait le 2026-07-05)*
 Remplacer le bandeau du calendrier (Q24) par une **page Horloges** hors voyage : une horloge **par ligne** (chez soi + chaque destination de mes voyages), triées par **décalage par rapport à Greenwich croissant** (le plus petit en haut).
+> Note : page `/horloges` (lien "Horloges" en tête de Tes voyages) — chez toi (encadré laiton, fuseau du profil) + une horloge par destination de voyage non archivé (dédup par fuseau), chaque ligne : grande heure, destination, jour + "UTC+4 · +3 h par rapport à chez toi", tick 15 s. Bandeau Q24 retiré du calendrier.
 
 ### [x] PHIL-Q30 — Fix : aperçu des documents du coffre bloqué par la CSP *(fait le 2026-07-05, livré dans le commit Q28)*
 Retour Yves : viewer cassé malgré des PDF valides (diagnostic mené jusque dans Chrome : réponse 200 `application/pdf` correcte). Cause : `X-Frame-Options: DENY`, `frame-ancestors 'none'` et `object-src 'none'` (PHIL-J01) appliqués **à la réponse PDF elle-même** → Chrome refuse de l'afficher (iframe et pleine page). Fix : `/api/documents/:id/view` exclu de la CSP globale dans `next.config.ts`, avec ses propres headers (`frame-ancestors 'self'`, `X-Frame-Options: SAMEORIGIN`, `object-src 'self'`, nosniff).

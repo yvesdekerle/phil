@@ -28,6 +28,12 @@ export default async function TripsPage() {
         <h1 className="font-display text-3xl text-encre">Tes voyages</h1>
         <div className="flex items-center gap-3">
           <Link
+            href="/horloges"
+            className="text-sm text-encre-douce underline underline-offset-4 hover:text-encre"
+          >
+            Horloges
+          </Link>
+          <Link
             href="/conseils"
             className="text-sm text-encre-douce underline underline-offset-4 hover:text-encre"
           >
