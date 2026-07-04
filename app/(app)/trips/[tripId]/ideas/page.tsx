@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { IdeaCard } from "@/components/ideas/idea-card";
 import { type Poll, PollsSection } from "@/components/ideas/polls-section";
+import { RealtimeRefresh } from "@/components/realtime-refresh";
 import { Button } from "@/components/ui/button";
 import type { IdeaWithMeta } from "@/lib/ideas/types";
 import { createClient } from "@/lib/supabase/server";
@@ -91,6 +92,8 @@ export default async function TripIdeasPage({
 
   return (
     <div className="flex flex-col gap-5">
+      {/* PHIL-Q03 : votes et sondages en direct */}
+      <RealtimeRefresh tables={["polls", "poll_votes", "idea_votes"]} />
       <PollsSection tripId={tripId} polls={polls} myId={user.id} isOwner={me?.role === "OWNER"} />
       <div className="flex items-center justify-between">
         <p className="text-sm text-encre-douce">

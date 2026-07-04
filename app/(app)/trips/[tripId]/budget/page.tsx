@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { RealtimeRefresh } from "@/components/realtime-refresh";
 import { computeBalances, computeSettlements } from "@/lib/budget/balances";
 import { fromBase, getRates, toBase } from "@/lib/budget/rates";
 import { createClient } from "@/lib/supabase/server";
@@ -120,20 +121,24 @@ export default async function BudgetPage({ params }: { params: Promise<{ tripId:
   }
 
   return (
-    <BudgetClient
-      tripId={tripId}
-      expenses={expenses}
-      balancesByCurrency={groups}
-      primaryCurrency={primary}
-      secondaryCurrency={secondary}
-      secondaryRate={secondaryRate}
-      members={(members ?? []).map((m) => ({
-        userId: m.user_id,
-        name: m.profiles?.display_name ?? "Voyageur",
-      }))}
-      events={events ?? []}
-      myId={user.id}
-      isOwner={me?.role === "OWNER"}
-    />
+    <>
+      {/* PHIL-Q03 : dépenses et remboursements en direct */}
+      <RealtimeRefresh tables={["expenses", "expense_beneficiaries"]} />
+      <BudgetClient
+        tripId={tripId}
+        expenses={expenses}
+        balancesByCurrency={groups}
+        primaryCurrency={primary}
+        secondaryCurrency={secondary}
+        secondaryRate={secondaryRate}
+        members={(members ?? []).map((m) => ({
+          userId: m.user_id,
+          name: m.profiles?.display_name ?? "Voyageur",
+        }))}
+        events={events ?? []}
+        myId={user.id}
+        isOwner={me?.role === "OWNER"}
+      />
+    </>
   );
 }

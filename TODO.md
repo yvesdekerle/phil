@@ -620,8 +620,9 @@ Le geste le plus fréquent de l'app doit être le plus court (standard TripIt/Wa
 Taper une photo ouvre une visionneuse plein écran (original) avec précédent/suivant, clavier (←/→/Échap) et fermeture au tap — au lieu de l'ouverture brute dans un nouvel onglet.
 > Note : overlay encre 95 % — compteur x/n + auteur en tête, flèches ‹ › (bouclage), ←/→/Échap au clavier, clic sur le fond = fermer, légende en pied. L'original ne se charge que dans la visionneuse (la grille reste sur les vignettes).
 
-### [ ] PHIL-Q03 — Temps réel sur les votes et sondages
+### [x] PHIL-Q03 — Temps réel sur les votes et sondages *(fait le 2026-07-04)*
 Supabase Realtime (free tier) : les sondages éclair, votes d'idées et dépenses se mettent à jour sans recharger. Migration : ajouter `polls`, `poll_votes`, `idea_votes`, `expenses` à la publication realtime (RLS appliquée par WALRUS — on ne reçoit que ce qu'on a le droit de voir). Composant `RealtimeRefresh` (channel + router.refresh() débouncé) posé sur les pages Idées et Budget.
+> Note : 5 tables ajoutées à la publication (`expense_beneficiaries` incluse). `RealtimeRefresh` invisible, `router.refresh()` débouncé 400 ms, désabonnement au démontage ; échec de connexion = comportement d'avant (rechargement manuel), jamais bloquant. Test réel à deux navigateurs à faire en prod (le SW/dev ne s'y prête pas). `verify:rls` 30/30.
 
 ### [x] PHIL-Q04 — Sélecteur de devise *(fait le 2026-07-04)*
 Remplacer les champs texte libres "EUR" par un input avec datalist des devises courantes (code + libellé, saisie libre toujours possible) — Paramètres du voyage (principale/secondaire) et formulaire de dépense.
