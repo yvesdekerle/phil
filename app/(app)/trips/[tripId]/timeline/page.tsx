@@ -3,13 +3,15 @@ import { fr } from "date-fns/locale";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { EventTypeIcon } from "@/components/calendar/event-type-icon";
+import { TripViewToggle } from "@/components/calendar/trip-view-toggle";
 import { eventDayKey } from "@/lib/events/datetime";
 import type { TripEvent } from "@/lib/events/types";
 import { EVENT_TYPE_LABELS } from "@/lib/events/types";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 
-const DAY_WIDTH = 84; // px par jour
+const DAY_WIDTH = 130; // px par jour (PHIL-Q36 : plus large pour lire les libellés)
+const LABEL_W = 150; // px de la colonne fixe des noms
 const LANES = ["TRANSPORT", "LODGING", "ACTIVITY"] as const;
 
 /** Vue timeline (PHIL-F03) : Gantt horizontal du voyage entier. */
@@ -59,15 +61,18 @@ export default async function TimelinePage({ params }: { params: Promise<{ tripI
     return { event, startIdx, span: Math.max(1, endIdx - startIdx + 1) };
   });
 
+  // Fond en colonnes : un léger séparateur vertical à chaque jour (PHIL-Q36)
+  const dayGridBackground = {
+    backgroundImage:
+      "repeating-linear-gradient(to right, rgba(176,141,63,0.16) 0, rgba(176,141,63,0.16) 1px, transparent 1px, transparent " +
+      `${DAY_WIDTH}px)`,
+    backgroundPosition: `${LABEL_W}px 0`,
+  } as const;
+
   return (
     <div>
-      <div className="mb-4 flex items-center justify-between">
-        <Link
-          href={`/trips/${tripId}`}
-          className="text-sm text-encre-douce underline underline-offset-4 hover:text-encre"
-        >
-          ← Retour au calendrier
-        </Link>
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <TripViewToggle tripId={tripId} active="timeline" />
         <h1 className="font-display text-2xl text-encre">Timeline</h1>
       </div>
 
@@ -80,14 +85,14 @@ export default async function TimelinePage({ params }: { params: Promise<{ tripI
         </div>
       ) : (
         <div className="overflow-x-auto rounded-lg border border-laiton-clair bg-papier pb-3">
-          <div style={{ width: dayCount * DAY_WIDTH + 130 }}>
-            {/* En-tête des jours */}
-            <div className="flex border-b border-laiton-clair/60">
-              <div className="w-[130px] shrink-0" />
+          <div style={{ width: dayCount * DAY_WIDTH + LABEL_W }}>
+            {/* En-tête des jours — colonne des noms figée à gauche */}
+            <div className="flex border-b border-laiton-clair/60" style={dayGridBackground}>
+              <div className="sticky left-0 z-20 shrink-0 bg-papier" style={{ width: LABEL_W }} />
               {days.map((d) => (
                 <div
                   key={d.toISOString()}
-                  className="shrink-0 border-l border-laiton-clair/30 px-2 py-2 text-center"
+                  className="shrink-0 border-l border-laiton-clair/40 px-2 py-2 text-center"
                   style={{ width: DAY_WIDTH }}
                 >
                   <p className="text-[0.65rem] text-encre-douce uppercase">
@@ -108,12 +113,20 @@ export default async function TimelinePage({ params }: { params: Promise<{ tripI
               }
               return (
                 <div key={lane} className="border-b border-laiton-clair/40 last:border-b-0">
-                  <p className="px-3 pt-2.5 pb-1 text-[0.65rem] font-medium tracking-wide text-laiton uppercase">
+                  <p className="sticky left-0 z-20 bg-papier px-3 pt-2.5 pb-1 text-[0.65rem] font-medium tracking-wide text-laiton uppercase">
                     {EVENT_TYPE_LABELS[lane]}
                   </p>
                   {laneBars.map(({ event, startIdx, span }) => (
-                    <div key={event.id} className="flex items-center py-0.5">
-                      <div className="w-[130px] shrink-0 truncate px-3 text-xs text-encre-douce">
+                    <div
+                      key={event.id}
+                      className="flex items-center py-0.5"
+                      style={dayGridBackground}
+                    >
+                      <div
+                        className="sticky left-0 z-20 shrink-0 truncate border-r border-laiton-clair/40 bg-papier px-3 text-xs text-encre-douce"
+                        style={{ width: LABEL_W }}
+                        title={event.title}
+                      >
                         {event.title}
                       </div>
                       <div className="relative h-8" style={{ width: dayCount * DAY_WIDTH }}>

@@ -1,6 +1,8 @@
+import { cookies } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { TodayHero } from "@/components/calendar/today-hero";
+import { TripViewToggle } from "@/components/calendar/trip-view-toggle";
 import { WeatherLine, WeatherStrip } from "@/components/trips/trip-weather";
 import { Button } from "@/components/ui/button";
 import { eventDayKey, eventTime } from "@/lib/events/datetime";
@@ -19,6 +21,11 @@ export default async function TripCalendarPage({
   params: Promise<{ tripId: string }>;
 }) {
   const { tripId } = await params;
+  // PHIL-Q36 : vue préférée mémorisée — on atterrit direct sur la Timeline si choisie
+  const view = (await cookies()).get("phil_trip_view")?.value;
+  if (view === "timeline") {
+    redirect(`/trips/${tripId}/timeline`);
+  }
   const supabase = await createClient();
   const {
     data: { user },
@@ -126,10 +133,8 @@ export default async function TripCalendarPage({
         />
       ) : null}
       {trip ? <WeatherStrip days={weatherDays} destination={trip.destination} /> : null}
-      <div className="flex items-center justify-end gap-3">
-        <Button asChild variant="outline">
-          <Link href={`/trips/${tripId}/timeline`}>Timeline</Link>
-        </Button>
+      <div className="flex items-center justify-between gap-3">
+        <TripViewToggle tripId={tripId} active="calendar" />
         {canEdit ? (
           <Button asChild>
             <Link href={`/trips/${tripId}/events/new`}>Ajouter un événement</Link>

@@ -692,8 +692,9 @@ Ajouter au coffre **carte Vitale** et **carte européenne d'assurance maladie** 
 La recherche du calendrier recharge la page (form GET) : la passer en **live avec micro-délai** (debounce ~200 ms), filtrage côté client, sans rechargement.
 > Note : liste du calendrier extraite en client component `calendar-days.tsx` — recherche live via `useDeferredValue` (input réactif, filtrage différé, zéro aller-retour serveur), `fuzzyMatch` réutilisé. La page serveur ne prend plus `?q=`. **Vérifié dans Chrome** : "plnoge" filtre instantanément la liste sans recharger (URL inchangée).
 
-### [ ] PHIL-Q36 — Timeline : colonne fixe, séparateurs de jours, jours plus larges, bascule mémorisée
+### [x] PHIL-Q36 — Timeline : colonne fixe, séparateurs de jours, jours plus larges, bascule mémorisée *(fait le 2026-07-05)*
 Retours Yves : colonne des noms (transports/activités) **fixe** au scroll horizontal ; **séparateurs verticaux** légers entre les jours ; **jours plus larges** ; **bascule Calendrier ⇄ Timeline mémorisée** (on retrouve sa vue préférée en rouvrant un voyage).
+> Note : colonne des noms + en-têtes de lane en `sticky left-0 z-20 bg-papier` (restent visibles au scroll horizontal) ; séparateurs de jours via `repeating-linear-gradient` doré léger décalé de la largeur de colonne ; `DAY_WIDTH` 84→130 px, `LABEL_W` 150 px. Bascule `TripViewToggle` (cookie `phil_trip_view`, 1 an) sur les deux vues ; le calendrier redirige vers la Timeline si c'est la vue mémorisée. **Vérifié dans Chrome** : au scroll jusqu'au 22 nov, les noms restent figés à gauche, séparateurs visibles, bascule fonctionnelle.
 
 ### [ ] PHIL-Q37 — i18n : français / anglais (traduire toute l'app)
 Le profil a déjà le choix FR/EN (`profiles.locale`) mais rien n'est traduit. Mettre en place l'infrastructure i18n et traduire l'ensemble de l'UI (gros chantier, à cadrer). Conserver la microcopy Verne dans les deux langues.
