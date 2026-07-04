@@ -672,8 +672,9 @@ Remplacer le bandeau du calendrier (Q24) par une **page Horloges** hors voyage :
 ### [x] PHIL-Q30 — Fix : aperçu des documents du coffre bloqué par la CSP *(fait le 2026-07-05, livré dans le commit Q28)*
 Retour Yves : viewer cassé malgré des PDF valides (diagnostic mené jusque dans Chrome : réponse 200 `application/pdf` correcte). Cause : `X-Frame-Options: DENY`, `frame-ancestors 'none'` et `object-src 'none'` (PHIL-J01) appliqués **à la réponse PDF elle-même** → Chrome refuse de l'afficher (iframe et pleine page). Fix : `/api/documents/:id/view` exclu de la CSP globale dans `next.config.ts`, avec ses propres headers (`frame-ancestors 'self'`, `X-Frame-Options: SAMEORIGIN`, `object-src 'self'`, nosniff).
 
-### [~] PHIL-Q31 — Navigation : liens principaux + menu du profil
+### [x] PHIL-Q31 — Navigation : liens principaux + menu du profil *(fait le 2026-07-05)*
 Retours Yves (2026-07-05) : mettre **Horloges** et **Conseils** dans le menu principal tout en haut (à côté de Voyages/Coffre/Amis) ; l'avatar ouvre un **menu déroulant** (Profil / Exploration / Déconnexion) au lieu d'un lien direct.
+> Note : `NAV_LINKS` = Voyages/Coffre/Amis/Horloges/Conseils dans le header ; liens Horloges/Conseils retirés de l'en-tête de "Tes voyages" (doublon). Nouveau `components/layout/profile-menu.tsx` (client) : avatar → menu (Profil / Exploration / Déconnexion via form server action), ferme au clic extérieur + Échap, `role=menu`. **Vérifié dans Chrome** : menu s'ouvre/ferme, avatar = image du compte Google.
 
 ### [x] PHIL-Q32 — Fix : crash de la carte du monde (Exploration) *(fait le 2026-07-05)*
 `Cannot read properties of undefined (reading 'appendChild')` dans `world-map.tsx:74` (`.addTo(map)`) : le GeoJSON est chargé en async et le cleanup de l'effet détruit la carte avant l'arrivée des données (double montage StrictMode). Garde d'annulation.

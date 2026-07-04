@@ -26,23 +26,9 @@ export default async function TripsPage() {
     <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">
       <div className="mb-6 flex items-center justify-between gap-3">
         <h1 className="font-display text-3xl text-encre">Tes voyages</h1>
-        <div className="flex items-center gap-3">
-          <Link
-            href="/horloges"
-            className="text-sm text-encre-douce underline underline-offset-4 hover:text-encre"
-          >
-            Horloges
-          </Link>
-          <Link
-            href="/conseils"
-            className="text-sm text-encre-douce underline underline-offset-4 hover:text-encre"
-          >
-            Conseils de voyage
-          </Link>
-          <Button asChild>
-            <Link href="/trips/new">Créer un voyage</Link>
-          </Button>
-        </div>
+        <Button asChild>
+          <Link href="/trips/new">Créer un voyage</Link>
+        </Button>
       </div>
 
       {trips.length === 0 ? (

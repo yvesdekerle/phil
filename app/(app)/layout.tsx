@@ -1,7 +1,15 @@
-import Image from "next/image";
 import Link from "next/link";
+import { ProfileMenu } from "@/components/layout/profile-menu";
 import { getOwnProfile } from "@/lib/supabase/profiles";
 import { createClient } from "@/lib/supabase/server";
+
+const NAV_LINKS = [
+  { href: "/trips", label: "Voyages" },
+  { href: "/vault", label: "Coffre" },
+  { href: "/friends", label: "Amis" },
+  { href: "/horloges", label: "Horloges" },
+  { href: "/conseils", label: "Conseils" },
+];
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -20,45 +28,18 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               Phil
             </Link>
             <nav className="flex items-center gap-4 text-sm">
-              <Link
-                href="/trips"
-                className="text-encre-douce transition-colors hover:text-encre focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-laiton"
-              >
-                Voyages
-              </Link>
-              <Link
-                href="/vault"
-                className="text-encre-douce transition-colors hover:text-encre focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-laiton"
-              >
-                Coffre
-              </Link>
-              <Link
-                href="/friends"
-                className="text-encre-douce transition-colors hover:text-encre focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-laiton"
-              >
-                Amis
-              </Link>
+              {NAV_LINKS.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="text-encre-douce transition-colors hover:text-encre focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-laiton"
+                >
+                  {link.label}
+                </Link>
+              ))}
             </nav>
           </div>
-          <Link
-            href="/profile"
-            aria-label="Ton profil"
-            className="rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-laiton"
-          >
-            {profile?.avatar_url ? (
-              <Image
-                src={profile.avatar_url}
-                alt=""
-                width={34}
-                height={34}
-                className="rounded-full border border-laiton-clair"
-              />
-            ) : (
-              <span className="flex size-[34px] items-center justify-center rounded-full border border-laiton-clair bg-papier text-sm text-laiton">
-                {initial}
-              </span>
-            )}
-          </Link>
+          <ProfileMenu avatarUrl={profile?.avatar_url ?? null} initial={initial} />
         </div>
       </header>
       {children}
