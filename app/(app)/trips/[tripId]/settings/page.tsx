@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { PrepareOfflineButton } from "@/components/offline/prepare-offline-button";
 import { createClient } from "@/lib/supabase/server";
+import { CalendarFeed } from "./calendar-feed";
 import { CoverUpload } from "./cover-upload";
 import { TripSettingsForm } from "./settings-form";
 
@@ -23,10 +24,15 @@ export default async function TripSettingsPage({
 
   const { data: me } = await supabase
     .from("trip_participants")
-    .select("role")
+    .select("role, calendar_token")
     .eq("trip_id", tripId)
     .eq("user_id", user.id)
     .single();
+
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const calendarUrl = me
+    ? `${baseUrl}/api/trips/${tripId}/calendar.ics?token=${me.calendar_token}`
+    : null;
 
   const isOwner = me?.role === "OWNER";
   const canEdit = me?.role === "OWNER" || me?.role === "EDITOR";
@@ -34,6 +40,7 @@ export default async function TripSettingsPage({
   return (
     <div className="mx-auto flex max-w-lg flex-col gap-6">
       <PrepareOfflineButton tripId={trip.id} />
+      {calendarUrl ? <CalendarFeed url={calendarUrl} /> : null}
       {canEdit ? <CoverUpload tripId={trip.id} /> : null}
       <TripSettingsForm
         tripId={trip.id}

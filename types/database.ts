@@ -485,6 +485,7 @@ export type Database = {
       };
       trip_participants: {
         Row: {
+          calendar_token: string;
           invited_by: string | null;
           joined_at: string;
           role: Database["public"]["Enums"]["trip_role"];
@@ -492,6 +493,7 @@ export type Database = {
           user_id: string;
         };
         Insert: {
+          calendar_token?: string;
           invited_by?: string | null;
           joined_at?: string;
           role?: Database["public"]["Enums"]["trip_role"];
@@ -499,6 +501,7 @@ export type Database = {
           user_id: string;
         };
         Update: {
+          calendar_token?: string;
           invited_by?: string | null;
           joined_at?: string;
           role?: Database["public"]["Enums"]["trip_role"];

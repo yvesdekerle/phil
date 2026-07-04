@@ -12,7 +12,14 @@ const PUBLIC_PATHS = [
   "/legal",
 ];
 /** Préfixes publics : callback OAuth, invitations (D06), health check, assets PWA, crons (protégés par CRON_SECRET). */
-const PUBLIC_PREFIXES = ["/auth/", "/invitations/", "/api/health", "/icons/", "/api/cron/"];
+const PUBLIC_PREFIXES = [
+  "/auth/",
+  "/invitations/",
+  "/api/health",
+  "/icons/",
+  "/api/cron/",
+  "/api/trips/",
+];
 
 function isPublicPath(pathname: string): boolean {
   return PUBLIC_PATHS.includes(pathname) || PUBLIC_PREFIXES.some((p) => pathname.startsWith(p));
