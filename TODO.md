@@ -633,6 +633,16 @@ Remplacer les champs texte libres "EUR" par un input avec datalist des devises c
 Bouton "Exporter (CSV)" sur l'onglet Budget : titre, montant, devise, montant converti, catégorie, payeur, bénéficiaires, date, remboursement — généré côté client depuis les données affichées.
 > Note : génération 100 % client (Blob + download `budget-phil.csv`), séparateur `;` + BOM UTF-8 + décimales à virgule pour Excel FR, montants convertis en devise principale inclus, noms réels (pas "Toi"). `spent_on` remonté au client au passage.
 
+### [x] PHIL-Q07 — Accueil : redirection au lieu de la page placeholder *(fait le 2026-07-04)*
+La racine `/` affichait encore le splash de la phase 1 ("bientôt prêt à partir"). Demande Yves : connecté → `/trips`, sinon → `/login`.
+> Note : `redirect()` côté serveur, plus aucune page intermédiaire.
+
+### [ ] PHIL-Q08 — Seed démo complet (Maurice novembre 2026)
+Peupler le voyage démo avec le vrai séjour (5→21 nov, Tamarin puis Blue Bay) : 7 nouveaux comptes démo (Alexandre, Audrey, Adé, Mathieu, Quentin, Chloé, Julie), vol Julie & Quentin le 6 nov 9h, activités piochées dans le guide Maurice d'Yves (yallah/activites-maurice.md), et des données dans **toutes** les fonctionnalités : idées + votes, sondages, candidats + avis, valise (+ à-emporter), budget multi-devises + remboursement, journal, notes, fiches d'urgence, documents PDF, photos basse qualité, brouillon d'import email, WhatsApp. Script `scripts/seed-demo-maurice.ts` (service role, réinitialise les données du voyage démo uniquement).
+
+### [ ] PHIL-Q09 — Documentation complète des fonctionnalités
+`docs/FONCTIONNALITES.md` : toutes les fonctionnalités par catégorie, à jour des vagues 1 à 5.
+
 ### [x] PHIL-Q06 — Inviter ses compagnons habituels en un tap *(fait le 2026-07-04)*
 Sur la page Participants : sous le formulaire d'invitation par email, une rangée "Tes compagnons de route" — les amis du carnet (D08) pas encore à bord de ce voyage, avatar + prénom, un tap = invitation (réutilise `inviteFriend`, choix du rôle simple). "On part souvent avec les mêmes personnes" — demande Yves du 2026-07-04.
 > Note : carte "Tes compagnons de route" (visible OWNER/EDITOR) au-dessus du formulaire d'invitation — puces avatar + prénom des co-voyageurs des autres voyages non encore à bord, un tap → `inviteFriend` D08 (email via Resend + lien dans la liste des invitations, rôle EDITOR comme depuis le carnet), état "✓" après envoi, `revalidatePath` ajouté à l'action pour que l'invitation apparaisse aussitôt. Doublons gérés par le flux existant ("déjà en attente").
