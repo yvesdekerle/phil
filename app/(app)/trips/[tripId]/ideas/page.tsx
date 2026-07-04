@@ -3,8 +3,10 @@ import { redirect } from "next/navigation";
 import { IdeaCard } from "@/components/ideas/idea-card";
 import { type Poll, PollsSection } from "@/components/ideas/polls-section";
 import { RealtimeRefresh } from "@/components/realtime-refresh";
+import { SearchForm } from "@/components/search-form";
 import { Button } from "@/components/ui/button";
 import type { IdeaWithMeta } from "@/lib/ideas/types";
+import { fuzzyMatch } from "@/lib/search/fuzzy";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 
@@ -13,10 +15,10 @@ export default async function TripIdeasPage({
   searchParams,
 }: {
   params: Promise<{ tripId: string }>;
-  searchParams: Promise<{ sort?: string; tag?: string; dismissed?: string }>;
+  searchParams: Promise<{ sort?: string; tag?: string; dismissed?: string; q?: string }>;
 }) {
   const { tripId } = await params;
-  const { sort, tag, dismissed } = await searchParams;
+  const { sort, tag, dismissed, q } = await searchParams;
   const sortBy = sort === "recent" ? "recent" : "votes";
   const showDismissed = dismissed === "1";
 
@@ -77,6 +79,12 @@ export default async function TripIdeasPage({
   if (tag) {
     ideas = ideas.filter((i) => i.tags.includes(tag));
   }
+  // PHIL-Q22 : recherche tolérante (accents, petites fautes)
+  if (q?.trim()) {
+    ideas = ideas.filter((i) =>
+      fuzzyMatch(`${i.title} ${i.description ?? ""} ${i.location_name ?? ""}`, q),
+    );
+  }
   if (sortBy === "votes") {
     ideas = [...ideas].sort((a, b) => b.voteCount - a.voteCount);
   }
@@ -113,6 +121,13 @@ export default async function TripIdeasPage({
         🏠 <span className="font-medium">Hébergements candidats</span>
         <span className="text-encre-douce"> — comparer les options avant de trancher →</span>
       </Link>
+
+      <SearchForm
+        action={`/trips/${tripId}/ideas`}
+        q={q}
+        placeholder="Rechercher une idée (plongée, plnoge…)"
+        hidden={{ sort, tag, dismissed }}
+      />
 
       <div className="flex flex-wrap items-center gap-2">
         <Link

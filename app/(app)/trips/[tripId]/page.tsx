@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { EventTypeIcon } from "@/components/calendar/event-type-icon";
 import { TodayHero } from "@/components/calendar/today-hero";
+import { SearchForm } from "@/components/search-form";
 import { WeatherLine, WeatherStrip } from "@/components/trips/trip-weather";
 import { Button } from "@/components/ui/button";
 import { eventDayKey, eventTime, groupEventsByDay } from "@/lib/events/datetime";
@@ -9,6 +10,7 @@ import type { TripEvent } from "@/lib/events/types";
 import { navigateUrl } from "@/lib/geo/directions";
 import { ensureTripCoords } from "@/lib/geo/locate";
 import { formatMinutes, getTravelMinutes } from "@/lib/geo/travel-time";
+import { fuzzyMatch } from "@/lib/search/fuzzy";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 import { type DailyForecast, getDailyForecast } from "@/lib/weather/open-meteo";
@@ -16,10 +18,13 @@ import { QuickAdd } from "./quick-add";
 
 export default async function TripCalendarPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ tripId: string }>;
+  searchParams: Promise<{ q?: string }>;
 }) {
   const { tripId } = await params;
+  const { q } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -51,7 +56,11 @@ export default async function TripCalendarPage({
 
   const events = (eventsData ?? []) as TripEvent[];
   const canEdit = me?.role === "OWNER" || me?.role === "EDITOR";
-  const days = groupEventsByDay(events);
+  // PHIL-Q22 : recherche tolérante sur le programme
+  const visibleEvents = q?.trim()
+    ? events.filter((e) => fuzzyMatch(`${e.title} ${e.location_name ?? ""} ${e.notes ?? ""}`, q))
+    : events;
+  const days = groupEventsByDay(visibleEvents);
   // "Aujourd'hui" dans le fuseau du voyage
   const todayKey = trip ? eventDayKey(new Date().toISOString(), trip.default_timezone) : null;
 
@@ -152,6 +161,10 @@ export default async function TripCalendarPage({
         />
       ) : null}
 
+      {events.length > 0 ? (
+        <SearchForm action={`/trips/${tripId}`} q={q} placeholder="Rechercher dans le programme…" />
+      ) : null}
+
       {days.length > 0 ? (
         <p className="-mb-3 text-right text-xs text-encre-douce">
           Heures affichées en heure locale de chaque événement.
@@ -160,9 +173,13 @@ export default async function TripCalendarPage({
 
       {days.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-6 py-14 text-center">
-          <p className="font-display text-xl text-encre italic">Aucun événement pour l'instant</p>
+          <p className="font-display text-xl text-encre italic">
+            {q ? "Rien ne correspond à cette recherche" : "Aucun événement pour l'instant"}
+          </p>
           <p className="max-w-sm text-sm text-encre-douce">
-            Même Phileas prenait des pauses — mais un vol, un hôtel ou une plongée, ça se note.
+            {q
+              ? "Essaie un autre mot — la recherche tolère les accents et les petites fautes."
+              : "Même Phileas prenait des pauses — mais un vol, un hôtel ou une plongée, ça se note."}
           </p>
           {canEdit ? (
             <Button asChild className="mt-1">
