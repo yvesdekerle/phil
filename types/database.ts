@@ -357,6 +357,87 @@ export type Database = {
           },
         ];
       };
+      poll_votes: {
+        Row: {
+          option_index: number;
+          poll_id: string;
+          user_id: string;
+          voted_at: string;
+        };
+        Insert: {
+          option_index: number;
+          poll_id: string;
+          user_id: string;
+          voted_at?: string;
+        };
+        Update: {
+          option_index?: number;
+          poll_id?: string;
+          user_id?: string;
+          voted_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "poll_votes_poll_id_fkey";
+            columns: ["poll_id"];
+            isOneToOne: false;
+            referencedRelation: "polls";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "poll_votes_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      polls: {
+        Row: {
+          closed_at: string | null;
+          created_at: string;
+          created_by: string;
+          id: string;
+          options: string[];
+          question: string;
+          trip_id: string;
+        };
+        Insert: {
+          closed_at?: string | null;
+          created_at?: string;
+          created_by: string;
+          id?: string;
+          options: string[];
+          question: string;
+          trip_id: string;
+        };
+        Update: {
+          closed_at?: string | null;
+          created_at?: string;
+          created_by?: string;
+          id?: string;
+          options?: string[];
+          question?: string;
+          trip_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "polls_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "polls_trip_id_fkey";
+            columns: ["trip_id"];
+            isOneToOne: false;
+            referencedRelation: "trips";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       profiles: {
         Row: {
           avatar_url: string | null;
