@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { BadgesGrid } from "@/components/explorer/badges-grid";
 import { WorldMapLazy } from "@/components/map/world-map-lazy";
+import { computeBadges } from "@/lib/gamification/badges";
 import { countryAt } from "@/lib/geo/country-lookup";
 import { haversineKm } from "@/lib/geo/distance";
 import { createClient } from "@/lib/supabase/server";
@@ -92,6 +94,67 @@ export default async function ExplorerPage() {
     ).values(),
   ];
 
+  // PHIL-P12 : compteurs de contribution personnels pour les badges
+  const [
+    { count: packItems },
+    { count: myIdeas },
+    { count: ideaVotes },
+    { count: pollVotes },
+    { count: candidateVotes },
+    { count: emergencySheets },
+    { count: myDocuments },
+    { count: myPhotos },
+  ] = await Promise.all([
+    supabase
+      .from("checklist_items")
+      .select("id", { count: "exact", head: true })
+      .eq("created_by", user.id),
+    supabase
+      .from("trip_ideas")
+      .select("id", { count: "exact", head: true })
+      .eq("created_by", user.id),
+    supabase
+      .from("idea_votes")
+      .select("idea_id", { count: "exact", head: true })
+      .eq("user_id", user.id),
+    supabase
+      .from("poll_votes")
+      .select("poll_id", { count: "exact", head: true })
+      .eq("user_id", user.id),
+    supabase
+      .from("candidate_votes")
+      .select("candidate_id", { count: "exact", head: true })
+      .eq("user_id", user.id),
+    supabase
+      .from("emergency_sheets")
+      .select("trip_id", { count: "exact", head: true })
+      .eq("user_id", user.id),
+    supabase
+      .from("documents")
+      .select("id", { count: "exact", head: true })
+      .eq("owner_id", user.id)
+      .is("deleted_at", null),
+    supabase
+      .from("trip_photos")
+      .select("id", { count: "exact", head: true })
+      .eq("uploaded_by", user.id),
+  ]);
+
+  const badges = computeBadges({
+    trips: allTrips.length,
+    doneTrips: doneTrips.length,
+    travelDays,
+    km,
+    countries: visited.length,
+    packItems: packItems ?? 0,
+    ideas: myIdeas ?? 0,
+    votes: (ideaVotes ?? 0) + (pollVotes ?? 0) + (candidateVotes ?? 0),
+    journalPages: journalCount ?? 0,
+    photos: myPhotos ?? 0,
+    emergencySheets: emergencySheets ?? 0,
+    documents: myDocuments ?? 0,
+  });
+
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-8">
       <h1 className="font-display text-3xl text-encre">Carnet de l'explorateur</h1>
@@ -132,6 +195,8 @@ export default async function ExplorerPage() {
         <CountrySuggestions suggestions={suggestions} />
         <WorldMapLazy visited={visited} />
       </section>
+
+      <BadgesGrid badges={badges} />
 
       <p className="mt-6 text-sm text-encre-douce">
         <Link href="/trips" className="underline underline-offset-4 hover:text-encre">
