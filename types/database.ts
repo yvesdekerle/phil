@@ -549,6 +549,56 @@ export type Database = {
           },
         ];
       };
+      import_drafts: {
+        Row: {
+          created_at: string;
+          extracted: Json;
+          file_name: string | null;
+          id: string;
+          mime_type: string | null;
+          sender: string;
+          size_bytes: number | null;
+          status: string;
+          storage_path: string | null;
+          subject: string | null;
+          trip_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          extracted: Json;
+          file_name?: string | null;
+          id?: string;
+          mime_type?: string | null;
+          sender: string;
+          size_bytes?: number | null;
+          status?: string;
+          storage_path?: string | null;
+          subject?: string | null;
+          trip_id: string;
+        };
+        Update: {
+          created_at?: string;
+          extracted?: Json;
+          file_name?: string | null;
+          id?: string;
+          mime_type?: string | null;
+          sender?: string;
+          size_bytes?: number | null;
+          status?: string;
+          storage_path?: string | null;
+          subject?: string | null;
+          trip_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "import_drafts_trip_id_fkey";
+            columns: ["trip_id"];
+            isOneToOne: false;
+            referencedRelation: "trips";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       journal_entries: {
         Row: {
           author_id: string;
@@ -1128,6 +1178,7 @@ export type Database = {
           destination: string;
           destination_lat: number | null;
           destination_lng: number | null;
+          email_alias: string | null;
           end_date: string;
           id: string;
           name: string;
@@ -1145,6 +1196,7 @@ export type Database = {
           destination: string;
           destination_lat?: number | null;
           destination_lng?: number | null;
+          email_alias?: string | null;
           end_date: string;
           id?: string;
           name: string;
@@ -1162,6 +1214,7 @@ export type Database = {
           destination?: string;
           destination_lat?: number | null;
           destination_lng?: number | null;
+          email_alias?: string | null;
           end_date?: string;
           id?: string;
           name?: string;

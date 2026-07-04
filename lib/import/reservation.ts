@@ -55,9 +55,13 @@ Extrais les informations en JSON strict avec exactement ces clés :
 Pour un hébergement (LODGING) : from, to et transportMode restent null.
 Ne devine jamais une date absente : mets null. Réponds uniquement le JSON.`;
 
-/** Analyse un ou plusieurs fichiers (PDF/images) et renvoie les champs extraits. */
+/**
+ * Analyse un ou plusieurs fichiers (PDF/images) — et/ou le texte d'un email
+ * (PHIL-P02) — et renvoie les champs extraits.
+ */
 export async function extractReservation(
   files: { bytes: Uint8Array; mimeType: string }[],
+  emailText?: string,
 ): Promise<ExtractedReservation | null> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
@@ -67,6 +71,9 @@ export async function extractReservation(
   const parts: unknown[] = files.map((f) => ({
     inline_data: { mime_type: f.mimeType, data: Buffer.from(f.bytes).toString("base64") },
   }));
+  if (emailText?.trim()) {
+    parts.push({ text: `Contenu de l'email :\n${emailText.slice(0, 20_000)}` });
+  }
   parts.push({ text: PROMPT });
 
   try {

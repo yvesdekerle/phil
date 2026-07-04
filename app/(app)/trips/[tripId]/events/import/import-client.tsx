@@ -8,7 +8,7 @@ import { TRANSPORT_MODE_LABELS, TRANSPORT_MODES } from "@/lib/events/transport";
 import type { ExtractedReservation } from "@/lib/import/reservation";
 import { createClient } from "@/lib/supabase/client";
 import { extensionFor } from "@/lib/vault/upload";
-import { createImportedEvent, type ImportedEventState } from "./actions";
+import { createImportedEvent, finalizeDraft, type ImportedEventState } from "./actions";
 
 const KIND_LABELS = {
   TRANSPORT: "Transport",
@@ -21,16 +21,23 @@ export function ImportClient({
   tripId,
   userId,
   defaultTimezone,
+  draft,
 }: {
   tripId: string;
   userId: string;
   defaultTimezone: string;
+  /** PHIL-P02 : brouillon reçu par email, pré-validé (pas de fichier à envoyer). */
+  draft?: { id: string; extracted: ExtractedReservation; fileName: string | null };
 }) {
   const [files, setFiles] = useState<File[]>([]);
-  const [phase, setPhase] = useState<"pick" | "analyzing" | "review" | "saving">("pick");
+  const [phase, setPhase] = useState<"pick" | "analyzing" | "review" | "saving">(
+    draft ? "review" : "pick",
+  );
   const [error, setError] = useState<string | null>(null);
-  const [extracted, setExtracted] = useState<ExtractedReservation | null>(null);
-  const [kind, setKind] = useState<"TRANSPORT" | "LODGING" | "ACTIVITY">("ACTIVITY");
+  const [extracted, setExtracted] = useState<ExtractedReservation | null>(draft?.extracted ?? null);
+  const [kind, setKind] = useState<"TRANSPORT" | "LODGING" | "ACTIVITY">(
+    draft?.extracted.kind ?? "ACTIVITY",
+  );
   const [, startTransition] = useTransition();
   const inputRef = useRef<HTMLInputElement>(null);
   const timezones = useMemo(() => Intl.supportedValuesOf("timeZone"), []);
@@ -63,6 +70,23 @@ export function ImportClient({
   }
 
   async function save(formData: FormData) {
+    // Brouillon email : pas d'upload, la pièce jointe est déjà côté serveur
+    if (draft) {
+      setError(null);
+      setPhase("saving");
+      formData.set("tripId", tripId);
+      formData.set("kind", kind);
+      formData.set("draftId", draft.id);
+      startTransition(async () => {
+        const result: ImportedEventState = await finalizeDraft({ status: "idle" }, formData);
+        if (result.status === "error") {
+          setError(result.message ?? "La création a échoué.");
+          setPhase("review");
+        }
+      });
+      return;
+    }
+
     const file = files[0];
     if (!file) {
       return;
@@ -281,12 +305,18 @@ export function ImportClient({
         <Button type="submit" disabled={phase === "saving"}>
           {phase === "saving" ? "Phil consigne tout ça…" : "Créer l'événement"}
         </Button>
-        <Button type="button" variant="ghost" onClick={() => setPhase("pick")}>
-          Reprendre l&apos;analyse
-        </Button>
+        {!draft ? (
+          <Button type="button" variant="ghost" onClick={() => setPhase("pick")}>
+            Reprendre l&apos;analyse
+          </Button>
+        ) : null}
       </div>
       <p className="text-xs text-encre-douce">
-        Le fichier sera rangé dans les Documents du voyage et attaché à l&apos;événement.
+        {draft
+          ? draft.fileName
+            ? `La pièce jointe (${draft.fileName}) sera rangée dans les Documents du voyage et attachée à l'événement.`
+            : "Reçu par email, sans pièce jointe exploitable."
+          : "Le fichier sera rangé dans les Documents du voyage et attaché à l'événement."}
       </p>
     </form>
   );

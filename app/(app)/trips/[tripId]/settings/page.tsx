@@ -3,6 +3,7 @@ import { PrepareOfflineButton } from "@/components/offline/prepare-offline-butto
 import { createClient } from "@/lib/supabase/server";
 import { CalendarFeed } from "./calendar-feed";
 import { CoverUpload } from "./cover-upload";
+import { EmailAliasCard } from "./email-alias";
 import { TripSettingsForm } from "./settings-form";
 
 export default async function TripSettingsPage({
@@ -41,6 +42,13 @@ export default async function TripSettingsPage({
     <div className="mx-auto flex max-w-lg flex-col gap-6">
       <PrepareOfflineButton tripId={trip.id} />
       {calendarUrl ? <CalendarFeed url={calendarUrl} /> : null}
+      {canEdit ? (
+        <EmailAliasCard
+          tripId={trip.id}
+          alias={trip.email_alias}
+          domain={process.env.NEXT_PUBLIC_INBOUND_EMAIL_DOMAIN ?? null}
+        />
+      ) : null}
       {canEdit ? <CoverUpload tripId={trip.id} /> : null}
       <TripSettingsForm
         tripId={trip.id}

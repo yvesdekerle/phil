@@ -69,6 +69,33 @@ async function getMyRole(tripId: string): Promise<{ role: string | null; userId:
   return { role: data?.role ?? null, userId: user.id };
 }
 
+/** Génère l'alias d'import par email du voyage (PHIL-P02). RLS : OWNER/EDITOR. */
+export async function generateEmailAlias(tripId: string): Promise<void> {
+  if (!z.string().uuid().safeParse(tripId).success) {
+    return;
+  }
+  const supabase = await createClient();
+  const { data: trip } = await supabase
+    .from("trips")
+    .select("name, email_alias")
+    .eq("id", tripId)
+    .single();
+  if (!trip || trip.email_alias) {
+    return;
+  }
+  const slug = trip.name
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 20);
+  const suffix = crypto.randomUUID().slice(0, 4);
+  const alias = `${slug || "voyage"}-${suffix}`;
+  await supabase.from("trips").update({ email_alias: alias }).eq("id", tripId);
+  revalidatePath(`/trips/${tripId}/settings`);
+}
+
 export async function updateTrip(
   _prev: TripSettingsState,
   formData: FormData,
