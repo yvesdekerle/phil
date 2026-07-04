@@ -669,8 +669,9 @@ Remplacer la bascule Grille/Carte par **la carte en haut** (pins = vignettes ron
 Retours Yves : plus de panneau séparé — les suggestions du catalogue apparaissent **directement dans chaque section** (avant le départ / à emporter / sur place) en items "en attente" à sélectionner ; compléter la liste (casquette, lunettes, masque et tuba, t-shirts, pull, pantalons, shorts…) ; **"Vaccins à jour" dans Avant le départ** ; **date optionnelle sur les items** ("à faire avant le…", colonne `due_date`).
 > Note : catalogue réparti par section — **Avant le départ** (Vaccins à jour, passeports 6 mois, assurance, Google Maps hors-ligne, copies dans le coffre, banque prévenue), **À emporter** (Vêtements +chemises, Chaussures, Toilette, Indispensables +masque et tuba), **Sur place** (e-SIM, espèces). Puces pointillées "À sélectionner — {catégorie}" sous les items de chaque section, quantité modifiable inline (affichée si > 1), + = ajout, l'item réel gagne alors sa corbeille. Colonne `due_date` + champ date optionnel dans le formulaire d'ajout + "avant le 5 oct." affiché sur l'item. Le panneau "Garde-robe type" est supprimé (remplacé par l'intégration en section).
 
-### [ ] PHIL-Q16 — Tout préparer pour le hors-ligne
+### [x] PHIL-Q16 — Tout préparer pour le hors-ligne *(fait le 2026-07-05)*
 Le bouton "Préparer pour le hors-ligne" cache les données du voyage et chaque document a son bouton individuel — ajouter une préparation **complète** : données + tous les documents du voyage d'un coup.
+> Note : bouton **"Tout préparer (documents inclus)"** à côté de l'existant — synchronise les données puis télécharge chaque document du voyage pas encore offline (progression "x/n", déjà présents comptés, limite 100 Mo I04 respectée avec message d'échec explicite).
 
 ### [ ] PHIL-Q17 — Page Conseils de voyage
 Conseils pratiques avant le départ : télécharger Google Maps hors-ligne, e-SIM, adaptateur, retraits/monnaie, santé/vaccins, copies des papiers dans le coffre Phil, etc. Accessible depuis les Paramètres du voyage et la liste des voyages.
