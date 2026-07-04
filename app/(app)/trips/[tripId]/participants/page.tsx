@@ -84,7 +84,7 @@ export default async function TripParticipantsPage({
         <div>
           <Button asChild variant="outline">
             <a href={trip.whatsapp_group_url} target="_blank" rel="noopener noreferrer">
-              <MessageCircle aria-hidden="true" /> Groupe WhatsApp du voyage
+              <MessageCircle aria-hidden="true" /> Groupe de discussion du voyage
             </a>
           </Button>
         </div>

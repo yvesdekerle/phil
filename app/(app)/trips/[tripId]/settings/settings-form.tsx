@@ -46,7 +46,10 @@ const formSchema = z
         z
           .string()
           .url("URL invalide.")
-          .startsWith("https://chat.whatsapp.com/", "Un lien d'invitation chat.whatsapp.com."),
+          .regex(
+            /^https:\/\/(chat\.whatsapp\.com|m\.me|(www\.)?messenger\.com)\//,
+            "Un lien WhatsApp (chat.whatsapp.com) ou Messenger (m.me).",
+          ),
       ])
       .optional(),
     currencyPrimary: z
@@ -178,11 +181,13 @@ export function TripSettingsForm({
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="whatsappGroupUrl">Groupe WhatsApp du voyage (lien d'invitation)</Label>
+          <Label htmlFor="whatsappGroupUrl">
+            Groupe de discussion du voyage (WhatsApp ou Messenger)
+          </Label>
           <Input
             id="whatsappGroupUrl"
             type="url"
-            placeholder="https://chat.whatsapp.com/…"
+            placeholder="https://chat.whatsapp.com/… ou https://m.me/j/…"
             disabled={!canEdit}
             {...register("whatsappGroupUrl")}
           />

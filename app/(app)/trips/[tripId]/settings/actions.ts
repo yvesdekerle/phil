@@ -25,7 +25,10 @@ const tripUpdateSchema = z
         z
           .string()
           .url("URL invalide.")
-          .startsWith("https://chat.whatsapp.com/", "Un lien d'invitation chat.whatsapp.com."),
+          .regex(
+            /^https:\/\/(chat\.whatsapp\.com|m\.me|(www\.)?messenger\.com)\//,
+            "Un lien WhatsApp (chat.whatsapp.com) ou Messenger (m.me).",
+          ),
       ])
       .optional(),
     currencyPrimary: z

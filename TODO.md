@@ -665,8 +665,9 @@ Analyse des captures Tricount d'Yves (tmp/tricount) : renommer Budget → **Bour
 "plongée / plongee / plnoge" doivent tous trouver la plongée : helper de recherche tolérante (accents, fautes légères) appliqué aux dépenses de la Bourse, au calendrier et aux idées (champ `?q=`).
 > Note : `lib/search/fuzzy.ts` — normalisation accents + Levenshtein borné par mot (0 pour ≤ 3 lettres, 1 pour ≤ 5, 2 au-delà) + préfixe approché ; **vérifié par test** : plongée/plongee/plnoge/PLONGE → oui, xyz → non, "catamarn" → catamaran. Champ de recherche (`SearchForm`, GET, conserve tri/filtres) sur : le **calendrier** (titre + lieu + notes, état vide dédié), les **idées** (titre + description + lieu), et la **Bourse** déjà servie par Q21 (filtre instantané côté client).
 
-### [ ] PHIL-Q23 — Lien de groupe : WhatsApp ou Messenger
+### [x] PHIL-Q23 — Lien de groupe : WhatsApp ou Messenger *(fait le 2026-07-05)*
 Le champ n'accepte que chat.whatsapp.com — accepter aussi les liens Messenger (m.me / messenger.com) et renommer en "groupe de discussion".
+> Note : contrainte en base élargie (chat.whatsapp.com, m.me, messenger.com), Zod aligné (form + action), libellés "Groupe de discussion du voyage (WhatsApp ou Messenger)". La colonne garde son nom technique `whatsapp_group_url`.
 
 ### [x] PHIL-Q15 — Carte du programme façon Polarsteps *(fait le 2026-07-04)*
 Retours Yves (2026-07-04) : pins **numérotés 1, 2, 3…** selon l'ordre chronologique du jour filtré ; style Polarsteps — pastilles rondes bord blanc + ombre, **tracé plein adouci** (fini le pointillé) ; **hébergements en icône maison** avec leur couleur propre. Seed : étoffer le vendredi 13 novembre (4 activités).
