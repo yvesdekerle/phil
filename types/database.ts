@@ -1114,6 +1114,8 @@ export type Database = {
           created_at: string;
           event_id: string | null;
           id: string;
+          lat: number | null;
+          lng: number | null;
           size_bytes: number;
           storage_path: string;
           thumb_path: string | null;
@@ -1125,6 +1127,8 @@ export type Database = {
           created_at?: string;
           event_id?: string | null;
           id?: string;
+          lat?: number | null;
+          lng?: number | null;
           size_bytes?: number;
           storage_path: string;
           thumb_path?: string | null;
@@ -1136,6 +1140,8 @@ export type Database = {
           created_at?: string;
           event_id?: string | null;
           id?: string;
+          lat?: number | null;
+          lng?: number | null;
           size_bytes?: number;
           storage_path?: string;
           thumb_path?: string | null;

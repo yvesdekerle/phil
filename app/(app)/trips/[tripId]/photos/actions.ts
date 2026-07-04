@@ -16,6 +16,9 @@ const registerSchema = z.object({
   sizeBytes: z.coerce.number().int().min(1).max(MAX_PHOTO_BYTES),
   caption: z.string().trim().max(300).optional(),
   eventId: z.union([z.literal(""), z.string().uuid()]).optional(),
+  // PHIL-Q12 : position GPS EXIF extraite côté client
+  lat: z.union([z.literal(""), z.coerce.number().min(-90).max(90)]).optional(),
+  lng: z.union([z.literal(""), z.coerce.number().min(-180).max(180)]).optional(),
 });
 
 export type PhotoState = { status: "idle" | "error"; message?: string };
@@ -41,6 +44,8 @@ export async function registerPhoto(_prev: PhotoState, formData: FormData): Prom
     sizeBytes: formData.get("sizeBytes"),
     caption: formData.get("caption") ?? "",
     eventId: formData.get("eventId") ?? "",
+    lat: formData.get("lat") ?? "",
+    lng: formData.get("lng") ?? "",
   });
   if (!parsed.success) {
     return { status: "error", message: "Saisie invalide." };
@@ -86,6 +91,8 @@ export async function registerPhoto(_prev: PhotoState, formData: FormData): Prom
     size_bytes: d.sizeBytes,
     caption: d.caption || null,
     event_id: d.eventId || null,
+    lat: typeof d.lat === "number" ? d.lat : null,
+    lng: typeof d.lng === "number" ? d.lng : null,
   });
   if (error) {
     await removeBlobs([d.storagePath, d.thumbPath]);

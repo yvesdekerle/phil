@@ -849,12 +849,12 @@ async function main() {
 
   // ————— Photos (basse qualité, décision O10) —————
   const photoDefs = [
-    { seed: "maurice-lagon", caption: "Le lagon depuis la villa", by: "yves", eventId: null },
-    { seed: "maurice-morne", caption: "Sommet du Morne — ça valait le réveil", by: "mathieu", eventId: morneId },
-    { seed: "maurice-dauphins", caption: "Ils étaient une vingtaine autour du bateau 🐬", by: "alexandre", eventId: catamaranId },
-    { seed: "maurice-chamarel", caption: "Terres des 7 couleurs", by: "amelie", eventId: null },
-    { seed: "maurice-plage", caption: "Tamarin au couchant", by: "julie", eventId: null },
-    { seed: "maurice-marche", caption: "Le marché de Port Louis, dholl puri en main", by: "chloe", eventId: null },
+    { seed: "maurice-lagon", caption: "Le lagon depuis la villa", by: "yves", eventId: null, lat: -20.3253, lng: 57.3708 },
+    { seed: "maurice-morne", caption: "Sommet du Morne — ça valait le réveil", by: "mathieu", eventId: morneId, lat: -20.456, lng: 57.311 },
+    { seed: "maurice-dauphins", caption: "Ils étaient une vingtaine autour du bateau 🐬", by: "alexandre", eventId: catamaranId, lat: -20.345, lng: 57.35 },
+    { seed: "maurice-chamarel", caption: "Terres des 7 couleurs", by: "amelie", eventId: null, lat: -20.4245, lng: 57.374 },
+    { seed: "maurice-plage", caption: "Tamarin au couchant", by: "julie", eventId: null, lat: -20.3266, lng: 57.3705 },
+    { seed: "maurice-marche", caption: "Le marché de Port Louis, dholl puri en main", by: "chloe", eventId: null, lat: -20.159, lng: 57.5028 },
   ];
   let photosOk = 0;
   for (const p of photoDefs) {
@@ -878,6 +878,8 @@ async function main() {
         size_bytes: full.byteLength,
         caption: p.caption,
         event_id: p.eventId,
+        lat: p.lat,
+        lng: p.lng,
       });
       if (!error) {
         photosOk++;

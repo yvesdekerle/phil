@@ -18,7 +18,7 @@ export default async function TripPhotosPage({ params }: { params: Promise<{ tri
     supabase
       .from("trip_photos")
       .select(
-        "id, caption, uploaded_by, size_bytes, thumb_path, event_id, created_at, profiles!trip_photos_uploaded_by_fkey(display_name)",
+        "id, caption, uploaded_by, size_bytes, thumb_path, event_id, lat, lng, created_at, profiles!trip_photos_uploaded_by_fkey(display_name)",
       )
       .eq("trip_id", tripId)
       .order("created_at", { ascending: false }),
@@ -46,6 +46,8 @@ export default async function TripPhotosPage({ params }: { params: Promise<{ tri
         sizeBytes: p.size_bytes,
         hasThumb: p.thumb_path !== null,
         eventId: p.event_id,
+        lat: p.lat,
+        lng: p.lng,
       }))}
       events={events ?? []}
       myId={user.id}

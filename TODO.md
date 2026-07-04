@@ -653,8 +653,9 @@ Demande Yves (2026-07-04) : proposer les affaires qu'on retrouve dans tous les v
 La carte (N01) existe mais n'est accessible que par un bouton sur le calendrier — demande Yves : l'ajouter aux onglets du voyage.
 > Note : onglet **Carte** en 2e position (après Calendrier), bouton redondant du calendrier retiré (Timeline conservé). La page carte existante (Programme/Idées, filtre par jour) est inchangée.
 
-### [ ] PHIL-Q12 — Carte des photos (position EXIF)
+### [x] PHIL-Q12 — Carte des photos (position EXIF) *(fait le 2026-07-04)*
 Dans l'onglet Photos : bascule Grille/Carte — les photos sont épinglées sur une carte à partir des **données GPS EXIF** lues dans le fichier au moment de l'upload (colonnes lat/lng sur `trip_photos`, extraction côté client). Les photos sans position restent en grille seulement.
+> Note : **parseur EXIF GPS maison** (`lib/photos/exif-gps.ts`, ~90 lignes, zéro dépendance — npm plantait sur l'installation d'exifr et un parseur dédié suffit) : segment APP1 → IFD GPS → degrés décimaux, JPEG uniquement (PNG/WebP ne portent quasi jamais de GPS), best-effort. **Validé par test** avec un JPEG EXIF construit sur mesure (Le Morne : -20.456, 57.311 restitué exactement). Colonnes `lat/lng`, pills Grille/Carte (n) dans l'onglet Photos, carte OSM avec pions bordeaux (légende + auteur en popup). Les photos du seed démo portent des positions. À noter : beaucoup d'apps (WhatsApp, réseaux) **strippent l'EXIF** — les photos venant de l'appareil photo la gardent.
 
 ### [x] PHIL-Q06 — Inviter ses compagnons habituels en un tap *(fait le 2026-07-04)*
 Sur la page Participants : sous le formulaire d'invitation par email, une rangée "Tes compagnons de route" — les amis du carnet (D08) pas encore à bord de ce voyage, avatar + prénom, un tap = invitation (réutilise `inviteFriend`, choix du rôle simple). "On part souvent avec les mêmes personnes" — demande Yves du 2026-07-04.

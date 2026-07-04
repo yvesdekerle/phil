@@ -2,8 +2,11 @@
 
 import { ChevronLeft, ChevronRight, Trash2, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import type { MapMarker } from "@/components/map/trip-map";
+import { TripMapLazy } from "@/components/map/trip-map-lazy";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { extractGps } from "@/lib/photos/exif-gps";
 import {
   formatBytes,
   MAX_PHOTO_BYTES,
@@ -22,6 +25,8 @@ type Photo = {
   sizeBytes: number;
   hasThumb: boolean;
   eventId: string | null;
+  lat: number | null;
+  lng: number | null;
 };
 type EventOption = { id: string; title: string };
 
@@ -49,6 +54,10 @@ export function PhotosClient({
   const inputRef = useRef<HTMLInputElement>(null);
   const captionRef = useRef<HTMLInputElement>(null);
   const eventRef = useRef<HTMLSelectElement>(null);
+
+  // PHIL-Q12 : bascule grille / carte
+  const [view, setView] = useState<"grid" | "map">("grid");
+  const located = photos.filter((p) => p.lat !== null && p.lng !== null);
 
   // PHIL-Q02 : visionneuse
   const [lightbox, setLightbox] = useState<number | null>(null);
@@ -122,6 +131,9 @@ export function PhotosClient({
         }
       }
 
+      // PHIL-Q12 : position GPS lue dans l'EXIF (jamais bloquant)
+      const gps = await extractGps(file);
+
       const formData = new FormData();
       formData.set("tripId", tripId);
       formData.set("photoId", photoId);
@@ -130,6 +142,8 @@ export function PhotosClient({
       formData.set("sizeBytes", String(file.size));
       formData.set("caption", caption);
       formData.set("eventId", eventId);
+      formData.set("lat", gps ? String(gps.lat) : "");
+      formData.set("lng", gps ? String(gps.lng) : "");
       const result: PhotoState = await registerPhoto({ status: "idle" }, formData);
       if (result.status === "error") {
         setError(result.message ?? "Enregistrement impossible.");
@@ -192,7 +206,56 @@ export function PhotosClient({
 
       {error ? <p className="text-sm text-bordeaux">{error}</p> : null}
 
-      {photos.length === 0 ? (
+      {photos.length > 0 ? (
+        <nav className="flex gap-1 text-sm" aria-label="Vues des photos">
+          <button
+            type="button"
+            onClick={() => setView("grid")}
+            className={
+              view === "grid"
+                ? "rounded-full bg-bordeaux px-3 py-1 font-medium text-papier"
+                : "rounded-full px-3 py-1 text-encre-douce hover:bg-laiton/10 hover:text-encre"
+            }
+          >
+            Grille
+          </button>
+          <button
+            type="button"
+            onClick={() => setView("map")}
+            className={
+              view === "map"
+                ? "rounded-full bg-bordeaux px-3 py-1 font-medium text-papier"
+                : "rounded-full px-3 py-1 text-encre-douce hover:bg-laiton/10 hover:text-encre"
+            }
+          >
+            Carte ({located.length})
+          </button>
+        </nav>
+      ) : null}
+
+      {view === "map" && photos.length > 0 ? (
+        located.length === 0 ? (
+          <p className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-4 py-8 text-center text-sm text-encre-douce">
+            Aucune photo géolocalisée — la position GPS est lue automatiquement dans les photos
+            (JPEG) qui en contiennent.
+          </p>
+        ) : (
+          <TripMapLazy
+            markers={located.map(
+              (p): MapMarker => ({
+                id: p.id,
+                lat: p.lat as number,
+                lng: p.lng as number,
+                title: p.caption ?? "Photo",
+                subtitle: p.uploaderName,
+                color: "#6e1f2e",
+              }),
+            )}
+          />
+        )
+      ) : null}
+
+      {view === "map" ? null : photos.length === 0 ? (
         <div className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-6 py-14 text-center">
           <p className="font-display text-xl text-encre italic">Aucune photo pour l&apos;instant</p>
           <p className="mt-2 text-sm text-encre-douce">
