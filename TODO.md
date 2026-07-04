@@ -228,6 +228,14 @@ Cron job (Vercel Cron, gratuit sur Hobby avec 2 jobs) qui scanne quotidiennement
 Vue "Activité de mon coffre" qui affiche les dernières entrées de `vault_access_log` filtrées sur les documents de l'user. Permet de voir qui a consulté quoi et quand. Filtres par document, par action, par date. Le log est alimenté depuis la Phase 3 (B07) : la page révèle l'historique complet.
 > Note : `/vault/activity` — donc derrière le verrou passkey du layout (vérifié : écran "Coffre verrouillé" avant Touch ID). Lecture RLS (`document_owner_id`), embed nom du document (« Document supprimé » si purgé — l'audit survit, FK set null) et auteur de l'accès, filtres par action / période (7 j, 30 j, tout) / document via l'URL, 200 dernières entrées. Vérifié en réel : historique complet de la journée affiché avec filtres.
 
+### [ ] PHIL-E09 — Partage ciblé d'un document du coffre *(demandé le 2026-07-04)*
+Aujourd'hui, partager un document du coffre vers un voyage le rend visible de **tout l'équipage** (règle critique n°1). Cas d'usage : à 9 sur Maurice, prêter son permis au seul conducteur — pas aux 8 autres. Permettre de choisir, au moment du partage, **"Tout l'équipage" (défaut) ou une/des personnes précises** du voyage.
+- **Schéma** : colonne `shared_with uuid null references profiles` sur `document_shares` (NULL = tout le voyage, comportement actuel inchangé) ; contrainte d'unicité étendue `(document_id, trip_id, shared_with)`.
+- **RLS** : mise à jour du helper `private.is_document_shared_with_user` — le partage vaut si `shared_with IS NULL` ou `shared_with = auth.uid()`. Le propriétaire garde la main (création/retrait).
+- **UI** : dans "Partager avec un voyage" (fiche document du coffre), second sélecteur optionnel "Avec qui ?" (Tout l'équipage / participants cochables). Onglet Documents du voyage : badge "Partagé par X — pour toi" ; invisible pour les non-destinataires. Le document picker (F10, partage auto) reste en "tout l'équipage".
+- **Audit** : le log `SHARE`/`UNSHARE` mentionne la cible.
+- **Sécurité** : règle critique n°1 amendée dans CLAUDE.md + `verify-rls` étendu (3 vérifs : cible voit, autre participant ne voit pas, retrait ciblé n'affecte pas un partage équipage parallèle).
+
 ---
 
 ## Catégorie F — Calendrier & événements de voyage
