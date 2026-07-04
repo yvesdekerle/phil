@@ -20,6 +20,9 @@ export type ChecklistItem = {
   done: boolean;
   assigned_to: string | null;
   created_by: string;
+  /** PHIL-O05 : item rattaché à un événement ("à emporter" d'une activité). */
+  event_id: string | null;
+  eventTitle: string | null;
 };
 type Member = { userId: string; name: string };
 
@@ -84,7 +87,14 @@ export function ChecklistClient({
                     checked={item.done}
                     disabled={pending}
                     onChange={(e) =>
-                      startTransition(() => toggleChecklistItem(tripId, item.id, e.target.checked))
+                      startTransition(() =>
+                        toggleChecklistItem(
+                          tripId,
+                          item.id,
+                          e.target.checked,
+                          item.event_id ?? undefined,
+                        ),
+                      )
                     }
                     className="size-4 accent-[#6e1f2e]"
                     aria-label={`Fait : ${item.title}`}
@@ -96,6 +106,11 @@ export function ChecklistClient({
                     )}
                   >
                     {item.title}
+                    {item.eventTitle ? (
+                      <span className="ml-1.5 rounded-full bg-laiton/15 px-2 py-0.5 text-[0.65rem] text-laiton">
+                        {item.eventTitle}
+                      </span>
+                    ) : null}
                   </span>
                   <select
                     value={item.assigned_to ?? ""}
@@ -119,7 +134,11 @@ export function ChecklistClient({
                     <button
                       type="button"
                       disabled={pending}
-                      onClick={() => startTransition(() => deleteChecklistItem(tripId, item.id))}
+                      onClick={() =>
+                        startTransition(() =>
+                          deleteChecklistItem(tripId, item.id, item.event_id ?? undefined),
+                        )
+                      }
                       className="text-encre-douce hover:text-bordeaux"
                       aria-label={`Supprimer ${item.title}`}
                     >

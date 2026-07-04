@@ -510,8 +510,9 @@ Pour un voyage en cours : si la météo de demain annonce de la pluie (seuil à 
 Fil de notes sous chaque événement ("le resto est fermé le lundi", "RDV plutôt à l'entrée sud") : auteur, date, suppression par l'auteur ou l'OWNER. Ce n'est **pas un chat** — la discussion de groupe reste sur WhatsApp (O06).
 > Note : table `event_notes` (body 1-1000 car., RLS : lecture équipage via `private.event_trip_id`, insert membre en son nom, delete auteur ou OWNER, pas d'update — pas un chat). Section "Notes de l'équipage" sur la fiche événement : fil chronologique (auteur, date, corbeille si droit), textarea inline avec reset après envoi. `verify:rls` 30/30.
 
-### [ ] PHIL-O05 — "À emporter" par activité
+### [x] PHIL-O05 — "À emporter" par activité *(fait le 2026-07-04)*
 Sur un événement (surtout ACTIVITY) : liste des choses à prendre ("snorkeling → maillot, serviette, crème solaire"). Piste : réutiliser `checklist_items` avec un `event_id` optionnel — items visibles sur la fiche événement ET dans la section "à emporter" de la Valise (O08). Bonus à évaluer : le rappel J-1 (N08) mentionne les items non cochés.
+> Note : `checklist_items.event_id` (nullable, cascade, RLS existante par trip_id inchangée). Section "À emporter" sur la fiche événement (tous types) : coche, ajout inline (section `a_emporter`), suppression — mêmes server actions que la Valise, étendues d'un `eventId` optionnel pour revalider la fiche. Dans la Valise, les items rattachés portent un badge laiton avec le titre de l'événement. **Écart** : le rappel J-1 ne mentionne pas les items non cochés (bonus non retenu, à re-proposer si besoin).
 
 ### [x] PHIL-O06 — WhatsApp : profil et groupe du voyage *(fait le 2026-07-04)*
 1. Sur le profil : numéro de téléphone et/ou username WhatsApp (nouveauté WhatsApp ~2025) → lien wa.me sur les cartes participants et les fiches d'urgence (N06).

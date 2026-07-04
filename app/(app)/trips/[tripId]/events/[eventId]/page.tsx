@@ -13,6 +13,7 @@ import { createClient } from "@/lib/supabase/server";
 import { attachDocument, detachDocument } from "./actions";
 import { EventActions } from "./event-actions";
 import { type EventNote, EventNotes } from "./event-notes";
+import { EventPacking, type PackingItem } from "./event-packing";
 import { EventParticipants } from "./event-participants";
 
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
@@ -45,6 +46,7 @@ export default async function EventDetailPage({
     { data: members },
     { data: signedUp },
     { data: noteRows },
+    { data: packingRows },
   ] = await Promise.all([
     supabase.from("trip_events").select("*").eq("id", eventId).eq("trip_id", tripId).single(),
     supabase
@@ -66,6 +68,11 @@ export default async function EventDetailPage({
     supabase
       .from("event_notes")
       .select("id, body, created_at, author_id, profiles!event_notes_author_id_fkey(display_name)")
+      .eq("event_id", eventId)
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("checklist_items")
+      .select("id, title, done, created_by")
       .eq("event_id", eventId)
       .order("created_at", { ascending: true }),
   ]);
@@ -189,6 +196,14 @@ export default async function EventDetailPage({
       ) : null}
 
       <EventParticipants tripId={tripId} eventId={event.id} options={participantOptions} />
+
+      <EventPacking
+        tripId={tripId}
+        eventId={event.id}
+        items={(packingRows ?? []) as PackingItem[]}
+        myId={user.id}
+        isOwner={me?.role === "OWNER"}
+      />
 
       <EventNotes
         tripId={tripId}

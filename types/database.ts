@@ -39,6 +39,7 @@ export type Database = {
           created_at: string;
           created_by: string;
           done: boolean;
+          event_id: string | null;
           id: string;
           section: string;
           title: string;
@@ -49,6 +50,7 @@ export type Database = {
           created_at?: string;
           created_by: string;
           done?: boolean;
+          event_id?: string | null;
           id?: string;
           section?: string;
           title: string;
@@ -59,6 +61,7 @@ export type Database = {
           created_at?: string;
           created_by?: string;
           done?: boolean;
+          event_id?: string | null;
           id?: string;
           section?: string;
           title?: string;
@@ -77,6 +80,13 @@ export type Database = {
             columns: ["created_by"];
             isOneToOne: false;
             referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "checklist_items_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "trip_events";
             referencedColumns: ["id"];
           },
           {

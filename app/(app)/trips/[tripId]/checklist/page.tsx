@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { ChecklistClient, type ChecklistItem } from "./checklist-client";
+import { ChecklistClient } from "./checklist-client";
 
 /** Checklist partagée du voyage (PHIL-N11). */
 export default async function ChecklistPage({ params }: { params: Promise<{ tripId: string }> }) {
@@ -16,7 +16,7 @@ export default async function ChecklistPage({ params }: { params: Promise<{ trip
   const [{ data: items }, { data: members }, { data: me }] = await Promise.all([
     supabase
       .from("checklist_items")
-      .select("id, section, title, done, assigned_to, created_by")
+      .select("id, section, title, done, assigned_to, created_by, event_id, trip_events(title)")
       .eq("trip_id", tripId)
       .order("created_at", { ascending: true }),
     supabase
@@ -35,7 +35,10 @@ export default async function ChecklistPage({ params }: { params: Promise<{ trip
   return (
     <ChecklistClient
       tripId={tripId}
-      items={(items ?? []) as ChecklistItem[]}
+      items={(items ?? []).map((i) => ({
+        ...i,
+        eventTitle: i.trip_events?.title ?? null,
+      }))}
       members={(members ?? []).map((m) => ({
         userId: m.user_id,
         name: m.profiles?.display_name ?? "Voyageur",
