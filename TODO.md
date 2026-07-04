@@ -518,8 +518,9 @@ Sur un événement (surtout ACTIVITY) : liste des choses à prendre ("snorkeling
 ### [ ] PHIL-O07 — Lien opérateur sur les transports
 Champ URL optionnel sur les événements TRANSPORT : lien vers l'app/le site de la compagnie (statut du vol, du train). Remplace le suivi de vol intégré, écarté (AeroAPI payant, AviationStack ~100 req/mois en gratuit). À trancher au ticket : champ URL générique sur **tous** les événements (resto → lien réservation) plutôt que TRANSPORT seul.
 
-### [ ] PHIL-O08 — Renommer la Checklist en "Valise"
+### [x] PHIL-O08 — Renommer la Checklist en "Valise" *(fait le 2026-07-04)*
 Renommage produit : onglet, titres, microcopy, templates N03. Les sections restent (avant le départ / à emporter / sur place). Vérifier que "Valise" reste juste pour les items non-bagage ("réserver le taxi") — sinon un titre du type "Valise & to-do".
+> Note : l'onglet était la seule occurrence visible de "Checklist" (la page n'a pas de titre propre, les templates n'en parlent pas). Onglet → **Valise** ; les libellés de sections couvrent déjà les items non-bagage, pas besoin de "Valise & to-do". Route `/checklist` et table inchangées (technique).
 
 ### [ ] PHIL-O09 — Catégories de dépenses et suivi (deux vues distinctes)
 Colonne `category` sur `expenses` (transport / logement / activité / resto / courses / autre) + exposer dans le formulaire le `event_id` déjà prêt en base (une dépense liée à un événement hérite de sa catégorie et de son contexte — adresses et liens des logements vivent déjà sur les événements LODGING). Le Budget devient **deux parties distinctes** (décision du 2026-07-04) :
