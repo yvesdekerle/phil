@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PrepareOfflineButton } from "@/components/offline/prepare-offline-button";
 import { createClient } from "@/lib/supabase/server";
@@ -42,6 +43,14 @@ export default async function TripSettingsPage({
   return (
     <div className="mx-auto flex max-w-lg flex-col gap-6">
       <PrepareOfflineButton tripId={trip.id} />
+      <p className="text-sm">
+        <Link
+          href="/conseils"
+          className="text-encre-douce underline underline-offset-4 hover:text-encre"
+        >
+          Conseils avant le départ (cartes hors-ligne, e-SIM, papiers…) →
+        </Link>
+      </p>
       {calendarUrl ? <CalendarFeed url={calendarUrl} /> : null}
       {canEdit ? (
         <EmailAliasCard

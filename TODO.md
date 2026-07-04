@@ -673,8 +673,9 @@ Retours Yves : plus de panneau séparé — les suggestions du catalogue apparai
 Le bouton "Préparer pour le hors-ligne" cache les données du voyage et chaque document a son bouton individuel — ajouter une préparation **complète** : données + tous les documents du voyage d'un coup.
 > Note : bouton **"Tout préparer (documents inclus)"** à côté de l'existant — synchronise les données puis télécharge chaque document du voyage pas encore offline (progression "x/n", déjà présents comptés, limite 100 Mo I04 respectée avec message d'échec explicite).
 
-### [ ] PHIL-Q17 — Page Conseils de voyage
+### [x] PHIL-Q17 — Page Conseils de voyage *(fait le 2026-07-05)*
 Conseils pratiques avant le départ : télécharger Google Maps hors-ligne, e-SIM, adaptateur, retraits/monnaie, santé/vaccins, copies des papiers dans le coffre Phil, etc. Accessible depuis les Paramètres du voyage et la liste des voyages.
+> Note : page `/conseils` — 7 rubriques (cartes & navigation, téléphone/e-SIM, papiers, argent, santé, vol & bagages, sur place) + "Dans Phil avant de partir", chaque conseil renvoie quand c'est pertinent vers la fonctionnalité Phil correspondante (coffre, valise, offline, fiches d'urgence). Liens d'accès : en-tête de la liste des voyages + Paramètres du voyage.
 
 ### [ ] PHIL-Q18 — Rappel "la journée de demain est vide"
 La veille au soir (cron 16h UTC existant), si le lendemain d'un voyage en cours n'a aucun événement → push "Demain est libre — on prépare ?". Préférence on/off dédiée ; l'heure n'est pas réglable (cron Hobby = un passage fixe par jour, documenté).
