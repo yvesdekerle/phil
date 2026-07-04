@@ -458,8 +458,9 @@ Sur un partage de document du coffre (équipage ou ciblé E09) : échéance opti
 ### [ ] PHIL-N06 — Fiche d'urgence
 Par voyageur et par voyage : contacts d'urgence, n° de police d'assurance + téléphone assisteur, groupe sanguin/allergies (optionnel), ambassade du pays de destination, copies des papiers partagés. **Digitale** (page du voyage, visible de l'équipage), **partagée**, **imprimable** (mise en page dédiée via CSS print). Données sensibles → mêmes protections que le coffre pour les champs médicaux.
 
-### [ ] PHIL-N07 — Notifications push PWA + paramétrage
+### [x] PHIL-N07 — Notifications push PWA + paramétrage *(fait le 2026-07-04 — test réel en prod à faire)*
 Web Push (VAPID) : table `push_subscriptions`, abonnement depuis l'app installée, envoi côté serveur (lib `web-push`). Événements notifiés : invitation reçue, idée proposée, sondage ouvert (N12), rappel J-1 (N08), alerte passeport. **Page de paramétrage** dans le profil : un interrupteur par type de notification push (étend le modèle K04), activation/désactivation de l'appareil.
+> Note : table + RLS own, clés VAPID générées (`.env.local` ; **`! bash tmp/set-vercel-vapid.sh` à lancer pour la prod**), `sendPushToUser()` (respecte les prefs K04, purge les abonnements 404/410), handlers push/click dans le SW, interrupteur "cet appareil" au profil (sous les prefs par type). Branchements émetteurs : à faire au fil des tickets (N08 rappels, invitations, N12). **Test réel en prod requis** (le SW ne tourne pas en dev) : activer sur téléphone après déploiement + clés Vercel.
 
 ### [ ] PHIL-N08 — Rappels J-1 par notification push
 Le second slot cron Vercel (quotidien) parcourt les événements de demain et notifie en push les participants concernés (inscrits à l'événement si liste F11 non vide, sinon tout l'équipage). Respecte les préférences N07. (L'email J-1 est abandonné — décision du 2026-07-04.)
