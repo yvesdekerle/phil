@@ -185,6 +185,7 @@ async function main() {
   const snorkelingId = uuid();
   const morneId = uuid();
   const villaBlueBayId = uuid();
+  const pamplemoussesId = uuid();
 
   const events: Ev[] = [
     {
@@ -343,6 +344,7 @@ async function main() {
       meta: { cost: 550, cost_currency: "EUR" },
     },
     {
+      id: pamplemoussesId,
       type: "ACTIVITY",
       title: "Jardin botanique de Pamplemousses",
       starts: mu("2026-11-13", "09:30"),
@@ -831,6 +833,13 @@ async function main() {
       eventId: catamaranId,
     },
     {
+      title: "Billets — Jardin de Pamplemousses (x9)",
+      lines: ["SSR Botanical Garden — entrees adultes x9", "13 nov 2026 - 9h30", "Reference : SSRBG-44120", "Presenter ce billet a l'entree (QR simule)"],
+      category: "ticket",
+      fileName: "billets-jardin-pamplemousses.pdf",
+      eventId: pamplemoussesId,
+    },
+    {
       title: "Assurance voyage groupe",
       lines: ["Contrat multirisque voyage", "Du 4 au 22 novembre 2026 — 9 assurés", "Police n° AXA-TRV-90112", "Assistance 24/7 : +33 1 55 92 40 00"],
       category: "insurance",
@@ -866,7 +875,7 @@ async function main() {
       await admin.from("event_documents").insert({ event_id: d.eventId, document_id: documentId });
     }
   }
-  console.log("✓ 3 documents PDF (billets, voucher, assurance) attachés aux événements");
+  console.log(`✓ ${docs.length} documents PDF (billets avion, voucher, assurance, billets Pamplemousses) attachés`);
 
   // ————— Photos (basse qualité, décision O10) —————
   const photoDefs = [
@@ -910,6 +919,94 @@ async function main() {
     }
   }
   console.log(`✓ photos : ${photosOk}/${photoDefs.length} (basse qualité, décision O10)`);
+
+  // ————— Coffre d'Yves : spécimens complets (les anciens étaient vides) —————
+  const { data: oldVault } = await admin
+    .from("documents")
+    .select("id, storage_path, file_name")
+    .eq("owner_id", yvesId)
+    .eq("scope", "VAULT")
+    .ilike("file_name", "%specimen%");
+  if (oldVault?.length) {
+    await admin.storage.from("documents").remove(oldVault.map((d) => d.storage_path));
+    await admin
+      .from("documents")
+      .delete()
+      .in(
+        "id",
+        oldVault.map((d) => d.id),
+      );
+  }
+  const vaultDocs = [
+    {
+      title: "PASSEPORT - SPECIMEN",
+      lines: [
+        "Republique francaise - SPECIMEN de demonstration",
+        "Titulaire : FOGG, Phileas (specimen)",
+        "N° du document : 24FV58212",
+        "Delivre le : 05/01/2024 - Expire le : 04/01/2034",
+        "P<FRAFOGG<<PHILEAS<<<<<<<<<<<<<<<<<<<<<<<<<<",
+        "24FV582125FRA7212319M3401043<<<<<<<<<<<<<<02",
+      ],
+      category: "passport",
+      fileName: "passeport-specimen.pdf",
+      documentNumber: "24FV58212",
+      expiresAt: "2034-01-04",
+    },
+    {
+      title: "CARTE D'IDENTITE - SPECIMEN",
+      lines: [
+        "Republique francaise - SPECIMEN de demonstration",
+        "Titulaire : FOGG, Phileas (specimen)",
+        "N° du document : IDFR2033X44",
+        "Expire le : 04/11/2033",
+      ],
+      category: "id_card",
+      fileName: "carte-identite-specimen.pdf",
+      documentNumber: "IDFR2033X44",
+      expiresAt: "2033-11-04",
+    },
+    {
+      title: "PERMIS DE CONDUIRE - SPECIMEN",
+      lines: [
+        "Republique francaise - SPECIMEN de demonstration",
+        "Titulaire : FOGG, Phileas (specimen)",
+        "Categories : B - N° 88AB12345",
+        "Expire le : 12/03/2038",
+      ],
+      category: "driving_license",
+      fileName: "permis-conduire-specimen.pdf",
+      documentNumber: "88AB12345",
+      expiresAt: "2038-03-12",
+    },
+  ];
+  for (const d of vaultDocs) {
+    const documentId = uuid();
+    const bytes = await makePdf(d.title, d.lines);
+    const storagePath = `${yvesId}/${documentId}.pdf`;
+    const { error: upErr } = await admin.storage
+      .from("documents")
+      .upload(storagePath, bytes, { contentType: "application/pdf" });
+    if (upErr) {
+      throw new Error(`Upload ${d.fileName} : ${upErr.message}`);
+    }
+    const { error } = await admin.from("documents").insert({
+      id: documentId,
+      owner_id: yvesId,
+      scope: "VAULT",
+      file_name: d.fileName,
+      mime_type: "application/pdf",
+      size_bytes: bytes.byteLength,
+      storage_path: storagePath,
+      category: d.category as "passport",
+      expires_at: d.expiresAt,
+      metadata: { document_number: d.documentNumber },
+    });
+    if (error) {
+      throw new Error(`Coffre ${d.fileName} : ${error.message}`);
+    }
+  }
+  console.log("✓ coffre : 3 spécimens complets (passeport, CNI, permis) — PDF réels");
 
   // ————— Brouillon d'import reçu "par email" (PHIL-P02) —————
   await admin.from("import_drafts").insert({

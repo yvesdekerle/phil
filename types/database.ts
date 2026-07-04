@@ -206,6 +206,7 @@ export type Database = {
           expires_at: string | null;
           file_name: string;
           id: string;
+          label: string | null;
           metadata: Json;
           mime_type: string;
           owner_id: string;
@@ -221,6 +222,7 @@ export type Database = {
           expires_at?: string | null;
           file_name: string;
           id?: string;
+          label?: string | null;
           metadata?: Json;
           mime_type: string;
           owner_id: string;
@@ -236,6 +238,7 @@ export type Database = {
           expires_at?: string | null;
           file_name?: string;
           id?: string;
+          label?: string | null;
           metadata?: Json;
           mime_type?: string;
           owner_id?: string;

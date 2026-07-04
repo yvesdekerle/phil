@@ -16,7 +16,20 @@ const createTripDocumentSchema = z.object({
   storagePath: z.string().min(1),
   category: z.enum(TRIP_CATEGORIES as [string, ...string[]]),
   expiresAt: z.union([z.literal(""), z.string().regex(/^\d{4}-\d{2}-\d{2}$/)]).optional(),
+  // PHIL-Q26 : libellé libre + rattachement direct à un événement
+  label: z.string().trim().max(60).optional(),
+  eventId: z.union([z.literal(""), z.string().uuid()]).optional(),
 });
+
+/** Catégorie déduite du libellé libre — garde les filtres existants pertinents. */
+function categoryFromLabel(label: string): (typeof TRIP_CATEGORIES)[number] {
+  const n = label.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+  if (n.includes("billet") || n.includes("ticket") || n.includes("forfait")) return "ticket";
+  if (n.includes("voucher") || n.includes("reservation")) return "voucher";
+  if (n.includes("hebergement") || n.includes("hotel") || n.includes("villa")) return "lodging";
+  if (n.includes("assurance")) return "insurance";
+  return "other";
+}
 
 export type CreateTripDocumentState = {
   status: "idle" | "error";
@@ -41,6 +54,8 @@ export async function createTripDocument(
     storagePath: formData.get("storagePath"),
     category: formData.get("category"),
     expiresAt: formData.get("expiresAt") ?? "",
+    label: formData.get("label") ?? "",
+    eventId: formData.get("eventId") ?? "",
   });
 
   if (!parsed.success) {
@@ -68,7 +83,10 @@ export async function createTripDocument(
     mime_type: parsed.data.mimeType,
     size_bytes: parsed.data.sizeBytes,
     storage_path: parsed.data.storagePath,
-    category: parsed.data.category as (typeof TRIP_CATEGORIES)[number],
+    category: parsed.data.label
+      ? categoryFromLabel(parsed.data.label)
+      : (parsed.data.category as (typeof TRIP_CATEGORIES)[number]),
+    label: parsed.data.label || null,
     expires_at: parsed.data.expiresAt || null,
     metadata: {},
   });
@@ -80,6 +98,14 @@ export async function createTripDocument(
       status: "error",
       message: "L'enregistrement a échoué — il faut être capitaine ou éditeur du voyage.",
     };
+  }
+
+  // PHIL-Q26 : rattachement direct à un événement choisi à l'upload
+  if (parsed.data.eventId) {
+    await supabase
+      .from("event_documents")
+      .insert({ event_id: parsed.data.eventId, document_id: parsed.data.documentId });
+    redirect(`/trips/${parsed.data.tripId}/events/${parsed.data.eventId}`);
   }
 
   redirect(`/trips/${parsed.data.tripId}/documents`);

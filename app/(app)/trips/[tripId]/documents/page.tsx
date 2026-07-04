@@ -14,6 +14,7 @@ type TripDocument = {
   id: string;
   file_name: string;
   category: (typeof CATEGORIES)[number];
+  label: string | null;
   uploaded_at: string;
   scope: "VAULT" | "TRIP";
   ownerName: string;
@@ -43,14 +44,16 @@ export default async function TripDocumentsPage({
   const [{ data: tripDocs }, { data: sharedRows }, { data: me }] = await Promise.all([
     supabase
       .from("documents")
-      .select("id, file_name, category, uploaded_at, scope, owner_id, profiles(display_name)")
+      .select(
+        "id, file_name, category, label, uploaded_at, scope, owner_id, profiles(display_name)",
+      )
       .eq("trip_id", tripId)
       .eq("scope", "TRIP")
       .is("deleted_at", null),
     supabase
       .from("document_shares")
       .select(
-        "shared_with, documents(id, file_name, category, uploaded_at, scope, deleted_at, profiles(display_name))",
+        "shared_with, documents(id, file_name, category, label, uploaded_at, scope, deleted_at, profiles(display_name))",
       )
       .eq("trip_id", tripId),
     supabase
@@ -68,6 +71,7 @@ export default async function TripDocumentsPage({
     id: d.id,
     file_name: d.file_name,
     category: d.category,
+    label: d.label,
     uploaded_at: d.uploaded_at,
     scope: "TRIP" as const,
     ownerName: d.profiles?.display_name ?? "Voyageur",
@@ -83,6 +87,7 @@ export default async function TripDocumentsPage({
       id: r.documents.id,
       file_name: r.documents.file_name,
       category: r.documents.category,
+      label: r.documents.label,
       uploaded_at: r.documents.uploaded_at,
       scope: "VAULT" as const,
       ownerName: r.documents.profiles?.display_name ?? "Voyageur",
@@ -207,7 +212,7 @@ export default async function TripDocumentsPage({
                     {doc.file_name}
                   </span>
                   <span className="block text-xs text-encre-douce">
-                    {CATEGORY_LABELS[doc.category]} ·{" "}
+                    {doc.label ?? CATEGORY_LABELS[doc.category]} ·{" "}
                     {format(parseISO(doc.uploaded_at), "d MMM yyyy", { locale: fr })}
                   </span>
                 </span>

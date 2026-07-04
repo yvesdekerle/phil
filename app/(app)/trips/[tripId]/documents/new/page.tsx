@@ -24,6 +24,11 @@ export default async function NewTripDocumentPage({
   if (!trip) {
     notFound();
   }
+  const { data: events } = await supabase
+    .from("trip_events")
+    .select("id, title")
+    .eq("trip_id", tripId)
+    .order("starts_at", { ascending: true });
 
   return (
     <div className="mx-auto flex max-w-lg flex-col gap-5">
@@ -42,11 +47,13 @@ export default async function NewTripDocumentPage({
           <UploadForm
             userId={user.id}
             action={createTripDocument}
-            defaultCategory="ticket"
+            defaultCategory="other"
             categories={TRIP_CATEGORIES}
             tripId={trip.id}
             submitLabel="Ajouter au voyage"
             pendingLabel="Phil distribue le document…"
+            freeLabel
+            events={events ?? []}
           />
         </CardContent>
       </Card>

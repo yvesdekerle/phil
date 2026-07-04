@@ -29,7 +29,21 @@ type Props = {
   tripId?: string;
   submitLabel: string;
   pendingLabel: string;
+  /** PHIL-Q26 : libellé libre ("Forfait de ski") au lieu de la catégorie fermée. */
+  freeLabel?: boolean;
+  /** PHIL-Q26 : rattacher directement à un événement. */
+  events?: { id: string; title: string }[];
 };
+
+const LABEL_SUGGESTIONS = [
+  "Billet",
+  "Voucher",
+  "Hébergement",
+  "Assurance",
+  "Forfait de ski",
+  "Location de voiture",
+  "Réservation restaurant",
+];
 
 export function UploadForm({
   userId,
@@ -39,9 +53,13 @@ export function UploadForm({
   tripId,
   submitLabel,
   pendingLabel,
+  freeLabel = false,
+  events = [],
 }: Props) {
   const [file, setFile] = useState<File | null>(null);
   const [category, setCategory] = useState<DocumentCategory>(defaultCategory);
+  const [label, setLabel] = useState("");
+  const [eventId, setEventId] = useState("");
   const [expiresAt, setExpiresAt] = useState("");
   const [documentNumber, setDocumentNumber] = useState("");
   const [mrzStatus, setMrzStatus] = useState<string | null>(null);
@@ -117,6 +135,8 @@ export function UploadForm({
     formData.set("category", category);
     formData.set("expiresAt", expiresAt);
     formData.set("documentNumber", documentNumber);
+    formData.set("label", label);
+    formData.set("eventId", eventId);
     if (tripId) {
       formData.set("tripId", tripId);
     }
@@ -187,21 +207,60 @@ export function UploadForm({
         />
       </div>
 
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="category">Catégorie</Label>
-        <Select value={category} onValueChange={(v) => setCategory(v as DocumentCategory)}>
-          <SelectTrigger id="category" className="w-full">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {categories.map((c) => (
-              <SelectItem key={c} value={c}>
-                {CATEGORY_LABELS[c]}
-              </SelectItem>
+      {freeLabel ? (
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="doc-label">Type de document</Label>
+          <Input
+            id="doc-label"
+            value={label}
+            onChange={(e) => setLabel(e.target.value)}
+            placeholder="Billet, voucher, forfait de ski…"
+            maxLength={60}
+            list="doc-label-suggestions"
+            autoComplete="off"
+          />
+          <datalist id="doc-label-suggestions">
+            {LABEL_SUGGESTIONS.map((s) => (
+              <option key={s} value={s} />
             ))}
-          </SelectContent>
-        </Select>
-      </div>
+          </datalist>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="category">Catégorie</Label>
+          <Select value={category} onValueChange={(v) => setCategory(v as DocumentCategory)}>
+            <SelectTrigger id="category" className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {categories.map((c) => (
+                <SelectItem key={c} value={c}>
+                  {CATEGORY_LABELS[c]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      {events.length > 0 ? (
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="doc-event">Rattacher à un événement (optionnel)</Label>
+          <select
+            id="doc-event"
+            value={eventId}
+            onChange={(e) => setEventId(e.target.value)}
+            className="rounded-md border border-laiton-clair bg-papier px-3 py-2 text-sm"
+          >
+            <option value="">Aucun — juste dans les documents du voyage</option>
+            {events.map((ev) => (
+              <option key={ev.id} value={ev.id}>
+                {ev.title}
+              </option>
+            ))}
+          </select>
+        </div>
+      ) : null}
 
       <div className="flex flex-col gap-2">
         {mrzStatus ? <p className="text-xs text-laiton">{mrzStatus}</p> : null}
