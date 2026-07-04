@@ -1,7 +1,7 @@
 "use client";
 
-import { Trash2 } from "lucide-react";
-import { useRef, useState, useTransition } from "react";
+import { ChevronLeft, ChevronRight, Trash2, X } from "lucide-react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -49,6 +49,29 @@ export function PhotosClient({
   const inputRef = useRef<HTMLInputElement>(null);
   const captionRef = useRef<HTMLInputElement>(null);
   const eventRef = useRef<HTMLSelectElement>(null);
+
+  // PHIL-Q02 : visionneuse
+  const [lightbox, setLightbox] = useState<number | null>(null);
+  const step = useCallback(
+    (delta: number) => {
+      setLightbox((current) =>
+        current === null ? null : (current + delta + photos.length) % photos.length,
+      );
+    },
+    [photos.length],
+  );
+  useEffect(() => {
+    if (lightbox === null) {
+      return;
+    }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setLightbox(null);
+      if (e.key === "ArrowLeft") step(-1);
+      if (e.key === "ArrowRight") step(1);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [lightbox, step]);
 
   const usedBytes = photos.reduce((s, p) => s + p.sizeBytes, 0);
   const remaining = quota - photos.length;
@@ -178,15 +201,15 @@ export function PhotosClient({
         </div>
       ) : (
         <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-          {photos.map((p) => (
+          {photos.map((p, index) => (
             <li key={p.id} className="group relative">
-              <a
-                href={`/api/photos/${p.id}/view`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block overflow-hidden rounded-lg border border-laiton-clair bg-parchemin"
+              <button
+                type="button"
+                onClick={() => setLightbox(index)}
+                className="block w-full overflow-hidden rounded-lg border border-laiton-clair bg-parchemin"
+                aria-label={`Ouvrir ${p.caption ?? "la photo"}`}
               >
-                {/* Vignette générée côté client ; l'original ne charge qu'au clic */}
+                {/* Vignette générée côté client ; l'original ne charge que dans la visionneuse */}
                 {/* biome-ignore lint/performance/noImgElement: source authentifiée dynamique, next/image inutile ici */}
                 <img
                   src={`/api/photos/${p.id}/view${p.hasThumb ? "?thumb=1" : ""}`}
@@ -194,7 +217,7 @@ export function PhotosClient({
                   loading="lazy"
                   className="aspect-square w-full object-cover transition-transform group-hover:scale-[1.02]"
                 />
-              </a>
+              </button>
               {p.caption ? (
                 <p className="mt-1 truncate text-xs text-encre-douce" title={p.caption}>
                   {p.caption}
@@ -216,6 +239,69 @@ export function PhotosClient({
           ))}
         </ul>
       )}
+
+      {lightbox !== null && photos[lightbox] ? (
+        <div
+          className="fixed inset-0 z-50 flex flex-col bg-encre/95"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Visionneuse photos"
+        >
+          <div className="flex items-center justify-between px-4 py-3 text-papier">
+            <span className="text-sm opacity-80">
+              {lightbox + 1}/{photos.length} · {photos[lightbox].uploaderName}
+            </span>
+            <button
+              type="button"
+              onClick={() => setLightbox(null)}
+              aria-label="Fermer"
+              className="rounded-full p-2 hover:bg-papier/10"
+            >
+              <X className="size-5" aria-hidden="true" />
+            </button>
+          </div>
+          {/* biome-ignore lint/a11y/noStaticElementInteractions: clic sur le fond = fermer, doublé par le bouton Fermer */}
+          {/* biome-ignore lint/a11y/useKeyWithClickEvents: Échap gère le clavier (useEffect), le bouton Fermer est focusable */}
+          <div
+            className="relative flex min-h-0 flex-1 items-center justify-center px-12"
+            onClick={(e) => e.target === e.currentTarget && setLightbox(null)}
+          >
+            {/* biome-ignore lint/performance/noImgElement: original authentifié, taille inconnue */}
+            <img
+              src={`/api/photos/${photos[lightbox].id}/view`}
+              alt={photos[lightbox].caption ?? "Photo du voyage"}
+              className="max-h-full max-w-full object-contain"
+            />
+            {photos.length > 1 ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => step(-1)}
+                  aria-label="Photo précédente"
+                  className="absolute left-2 rounded-full bg-papier/10 p-2 text-papier hover:bg-papier/20"
+                >
+                  <ChevronLeft className="size-6" aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => step(1)}
+                  aria-label="Photo suivante"
+                  className="absolute right-2 rounded-full bg-papier/10 p-2 text-papier hover:bg-papier/20"
+                >
+                  <ChevronRight className="size-6" aria-hidden="true" />
+                </button>
+              </>
+            ) : null}
+          </div>
+          {photos[lightbox].caption ? (
+            <p className="px-4 py-3 text-center text-sm text-papier/90">
+              {photos[lightbox].caption}
+            </p>
+          ) : (
+            <div className="py-3" />
+          )}
+        </div>
+      ) : null}
     </div>
   );
 }

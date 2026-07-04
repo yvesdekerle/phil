@@ -616,8 +616,9 @@ Ordre : Q06 → Q04 → Q05 → Q02 → Q03 → Q01. Écartés volontairement : 
 ### [ ] PHIL-Q01 — Ajout rapide d'événement
 Le geste le plus fréquent de l'app doit être le plus court (standard TripIt/Wanderlog) : sur le calendrier du voyage, un champ "Ajout rapide" — titre + jour (+ heure optionnelle, défaut 12h) → crée une ACTIVITY enrichissable ensuite via la fiche/l'édition. Les formulaires complets restent pour les cas riches.
 
-### [ ] PHIL-Q02 — Visionneuse photos (lightbox)
+### [x] PHIL-Q02 — Visionneuse photos (lightbox) *(fait le 2026-07-04)*
 Taper une photo ouvre une visionneuse plein écran (original) avec précédent/suivant, clavier (←/→/Échap) et fermeture au tap — au lieu de l'ouverture brute dans un nouvel onglet.
+> Note : overlay encre 95 % — compteur x/n + auteur en tête, flèches ‹ › (bouclage), ←/→/Échap au clavier, clic sur le fond = fermer, légende en pied. L'original ne se charge que dans la visionneuse (la grille reste sur les vignettes).
 
 ### [ ] PHIL-Q03 — Temps réel sur les votes et sondages
 Supabase Realtime (free tier) : les sondages éclair, votes d'idées et dépenses se mettent à jour sans recharger. Migration : ajouter `polls`, `poll_votes`, `idea_votes`, `expenses` à la publication realtime (RLS appliquée par WALRUS — on ne reçoit que ce qu'on a le droit de voir). Composant `RealtimeRefresh` (channel + router.refresh() débouncé) posé sur les pages Idées et Budget.
