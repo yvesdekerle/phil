@@ -645,6 +645,16 @@ Peupler le voyage démo avec le vrai séjour (5→21 nov, Tamarin puis Blue Bay)
 `docs/FONCTIONNALITES.md` : toutes les fonctionnalités par catégorie, à jour des vagues 1 à 5.
 > Note : 17 catégories (comptes, voyages/équipage, calendrier, imports, coffre, documents, idées/décisions, valise, budget, photos, journal/souvenirs, cartes, météo, notifications, partage extérieur, offline, sécurité) + tableau des configurations en attente (🔑) + comptes de démo. À maintenir au fil des tickets.
 
+### [~] PHIL-Q10 — Valise : garde-robe type avec quantités
+Demande Yves (2026-07-04) : proposer les affaires qu'on retrouve dans tous les voyages (t-shirts, pantalons, shorts, maillots, brosse à dents, lunettes de soleil, crème solaire…), **rangées par catégorie** (vêtements, trousse de toilette, indispensables…), **avec des quantités** (calculées d'après la durée du séjour, ajustables). Les items non sélectionnés restent "à sélectionner" avec un bouton **+ Ajouter** ; les items déjà dans la valise ont un bouton **Retirer**.
+
+### [x] PHIL-Q11 — La carte devient un onglet du voyage *(fait le 2026-07-04)*
+La carte (N01) existe mais n'est accessible que par un bouton sur le calendrier — demande Yves : l'ajouter aux onglets du voyage.
+> Note : onglet **Carte** en 2e position (après Calendrier), bouton redondant du calendrier retiré (Timeline conservé). La page carte existante (Programme/Idées, filtre par jour) est inchangée.
+
+### [ ] PHIL-Q12 — Carte des photos (position EXIF)
+Dans l'onglet Photos : bascule Grille/Carte — les photos sont épinglées sur une carte à partir des **données GPS EXIF** lues dans le fichier au moment de l'upload (colonnes lat/lng sur `trip_photos`, extraction côté client). Les photos sans position restent en grille seulement.
+
 ### [x] PHIL-Q06 — Inviter ses compagnons habituels en un tap *(fait le 2026-07-04)*
 Sur la page Participants : sous le formulaire d'invitation par email, une rangée "Tes compagnons de route" — les amis du carnet (D08) pas encore à bord de ce voyage, avatar + prénom, un tap = invitation (réutilise `inviteFriend`, choix du rôle simple). "On part souvent avec les mêmes personnes" — demande Yves du 2026-07-04.
 > Note : carte "Tes compagnons de route" (visible OWNER/EDITOR) au-dessus du formulaire d'invitation — puces avatar + prénom des co-voyageurs des autres voyages non encore à bord, un tap → `inviteFriend` D08 (email via Resend + lien dans la liste des invitations, rôle EDITOR comme depuis le carnet), état "✓" après envoi, `revalidatePath` ajouté à l'action pour que l'invitation apparaisse aussitôt. Doublons gérés par le flux existant ("déjà en attente").
