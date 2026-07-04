@@ -3,10 +3,13 @@ import { formatInTimeZone } from "date-fns-tz";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { EventTypeIcon } from "@/components/calendar/event-type-icon";
+import { WeatherLine } from "@/components/trips/trip-weather";
 import { eventDayKey, eventTime, formatInTimezone } from "@/lib/events/datetime";
 import type { TripEvent } from "@/lib/events/types";
+import { ensureTripCoords } from "@/lib/geo/locate";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
+import { type DailyForecast, getDailyForecast } from "@/lib/weather/open-meteo";
 
 const HOUR_START = 6;
 const HOUR_END = 24;
@@ -54,15 +57,32 @@ export default async function DayViewPage({
     redirect("/login");
   }
 
-  const { data: events } = await supabase
-    .from("trip_events")
-    .select("*")
-    .eq("trip_id", tripId)
-    .order("starts_at", { ascending: true });
+  const [{ data: events }, { data: trip }] = await Promise.all([
+    supabase
+      .from("trip_events")
+      .select("*")
+      .eq("trip_id", tripId)
+      .order("starts_at", { ascending: true }),
+    supabase
+      .from("trips")
+      .select("id, destination, destination_lat, destination_lng, default_timezone")
+      .eq("id", tripId)
+      .single(),
+  ]);
 
   const dayEvents = (events ?? []).filter(
     (e) => eventDayKey(e.starts_at, e.timezone) === date,
   ) as TripEvent[];
+
+  // PHIL-O02 : météo du jour si la date est couverte par la prévision
+  let dayWeather: DailyForecast | null = null;
+  if (trip) {
+    const coords = await ensureTripCoords(supabase, trip);
+    if (coords) {
+      const forecast = await getDailyForecast(coords.lat, coords.lng, trip.default_timezone);
+      dayWeather = forecast.find((d) => d.date === date) ?? null;
+    }
+  }
 
   const label = formatInTimeZone(`${date}T12:00:00Z`, "UTC", "EEEE d MMMM yyyy", { locale: fr });
   const hours = Array.from({ length: HOUR_END - HOUR_START }, (_, i) => HOUR_START + i);
@@ -75,7 +95,13 @@ export default async function DayViewPage({
       >
         ← Retour au calendrier
       </Link>
-      <h1 className="mt-2 mb-4 font-display text-2xl text-encre capitalize">{label}</h1>
+      <h1 className="mt-2 font-display text-2xl text-encre capitalize">{label}</h1>
+      {dayWeather ? (
+        <p className="mt-1">
+          <WeatherLine day={dayWeather} />
+        </p>
+      ) : null}
+      <div className="mb-4" />
 
       {dayEvents.length === 0 ? (
         <div className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-6 py-14 text-center">

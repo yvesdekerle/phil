@@ -19,11 +19,14 @@ export function TodayHero({
   current,
   next,
   dayKey,
+  weather,
 }: {
   tripId: string;
   current: HeroEvent | null;
   next: HeroEvent | null;
   dayKey: string;
+  /** Ligne météo du jour (PHIL-O02), rendue côté serveur. */
+  weather?: React.ReactNode;
 }) {
   const [countdown, setCountdown] = useState<string | null>(null);
 
@@ -58,8 +61,11 @@ export function TodayHero({
 
   return (
     <section className="rounded-lg border border-bordeaux/30 bg-gradient-to-br from-papier to-parchemin px-5 py-4">
-      <div className="mb-2 flex items-center justify-between">
-        <h2 className="font-display text-lg text-encre italic">Aujourd'hui</h2>
+      <div className="mb-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+        <span className="flex items-center gap-3">
+          <h2 className="font-display text-lg text-encre italic">Aujourd'hui</h2>
+          {weather}
+        </span>
         <Link
           href={`/trips/${tripId}/day/${dayKey}`}
           className="text-xs text-encre-douce underline underline-offset-4 hover:text-encre"

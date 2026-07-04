@@ -3,6 +3,7 @@
 import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { geocode } from "@/lib/geo/geocode";
 import { createClient } from "@/lib/supabase/server";
 import { getTemplate } from "@/lib/trips/templates";
 
@@ -60,10 +61,14 @@ export async function createTrip(
   // id généré côté serveur + insert sans RETURNING : la policy SELECT n'est
   // satisfaite qu'après le trigger AFTER INSERT qui crée la ligne participant (cf. B09).
   const tripId = randomUUID();
+  // PHIL-O02 : coordonnées de la destination pour la météo (best-effort)
+  const coords = await geocode(parsed.data.destination);
   const { error } = await supabase.from("trips").insert({
     id: tripId,
     name: parsed.data.name,
     destination: parsed.data.destination,
+    destination_lat: coords?.lat ?? null,
+    destination_lng: coords?.lng ?? null,
     start_date: parsed.data.startDate,
     end_date: parsed.data.endDate,
     cover_image_url: parsed.data.coverImageUrl || null,

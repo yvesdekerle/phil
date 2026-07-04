@@ -2,11 +2,14 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { EventTypeIcon } from "@/components/calendar/event-type-icon";
 import { TodayHero } from "@/components/calendar/today-hero";
+import { WeatherLine, WeatherStrip } from "@/components/trips/trip-weather";
 import { Button } from "@/components/ui/button";
 import { eventDayKey, eventTime, groupEventsByDay } from "@/lib/events/datetime";
 import type { TripEvent } from "@/lib/events/types";
+import { ensureTripCoords } from "@/lib/geo/locate";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
+import { type DailyForecast, getDailyForecast } from "@/lib/weather/open-meteo";
 
 export default async function TripCalendarPage({
   params,
@@ -36,7 +39,9 @@ export default async function TripCalendarPage({
       .single(),
     supabase
       .from("trips")
-      .select("default_timezone, start_date, end_date")
+      .select(
+        "id, destination, destination_lat, destination_lng, default_timezone, start_date, end_date",
+      )
       .eq("id", tripId)
       .single(),
   ]);
@@ -66,6 +71,19 @@ export default async function TripCalendarPage({
     : null;
   const nextEvent = tripOngoing ? (events.find((e) => e.starts_at > nowIso) ?? null) : null;
 
+  // PHIL-O02 : météo à destination — les jours du voyage couverts par la prévision
+  let weatherDays: DailyForecast[] = [];
+  if (trip && todayKey) {
+    const coords = await ensureTripCoords(supabase, trip);
+    if (coords) {
+      const forecast = await getDailyForecast(coords.lat, coords.lng, trip.default_timezone);
+      weatherDays = forecast
+        .filter((d) => d.date >= trip.start_date && d.date <= trip.end_date && d.date >= todayKey)
+        .slice(0, 7);
+    }
+  }
+  const todayWeather = weatherDays.find((d) => d.date === todayKey) ?? null;
+
   return (
     <div className="flex flex-col gap-6">
       {tripOngoing && todayKey ? (
@@ -74,8 +92,10 @@ export default async function TripCalendarPage({
           current={currentEvent ? heroOf(currentEvent) : null}
           next={nextEvent ? heroOf(nextEvent) : null}
           dayKey={todayKey}
+          weather={todayWeather ? <WeatherLine day={todayWeather} /> : undefined}
         />
       ) : null}
+      {trip ? <WeatherStrip days={weatherDays} destination={trip.destination} /> : null}
       <div className="flex items-center justify-end gap-3">
         <Button asChild variant="outline">
           <Link href={`/trips/${tripId}/map`}>Carte</Link>

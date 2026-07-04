@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { geocode } from "@/lib/geo/geocode";
 import { createClient } from "@/lib/supabase/server";
 
 const tripUpdateSchema = z
@@ -68,12 +69,26 @@ export async function updateTrip(
   }
 
   const supabase = await createClient();
+  // PHIL-O02 : re-géocoder la destination (météo). Si le géocodage échoue et
+  // que la destination a changé, on efface les coordonnées devenues fausses.
+  const { data: before } = await supabase
+    .from("trips")
+    .select("destination")
+    .eq("id", parsed.data.tripId)
+    .single();
+  const coords = await geocode(parsed.data.destination);
+  const coordsPatch = coords
+    ? { destination_lat: coords.lat, destination_lng: coords.lng }
+    : before && before.destination !== parsed.data.destination
+      ? { destination_lat: null, destination_lng: null }
+      : {};
   const { error, count } = await supabase
     .from("trips")
     .update(
       {
         name: parsed.data.name,
         destination: parsed.data.destination,
+        ...coordsPatch,
         start_date: parsed.data.startDate,
         end_date: parsed.data.endDate,
         cover_image_url: parsed.data.coverImageUrl || null,

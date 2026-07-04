@@ -39,6 +39,34 @@ export async function geolocateEvent(
   }
 }
 
+/**
+ * Coordonnées de la destination du voyage (PHIL-O02) : renvoie les colonnes
+ * si présentes, sinon géocode la destination et tente de les stocker
+ * (best-effort — l'update échoue silencieusement pour un VIEWER, la météo
+ * s'affiche quand même).
+ */
+export async function ensureTripCoords(
+  supabase: SupabaseClient<Database>,
+  trip: {
+    id: string;
+    destination: string;
+    destination_lat: number | null;
+    destination_lng: number | null;
+  },
+): Promise<{ lat: number; lng: number } | null> {
+  if (trip.destination_lat !== null && trip.destination_lng !== null) {
+    return { lat: trip.destination_lat, lng: trip.destination_lng };
+  }
+  const coords = await geocode(trip.destination);
+  if (coords) {
+    await supabase
+      .from("trips")
+      .update({ destination_lat: coords.lat, destination_lng: coords.lng })
+      .eq("id", trip.id);
+  }
+  return coords;
+}
+
 export async function geolocateIdea(
   supabase: SupabaseClient<Database>,
   tripId: string,

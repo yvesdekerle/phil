@@ -899,6 +899,8 @@ export type Database = {
           created_by: string;
           default_timezone: string;
           destination: string;
+          destination_lat: number | null;
+          destination_lng: number | null;
           end_date: string;
           id: string;
           name: string;
@@ -911,6 +913,8 @@ export type Database = {
           created_by: string;
           default_timezone?: string;
           destination: string;
+          destination_lat?: number | null;
+          destination_lng?: number | null;
           end_date: string;
           id?: string;
           name: string;
@@ -923,6 +927,8 @@ export type Database = {
           created_by?: string;
           default_timezone?: string;
           destination?: string;
+          destination_lat?: number | null;
+          destination_lng?: number | null;
           end_date?: string;
           id?: string;
           name?: string;
