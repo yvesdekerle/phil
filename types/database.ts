@@ -910,6 +910,64 @@ export type Database = {
           },
         ];
       };
+      trip_photos: {
+        Row: {
+          caption: string | null;
+          created_at: string;
+          event_id: string | null;
+          id: string;
+          size_bytes: number;
+          storage_path: string;
+          thumb_path: string | null;
+          trip_id: string;
+          uploaded_by: string;
+        };
+        Insert: {
+          caption?: string | null;
+          created_at?: string;
+          event_id?: string | null;
+          id?: string;
+          size_bytes?: number;
+          storage_path: string;
+          thumb_path?: string | null;
+          trip_id: string;
+          uploaded_by: string;
+        };
+        Update: {
+          caption?: string | null;
+          created_at?: string;
+          event_id?: string | null;
+          id?: string;
+          size_bytes?: number;
+          storage_path?: string;
+          thumb_path?: string | null;
+          trip_id?: string;
+          uploaded_by?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "trip_photos_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "trip_events";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "trip_photos_trip_id_fkey";
+            columns: ["trip_id"];
+            isOneToOne: false;
+            referencedRelation: "trips";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "trip_photos_uploaded_by_fkey";
+            columns: ["uploaded_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       trips: {
         Row: {
           archived_at: string | null;
