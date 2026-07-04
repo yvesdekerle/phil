@@ -657,6 +657,27 @@ La carte (N01) existe mais n'est accessible que par un bouton sur le calendrier 
 Demande Yves (2026-07-04) : à côté des distances, un lien qui ouvre l'app de conduite (Google Maps retenu — ses liens universels ouvrent l'app native sur mobile). Sur : chaque trajet de la vue jour (origine → destination en coordonnées) et le Prochain départ du mode Aujourd'hui (destination seule → Google part de la position actuelle). La fiche événement avait déjà son bouton Itinéraire.
 > Note : `lib/geo/directions.ts` (`directionsUrl` origine→destination, `navigateUrl` destination seule, `travelmode=driving`, coordonnées à 6 décimales). Vue jour : lien "🧭 Itinéraire" sur chaque trajet. Mode Aujourd'hui : bouton **"Y aller"** bordeaux sur la carte Prochain départ (coordonnées si géocodé, sinon adresse texte). Le bouton Itinéraire de la fiche événement utilise désormais les coordonnées précises quand elles existent. Waze écarté (préférence Yves : Google Maps ; ses liens s'ouvrent dans l'app installée).
 
+### [~] PHIL-Q15 — Carte du programme façon Polarsteps
+Retours Yves (2026-07-04) : pins **numérotés 1, 2, 3…** selon l'ordre chronologique du jour filtré ; style Polarsteps — pastilles rondes bord blanc + ombre, **tracé plein adouci** (fini le pointillé) ; **hébergements en icône maison** avec leur couleur propre. Seed : étoffer le vendredi 13 novembre (4 activités).
+
+### [ ] PHIL-Q14 — Page Photos : carte au-dessus, grille en dessous, façon Polarsteps
+Remplacer la bascule Grille/Carte par **la carte en haut** (pins = vignettes rondes des photos, clic → visionneuse) **et la grille en dessous**. Clarifier les options d'envoi (légende + événement) en les regroupant avec le bouton "Ajouter des photos".
+
+### [ ] PHIL-Q20 — Valise : catalogue intégré par section, vaccins, dates
+Retours Yves : plus de panneau séparé — les suggestions du catalogue apparaissent **directement dans chaque section** (avant le départ / à emporter / sur place) en items "en attente" à sélectionner ; compléter la liste (casquette, lunettes, masque et tuba, t-shirts, pull, pantalons, shorts…) ; **"Vaccins à jour" dans Avant le départ** ; **date optionnelle sur les items** ("à faire avant le…", colonne `due_date`).
+
+### [ ] PHIL-Q16 — Tout préparer pour le hors-ligne
+Le bouton "Préparer pour le hors-ligne" cache les données du voyage et chaque document a son bouton individuel — ajouter une préparation **complète** : données + tous les documents du voyage d'un coup.
+
+### [ ] PHIL-Q17 — Page Conseils de voyage
+Conseils pratiques avant le départ : télécharger Google Maps hors-ligne, e-SIM, adaptateur, retraits/monnaie, santé/vaccins, copies des papiers dans le coffre Phil, etc. Accessible depuis les Paramètres du voyage et la liste des voyages.
+
+### [ ] PHIL-Q18 — Rappel "la journée de demain est vide"
+La veille au soir (cron 16h UTC existant), si le lendemain d'un voyage en cours n'a aucun événement → push "Demain est libre — on prépare ?". Préférence on/off dédiée ; l'heure n'est pas réglable (cron Hobby = un passage fixe par jour, documenté).
+
+### [ ] PHIL-Q19 — Export / import JSON d'un voyage complet
+Export JSON d'un voyage (événements, idées, valise, candidats — sans documents ni données du coffre) + bouton d'import qui recrée un voyage complet depuis ce JSON (validation Zod stricte). Décision : bonne idée — ça donne la sauvegarde, la duplication de voyage et le partage de squelettes entre amis en un seul mécanisme.
+
 ### [x] PHIL-Q12 — Carte des photos (position EXIF) *(fait le 2026-07-04)*
 Dans l'onglet Photos : bascule Grille/Carte — les photos sont épinglées sur une carte à partir des **données GPS EXIF** lues dans le fichier au moment de l'upload (colonnes lat/lng sur `trip_photos`, extraction côté client). Les photos sans position restent en grille seulement.
 > Note : **parseur EXIF GPS maison** (`lib/photos/exif-gps.ts`, ~90 lignes, zéro dépendance — npm plantait sur l'installation d'exifr et un parseur dédié suffit) : segment APP1 → IFD GPS → degrés décimaux, JPEG uniquement (PNG/WebP ne portent quasi jamais de GPS), best-effort. **Validé par test** avec un JPEG EXIF construit sur mesure (Le Morne : -20.456, 57.311 restitué exactement). Colonnes `lat/lng`, pills Grille/Carte (n) dans l'onglet Photos, carte OSM avec pions bordeaux (légende + auteur en popup). Les photos du seed démo portent des positions. À noter : beaucoup d'apps (WhatsApp, réseaux) **strippent l'EXIF** — les photos venant de l'appareil photo la gardent.
