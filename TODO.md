@@ -425,9 +425,10 @@ Permettre de saisir plusieurs options d'hébergement pour un même créneau avan
 **Décision du 2026-07-04 : retenu (vague 3), avec vote pondéré** (et non un simple +1) — format à définir avec L02.
 > Note : **concept dédié** `lodging_candidates` retenu (pas de statut CANDIDATE sur `trip_events` : calendrier, iCal, rappels J-1 et carte supposent des événements réels). Créneau = même paire check-in/check-out (groupement d'affichage, pas de table de slots). RLS : proposition par tout membre (collaboratif comme les idées), choix/rejet OWNER/EDITOR, suppression auteur/OWNER. Page `/trips/{id}/lodging` (carte d'accès en tête des Idées) : options groupées par créneau (titre, lien, prix libre, notes, auteur), "Choisir → calendrier" crée l'événement LODGING (check-in 15h / check-out 11h, fuseau du voyage, lien en `external_url`, géocodage N01) et marque le candidat Retenu ; **plusieurs choix possibles sur un même créneau** (cas ski) ; Écarter/Remettre en lice réversible. `verify:rls` 30/30. Le vote pondéré arrive avec L02.
 
-### [ ] PHIL-L02 — Avis qualitatifs et aide à la décision
+### [x] PHIL-L02 — Avis qualitatifs et aide à la décision *(fait le 2026-07-04)*
 Aller au-delà du vote +1 sur les idées : permettre des avis qualitatifs ("Vaut le coup", "Optionnel", "Trop cher") sur les activités et hébergements candidats. Inspiration : les colonnes "Vaut le coup ?" et "Choix 1/2" du spreadsheet Islande. Analyser le bon format (tags prédéfinis, commentaires libres, notation 1-5, etc.).
 **Décision du 2026-07-04 : retenu (vague 3)** — porte le vote pondéré des hébergements candidats (L01).
+> Note : format retenu = **3 avis pondérés** façon spreadsheet Islande — "Vaut le coup" (+2), "Optionnel" (+1), "Plutôt non" (−1) — + **commentaire libre** (≤ 300 car.). Table `candidate_votes` (PK candidat+user, un avis par personne, modifiable/retirable, RLS via helper `private.candidate_trip_id`). Sur chaque carte candidat : badge **Score** (somme) + nombre d'avis, mes 3 boutons (le mien surligné), champ commentaire, liste des avis nominatifs avec citations. **Écart assumé** : les idées d'activités gardent le +1 simple (H03) — étendre le vote pondéré aux idées se fera sur demande si le besoin se confirme. `verify:rls` 30/30.
 
 ---
 

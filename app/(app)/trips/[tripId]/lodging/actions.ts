@@ -92,6 +92,57 @@ export async function setCandidateStatus(
   revalidatePath(`/trips/${tripId}/lodging`);
 }
 
+const voteSchema = z.object({
+  tripId: z.string().uuid(),
+  candidateId: z.string().uuid(),
+  rating: z.coerce.number().refine((r) => [-1, 1, 2].includes(r), "Avis inconnu."),
+  comment: z.string().trim().max(300).optional(),
+});
+
+/** Avis pondéré sur un candidat (PHIL-L02) : +2 / +1 / -1, modifiable. */
+export async function rateCandidate(
+  _prev: CandidateState,
+  formData: FormData,
+): Promise<CandidateState> {
+  const parsed = voteSchema.safeParse({
+    tripId: formData.get("tripId"),
+    candidateId: formData.get("candidateId"),
+    rating: formData.get("rating"),
+    comment: formData.get("comment") ?? "",
+  });
+  if (!parsed.success) {
+    return { status: "error", message: "Avis invalide." };
+  }
+  const { supabase, user } = await requireUser();
+  const d = parsed.data;
+  const { error } = await supabase.from("candidate_votes").upsert({
+    candidate_id: d.candidateId,
+    user_id: user.id,
+    rating: d.rating,
+    comment: d.comment || null,
+    updated_at: new Date().toISOString(),
+  });
+  if (error) {
+    return { status: "error", message: "Vote impossible." };
+  }
+  revalidatePath(`/trips/${d.tripId}/lodging`);
+  return { status: "idle" };
+}
+
+/** Retire son avis. */
+export async function clearCandidateVote(tripId: string, candidateId: string): Promise<void> {
+  if (!areUuids(tripId, candidateId)) {
+    return;
+  }
+  const { supabase, user } = await requireUser();
+  await supabase
+    .from("candidate_votes")
+    .delete()
+    .eq("candidate_id", candidateId)
+    .eq("user_id", user.id);
+  revalidatePath(`/trips/${tripId}/lodging`);
+}
+
 export async function deleteCandidate(tripId: string, candidateId: string): Promise<void> {
   if (!areUuids(tripId, candidateId)) {
     return;

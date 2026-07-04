@@ -35,6 +35,17 @@ export default async function LodgingCandidatesPage({
       .single(),
   ]);
 
+  // PHIL-L02 : avis pondérés des candidats du voyage
+  const candidateIds = (candidates ?? []).map((c) => c.id);
+  const { data: votes } = candidateIds.length
+    ? await supabase
+        .from("candidate_votes")
+        .select(
+          "candidate_id, user_id, rating, comment, profiles!candidate_votes_user_id_fkey(display_name)",
+        )
+        .in("candidate_id", candidateIds)
+    : { data: [] };
+
   return (
     <div className="flex flex-col gap-5">
       <div>
@@ -66,6 +77,13 @@ export default async function LodgingCandidatesPage({
             authorName: c.profiles?.display_name ?? "Voyageur",
           }),
         )}
+        votes={(votes ?? []).map((v) => ({
+          candidateId: v.candidate_id,
+          userId: v.user_id,
+          rating: v.rating,
+          comment: v.comment,
+          name: v.profiles?.display_name ?? "Voyageur",
+        }))}
         myId={user.id}
         role={me?.role ?? "VIEWER"}
       />

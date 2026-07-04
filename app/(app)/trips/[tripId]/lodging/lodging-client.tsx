@@ -11,7 +11,9 @@ import {
   addCandidate,
   type CandidateState,
   chooseCandidate,
+  clearCandidateVote,
   deleteCandidate,
+  rateCandidate,
   setCandidateStatus,
 } from "./actions";
 
@@ -28,6 +30,105 @@ export type Candidate = {
   authorName: string;
 };
 
+export type CandidateVote = {
+  candidateId: string;
+  userId: string;
+  rating: number;
+  comment: string | null;
+  name: string;
+};
+
+const RATING_LABELS: Record<number, string> = {
+  2: "Vaut le coup",
+  1: "Optionnel",
+  [-1]: "Plutôt non",
+};
+
+/** Avis pondérés d'un candidat (PHIL-L02) : score, mes boutons, avis des autres. */
+function CandidateVotes({
+  tripId,
+  candidateId,
+  votes,
+  myId,
+}: {
+  tripId: string;
+  candidateId: string;
+  votes: CandidateVote[];
+  myId: string;
+}) {
+  const [, voteAction] = useActionState<CandidateState, FormData>(rateCandidate, {
+    status: "idle",
+  });
+  const [pending, startTransition] = useTransition();
+  const myVote = votes.find((v) => v.userId === myId);
+  const score = votes.reduce((s, v) => s + v.rating, 0);
+
+  return (
+    <div className="mt-2 border-t border-laiton-clair/40 pt-2">
+      <div className="flex flex-wrap items-center gap-2">
+        <span
+          className={cn(
+            "rounded-full px-2 py-0.5 text-xs font-medium tabular-nums",
+            score > 0 ? "bg-bordeaux/10 text-bordeaux" : "bg-encre/10 text-encre-douce",
+          )}
+          title={`${votes.length} avis`}
+        >
+          Score {score > 0 ? `+${score}` : score} · {votes.length} avis
+        </span>
+        <form action={voteAction} className="flex flex-wrap items-center gap-1.5">
+          <input type="hidden" name="tripId" value={tripId} />
+          <input type="hidden" name="candidateId" value={candidateId} />
+          {[2, 1, -1].map((rating) => (
+            <button
+              key={rating}
+              type="submit"
+              name="rating"
+              value={rating}
+              disabled={pending}
+              className={cn(
+                "rounded-full border px-2.5 py-0.5 text-xs transition-colors",
+                myVote?.rating === rating
+                  ? "border-bordeaux bg-bordeaux text-papier"
+                  : "border-laiton-clair text-encre-douce hover:text-encre",
+              )}
+            >
+              {RATING_LABELS[rating]}
+            </button>
+          ))}
+          <Input
+            name="comment"
+            placeholder="Un mot ? (optionnel)"
+            maxLength={300}
+            defaultValue={myVote?.comment ?? ""}
+            className="h-7 w-44 text-xs"
+          />
+          {myVote ? (
+            <button
+              type="button"
+              disabled={pending}
+              onClick={() => startTransition(() => clearCandidateVote(tripId, candidateId))}
+              className="text-xs text-encre-douce underline underline-offset-2 hover:text-encre"
+            >
+              retirer
+            </button>
+          ) : null}
+        </form>
+      </div>
+      {votes.some((v) => v.comment || v.userId !== myId) ? (
+        <ul className="mt-1.5 flex flex-col gap-0.5">
+          {votes.map((v) => (
+            <li key={v.userId} className="text-xs text-encre-douce">
+              <span className="font-medium text-encre">{v.userId === myId ? "Toi" : v.name}</span> —{" "}
+              {RATING_LABELS[v.rating] ?? v.rating}
+              {v.comment ? ` · « ${v.comment} »` : ""}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
+  );
+}
+
 function slotLabel(checkIn: string, checkOut: string): string {
   const inLabel = format(new Date(`${checkIn}T12:00:00`), "d MMM", { locale: fr });
   const outLabel = format(new Date(`${checkOut}T12:00:00`), "d MMM yyyy", { locale: fr });
@@ -38,11 +139,13 @@ function slotLabel(checkIn: string, checkOut: string): string {
 export function LodgingClient({
   tripId,
   candidates,
+  votes,
   myId,
   role,
 }: {
   tripId: string;
   candidates: Candidate[];
+  votes: CandidateVote[];
   myId: string;
   role: string;
 }) {
@@ -173,6 +276,12 @@ export function LodgingClient({
                       ) : null}
                     </div>
                     {c.notes ? <p className="mt-1 text-xs text-encre-douce">{c.notes}</p> : null}
+                    <CandidateVotes
+                      tripId={tripId}
+                      candidateId={c.id}
+                      votes={votes.filter((v) => v.candidateId === c.id)}
+                      myId={myId}
+                    />
                     <div className="mt-2 flex flex-wrap items-center gap-2">
                       <span className="text-[0.65rem] text-encre-douce/70">
                         proposé par {c.createdBy === myId ? "toi" : c.authorName}

@@ -33,6 +33,45 @@ export type Database = {
   };
   public: {
     Tables: {
+      candidate_votes: {
+        Row: {
+          candidate_id: string;
+          comment: string | null;
+          rating: number;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          candidate_id: string;
+          comment?: string | null;
+          rating: number;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          candidate_id?: string;
+          comment?: string | null;
+          rating?: number;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "candidate_votes_candidate_id_fkey";
+            columns: ["candidate_id"];
+            isOneToOne: false;
+            referencedRelation: "lodging_candidates";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "candidate_votes_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       checklist_items: {
         Row: {
           assigned_to: string | null;
