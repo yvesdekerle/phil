@@ -680,8 +680,9 @@ Retours Yves (2026-07-05) : mettre **Horloges** et **Conseils** dans le menu pri
 `Cannot read properties of undefined (reading 'appendChild')` dans `world-map.tsx:74` (`.addTo(map)`) : le GeoJSON est chargé en async et le cleanup de l'effet détruit la carte avant l'arrivée des données (double montage StrictMode). Garde d'annulation.
 > Note : flag `cancelled` posé dans le cleanup, testé avant `.addTo(map)`, `.catch()` sur le fetch. **Vérifié dans Chrome** : `/explorer` charge sans overlay d'erreur, mappemonde dessinée (France/Espagne/Italie/Grèce/Maroc colorés), console vierge.
 
-### [ ] PHIL-Q33 — Valise : vêtements Haut/Bas, coupe-vent & manteau, catégorie libre plus claire
+### [x] PHIL-Q33 — Valise : vêtements Haut/Bas, coupe-vent & manteau, catégorie libre plus claire *(fait le 2026-07-05)*
 Séparer la catégorie "Vêtements" en **Haut** / **Bas** ; ajouter **coupe-vent** et **manteau** ; rendre évident qu'on peut **créer sa propre catégorie** (le champ existe déjà mais n'est pas visible comme tel).
+> Note : catalogue scindé en "Vêtements — Haut" (avec coupe-vent + manteau), "Vêtements — Bas", "Sous-vêtements & nuit". Formulaire d'ajout encadré avec titre explicite "Ajouter ton propre élément — tape une catégorie existante ou invente-en une nouvelle" et placeholders parlants ("Catégorie (ex : Plongée)"). La création de catégorie marchait déjà (champ libre + datalist) mais n'était pas identifiable comme telle.
 
 ### [ ] PHIL-Q34 — Coffre : carte Vitale, carte européenne, libellé libre
 Ajouter au coffre **carte Vitale** et **carte européenne d'assurance maladie** ; plutôt que la catégorie "Autre", permettre de **saisir le libellé à la main** (réutiliser `documents.label`).

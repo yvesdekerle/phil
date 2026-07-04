@@ -37,20 +37,34 @@ export const PACKING_CATALOG: {
     ],
   },
   {
-    category: "Vêtements",
+    category: "Vêtements — Haut",
     section: "a_emporter",
     items: [
       { title: "T-shirts", qty: perNights(10) },
       { title: "Chemises ou tops", qty: perNights(4, 4) },
-      { title: "Sous-vêtements", qty: (n) => Math.max(2, Math.min(12, n + 1)) },
-      { title: "Paires de chaussettes", qty: perNights(8) },
+      { title: "Pull ou petite laine", qty: one },
+      { title: "Coupe-vent", qty: one },
+      { title: "Manteau", qty: one },
+      { title: "Tenue habillée (soirée)", qty: one },
+      { title: "Casquette ou chapeau", qty: one },
+    ],
+  },
+  {
+    category: "Vêtements — Bas",
+    section: "a_emporter",
+    items: [
       { title: "Shorts", qty: perNights(5, 3) },
       { title: "Pantalons", qty: perNights(3, 7) },
-      { title: "Pull ou petite laine", qty: one },
+    ],
+  },
+  {
+    category: "Sous-vêtements & nuit",
+    section: "a_emporter",
+    items: [
+      { title: "Sous-vêtements", qty: (n) => Math.max(2, Math.min(12, n + 1)) },
+      { title: "Paires de chaussettes", qty: perNights(8) },
       { title: "Maillots de bain", qty: (n) => (n >= 5 ? 2 : 1) },
-      { title: "Tenue habillée (soirée)", qty: one },
       { title: "Pyjama", qty: one },
-      { title: "Casquette ou chapeau", qty: one },
     ],
   },
   {

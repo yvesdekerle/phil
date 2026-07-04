@@ -231,39 +231,50 @@ export function ChecklistClient({
       )}
 
       {/* Ajouter ses propres éléments, avec catégorie libre */}
-      <form action={formAction} className="flex flex-wrap items-center gap-2">
+      <form
+        action={formAction}
+        className="flex flex-col gap-2 rounded-lg border border-laiton-clair bg-papier px-4 py-3"
+      >
+        <p className="text-xs font-medium text-encre">
+          Ajouter ton propre élément{" "}
+          <span className="font-normal text-encre-douce">
+            — tape une catégorie existante ou invente-en une nouvelle
+          </span>
+        </p>
         <input type="hidden" name="tripId" value={tripId} />
         <input type="hidden" name="section" value={tab} />
-        <Input
-          name="title"
-          placeholder="Ajouter un élément…"
-          className="h-8 min-w-36 flex-1 text-sm"
-          required
-          maxLength={200}
-        />
-        <Input
-          name="category"
-          placeholder="Catégorie"
-          className="h-8 w-36 text-sm"
-          maxLength={40}
-          list={`categories-${tab}`}
-          autoComplete="off"
-        />
-        <datalist id={`categories-${tab}`}>
-          {categorySuggestions.map((c) => (
-            <option key={c} value={c} />
-          ))}
-        </datalist>
-        <Input
-          name="dueDate"
-          type="date"
-          className="h-8 w-36 text-sm"
-          aria-label="Échéance (optionnel)"
-          title="À faire avant le… (optionnel)"
-        />
-        <Button type="submit" size="sm" variant="outline">
-          Ajouter
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Input
+            name="title"
+            placeholder="Ex : gourde filtrante"
+            className="h-8 min-w-36 flex-1 text-sm"
+            required
+            maxLength={200}
+          />
+          <Input
+            name="category"
+            placeholder="Catégorie (ex : Plongée)"
+            className="h-8 w-44 text-sm"
+            maxLength={40}
+            list={`categories-${tab}`}
+            autoComplete="off"
+          />
+          <datalist id={`categories-${tab}`}>
+            {categorySuggestions.map((c) => (
+              <option key={c} value={c} />
+            ))}
+          </datalist>
+          <Input
+            name="dueDate"
+            type="date"
+            className="h-8 w-36 text-sm"
+            aria-label="Échéance (optionnel)"
+            title="À faire avant le… (optionnel)"
+          />
+          <Button type="submit" size="sm" variant="outline">
+            Ajouter
+          </Button>
+        </div>
       </form>
 
       {/* Encore à sélectionner : le catalogue, ligne à ligne */}
