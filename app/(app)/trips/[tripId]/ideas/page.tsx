@@ -103,6 +103,14 @@ export default async function TripIdeasPage({
         ) : null}
       </div>
 
+      <Link
+        href={`/trips/${tripId}/lodging`}
+        className="rounded-lg border border-laiton-clair bg-papier px-4 py-3 text-sm text-encre transition-shadow hover:shadow-[0_2px_12px_rgba(31,42,68,0.1)]"
+      >
+        🏠 <span className="font-medium">Hébergements candidats</span>
+        <span className="text-encre-douce"> — comparer les options avant de trancher →</span>
+      </Link>
+
       <div className="flex flex-wrap items-center gap-2">
         <Link
           href={filterHref(null, tag ?? null)}

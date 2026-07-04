@@ -507,6 +507,73 @@ export type Database = {
           },
         ];
       };
+      lodging_candidates: {
+        Row: {
+          check_in: string;
+          check_out: string;
+          chosen_event_id: string | null;
+          created_at: string;
+          created_by: string;
+          id: string;
+          notes: string | null;
+          price: string | null;
+          status: string;
+          title: string;
+          trip_id: string;
+          url: string | null;
+        };
+        Insert: {
+          check_in: string;
+          check_out: string;
+          chosen_event_id?: string | null;
+          created_at?: string;
+          created_by: string;
+          id?: string;
+          notes?: string | null;
+          price?: string | null;
+          status?: string;
+          title: string;
+          trip_id: string;
+          url?: string | null;
+        };
+        Update: {
+          check_in?: string;
+          check_out?: string;
+          chosen_event_id?: string | null;
+          created_at?: string;
+          created_by?: string;
+          id?: string;
+          notes?: string | null;
+          price?: string | null;
+          status?: string;
+          title?: string;
+          trip_id?: string;
+          url?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "lodging_candidates_chosen_event_id_fkey";
+            columns: ["chosen_event_id"];
+            isOneToOne: false;
+            referencedRelation: "trip_events";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "lodging_candidates_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "lodging_candidates_trip_id_fkey";
+            columns: ["trip_id"];
+            isOneToOne: false;
+            referencedRelation: "trips";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       poll_votes: {
         Row: {
           option_index: number;
