@@ -18,8 +18,10 @@ type Share = {
   tripId: string;
   tripName: string;
   recipientName: string | null; // null = tout l'équipage
+  expiresAt: string | null; // N05 : partage à durée limitée
+  tripEndDate: string | null;
 };
-type Trip = { id: string; name: string; destination: string };
+type Trip = { id: string; name: string; destination: string; end_date: string };
 type Member = { userId: string; name: string };
 
 /**
@@ -34,13 +36,14 @@ export function ShareManager({ documentId, shares }: { documentId: string; share
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
   const [members, setMembers] = useState<Member[] | null>(null);
   const [state, setState] = useState<DocumentActionState>({ status: "idle" });
+  const [shareUntil, setShareUntil] = useState<string>(""); // "" = permanent
   const [pending, startTransition] = useTransition();
 
   const load = useCallback(async () => {
     const supabase = createClient();
     const { data } = await supabase
       .from("trips")
-      .select("id, name, destination")
+      .select("id, name, destination, end_date")
       .is("archived_at", null)
       .order("start_date", { ascending: true });
     setTrips((data ?? []) as Trip[]);
@@ -59,6 +62,7 @@ export function ShareManager({ documentId, shares }: { documentId: string; share
 
   async function pickTrip(trip: Trip) {
     setSelectedTrip(trip);
+    setShareUntil(trip.end_date); // défaut N05 : fin du voyage
     setMembers(null);
     const supabase = createClient();
     const [{ data }, { data: auth }] = await Promise.all([
@@ -79,7 +83,12 @@ export function ShareManager({ documentId, shares }: { documentId: string; share
 
   function share(tripId: string, sharedWith: string | null) {
     startTransition(async () => {
-      const result = await shareDocument(documentId, tripId, sharedWith);
+      const result = await shareDocument(
+        documentId,
+        tripId,
+        sharedWith,
+        shareUntil ? `${shareUntil}T23:59:59Z` : null,
+      );
       setState(result);
       if (result.status === "success") {
         setOpen(false);
@@ -143,6 +152,18 @@ export function ShareManager({ documentId, shares }: { documentId: string; share
               </div>
             ) : (
               <div className="flex max-h-72 flex-col gap-2 overflow-y-auto py-1">
+                <label className="flex items-center justify-between gap-3 rounded-md border border-laiton-clair/60 bg-parchemin/40 px-3 py-2 text-xs text-encre-douce">
+                  <span>
+                    Jusqu'au{" "}
+                    <span className="text-encre">(vide = permanent, défaut = fin du voyage)</span>
+                  </span>
+                  <input
+                    type="date"
+                    value={shareUntil}
+                    onChange={(e) => setShareUntil(e.target.value)}
+                    className="rounded border border-laiton-clair bg-papier px-2 py-1 text-xs text-encre"
+                  />
+                </label>
                 <button
                   type="button"
                   disabled={pending || crewShareTripIds.includes(selectedTrip.id)}
@@ -208,6 +229,9 @@ export function ShareManager({ documentId, shares }: { documentId: string; share
                 <span className="text-encre-douce">
                   {" — "}
                   {s.recipientName ? `seulement ${s.recipientName}` : "tout l'équipage"}
+                  {s.expiresAt
+                    ? ` · expire le ${new Date(s.expiresAt).toLocaleDateString("fr-FR")}`
+                    : ""}
                 </span>
               </span>
               <Button

@@ -36,6 +36,7 @@ export type Database = {
       document_shares: {
         Row: {
           document_id: string;
+          expires_at: string | null;
           id: string;
           shared_at: string;
           shared_by: string;
@@ -44,6 +45,7 @@ export type Database = {
         };
         Insert: {
           document_id: string;
+          expires_at?: string | null;
           id?: string;
           shared_at?: string;
           shared_by: string;
@@ -52,6 +54,7 @@ export type Database = {
         };
         Update: {
           document_id?: string;
+          expires_at?: string | null;
           id?: string;
           shared_at?: string;
           shared_by?: string;

@@ -88,7 +88,11 @@ export async function shareDocument(
   documentId: string,
   tripId: string,
   sharedWith: string | null = null,
+  expiresAt: string | null = null,
 ): Promise<DocumentActionState> {
+  if (expiresAt !== null && Number.isNaN(Date.parse(expiresAt))) {
+    return { status: "error", message: "Échéance invalide." };
+  }
   if (sharedWith !== null && !areUuids(sharedWith)) {
     return { status: "error", message: "Destinataire invalide." };
   }
@@ -107,6 +111,7 @@ export async function shareDocument(
     trip_id: tripId,
     shared_by: user.id,
     shared_with: sharedWith,
+    expires_at: expiresAt,
   });
 
   if (error) {

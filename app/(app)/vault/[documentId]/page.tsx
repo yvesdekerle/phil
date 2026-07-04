@@ -28,7 +28,7 @@ export default async function VaultDocumentPage({
     supabase
       .from("document_shares")
       .select(
-        "id, trip_id, shared_with, trips(name), profiles!document_shares_shared_with_fkey(display_name)",
+        "id, trip_id, shared_with, expires_at, trips(name, end_date), profiles!document_shares_shared_with_fkey(display_name)",
       )
       .eq("document_id", documentId),
   ]);
@@ -42,6 +42,8 @@ export default async function VaultDocumentPage({
     tripId: s.trip_id,
     tripName: s.trips?.name ?? "Voyage",
     recipientName: s.shared_with ? (s.profiles?.display_name ?? "Un voyageur") : null,
+    expiresAt: s.expires_at,
+    tripEndDate: s.trips?.end_date ?? null,
   }));
 
   const viewUrl = `/api/documents/${doc.id}/view`;

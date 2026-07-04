@@ -22,6 +22,12 @@ export async function GET(request: Request) {
 
   const admin = createAdminClient();
   const today = new Date();
+
+  // PHIL-N05 : purge des partages arrivés à échéance
+  const { count: purgedShares } = await admin
+    .from("document_shares")
+    .delete({ count: "exact" })
+    .lt("expires_at", today.toISOString());
   const results: { document: string; days: number; sent: boolean; reason?: string }[] = [];
 
   for (const days of THRESHOLD_DAYS) {
@@ -75,5 +81,9 @@ export async function GET(request: Request) {
     }
   }
 
-  return Response.json({ checked_at: today.toISOString(), alerts: results });
+  return Response.json({
+    checked_at: today.toISOString(),
+    alerts: results,
+    purged_shares: purgedShares ?? 0,
+  });
 }
