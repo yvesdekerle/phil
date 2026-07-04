@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMemo, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { CurrencyInput } from "@/components/budget/currency-input";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -152,10 +153,9 @@ export function TripSettingsForm({
         <div className="grid grid-cols-2 gap-4">
           <div className="flex flex-col gap-2">
             <Label htmlFor="currencyPrimary">Devise principale</Label>
-            <Input
+            <CurrencyInput
               id="currencyPrimary"
               placeholder="EUR"
-              maxLength={3}
               disabled={!canEdit}
               {...register("currencyPrimary")}
             />
@@ -165,10 +165,9 @@ export function TripSettingsForm({
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="currencySecondary">Devise secondaire (optionnelle)</Label>
-            <Input
+            <CurrencyInput
               id="currencySecondary"
               placeholder="MUR"
-              maxLength={3}
               disabled={!canEdit}
               {...register("currencySecondary")}
             />

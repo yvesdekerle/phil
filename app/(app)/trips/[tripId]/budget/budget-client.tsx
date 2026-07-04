@@ -3,6 +3,7 @@
 import { Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useActionState, useState, useTransition } from "react";
+import { CurrencyInput } from "@/components/budget/currency-input";
 import { Money } from "@/components/budget/money";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -114,11 +115,11 @@ export function BudgetClient({
                 placeholder="450"
                 required
               />
-              <Input
+              <CurrencyInput
                 name="currency"
                 defaultValue={primaryCurrency}
-                maxLength={3}
-                className="w-20"
+                className="w-24"
+                aria-label="Devise"
               />
             </div>
           </div>

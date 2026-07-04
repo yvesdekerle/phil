@@ -622,8 +622,9 @@ Taper une photo ouvre une visionneuse plein écran (original) avec précédent/s
 ### [ ] PHIL-Q03 — Temps réel sur les votes et sondages
 Supabase Realtime (free tier) : les sondages éclair, votes d'idées et dépenses se mettent à jour sans recharger. Migration : ajouter `polls`, `poll_votes`, `idea_votes`, `expenses` à la publication realtime (RLS appliquée par WALRUS — on ne reçoit que ce qu'on a le droit de voir). Composant `RealtimeRefresh` (channel + router.refresh() débouncé) posé sur les pages Idées et Budget.
 
-### [ ] PHIL-Q04 — Sélecteur de devise
+### [x] PHIL-Q04 — Sélecteur de devise *(fait le 2026-07-04)*
 Remplacer les champs texte libres "EUR" par un input avec datalist des devises courantes (code + libellé, saisie libre toujours possible) — Paramètres du voyage (principale/secondaire) et formulaire de dépense.
+> Note : `CurrencyInput` (datalist de 40 devises courantes avec libellés FR, `useId` pour éviter les collisions de datalist, saisie libre ISO conservée + validation Zod inchangée). Branché sur les 3 champs prévus.
 
 ### [ ] PHIL-Q05 — Export CSV du budget
 Bouton "Exporter (CSV)" sur l'onglet Budget : titre, montant, devise, montant converti, catégorie, payeur, bénéficiaires, date, remboursement — généré côté client depuis les données affichées.
