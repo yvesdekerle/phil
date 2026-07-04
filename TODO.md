@@ -543,6 +543,21 @@ Photos partagées par voyage, rattachables à un événement ou à un jour. **Qu
 
 ---
 
+## Catégorie P — Vague 4 (arbitrée avec Yves le 2026-07-04)
+
+Ordre de réalisation proposé : P01 → P02 → P03.
+
+### [ ] PHIL-P01 — Devises : conversion et double affichage
+Chaque voyage a une devise **principale** et une devise **secondaire** (choisies dans les Paramètres ; défauts proposés : EUR + devise de la destination). Tout montant du budget s'affiche **dans les deux : la principale en gros, la secondaire en petit dessous**. Conversion via une API de taux gratuite sans clé (Frankfurter, taux BCE, cache quotidien). Conséquence : les soldes et règlements du tricount (N09) et le Suivi (O09) deviennent **unifiés dans la devise principale** (conversion à l'affichage, les montants saisis restent stockés dans leur devise d'origine). Décision Yves du 2026-07-04 : important.
+
+### [ ] PHIL-P02 — Import de réservation par email
+La v2 de O01 : transférer l'email de confirmation à une adresse Phil → événement pré-rempli (même pipeline d'extraction Gemini). Boîte entrante gratuite : **Resend inbound** ou **Cloudflare Email Routing** (webhook vers l'app). Rattachement au voyage : **alias par voyage** (ex. `maurice-x7f2@…`, affiché dans les Paramètres) plutôt que déduction par dates. Sécurité : n'accepter que les emails dont l'expéditeur correspond à un participant du voyage ; l'événement arrive en "à valider" (pas de création silencieuse). Le PDF/corps de l'email est rangé en document du voyage comme dans O01.
+
+### [ ] PHIL-P03 — Partage public d'un voyage en lecture seule (façon Polarsteps)
+Lien public révocable (token, activable par l'OWNER dans les Paramètres) vers une page **sans authentification** montrant uniquement : nom, destination, dates, **itinéraire jour par jour** et **carte** du voyage. **Jamais** : documents, budget, fiches d'urgence, notes d'équipage, participants (prénoms à trancher). Photos : désactivées par défaut, interrupteur "inclure les photos" — à trancher au ticket. Attention à la route : rendu via un layout public (pas le layout authentifié), token en RLS ou lecture service-role filtrée.
+
+---
+
 ## Catégorie M — Animations & délices visuels (à traiter en fin de projet, demandé le 2026-07-03)
 
 ### [x] PHIL-M01 — Animation d'ouverture/fermeture du coffre *(fait le 2026-07-03)*
@@ -569,21 +584,10 @@ SVG animés en CSS, composant `<PhilLoader />` réutilisable, tirage aléatoire,
 - **PHIL-A07 — Pipeline CI GitHub Actions** : lint, type-check, tests et build sur chaque PR. Différé : Vercel builde déjà chaque push et chaque PR avec preview.
 - **PHIL-A08 — Tests automatisés (Vitest + Playwright)** : tests unitaires et end-to-end sur les parcours principaux. Différé : la vérification RLS manuelle (PHIL-B12) couvre le risque principal ; les tests auto viendront avec la maturité du projet.
 
-**Idées v2+** (issues de l'analyse initiale, non planifiées) :
+**Idées v2+** (dépoussiéré le 2026-07-04 — la majorité de la liste initiale est réalisée : carte N01, météo O02/O03, checklist N11+N03, dépenses N09+O09, iCal N02, OCR MRZ N04, mode Aujourd'hui N10, galerie photos O10, templates N03, import par fichier O01 ; le chat intégré est **écarté** — WhatsApp garde ce rôle, décision du 2026-07-04. Import email, devises et partage public sont devenus les tickets P01-P03) :
 
-- Parsing automatique des emails de confirmation (Booking, SNCF, Air France) via Gmail OAuth
-- Intégration carte (Mapbox / Leaflet+OSM) avec événements géolocalisés
-- Météo par destination et par jour
-- Suggestions d'activités contextuelles à la destination
-- Conversion de devise et vue budget du voyage
-- Checklist de bagages partagée avec templates
-- Suivi des dépenses partagées (mini-Tricount)
-- Export / synchronisation Google Calendar (flux iCal)
-- OCR sur les documents d'identité (extraction MRZ) pour pré-remplir les métadonnées
-- Génération PDF "récap voyage" imprimable
+- Génération PDF "récap/souvenir du voyage" imprimable (s'appuiera sur la galerie O10 ; pdf-lib déjà dans la stack)
+- Suggestions d'activités contextuelles à la destination (API de POI à évaluer)
+- "Dupliquer un voyage existant comme template" (évolution de N03)
+- Photos basse qualité pour le voyage démo (décision O10, au prochain passage sur le seed)
 - Application mobile native (si la PWA atteint ses limites)
-- Mode "live" pendant le voyage (événement en cours mis en avant, contacts d'urgence)
-- Chat intégré par voyage
-- Galerie photos partagée
-- Partage public d'un récap en lecture seule
-- Templates de voyages réutilisables
