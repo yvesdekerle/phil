@@ -688,8 +688,9 @@ Séparer la catégorie "Vêtements" en **Haut** / **Bas** ; ajouter **coupe-vent
 Ajouter au coffre **carte Vitale** et **carte européenne d'assurance maladie** ; plutôt que la catégorie "Autre", permettre de **saisir le libellé à la main** (réutiliser `documents.label`).
 > Note : deux valeurs d'enum `document_category` (`health_card`, `european_health_card`) ajoutées par migration (icônes HeartPulse / Stethoscope) ; `VAULT_CATEGORIES` + `CATEGORY_LABELS` étendus. Sur "Autre", un champ libellé libre apparaît (upload coffre) → stocké dans `documents.label`, affiché en priorité sur la liste et la fiche du coffre. Aucune policy RLS touchée.
 
-### [ ] PHIL-Q35 — Recherche calendrier en direct (debounce)
+### [x] PHIL-Q35 — Recherche calendrier en direct (debounce) *(fait le 2026-07-05)*
 La recherche du calendrier recharge la page (form GET) : la passer en **live avec micro-délai** (debounce ~200 ms), filtrage côté client, sans rechargement.
+> Note : liste du calendrier extraite en client component `calendar-days.tsx` — recherche live via `useDeferredValue` (input réactif, filtrage différé, zéro aller-retour serveur), `fuzzyMatch` réutilisé. La page serveur ne prend plus `?q=`. **Vérifié dans Chrome** : "plnoge" filtre instantanément la liste sans recharger (URL inchangée).
 
 ### [ ] PHIL-Q36 — Timeline : colonne fixe, séparateurs de jours, jours plus larges, bascule mémorisée
 Retours Yves : colonne des noms (transports/activités) **fixe** au scroll horizontal ; **séparateurs verticaux** légers entre les jours ; **jours plus larges** ; **bascule Calendrier ⇄ Timeline mémorisée** (on retrouve sa vue préférée en rouvrant un voyage).

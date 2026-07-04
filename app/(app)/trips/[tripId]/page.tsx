@@ -1,30 +1,24 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { EventTypeIcon } from "@/components/calendar/event-type-icon";
 import { TodayHero } from "@/components/calendar/today-hero";
-import { SearchForm } from "@/components/search-form";
 import { WeatherLine, WeatherStrip } from "@/components/trips/trip-weather";
 import { Button } from "@/components/ui/button";
-import { eventDayKey, eventTime, groupEventsByDay } from "@/lib/events/datetime";
+import { eventDayKey, eventTime } from "@/lib/events/datetime";
 import type { TripEvent } from "@/lib/events/types";
 import { navigateUrl } from "@/lib/geo/directions";
 import { ensureTripCoords } from "@/lib/geo/locate";
 import { formatMinutes, getTravelMinutes } from "@/lib/geo/travel-time";
-import { fuzzyMatch } from "@/lib/search/fuzzy";
 import { createClient } from "@/lib/supabase/server";
-import { cn } from "@/lib/utils";
 import { type DailyForecast, getDailyForecast } from "@/lib/weather/open-meteo";
+import { CalendarDays } from "./calendar-days";
 import { QuickAdd } from "./quick-add";
 
 export default async function TripCalendarPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ tripId: string }>;
-  searchParams: Promise<{ q?: string }>;
 }) {
   const { tripId } = await params;
-  const { q } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -56,11 +50,6 @@ export default async function TripCalendarPage({
 
   const events = (eventsData ?? []) as TripEvent[];
   const canEdit = me?.role === "OWNER" || me?.role === "EDITOR";
-  // PHIL-Q22 : recherche tolérante sur le programme
-  const visibleEvents = q?.trim()
-    ? events.filter((e) => fuzzyMatch(`${e.title} ${e.location_name ?? ""} ${e.notes ?? ""}`, q))
-    : events;
-  const days = groupEventsByDay(visibleEvents);
   // "Aujourd'hui" dans le fuseau du voyage
   const todayKey = trip ? eventDayKey(new Date().toISOString(), trip.default_timezone) : null;
 
@@ -161,84 +150,7 @@ export default async function TripCalendarPage({
         />
       ) : null}
 
-      {events.length > 0 ? (
-        <SearchForm action={`/trips/${tripId}`} q={q} placeholder="Rechercher dans le programme…" />
-      ) : null}
-
-      {days.length > 0 ? (
-        <p className="-mb-3 text-right text-xs text-encre-douce">
-          Heures affichées en heure locale de chaque événement.
-        </p>
-      ) : null}
-
-      {days.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-6 py-14 text-center">
-          <p className="font-display text-xl text-encre italic">
-            {q ? "Rien ne correspond à cette recherche" : "Aucun événement pour l'instant"}
-          </p>
-          <p className="max-w-sm text-sm text-encre-douce">
-            {q
-              ? "Essaie un autre mot — la recherche tolère les accents et les petites fautes."
-              : "Même Phileas prenait des pauses — mais un vol, un hôtel ou une plongée, ça se note."}
-          </p>
-          {canEdit ? (
-            <Button asChild className="mt-1">
-              <Link href={`/trips/${tripId}/events/new`}>Ajouter un événement</Link>
-            </Button>
-          ) : null}
-        </div>
-      ) : (
-        <div className="flex flex-col gap-6">
-          {days.map((day) => (
-            <section key={day.dayKey}>
-              <h2
-                className={cn(
-                  "mb-2 flex items-center gap-2 text-sm font-medium capitalize",
-                  day.dayKey === todayKey ? "text-bordeaux" : "text-encre-douce",
-                )}
-              >
-                <Link
-                  href={`/trips/${tripId}/day/${day.dayKey}`}
-                  className="underline-offset-4 hover:underline"
-                  title="Voir la journée heure par heure"
-                >
-                  {day.label}
-                </Link>
-                {day.dayKey === todayKey ? (
-                  <span className="rounded-full bg-bordeaux px-2 py-0.5 text-[0.65rem] font-medium text-papier uppercase">
-                    Aujourd'hui
-                  </span>
-                ) : null}
-              </h2>
-              <ul className="flex flex-col gap-2">
-                {day.events.map((event) => (
-                  <li key={event.id}>
-                    <Link
-                      href={`/trips/${tripId}/events/${event.id}`}
-                      className="flex items-center gap-3 rounded-lg border border-laiton-clair bg-papier px-4 py-3 transition-shadow hover:shadow-[0_2px_12px_rgba(31,42,68,0.1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-laiton"
-                    >
-                      <span className="w-14 shrink-0 text-sm font-medium text-encre tabular-nums">
-                        {eventTime(event.starts_at, event.timezone)}
-                      </span>
-                      <EventTypeIcon type={event.type} />
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate text-sm font-medium text-encre">
-                          {event.title}
-                        </span>
-                        {event.location_name ? (
-                          <span className="block truncate text-xs text-encre-douce">
-                            {event.location_name}
-                          </span>
-                        ) : null}
-                      </span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ))}
-        </div>
-      )}
+      <CalendarDays tripId={tripId} events={events} todayKey={todayKey} canEdit={canEdit} />
     </div>
   );
 }
