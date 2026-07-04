@@ -1,14 +1,40 @@
-/** Calcul des soldes et règlements simplifiés (PHIL-N09). */
+/** Calcul des soldes et règlements simplifiés (PHIL-N09, modes de division PHIL-Q21). */
+
+export type BeneficiaryShare = {
+  userId: string;
+  /** Parts (shares) ou montant exact (exact) — null en division égale. */
+  share: number | null;
+};
 
 export type ExpenseForBalance = {
   amount: number;
   currency: string;
   paid_by: string;
-  beneficiaries: string[];
+  splitMode?: "equal" | "shares" | "exact";
+  beneficiaries: BeneficiaryShare[];
 };
 
 export type Balance = { userId: string; paid: number; owed: number; net: number };
 export type Settlement = { from: string; to: string; amount: number };
+
+/** Part de chaque bénéficiaire selon le mode de division. */
+export function beneficiaryShares(e: ExpenseForBalance): { userId: string; owed: number }[] {
+  const mode = e.splitMode ?? "equal";
+  if (mode === "exact") {
+    return e.beneficiaries.map((b) => ({ userId: b.userId, owed: b.share ?? 0 }));
+  }
+  if (mode === "shares") {
+    const total = e.beneficiaries.reduce((s, b) => s + (b.share ?? 1), 0);
+    return e.beneficiaries.map((b) => ({
+      userId: b.userId,
+      owed: total > 0 ? (e.amount * (b.share ?? 1)) / total : 0,
+    }));
+  }
+  return e.beneficiaries.map((b) => ({
+    userId: b.userId,
+    owed: e.amount / e.beneficiaries.length,
+  }));
+}
 
 /** Soldes par personne pour une devise donnée. */
 export function computeBalances(expenses: ExpenseForBalance[], currency: string): Balance[] {
@@ -21,9 +47,8 @@ export function computeBalances(expenses: ExpenseForBalance[], currency: string)
   };
   for (const e of expenses.filter((e) => e.currency === currency && e.beneficiaries.length > 0)) {
     get(e.paid_by).paid += e.amount;
-    const share = e.amount / e.beneficiaries.length;
-    for (const b of e.beneficiaries) {
-      get(b).owed += share;
+    for (const { userId, owed } of beneficiaryShares(e)) {
+      get(userId).owed += owed;
     }
   }
   return [...map.entries()]

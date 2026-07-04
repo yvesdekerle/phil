@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
+import { beneficiaryShares } from "@/lib/budget/balances";
 import {
   asCategory,
   CATEGORY_LABELS,
@@ -8,6 +8,7 @@ import {
 } from "@/lib/budget/categories";
 import { getRates, toBase } from "@/lib/budget/rates";
 import { createClient } from "@/lib/supabase/server";
+import { PurseNav } from "../purse-nav";
 
 type Slice = { label: string; amount: number };
 
@@ -58,12 +59,14 @@ export default async function ExpenseTrackingPage({
   const [{ data: expensesData }, { data: trip }] = await Promise.all([
     supabase
       .from("expenses")
-      .select("amount, currency, category, spent_on, paid_by, expense_beneficiaries(user_id)")
+      .select(
+        "amount, currency, category, spent_on, paid_by, split_mode, expense_beneficiaries(user_id, share)",
+      )
       .eq("trip_id", tripId)
       .eq("is_settlement", false),
     supabase
       .from("trips")
-      .select("start_date, end_date, currency_primary, currency_secondary")
+      .select("start_date, end_date, currency_primary, currency_secondary, purse_closed_at")
       .eq("id", tripId)
       .single(),
   ]);
@@ -73,18 +76,29 @@ export default async function ExpenseTrackingPage({
   const rates = await getRates(primary);
 
   const expenses = (expensesData ?? []).map((e) => {
-    const beneficiaries = (e.expense_beneficiaries ?? []).map((b) => b.user_id);
     const raw = Number(e.amount);
     const amount =
       e.currency === primary ? raw : rates ? (toBase(raw, e.currency, rates) ?? raw) : raw;
     const converted = e.currency === primary || (rates && toBase(raw, e.currency, rates) !== null);
+    // PHIL-Q21 : ma part selon le mode de division (également / parts / exacts)
+    const myShare =
+      beneficiaryShares({
+        amount,
+        currency: converted ? primary : e.currency,
+        paid_by: e.paid_by,
+        splitMode: e.split_mode as "equal" | "shares" | "exact",
+        beneficiaries: (e.expense_beneficiaries ?? []).map((b) => ({
+          userId: b.user_id,
+          share: b.share === null ? null : Number(b.share),
+        })),
+      }).find((s) => s.userId === user.id)?.owed ?? 0;
     return {
       amount,
       currency: converted ? primary : e.currency,
       category: asCategory(e.category),
       spentOn: e.spent_on,
       paidBy: e.paid_by,
-      myShare: beneficiaries.includes(user.id) ? amount / beneficiaries.length : 0,
+      myShare,
     };
   });
 
@@ -102,17 +116,7 @@ export default async function ExpenseTrackingPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <nav className="flex gap-1 text-sm" aria-label="Vues du budget">
-        <Link
-          href={`/trips/${tripId}/budget`}
-          className="rounded-full px-3 py-1 text-encre-douce hover:bg-laiton/10 hover:text-encre"
-        >
-          Équilibre
-        </Link>
-        <span className="rounded-full bg-bordeaux px-3 py-1 font-medium text-papier">
-          Suivi des dépenses
-        </span>
-      </nav>
+      <PurseNav tripId={tripId} active="suivi" closed={Boolean(trip?.purse_closed_at)} />
 
       {expenses.length === 0 ? (
         <p className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-4 py-10 text-center text-sm text-encre-douce">

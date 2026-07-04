@@ -418,14 +418,17 @@ export type Database = {
       expense_beneficiaries: {
         Row: {
           expense_id: string;
+          share: number | null;
           user_id: string;
         };
         Insert: {
           expense_id: string;
+          share?: number | null;
           user_id: string;
         };
         Update: {
           expense_id?: string;
+          share?: number | null;
           user_id?: string;
         };
         Relationships: [
@@ -457,6 +460,7 @@ export type Database = {
           is_settlement: boolean;
           paid_by: string;
           spent_on: string;
+          split_mode: string;
           title: string;
           trip_id: string;
         };
@@ -471,6 +475,7 @@ export type Database = {
           is_settlement?: boolean;
           paid_by: string;
           spent_on?: string;
+          split_mode?: string;
           title: string;
           trip_id: string;
         };
@@ -485,6 +490,7 @@ export type Database = {
           is_settlement?: boolean;
           paid_by?: string;
           spent_on?: string;
+          split_mode?: string;
           title?: string;
           trip_id?: string;
         };
@@ -1192,6 +1198,7 @@ export type Database = {
           id: string;
           name: string;
           public_token: string | null;
+          purse_closed_at: string | null;
           start_date: string;
           whatsapp_group_url: string | null;
         };
@@ -1211,6 +1218,7 @@ export type Database = {
           id?: string;
           name: string;
           public_token?: string | null;
+          purse_closed_at?: string | null;
           start_date: string;
           whatsapp_group_url?: string | null;
         };
@@ -1230,6 +1238,7 @@ export type Database = {
           id?: string;
           name?: string;
           public_token?: string | null;
+          purse_closed_at?: string | null;
           start_date?: string;
           whatsapp_group_url?: string | null;
         };
