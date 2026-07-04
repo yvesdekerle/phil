@@ -569,8 +569,9 @@ Dans la vue jour et le mode Aujourd'hui : afficher "≈ 35 min de route" entre d
 ### [ ] PHIL-P06 — Valise intelligente (suggestions météo + activités)
 Sur la page Valise : encart "Phil te souffle" avec des suggestions contextuelles à ajouter en un tap — règles locales simples, sans LLM : météo du voyage (pluie → k-way, ≥ 28° → crème solaire, ≤ 5° → bonnet), mots-clés des activités planifiées (snorkeling/plongée → maillot, rando → chaussures), durée du séjour. Dédupliquées contre les items déjà présents.
 
-### [ ] PHIL-P07 — Autocomplétion de lieu à la saisie
+### [x] PHIL-P07 — Autocomplétion de lieu à la saisie *(fait le 2026-07-04)*
 Composant `PlaceInput` réutilisable (formulaires activité, hébergement, édition, idées) : recherche de lieu avec suggestions (Photon/komoot, gratuit, basé OSM) via une route proxy `/api/geo/search` (CSP oblige), sélection → adresse + coordonnées propres stockées directement (fiabilise la carte N01 et les temps de trajet P05 ; le géocodage Nominatim best-effort reste le fallback si saisie libre).
+> Note : proxy authentifié (pas de relais public), cache 24 h, ≥ 3 caractères, debounce 350 ms, validé en réel sur Photon ("flic en flac" → 3 résultats). Branché sur : lieu d'activité, **nom d'hébergement** (la sélection remplit aussi le champ adresse), lieu d'idée — la sélection pose `location_lat/lng` directement et court-circuite Nominatim ; toute modification manuelle du texte invalide les coordonnées (re-géocodage serveur). **Écart** : pas branché sur le formulaire d'édition (champ lieu simple conservé — le re-géocodage à l'édition couvre le besoin) ni sur les champs from/to des transports (texte libre voulu).
 
 ### [ ] PHIL-P08 — Journal de bord par jour
 Pendant (ou après) le voyage : quelques lignes par jour et par voyageur, visibles de l'équipage — section "Journal de bord" dans la vue jour. Table `journal_entries` (trip, jour, auteur, texte). C'est la matière première du futur PDF souvenir (backlog).

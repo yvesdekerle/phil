@@ -11,6 +11,8 @@ const ideaSchema = z.object({
   description: z.string().trim().max(2000).optional(),
   externalUrl: z.union([z.literal(""), z.string().url("Lien invalide.")]).optional(),
   locationName: z.string().trim().max(150).optional(),
+  locationLat: z.union([z.literal(""), z.coerce.number().min(-90).max(90)]).optional(),
+  locationLng: z.union([z.literal(""), z.coerce.number().min(-180).max(180)]).optional(),
   durationMinutes: z
     .union([
       z.literal(""),
@@ -41,6 +43,8 @@ export async function createIdea(
     description: formData.get("description") ?? "",
     externalUrl: formData.get("externalUrl") ?? "",
     locationName: formData.get("locationName") ?? "",
+    locationLat: formData.get("locationLat") ?? "",
+    locationLng: formData.get("locationLng") ?? "",
     durationMinutes: formData.get("durationMinutes") ?? "",
     cost: formData.get("cost") ?? "",
     costCurrency: formData.get("costCurrency") ?? "",
@@ -66,6 +70,12 @@ export async function createIdea(
     .filter((t) => t.length > 0)
     .slice(0, 10);
 
+  // PHIL-P07 : coordonnées choisies via l'autocomplétion (sinon géocodage plus bas)
+  const pickedCoords =
+    typeof d.locationLat === "number" && typeof d.locationLng === "number"
+      ? { lat: d.locationLat, lng: d.locationLng }
+      : null;
+
   const ideaId = crypto.randomUUID();
   const { error } = await supabase.from("trip_ideas").insert({
     id: ideaId,
@@ -74,6 +84,8 @@ export async function createIdea(
     description: d.description || null,
     external_url: d.externalUrl || null,
     location_name: d.locationName || null,
+    location_lat: pickedCoords?.lat ?? null,
+    location_lng: pickedCoords?.lng ?? null,
     estimated_duration_minutes: d.durationMinutes || null,
     estimated_cost: d.cost === "" ? null : d.cost,
     cost_currency: d.cost !== "" && d.cost !== undefined ? d.costCurrency || "EUR" : null,
@@ -88,7 +100,9 @@ export async function createIdea(
     };
   }
 
-  await geolocateIdea(supabase, d.tripId, ideaId, d.locationName);
+  if (!pickedCoords) {
+    await geolocateIdea(supabase, d.tripId, ideaId, d.locationName);
+  }
 
   redirect(`/trips/${d.tripId}/ideas`);
 }

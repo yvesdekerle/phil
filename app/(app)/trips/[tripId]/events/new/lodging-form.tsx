@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
+import { PlaceInput } from "@/components/geo/place-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,6 +27,7 @@ export function LodgingForm({
   defaultTimezone: string;
 }) {
   const [platform, setPlatform] = useState<LodgingPlatform>("booking");
+  const [address, setAddress] = useState("");
   const [timezone, setTimezone] = useState(defaultTimezone);
   const [state, setState] = useState<CreateEventState>({ status: "idle" });
   const [pending, startTransition] = useTransition();
@@ -46,12 +48,24 @@ export function LodgingForm({
     <form onSubmit={submit} className="flex flex-col gap-5">
       <div className="flex flex-col gap-2">
         <Label htmlFor="name">Nom de l'hébergement</Label>
-        <Input id="name" name="name" placeholder="Villa Trou-aux-Biches" />
+        <PlaceInput
+          id="name"
+          name="name"
+          placeholder="Villa Trou-aux-Biches"
+          maxLength={150}
+          onSelectAddress={setAddress}
+        />
       </div>
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="address">Adresse (optionnel)</Label>
-        <Input id="address" name="address" placeholder="Route côtière, Trou-aux-Biches" />
+        <Input
+          id="address"
+          name="address"
+          placeholder="Route côtière, Trou-aux-Biches"
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+        />
       </div>
 
       <div className="grid grid-cols-2 gap-4">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
+import { PlaceInput } from "@/components/geo/place-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -75,11 +76,12 @@ export function ActivityForm({
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="locationName">Lieu (optionnel)</Label>
-        <Input
+        <PlaceInput
           id="locationName"
           name="locationName"
           defaultValue={prefill?.locationName}
           placeholder="Trou-aux-Biches"
+          maxLength={150}
         />
       </div>
 

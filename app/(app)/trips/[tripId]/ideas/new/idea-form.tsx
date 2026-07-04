@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { PlaceInput } from "@/components/geo/place-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,7 +39,12 @@ export function IdeaForm({ tripId }: { tripId: string }) {
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col gap-2">
           <Label htmlFor="locationName">Lieu (optionnel)</Label>
-          <Input id="locationName" name="locationName" placeholder="Port-Louis" />
+          <PlaceInput
+            id="locationName"
+            name="locationName"
+            placeholder="Port-Louis"
+            maxLength={150}
+          />
         </div>
         <div className="flex flex-col gap-2">
           <Label htmlFor="externalUrl">Lien externe (optionnel)</Label>

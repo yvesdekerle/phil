@@ -10,6 +10,12 @@ import { createClient } from "@/lib/supabase/server";
 
 const DATETIME_LOCAL = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
 
+// PHIL-P07 : coordonnées optionnelles renseignées par l'autocomplétion de lieu
+const coordsSchema = {
+  locationLat: z.union([z.literal(""), z.coerce.number().min(-90).max(90)]).optional(),
+  locationLng: z.union([z.literal(""), z.coerce.number().min(-180).max(180)]).optional(),
+};
+
 const transportSchema = z
   .object({
     tripId: z.string().uuid(),
@@ -42,6 +48,7 @@ const lodgingSchema = z
     tripId: z.string().uuid(),
     name: z.string().trim().min(1, "Quel est le nom de l'hébergement ?").max(150),
     address: z.string().trim().max(300).optional(),
+    ...coordsSchema,
     checkInLocal: z.string().regex(DATETIME_LOCAL, "Date et heure de check-in requises."),
     checkOutLocal: z.string().regex(DATETIME_LOCAL, "Date et heure de check-out requises."),
     timezone: z.string().refine((tz) => Intl.supportedValuesOf("timeZone").includes(tz), {
@@ -63,6 +70,7 @@ const activitySchema = z.object({
   title: z.string().trim().min(1, "Donne un titre à cette activité.").max(150),
   description: z.string().trim().max(2000).optional(),
   locationName: z.string().trim().max(150).optional(),
+  ...coordsSchema,
   startsAtLocal: z.string().regex(DATETIME_LOCAL, "Date et heure de début requises."),
   timezone: z.string().refine((tz) => Intl.supportedValuesOf("timeZone").includes(tz), {
     message: "Fuseau horaire inconnu.",
@@ -92,6 +100,8 @@ export async function createActivityEvent(
     title: formData.get("title"),
     description: formData.get("description") ?? "",
     locationName: formData.get("locationName") ?? "",
+    locationLat: formData.get("locationLat") ?? "",
+    locationLng: formData.get("locationLng") ?? "",
     startsAtLocal: formData.get("startsAtLocal"),
     timezone: formData.get("timezone"),
     durationMinutes: formData.get("durationMinutes") ?? "",
@@ -131,6 +141,12 @@ export async function createActivityEvent(
     metadata.external_url = d.externalUrl;
   }
 
+  // PHIL-P07 : coordonnées choisies via l'autocomplétion (sinon géocodage plus bas)
+  const pickedCoords =
+    typeof d.locationLat === "number" && typeof d.locationLng === "number"
+      ? { lat: d.locationLat, lng: d.locationLng }
+      : null;
+
   const eventId = crypto.randomUUID();
   const { error } = await supabase.from("trip_events").insert({
     id: eventId,
@@ -141,6 +157,8 @@ export async function createActivityEvent(
     ends_at: endsAt,
     timezone: d.timezone,
     location_name: d.locationName || null,
+    location_lat: pickedCoords?.lat ?? null,
+    location_lng: pickedCoords?.lng ?? null,
     notes: d.description || null,
     metadata,
     created_by: user.id,
@@ -163,7 +181,9 @@ export async function createActivityEvent(
       .eq("trip_id", d.tripId);
   }
 
-  await geolocateEvent(supabase, d.tripId, eventId, d.locationName);
+  if (!pickedCoords) {
+    await geolocateEvent(supabase, d.tripId, eventId, d.locationName);
+  }
 
   redirect(`/trips/${d.tripId}`);
 }
@@ -176,6 +196,8 @@ export async function createLodgingEvent(
     tripId: formData.get("tripId"),
     name: formData.get("name"),
     address: formData.get("address") ?? "",
+    locationLat: formData.get("locationLat") ?? "",
+    locationLng: formData.get("locationLng") ?? "",
     checkInLocal: formData.get("checkInLocal"),
     checkOutLocal: formData.get("checkOutLocal"),
     timezone: formData.get("timezone"),
@@ -210,6 +232,12 @@ export async function createLodgingEvent(
     metadata.external_url = d.externalUrl;
   }
 
+  // PHIL-P07 : coordonnées choisies via l'autocomplétion (sinon géocodage plus bas)
+  const pickedCoords =
+    typeof d.locationLat === "number" && typeof d.locationLng === "number"
+      ? { lat: d.locationLat, lng: d.locationLng }
+      : null;
+
   const eventId = crypto.randomUUID();
   const { error } = await supabase.from("trip_events").insert({
     id: eventId,
@@ -221,6 +249,8 @@ export async function createLodgingEvent(
     timezone: d.timezone,
     location_name: d.name,
     location_address: d.address || null,
+    location_lat: pickedCoords?.lat ?? null,
+    location_lng: pickedCoords?.lng ?? null,
     notes: d.notes || null,
     metadata,
     created_by: user.id,
@@ -233,7 +263,9 @@ export async function createLodgingEvent(
     };
   }
 
-  await geolocateEvent(supabase, d.tripId, eventId, d.address || d.name);
+  if (!pickedCoords) {
+    await geolocateEvent(supabase, d.tripId, eventId, d.address || d.name);
+  }
 
   redirect(`/trips/${d.tripId}`);
 }
