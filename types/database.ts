@@ -1277,6 +1277,32 @@ export type Database = {
           },
         ];
       };
+      visited_countries: {
+        Row: {
+          country_code: string;
+          user_id: string;
+          visited_at: string;
+        };
+        Insert: {
+          country_code: string;
+          user_id: string;
+          visited_at?: string;
+        };
+        Update: {
+          country_code?: string;
+          user_id?: string;
+          visited_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "visited_countries_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: {
       [_ in never]: never;

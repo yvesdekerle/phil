@@ -591,8 +591,9 @@ Analyser sur quoi gamifier Phil sans le dénaturer (cercle d'amis, pas de leader
 ### [ ] PHIL-P12 — Gamification : badges à débloquer
 Implémentation du catalogue P11 : badges calculés depuis les données existantes (pas de table de progression en v1 — calcul à l'affichage), grille débloqués/verrouillés sur la page Explorateur (P09), noms et visuels esprit Verne ("Passepartout" checklist 100 %, "Tour du monde" X pays…).
 
-### [ ] PHIL-P13 — Carte des pays visités
+### [x] PHIL-P13 — Carte des pays visités *(fait le 2026-07-04)*
 Page (dans l'Explorateur P09) avec une **carte du monde** : pays **déjà visités en couleur** (palette Phil — plusieurs teintes possibles, ex. par période ou aléatoire stable), les autres en **beige parchemin** ("à visiter"). Fond de carte : GeoJSON Natural Earth 110m embarqué dans le repo (pas de CDN), rendu Leaflet existant. Alimentation : clic sur un pays pour le marquer visité/non visité + suggestion automatique depuis les destinations géocodées des voyages passés. Table `visited_countries` (user, code pays).
+> Note : **Natural Earth 50m** (le 110m n'a pas Maurice !) — 242 pays, réduit à 1,4 Mo (propriétés `{code ADM0_A3, name FR}`, coordonnées arrondies à 0,01°) dans `public/geo/countries.geojson`, chargé uniquement sur l'Explorateur. Carte Leaflet **sans tuiles** (fond parchemin uni, cohérent avec le thème), tooltip au survol, clic = toggle optimiste + action serveur ; 4 teintes Phil (bordeaux/laiton/encre/vert wagon) par hachage stable du code pays, non-visités en beige. Table `visited_countries` (PK user+code, RLS strictement own). Suggestions "D'après tes voyages" : **point-dans-polygone maison** (`lib/geo/country-lookup.ts`, zéro réseau, validé : Maurice/France/océan) sur les destinations géocodées des voyages passés. Tuile "pays visités" ajoutée aux stats. `verify:rls` 30/30.
 
 ---
 

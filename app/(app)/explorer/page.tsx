@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { WorldMapLazy } from "@/components/map/world-map-lazy";
+import { countryAt } from "@/lib/geo/country-lookup";
 import { haversineKm } from "@/lib/geo/distance";
 import { createClient } from "@/lib/supabase/server";
+import { CountrySuggestions } from "./country-suggestions";
 
 const WORLD_TOUR_KM = 40_075;
 
@@ -26,19 +29,27 @@ export default async function ExplorerPage() {
   }
 
   // La RLS ne renvoie que mes voyages ; tout le reste en découle.
-  const [{ data: trips }, { data: events }, { count: photoCount }, { count: journalCount }] =
-    await Promise.all([
-      supabase.from("trips").select("id, name, destination, start_date, end_date"),
-      supabase
-        .from("trip_events")
-        .select("trip_id, type, starts_at, location_lat, location_lng")
-        .order("starts_at", { ascending: true }),
-      supabase.from("trip_photos").select("id", { count: "exact", head: true }),
-      supabase
-        .from("journal_entries")
-        .select("trip_id", { count: "exact", head: true })
-        .eq("author_id", user.id),
-    ]);
+  const [
+    { data: trips },
+    { data: events },
+    { count: photoCount },
+    { count: journalCount },
+    { data: visitedRows },
+  ] = await Promise.all([
+    supabase
+      .from("trips")
+      .select("id, name, destination, destination_lat, destination_lng, start_date, end_date"),
+    supabase
+      .from("trip_events")
+      .select("trip_id, type, starts_at, location_lat, location_lng")
+      .order("starts_at", { ascending: true }),
+    supabase.from("trip_photos").select("id", { count: "exact", head: true }),
+    supabase
+      .from("journal_entries")
+      .select("trip_id", { count: "exact", head: true })
+      .eq("author_id", user.id),
+    supabase.from("visited_countries").select("country_code"),
+  ]);
 
   const today = new Date().toISOString().slice(0, 10);
   const allTrips = trips ?? [];
@@ -64,6 +75,22 @@ export default async function ExplorerPage() {
     }
   }
   const worldShare = km / WORLD_TOUR_KM;
+
+  // PHIL-P13 : pays visités + suggestions depuis les voyages passés géocodés
+  const visited = (visitedRows ?? []).map((v) => v.country_code);
+  const visitedSet = new Set(visited);
+  const suggestionsRaw = await Promise.all(
+    doneTrips
+      .filter((t) => t.destination_lat !== null && t.destination_lng !== null)
+      .map((t) => countryAt(t.destination_lat as number, t.destination_lng as number)),
+  );
+  const suggestions = [
+    ...new Map(
+      suggestionsRaw
+        .filter((c): c is NonNullable<typeof c> => c !== null && !visitedSet.has(c.code))
+        .map((c) => [c.code, c]),
+    ).values(),
+  ];
 
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-8">
@@ -93,7 +120,18 @@ export default async function ExplorerPage() {
         />
         <Stat value={String(photoCount ?? 0)} label="photos partagées" />
         <Stat value={String(journalCount ?? 0)} label="pages de journal" />
+        <Stat value={String(visited.length)} label="pays visités" hint="coche-les sur la carte" />
       </div>
+
+      <section className="mt-8">
+        <h2 className="mb-1 font-display text-xl text-encre">Ta mappemonde</h2>
+        <p className="mb-3 text-sm text-encre-douce">
+          Clique un pays pour le marquer visité — en couleur les conquêtes, en parchemin le reste du
+          monde à découvrir.
+        </p>
+        <CountrySuggestions suggestions={suggestions} />
+        <WorldMapLazy visited={visited} />
+      </section>
 
       <p className="mt-6 text-sm text-encre-douce">
         <Link href="/trips" className="underline underline-offset-4 hover:text-encre">
