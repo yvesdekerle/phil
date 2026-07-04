@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 import { waContactLink } from "@/lib/whatsapp";
+import { type FriendSuggestion, FriendSuggestions } from "./friend-suggestions";
 import { InviteSection } from "./invite-form";
 import { LeaveTripButton, ParticipantRowActions } from "./participant-actions";
 
@@ -51,6 +52,31 @@ export default async function TripParticipantsPage({
   const myRole = participants.find((p) => p.user_id === user.id)?.role;
   const canInvite = myRole === "OWNER" || myRole === "EDITOR";
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+
+  // PHIL-Q06 : compagnons de mes autres voyages, pas encore à bord de celui-ci
+  let friendSuggestions: FriendSuggestion[] = [];
+  if (canInvite) {
+    const { data: myTrips } = await supabase
+      .from("trips")
+      .select(
+        "id, trip_participants(user_id, profiles!trip_participants_user_id_fkey(display_name, avatar_url))",
+      )
+      .neq("id", tripId);
+    const aboard = new Set(participants.map((p) => p.user_id));
+    const seen = new Map<string, FriendSuggestion>();
+    for (const t of myTrips ?? []) {
+      for (const p of t.trip_participants) {
+        if (p.user_id !== user.id && !aboard.has(p.user_id) && !seen.has(p.user_id)) {
+          seen.set(p.user_id, {
+            userId: p.user_id,
+            name: p.profiles?.display_name ?? "Voyageur",
+            avatarUrl: p.profiles?.avatar_url ?? null,
+          });
+        }
+      }
+    }
+    friendSuggestions = [...seen.values()];
+  }
 
   return (
     <div className="flex flex-col gap-5">
@@ -122,6 +148,8 @@ export default async function TripParticipantsPage({
           );
         })}
       </ul>
+
+      {canInvite ? <FriendSuggestions tripId={tripId} friends={friendSuggestions} /> : null}
 
       {canInvite ? (
         <InviteSection tripId={tripId} pending={invitations ?? []} baseUrl={baseUrl} />

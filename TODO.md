@@ -628,8 +628,9 @@ Remplacer les champs texte libres "EUR" par un input avec datalist des devises c
 ### [ ] PHIL-Q05 — Export CSV du budget
 Bouton "Exporter (CSV)" sur l'onglet Budget : titre, montant, devise, montant converti, catégorie, payeur, bénéficiaires, date, remboursement — généré côté client depuis les données affichées.
 
-### [ ] PHIL-Q06 — Inviter ses compagnons habituels en un tap
+### [x] PHIL-Q06 — Inviter ses compagnons habituels en un tap *(fait le 2026-07-04)*
 Sur la page Participants : sous le formulaire d'invitation par email, une rangée "Tes compagnons de route" — les amis du carnet (D08) pas encore à bord de ce voyage, avatar + prénom, un tap = invitation (réutilise `inviteFriend`, choix du rôle simple). "On part souvent avec les mêmes personnes" — demande Yves du 2026-07-04.
+> Note : carte "Tes compagnons de route" (visible OWNER/EDITOR) au-dessus du formulaire d'invitation — puces avatar + prénom des co-voyageurs des autres voyages non encore à bord, un tap → `inviteFriend` D08 (email via Resend + lien dans la liste des invitations, rôle EDITOR comme depuis le carnet), état "✓" après envoi, `revalidatePath` ajouté à l'action pour que l'invitation apparaisse aussitôt. Doublons gérés par le flux existant ("déjà en attente").
 
 ---
 

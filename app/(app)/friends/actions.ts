@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -101,10 +102,11 @@ export async function inviteFriend(
     console.error("Envoi ré-invitation impossible:", e);
   }
 
+  revalidatePath(`/trips/${tripId}/participants`);
   return {
     status: "success",
     message: emailSent
       ? "Invitation envoyée par email."
-      : "Invitation créée — le lien à partager est sur la page Participants du voyage.",
+      : "Invitation créée — le lien à partager est dans la liste des invitations.",
   };
 }
