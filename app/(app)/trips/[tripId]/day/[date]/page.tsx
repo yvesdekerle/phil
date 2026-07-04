@@ -8,6 +8,7 @@ import { eventDayKey, eventTime, formatInTimezone } from "@/lib/events/datetime"
 import type { TripEvent } from "@/lib/events/types";
 import { ensureTripCoords } from "@/lib/geo/locate";
 import { formatMinutes, getTravelMinutes } from "@/lib/geo/travel-time";
+import { suggestVisitOrder } from "@/lib/geo/visit-order";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 import { type DailyForecast, getDailyForecast } from "@/lib/weather/open-meteo";
@@ -113,6 +114,30 @@ export default async function DayViewPage({
   );
   const travelLegs = legs.filter((l): l is NonNullable<typeof l> => l !== null);
 
+  // PHIL-P10 : ordre de visite suggéré (≥ 3 activités géolocalisées)
+  const activityStops = dayEvents
+    .filter((e) => e.type === "ACTIVITY" && e.location_lat !== null && e.location_lng !== null)
+    .map((e) => ({
+      id: e.id,
+      title: e.title,
+      lat: e.location_lat as number,
+      lng: e.location_lng as number,
+    }));
+  const dayLodging = (events ?? []).find(
+    (e) =>
+      e.type === "LODGING" &&
+      e.location_lat !== null &&
+      e.location_lng !== null &&
+      eventDayKey(e.starts_at, e.timezone) <= date &&
+      (e.ends_at === null || eventDayKey(e.ends_at, e.timezone) >= date),
+  );
+  const visitSuggestion = suggestVisitOrder(
+    activityStops,
+    dayLodging
+      ? { lat: dayLodging.location_lat as number, lng: dayLodging.location_lng as number }
+      : null,
+  );
+
   const label = formatInTimeZone(`${date}T12:00:00Z`, "UTC", "EEEE d MMMM yyyy", { locale: fr });
   const hours = Array.from({ length: HOUR_END - HOUR_START }, (_, i) => HOUR_START + i);
 
@@ -129,6 +154,22 @@ export default async function DayViewPage({
         <p className="mt-1">
           <WeatherLine day={dayWeather} />
         </p>
+      ) : null}
+      {visitSuggestion ? (
+        <div className="mt-2 rounded-md border border-laiton/50 bg-laiton/5 px-3 py-2">
+          <p className="mb-0.5 text-[0.65rem] font-medium text-laiton uppercase tracking-wide">
+            Ordre de visite malin (indicatif)
+          </p>
+          <p className="text-xs text-encre">
+            {dayLodging ? "Depuis l'hébergement : " : ""}
+            {visitSuggestion.order.map((s) => s.title).join(" → ")}
+          </p>
+          <p className="text-[0.65rem] text-encre-douce">
+            ≈ {Math.round(visitSuggestion.suggestedKm)} km au lieu de{" "}
+            {Math.round(visitSuggestion.currentKm)} km à vol d'oiseau — à toi de voir, rien ne bouge
+            tout seul.
+          </p>
+        </div>
       ) : null}
       {travelLegs.length > 0 ? (
         <div className="mt-2 rounded-md border border-laiton-clair/60 bg-papier px-3 py-2">
