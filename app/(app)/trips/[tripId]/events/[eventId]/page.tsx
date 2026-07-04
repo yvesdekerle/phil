@@ -12,6 +12,7 @@ import { EVENT_TYPE_LABELS } from "@/lib/events/types";
 import { createClient } from "@/lib/supabase/server";
 import { attachDocument, detachDocument } from "./actions";
 import { EventActions } from "./event-actions";
+import { type EventNote, EventNotes } from "./event-notes";
 import { EventParticipants } from "./event-participants";
 
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
@@ -43,6 +44,7 @@ export default async function EventDetailPage({
     { data: me },
     { data: members },
     { data: signedUp },
+    { data: noteRows },
   ] = await Promise.all([
     supabase.from("trip_events").select("*").eq("id", eventId).eq("trip_id", tripId).single(),
     supabase
@@ -61,6 +63,11 @@ export default async function EventDetailPage({
       .eq("trip_id", tripId)
       .order("joined_at", { ascending: true }),
     supabase.from("event_participants").select("user_id").eq("event_id", eventId),
+    supabase
+      .from("event_notes")
+      .select("id, body, created_at, author_id, profiles!event_notes_author_id_fkey(display_name)")
+      .eq("event_id", eventId)
+      .order("created_at", { ascending: true }),
   ]);
 
   if (!event) {
@@ -77,6 +84,14 @@ export default async function EventDetailPage({
     avatarUrl: m.profiles?.avatar_url ?? null,
     isIn: signedUpIds.has(m.user_id),
     canToggle: canEdit || m.user_id === user.id,
+  }));
+
+  const notes: EventNote[] = (noteRows ?? []).map((n) => ({
+    id: n.id,
+    body: n.body,
+    created_at: n.created_at,
+    author_id: n.author_id,
+    authorName: n.profiles?.display_name ?? "Voyageur",
   }));
 
   const meta = (event.metadata ?? {}) as Record<string, string | number>;
@@ -174,6 +189,14 @@ export default async function EventDetailPage({
       ) : null}
 
       <EventParticipants tripId={tripId} eventId={event.id} options={participantOptions} />
+
+      <EventNotes
+        tripId={tripId}
+        eventId={event.id}
+        notes={notes}
+        myId={user.id}
+        isOwner={me?.role === "OWNER"}
+      />
 
       <section>
         <div className="mb-2 flex items-center justify-between">

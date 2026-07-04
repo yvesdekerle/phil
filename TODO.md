@@ -422,9 +422,11 @@ Question soulevée : pourquoi "Hébergement", "Billet" et "Voucher" apparaissent
 
 ### [ ] PHIL-L01 — Hébergements candidats (multi-options)
 Permettre de saisir plusieurs options d'hébergement pour un même créneau avant de faire un choix définitif. Cas d'usage : comparer 3 Booking pour une nuit (prix, conditions d'annulation, distance), voter en groupe, puis convertir le choix retenu en événement LODGING. Cas d'usage secondaire : prendre 2 logements simultanés pour un même groupe (ex : ski, groupe > capacité d'un seul logement). Analyser si on étend `trip_events` (statut `CANDIDATE` réutilisant le mécanisme votes/conversion des idées) ou si on crée un concept dédié de "candidats".
+**Décision du 2026-07-04 : retenu (vague 3), avec vote pondéré** (et non un simple +1) — format à définir avec L02.
 
 ### [ ] PHIL-L02 — Avis qualitatifs et aide à la décision
 Aller au-delà du vote +1 sur les idées : permettre des avis qualitatifs ("Vaut le coup", "Optionnel", "Trop cher") sur les activités et hébergements candidats. Inspiration : les colonnes "Vaut le coup ?" et "Choix 1/2" du spreadsheet Islande. Analyser le bon format (tags prédéfinis, commentaires libres, notation 1-5, etc.).
+**Décision du 2026-07-04 : retenu (vague 3)** — porte le vote pondéré des hébergements candidats (L01).
 
 ---
 
@@ -484,6 +486,49 @@ Par voyage : items cochables, assignables à un participant ("Enceinte — Ameli
 ### [x] PHIL-N12 — Sondages éclair *(fait le 2026-07-04)*
 "Resto ce soir : créole ou italien ?" — question + 2-5 options, vote en un tap, résultat en direct, clôture manuelle ou automatique. Plus léger qu'une idée : durée de vie courte, pas de conversion en événement. Notification push à l'ouverture (N07).
 > Note : tables `polls` (options text[] 2-5, contrainte check) + `poll_votes` (PK poll+user, vote modifiable tant qu'ouvert, **bloqué après clôture par la RLS**). Section en tête de l'onglet Idées : création par tout participant (question + une option par ligne), barres de résultats en direct, ✓ sur mon vote, clôture par créateur/OWNER, 5 derniers sondages affichés. Push à l'ouverture vers les autres membres (sans préférence dédiée — écart, à raccrocher à un type si besoin). **Écart** : pas de clôture automatique. Vérifié via RLS : création/vote/changement OK, vote post-clôture rejeté.
+
+---
+
+## Catégorie O — Vague 3 (arbitrée avec Yves le 2026-07-04, analyse concurrentielle)
+
+Ordre de réalisation proposé : O04 → O08 → O02 → O03 → O06 → O07 → O05 → O09 → O10 → O01 → L01 → L02.
+Arbitrages : suivi de vol temps réel **écarté** (APIs payantes ou quotas dérisoires — un lien vers l'app de la compagnie suffit, O07) ; la discussion de groupe **reste sur WhatsApp** (Phil pointe vers le groupe, O06) ; galerie photos **ré-ouverte avec quota strict** (qualité d'origine conservée, nombre limité — remplace le "non" de la vague 2).
+
+### [ ] PHIL-O01 — Import de réservation par fichier
+Depuis un voyage : uploader le **PDF** (cas nominal — multi-pages géré nativement) ou **une ou plusieurs captures d'écran** d'une confirmation Booking/SNCF/compagnie → extraction des infos (type, dates/horaires, lieu, référence) et pré-remplissage d'un événement TRANSPORT/LODGING **à valider avant création**, document attaché au passage. Choix retenu plutôt qu'une boîte mail dédiée : pas d'infra email entrante, pas d'ambiguïté "quel voyage ?" (on est déjà dedans), et l'utilisateur a toujours le PDF sous la main. Évolution v2 possible : boîte mail entrante (Resend inbound ou Cloudflare Email Routing, gratuits) avec alias par voyage.
+**LLM requis** pour une extraction robuste multi-fournisseurs (des parsers par regex/fournisseur seraient ingérables). **Démarrage gratuit possible : Gemini Flash via clé Google AI Studio (free tier multimodal, PDF/images en entrée, quota journalier large)** — caveat : sur le free tier Google peut utiliser les données pour améliorer ses modèles (une confirmation de résa contient nom + référence ; jamais de document du coffre par ce canal). Alternatives free tier : Mistral La Plateforme, Groq. Bascule payante (Claude Haiku, ~centimes/mois) si le free tier gêne. En cas d'échec d'extraction, la saisie manuelle reste inchangée.
+
+### [ ] PHIL-O02 — Météo du voyage (Open-Meteo)
+API Open-Meteo (gratuite, sans clé, usage non commercial, prévisions ~16 jours) : encart météo de la semaine sur la page du voyage (coordonnées de la destination, géocodage N01), et météo du jour dans la vue jour + le mode Aujourd'hui (min/max, précipitations, icône). Cas d'usage : jeudi soir, je regarde la météo de vendredi.
+
+### [ ] PHIL-O03 — Alerte météo de la veille au soir
+Pour un voyage en cours : si la météo de demain annonce de la pluie (seuil à définir) sur le lieu du voyage → notification push la veille au soir. Contrainte : les 2 slots cron Hobby sont pris (6h expiry, 16h reminders) et un cron Hobby ne tourne qu'une fois par jour → greffer la vérification au cron `event-reminders` existant, éventuellement décalé de 16h à 18h UTC (20h Paris l'été) — à trancher au ticket. Approximation de fuseau assumée et documentée (le "20h local" exact dépend de la destination).
+
+### [x] PHIL-O04 — Notes sous les événements *(fait le 2026-07-04)*
+Fil de notes sous chaque événement ("le resto est fermé le lundi", "RDV plutôt à l'entrée sud") : auteur, date, suppression par l'auteur ou l'OWNER. Ce n'est **pas un chat** — la discussion de groupe reste sur WhatsApp (O06).
+> Note : table `event_notes` (body 1-1000 car., RLS : lecture équipage via `private.event_trip_id`, insert membre en son nom, delete auteur ou OWNER, pas d'update — pas un chat). Section "Notes de l'équipage" sur la fiche événement : fil chronologique (auteur, date, corbeille si droit), textarea inline avec reset après envoi. `verify:rls` 30/30.
+
+### [ ] PHIL-O05 — "À emporter" par activité
+Sur un événement (surtout ACTIVITY) : liste des choses à prendre ("snorkeling → maillot, serviette, crème solaire"). Piste : réutiliser `checklist_items` avec un `event_id` optionnel — items visibles sur la fiche événement ET dans la section "à emporter" de la Valise (O08). Bonus à évaluer : le rappel J-1 (N08) mentionne les items non cochés.
+
+### [ ] PHIL-O06 — WhatsApp : profil et groupe du voyage
+1. Sur le profil : numéro de téléphone et/ou username WhatsApp (nouveauté WhatsApp ~2025) → lien wa.me sur les cartes participants et les fiches d'urgence (N06).
+2. Sur le voyage : champ "lien du groupe WhatsApp" (`chat.whatsapp.com/…`) affiché en bonne place (en-tête du voyage ou onglet participants).
+
+### [ ] PHIL-O07 — Lien opérateur sur les transports
+Champ URL optionnel sur les événements TRANSPORT : lien vers l'app/le site de la compagnie (statut du vol, du train). Remplace le suivi de vol intégré, écarté (AeroAPI payant, AviationStack ~100 req/mois en gratuit). À trancher au ticket : champ URL générique sur **tous** les événements (resto → lien réservation) plutôt que TRANSPORT seul.
+
+### [ ] PHIL-O08 — Renommer la Checklist en "Valise"
+Renommage produit : onglet, titres, microcopy, templates N03. Les sections restent (avant le départ / à emporter / sur place). Vérifier que "Valise" reste juste pour les items non-bagage ("réserver le taxi") — sinon un titre du type "Valise & to-do".
+
+### [ ] PHIL-O09 — Catégories de dépenses et suivi (deux vues distinctes)
+Colonne `category` sur `expenses` (transport / logement / activité / resto / courses / autre) + exposer dans le formulaire le `event_id` déjà prêt en base (une dépense liée à un événement hérite de sa catégorie et de son contexte — adresses et liens des logements vivent déjà sur les événements LODGING). Le Budget devient **deux parties distinctes** (décision du 2026-07-04) :
+1. **Équilibre** (le "tricount", existant N09) : qui a payé quoi, soldes, règlements simplifiés.
+2. **Suivi des dépenses** (nouvelle page/onglet) : répartition par catégorie, avec deux lectures — **le voyage au global** (toutes les dépenses) et **mes dépenses** (ma part : ce que j'ai payé et ce dont je suis bénéficiaire) — et la timeline avant / pendant / après le voyage (date de la dépense vs dates du voyage).
+
+### [ ] PHIL-O10 — Galerie photos du voyage (quota strict)
+Photos partagées par voyage, rattachables à un événement ou à un jour. **Qualité d'origine conservée, nombre limité** (décision Yves — plutôt que compresser pour en mettre plus) : Supabase Free = 1 Go de storage total, à ~3-4 Mo la photo de téléphone ça fait ~250-300 photos maximum tous voyages confondus, documents inclus. Proposition : **quota de 40 photos par voyage** (~150 Mo) via constante ajustable + jauge de stockage global visible.
+**Vignettes** : générer une miniature côté client à l'upload (canvas, ~100-200 Ko) — la grille charge les vignettes, l'original ne se télécharge qu'à l'ouverture (la transformation d'images Supabase est réservée aux plans payants, donc génération client). **Voyage démo** : photos en basse qualité uniquement, pour ne pas entamer le quota réel. Base du futur carnet/PDF souvenir (backlog).
 
 ---
 

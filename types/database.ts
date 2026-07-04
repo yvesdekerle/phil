@@ -291,6 +291,45 @@ export type Database = {
           },
         ];
       };
+      event_notes: {
+        Row: {
+          author_id: string;
+          body: string;
+          created_at: string;
+          event_id: string;
+          id: string;
+        };
+        Insert: {
+          author_id: string;
+          body: string;
+          created_at?: string;
+          event_id: string;
+          id?: string;
+        };
+        Update: {
+          author_id?: string;
+          body?: string;
+          created_at?: string;
+          event_id?: string;
+          id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "event_notes_author_id_fkey";
+            columns: ["author_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "event_notes_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "trip_events";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       event_participants: {
         Row: {
           added_at: string;
