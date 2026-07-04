@@ -58,4 +58,29 @@ self.addEventListener("message", (event) => {
   }
 });
 
+// PHIL-N07 : réception des notifications push
+self.addEventListener("push", (event) => {
+  const data = (() => {
+    try {
+      return event.data?.json() as { title?: string; body?: string; url?: string };
+    } catch {
+      return null;
+    }
+  })();
+  event.waitUntil(
+    self.registration.showNotification(data?.title ?? "Phil", {
+      body: data?.body ?? "",
+      icon: "/icons/icon-192.png",
+      badge: "/icons/icon-192.png",
+      data: { url: data?.url ?? "/" },
+    }),
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = (event.notification.data as { url?: string })?.url ?? "/";
+  event.waitUntil(self.clients.openWindow(url));
+});
+
 serwist.addEventListeners();

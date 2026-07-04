@@ -10,6 +10,7 @@ import { signOut } from "./actions";
 import { DeleteAccountSection } from "./delete-account";
 import { NotificationPreferencesForm } from "./notification-preferences";
 import { ProfileForm } from "./profile-form";
+import { PushToggle } from "./push-toggle";
 
 export default async function ProfilePage() {
   const supabase = await createClient();
@@ -72,6 +73,9 @@ export default async function ProfilePage() {
             <NotificationPreferencesForm
               initial={parsePreferences(profile?.notification_preferences)}
             />
+            <div className="mt-4 border-t border-laiton-clair/50 pt-4">
+              <PushToggle />
+            </div>
           </CardContent>
         </Card>
 
