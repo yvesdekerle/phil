@@ -626,8 +626,9 @@ Supabase Realtime (free tier) : les sondages éclair, votes d'idées et dépense
 Remplacer les champs texte libres "EUR" par un input avec datalist des devises courantes (code + libellé, saisie libre toujours possible) — Paramètres du voyage (principale/secondaire) et formulaire de dépense.
 > Note : `CurrencyInput` (datalist de 40 devises courantes avec libellés FR, `useId` pour éviter les collisions de datalist, saisie libre ISO conservée + validation Zod inchangée). Branché sur les 3 champs prévus.
 
-### [ ] PHIL-Q05 — Export CSV du budget
+### [x] PHIL-Q05 — Export CSV du budget *(fait le 2026-07-04)*
 Bouton "Exporter (CSV)" sur l'onglet Budget : titre, montant, devise, montant converti, catégorie, payeur, bénéficiaires, date, remboursement — généré côté client depuis les données affichées.
+> Note : génération 100 % client (Blob + download `budget-phil.csv`), séparateur `;` + BOM UTF-8 + décimales à virgule pour Excel FR, montants convertis en devise principale inclus, noms réels (pas "Toi"). `spent_on` remonté au client au passage.
 
 ### [x] PHIL-Q06 — Inviter ses compagnons habituels en un tap *(fait le 2026-07-04)*
 Sur la page Participants : sous le formulaire d'invitation par email, une rangée "Tes compagnons de route" — les amis du carnet (D08) pas encore à bord de ce voyage, avatar + prénom, un tap = invitation (réutilise `inviteFriend`, choix du rôle simple). "On part souvent avec les mêmes personnes" — demande Yves du 2026-07-04.

@@ -26,6 +26,7 @@ export type ExpenseRow = {
   paid_by: string;
   created_by: string;
   category: string;
+  spentOn: string;
   isSettlement: boolean;
   beneficiaries: string[];
 };
@@ -75,6 +76,45 @@ export function BudgetClient({
     id === myId ? "Toi" : (members.find((m) => m.userId === id)?.name ?? "Voyageur");
   const fmt = (n: number, c: string) =>
     `${n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${c}`;
+  const realNameOf = (id: string) => members.find((m) => m.userId === id)?.name ?? "Voyageur";
+
+  // PHIL-Q05 : export CSV (séparateur ; + BOM pour Excel FR)
+  function exportCsv() {
+    const header = [
+      "Date",
+      "Titre",
+      "Catégorie",
+      "Montant",
+      "Devise",
+      `Montant (${primaryCurrency})`,
+      "Payé par",
+      "Bénéficiaires",
+      "Remboursement",
+    ];
+    const cell = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`;
+    const lines = expenses.map((e) =>
+      [
+        e.spentOn,
+        e.title,
+        e.isSettlement ? "" : e.category,
+        e.amount.toFixed(2).replace(".", ","),
+        e.currency,
+        e.amountPrimary !== null ? e.amountPrimary.toFixed(2).replace(".", ",") : "",
+        realNameOf(e.paid_by),
+        e.beneficiaries.map(realNameOf).join(", "),
+        e.isSettlement ? "oui" : "non",
+      ]
+        .map(cell)
+        .join(";"),
+    );
+    const csv = `﻿${header.map(cell).join(";")}\n${lines.join("\n")}`;
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "budget-phil.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -89,13 +129,20 @@ export function BudgetClient({
           Suivi des dépenses
         </Link>
       </nav>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm text-encre-douce">
           Qui a payé quoi — les comptes clairs, l'amitié durable.
         </p>
-        <Button type="button" onClick={() => setShowForm(!showForm)}>
-          {showForm ? "Annuler" : "Ajouter une dépense"}
-        </Button>
+        <div className="flex items-center gap-2">
+          {expenses.length > 0 ? (
+            <Button type="button" variant="outline" onClick={exportCsv}>
+              Exporter (CSV)
+            </Button>
+          ) : null}
+          <Button type="button" onClick={() => setShowForm(!showForm)}>
+            {showForm ? "Annuler" : "Ajouter une dépense"}
+          </Button>
+        </div>
       </div>
 
       {showForm ? (

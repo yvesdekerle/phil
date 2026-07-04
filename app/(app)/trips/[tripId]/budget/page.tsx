@@ -67,6 +67,7 @@ export default async function BudgetPage({ params }: { params: Promise<{ tripId:
       paid_by: e.paid_by,
       created_by: e.created_by,
       category: e.category,
+      spentOn: e.spent_on,
       isSettlement: e.is_settlement,
       beneficiaries: (e.expense_beneficiaries ?? []).map((b) => b.user_id),
     };
