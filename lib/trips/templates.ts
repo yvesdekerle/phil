@@ -8,6 +8,7 @@ export type TripTemplate = {
   name: string;
   description: string;
   ideas: { title: string; description?: string; tags: string[] }[];
+  checklist: { section: "avant_depart" | "a_emporter" | "sur_place"; title: string }[];
 };
 
 export const TRIP_TEMPLATES: TripTemplate[] = [
@@ -34,6 +35,12 @@ export const TRIP_TEMPLATES: TripTemplate[] = [
         tags: ["logistique", "budget"],
       },
     ],
+    checklist: [
+      { section: "avant_depart", title: "Permis de conduire de chaque conducteur" },
+      { section: "avant_depart", title: "Vérifier l'assurance du véhicule" },
+      { section: "a_emporter", title: "Chargeur voiture + câbles" },
+      { section: "a_emporter", title: "Glacière / encas de route" },
+    ],
   },
   {
     key: "chill",
@@ -45,6 +52,12 @@ export const TRIP_TEMPLATES: TripTemplate[] = [
       { title: "Un marché local", tags: ["culture"] },
       { title: "Une sortie mer (bateau, snorkeling…)", tags: ["mer"] },
       { title: "Massage / spa", tags: ["détente"] },
+    ],
+    checklist: [
+      { section: "a_emporter", title: "Crème solaire + après-soleil" },
+      { section: "a_emporter", title: "Maillots, serviettes de plage" },
+      { section: "a_emporter", title: "Enceinte + jeux de cartes" },
+      { section: "avant_depart", title: "Adaptateur de prises" },
     ],
   },
   {
@@ -66,6 +79,12 @@ export const TRIP_TEMPLATES: TripTemplate[] = [
       { title: "Soirée raclette / fondue", tags: ["gourmand"] },
       { title: "Luge ou balade raquettes pour le jour off", tags: ["détente"] },
       { title: "Vérifier les assurances (carré neige ?)", tags: ["logistique"] },
+    ],
+    checklist: [
+      { section: "avant_depart", title: "Réserver forfaits et matériel" },
+      { section: "a_emporter", title: "Gants, masque, crème solaire montagne" },
+      { section: "a_emporter", title: "Affaires de raclette (l'appareil !)" },
+      { section: "sur_place", title: "Retirer les forfaits" },
     ],
   },
 ];

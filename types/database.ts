@@ -33,6 +33,61 @@ export type Database = {
   };
   public: {
     Tables: {
+      checklist_items: {
+        Row: {
+          assigned_to: string | null;
+          created_at: string;
+          created_by: string;
+          done: boolean;
+          id: string;
+          section: string;
+          title: string;
+          trip_id: string;
+        };
+        Insert: {
+          assigned_to?: string | null;
+          created_at?: string;
+          created_by: string;
+          done?: boolean;
+          id?: string;
+          section?: string;
+          title: string;
+          trip_id: string;
+        };
+        Update: {
+          assigned_to?: string | null;
+          created_at?: string;
+          created_by?: string;
+          done?: boolean;
+          id?: string;
+          section?: string;
+          title?: string;
+          trip_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "checklist_items_assigned_to_fkey";
+            columns: ["assigned_to"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "checklist_items_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "checklist_items_trip_id_fkey";
+            columns: ["trip_id"];
+            isOneToOne: false;
+            referencedRelation: "trips";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       document_shares: {
         Row: {
           document_id: string;

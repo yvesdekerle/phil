@@ -87,6 +87,16 @@ export async function createTrip(
         created_by: user.id,
       })),
     );
+    if (template.checklist.length > 0) {
+      await supabase.from("checklist_items").insert(
+        template.checklist.map((c) => ({
+          trip_id: tripId,
+          section: c.section,
+          title: c.title,
+          created_by: user.id,
+        })),
+      );
+    }
   }
 
   redirect("/trips");

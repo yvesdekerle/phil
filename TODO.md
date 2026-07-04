@@ -475,8 +475,9 @@ Sur un événement ou en dépense libre : montant, devise, **payé par**, **pour
 ### [ ] PHIL-N10 — Mode "Aujourd'hui"
 Pendant le voyage, l'accueil du voyage devient la vue du jour : événement **en cours**, le **prochain départ** avec compte à rebours et lieu de RDV, les documents utiles du jour, accès à la carte du jour (N01). C'est l'écran qu'on regarde dix fois par jour sur place — pensé mobile d'abord.
 
-### [ ] PHIL-N11 — Checklist partagée
+### [x] PHIL-N11 — Checklist partagée *(fait le 2026-07-04)*
 Par voyage : items cochables, assignables à un participant ("Enceinte — Amelie"), sections (avant le départ / à emporter / sur place), progression visible. Alimentée par les templates N03.
+> Note : table `checklist_items` — RLS collaborative (tout participant lit/ajoute/coche/assigne, suppression = auteur ou OWNER, `created_by` verrouillé au sien). Onglet **Checklist** dans les tabs du voyage : 3 sections, barre de progression bordeaux, ajout inline, case à cocher, sélecteur d'assignation, corbeille. Les templates N03 pré-remplissent désormais aussi la checklist (roadtrip/chill/ski, 4 items chacun). Vérifié via RLS : ajout 201, coche+assignation 200, usurpation `created_by` 403, suppression créateur 200 ; page rendue côté serveur (3 sections + formulaires).
 
 ### [ ] PHIL-N12 — Sondages éclair
 "Resto ce soir : créole ou italien ?" — question + 2-5 options, vote en un tap, résultat en direct, clôture manuelle ou automatique. Plus léger qu'une idée : durée de vie courte, pas de conversion en événement. Notification push à l'ouverture (N07).
