@@ -543,9 +543,10 @@ Photos partagées par voyage, rattachables à un événement ou à un jour. **Qu
 
 ---
 
-## Catégorie P — Vague 4 (arbitrée avec Yves le 2026-07-04)
+## Catégorie P — Vague 4 (arbitrée avec Yves le 2026-07-04, complétée le soir même : "rajoute tout")
 
-Ordre de réalisation proposé : P01 → P02 → P03.
+Ordre de réalisation : P04 → P01 → P05 → P07 → P06 → P08 → P09 → P13 → P11 → P12 → P02 → P03 → P10.
+(petits gains d'abord ; P02/P03 en fin car plus lourds ; P10 en dernier, le moins urgent)
 
 ### [ ] PHIL-P01 — Devises : conversion et double affichage
 Chaque voyage a une devise **principale** et une devise **secondaire** (choisies dans les Paramètres ; défauts proposés : EUR + devise de la destination). Tout montant du budget s'affiche **dans les deux : la principale en gros, la secondaire en petit dessous**. Conversion via une API de taux gratuite sans clé (Frankfurter, taux BCE, cache quotidien). Conséquence : les soldes et règlements du tricount (N09) et le Suivi (O09) deviennent **unifiés dans la devise principale** (conversion à l'affichage, les montants saisis restent stockés dans leur devise d'origine). Décision Yves du 2026-07-04 : important.
@@ -555,6 +556,36 @@ La v2 de O01 : transférer l'email de confirmation à une adresse Phil → évé
 
 ### [ ] PHIL-P03 — Partage public d'un voyage en lecture seule (façon Polarsteps)
 Lien public révocable (token, activable par l'OWNER dans les Paramètres) vers une page **sans authentification** montrant uniquement : nom, destination, dates, **itinéraire jour par jour** et **carte** du voyage. **Jamais** : documents, budget, fiches d'urgence, notes d'équipage, participants (prénoms à trancher). Photos : désactivées par défaut, interrupteur "inclure les photos" — à trancher au ticket. Attention à la route : rendu via un layout public (pas le layout authentifié), token en RLS ou lecture service-role filtrée.
+
+### [ ] PHIL-P04 — Marquer les remboursements du tricount
+Le tricount calcule "Yves doit 42 € à Amelie" mais rien ne permet de dire "c'est réglé" : bouton **"Marquer comme réglé"** sur chaque règlement suggéré → enregistre un remboursement (transaction payée par le débiteur au seul bénéfice du créancier, flag `is_settlement`), ce qui remet les soldes à zéro naturellement. Les remboursements sont exclus du Suivi par catégories (ce n'est pas une dépense) et affichés à part dans la liste ("↩ Remboursement").
+
+### [ ] PHIL-P05 — Temps de trajet entre les événements d'une journée
+Dans la vue jour et le mode Aujourd'hui : afficher "≈ 35 min de route" entre deux événements consécutifs géolocalisés. API OSRM publique (gratuite, même écosystème qu'OSM/Nominatim déjà utilisés), profil voiture en v1, cache 1 h, best-effort (pas de coordonnées → pas d'affichage).
+
+### [ ] PHIL-P06 — Valise intelligente (suggestions météo + activités)
+Sur la page Valise : encart "Phil te souffle" avec des suggestions contextuelles à ajouter en un tap — règles locales simples, sans LLM : météo du voyage (pluie → k-way, ≥ 28° → crème solaire, ≤ 5° → bonnet), mots-clés des activités planifiées (snorkeling/plongée → maillot, rando → chaussures), durée du séjour. Dédupliquées contre les items déjà présents.
+
+### [ ] PHIL-P07 — Autocomplétion de lieu à la saisie
+Composant `PlaceInput` réutilisable (formulaires activité, hébergement, édition, idées) : recherche de lieu avec suggestions (Photon/komoot, gratuit, basé OSM) via une route proxy `/api/geo/search` (CSP oblige), sélection → adresse + coordonnées propres stockées directement (fiabilise la carte N01 et les temps de trajet P05 ; le géocodage Nominatim best-effort reste le fallback si saisie libre).
+
+### [ ] PHIL-P08 — Journal de bord par jour
+Pendant (ou après) le voyage : quelques lignes par jour et par voyageur, visibles de l'équipage — section "Journal de bord" dans la vue jour. Table `journal_entries` (trip, jour, auteur, texte). C'est la matière première du futur PDF souvenir (backlog).
+
+### [ ] PHIL-P09 — Stats de l'explorateur
+Page personnelle "Explorateur" : nombre de voyages, jours en voyage, pays visités, activités faites, km parcourus (haversine entre événements géolocalisés consécutifs), photos. Ton Jules Verne assumé ("tu as bouclé 0,8 tour du monde"). Sert de socle aux badges P12 et héberge la carte P13.
+
+### [ ] PHIL-P10 — Ordre de visite suggéré pour une journée
+Sur la vue jour (si ≥ 3 activités géolocalisées sans horaires contraints) : suggestion d'un ordre de visite qui minimise les trajets (plus proche voisin depuis l'hébergement, pas de vrai TSP). Affichage indicatif, ne modifie rien tout seul. Le moins prioritaire de la vague — à faire en dernier.
+
+### [ ] PHIL-P11 — Gamification : analyse
+Analyser sur quoi gamifier Phil sans le dénaturer (cercle d'amis, pas de leaderboard agressif) : axes candidats — pays visités, voyages bouclés, activités, km, photos, contribution au groupe (idées proposées, votes, checklist cochée, fiche d'urgence remplie, docs prêts avant J-7), assiduité du journal. Livrable : le catalogue de badges (noms Jules Verne, seuils, icônes) et les règles, documenté dans la note du ticket → alimente P12 directement.
+
+### [ ] PHIL-P12 — Gamification : badges à débloquer
+Implémentation du catalogue P11 : badges calculés depuis les données existantes (pas de table de progression en v1 — calcul à l'affichage), grille débloqués/verrouillés sur la page Explorateur (P09), noms et visuels esprit Verne ("Passepartout" checklist 100 %, "Tour du monde" X pays…).
+
+### [ ] PHIL-P13 — Carte des pays visités
+Page (dans l'Explorateur P09) avec une **carte du monde** : pays **déjà visités en couleur** (palette Phil — plusieurs teintes possibles, ex. par période ou aléatoire stable), les autres en **beige parchemin** ("à visiter"). Fond de carte : GeoJSON Natural Earth 110m embarqué dans le repo (pas de CDN), rendu Leaflet existant. Alimentation : clic sur un pays pour le marquer visité/non visité + suggestion automatique depuis les destinations géocodées des voyages passés. Table `visited_countries` (user, code pays).
 
 ---
 
