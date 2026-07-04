@@ -23,7 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CATEGORIES, CATEGORY_LABELS, type DocumentCategory } from "@/lib/vault/categories";
+import { CATEGORY_LABELS, type DocumentCategory, VAULT_CATEGORIES } from "@/lib/vault/categories";
 import { type DocumentActionState, deleteDocument, updateDocument } from "./actions";
 
 type Props = {
@@ -130,7 +130,7 @@ export function DocumentActions({ documentId, ...defaults }: Props) {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {CATEGORIES.map((c) => (
+                      {VAULT_CATEGORIES.map((c) => (
                         <SelectItem key={c} value={c}>
                           {CATEGORY_LABELS[c]}
                         </SelectItem>

@@ -19,3 +19,24 @@ export const CATEGORIES = Object.keys(CATEGORY_LABELS) as DocumentCategory[];
 export function isDocumentCategory(value: string): value is DocumentCategory {
   return value in CATEGORY_LABELS;
 }
+
+/**
+ * PHIL-L03 (option A) — le coffre est réservé aux documents personnels
+ * réutilisables ; billets, vouchers et hébergements appartiennent au groupe
+ * et vivent dans les documents du voyage.
+ */
+export const VAULT_CATEGORIES: DocumentCategory[] = [
+  "passport",
+  "id_card",
+  "driving_license",
+  "insurance",
+  "other",
+];
+
+export const TRIP_CATEGORIES: DocumentCategory[] = [
+  "ticket",
+  "voucher",
+  "lodging",
+  "insurance",
+  "other",
+];

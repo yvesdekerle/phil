@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { UploadForm } from "@/components/documents/upload-form";
 import { Card, CardContent } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
+import { TRIP_CATEGORIES } from "@/lib/vault/categories";
 import { createTripDocument } from "./actions";
 
 export default async function NewTripDocumentPage({
@@ -42,6 +43,7 @@ export default async function NewTripDocumentPage({
             userId={user.id}
             action={createTripDocument}
             defaultCategory="ticket"
+            categories={TRIP_CATEGORIES}
             tripId={trip.id}
             submitLabel="Ajouter au voyage"
             pendingLabel="Phil distribue le document…"

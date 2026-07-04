@@ -24,6 +24,8 @@ type Props = {
   userId: string;
   action: (prev: UploadActionState, formData: FormData) => Promise<UploadActionState>;
   defaultCategory?: DocumentCategory;
+  /** Catégories proposées (PHIL-L03 : coffre et voyage n'offrent pas les mêmes). */
+  categories?: DocumentCategory[];
   tripId?: string;
   submitLabel: string;
   pendingLabel: string;
@@ -33,6 +35,7 @@ export function UploadForm({
   userId,
   action,
   defaultCategory = "passport",
+  categories = CATEGORIES,
   tripId,
   submitLabel,
   pendingLabel,
@@ -171,7 +174,7 @@ export function UploadForm({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {CATEGORIES.map((c) => (
+            {categories.map((c) => (
               <SelectItem key={c} value={c}>
                 {CATEGORY_LABELS[c]}
               </SelectItem>

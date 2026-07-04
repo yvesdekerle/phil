@@ -5,7 +5,7 @@ import { z } from "zod";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { logVaultAccess } from "@/lib/vault/audit";
-import { CATEGORIES } from "@/lib/vault/categories";
+import { VAULT_CATEGORIES } from "@/lib/vault/categories";
 import { isAllowedMimeType, MAX_FILE_SIZE_BYTES } from "@/lib/vault/upload";
 
 const createDocumentSchema = z.object({
@@ -14,7 +14,7 @@ const createDocumentSchema = z.object({
   mimeType: z.string().refine(isAllowedMimeType, "Format non accepté."),
   sizeBytes: z.coerce.number().int().positive().max(MAX_FILE_SIZE_BYTES),
   storagePath: z.string().min(1),
-  category: z.enum(CATEGORIES as [string, ...string[]]),
+  category: z.enum(VAULT_CATEGORIES as [string, ...string[]]),
   expiresAt: z.union([z.literal(""), z.string().regex(/^\d{4}-\d{2}-\d{2}$/)]).optional(),
   documentNumber: z.string().trim().max(100).optional(),
 });
@@ -75,7 +75,7 @@ export async function createDocument(
     mime_type: parsed.data.mimeType,
     size_bytes: parsed.data.sizeBytes,
     storage_path: parsed.data.storagePath,
-    category: parsed.data.category as (typeof CATEGORIES)[number],
+    category: parsed.data.category as (typeof VAULT_CATEGORIES)[number],
     expires_at: parsed.data.expiresAt || null,
     metadata,
   });

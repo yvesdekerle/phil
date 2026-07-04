@@ -7,9 +7,9 @@ import { CategoryIcon } from "@/components/vault/category-icon";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 import {
-  CATEGORIES,
   CATEGORY_LABELS,
   isDocumentCategory,
+  VAULT_CATEGORIES,
   type VaultDocument,
 } from "@/lib/vault/categories";
 
@@ -67,7 +67,7 @@ export default async function VaultPage({
         >
           Tous
         </Link>
-        {CATEGORIES.map((c) => (
+        {VAULT_CATEGORIES.map((c) => (
           <Link
             key={c}
             href={`/vault?category=${c}`}
