@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { getTemplate } from "@/lib/trips/templates";
 
 const tripSchema = z
   .object({
@@ -72,6 +73,20 @@ export async function createTrip(
 
   if (error) {
     return { status: "error", message: "La création a échoué. Réessaie dans un instant." };
+  }
+
+  // PHIL-N03 : un template pré-remplit le pool d'idées
+  const template = getTemplate(formData.get("template") as string | null);
+  if (template) {
+    await supabase.from("trip_ideas").insert(
+      template.ideas.map((i) => ({
+        trip_id: tripId,
+        title: i.title,
+        description: i.description ?? null,
+        tags: i.tags,
+        created_by: user.id,
+      })),
+    );
   }
 
   redirect("/trips");

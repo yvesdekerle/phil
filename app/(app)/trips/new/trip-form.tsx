@@ -14,6 +14,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { TRIP_TEMPLATES } from "@/lib/trips/templates";
+import { cn } from "@/lib/utils";
 import { type CreateTripState, createTrip } from "./actions";
 
 const formSchema = z
@@ -60,11 +62,14 @@ export function TripForm({ defaultTimezone }: { defaultTimezone: string }) {
     },
   });
 
+  const [template, setTemplate] = useState<string>("");
+
   const onSubmit = handleSubmit((values) => {
     const formData = new FormData();
     for (const [key, value] of Object.entries(values)) {
       formData.set(key, value ?? "");
     }
+    formData.set("template", template);
     startTransition(async () => {
       setState(await createTrip({ status: "idle" }, formData));
     });
@@ -72,6 +77,47 @@ export function TripForm({ defaultTimezone }: { defaultTimezone: string }) {
 
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-5">
+      {/* PHIL-N03 : vierge ou template */}
+      <div className="flex flex-col gap-2">
+        <Label>Point de départ</Label>
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={() => setTemplate("")}
+            className={cn(
+              "rounded-md border px-3 py-2.5 text-left text-sm transition-colors",
+              template === ""
+                ? "border-bordeaux bg-bordeaux/5"
+                : "border-laiton-clair bg-papier hover:bg-parchemin",
+            )}
+          >
+            <span className="block font-medium text-encre">Vierge</span>
+            <span className="text-xs text-encre-douce">Carnet blanc, tout à écrire.</span>
+          </button>
+          {TRIP_TEMPLATES.map((t) => (
+            <button
+              key={t.key}
+              type="button"
+              onClick={() => setTemplate(t.key)}
+              className={cn(
+                "rounded-md border px-3 py-2.5 text-left text-sm transition-colors",
+                template === t.key
+                  ? "border-bordeaux bg-bordeaux/5"
+                  : "border-laiton-clair bg-papier hover:bg-parchemin",
+              )}
+            >
+              <span className="block font-medium text-encre">{t.name}</span>
+              <span className="text-xs text-encre-douce">{t.description}</span>
+            </button>
+          ))}
+        </div>
+        {template ? (
+          <p className="text-xs text-encre-douce">
+            {TRIP_TEMPLATES.find((t) => t.key === template)?.ideas.length} idées seront pré-remplies
+            dans le carnet d'envies.
+          </p>
+        ) : null}
+      </div>
       <div className="flex flex-col gap-2">
         <Label htmlFor="name">Nom du voyage</Label>
         <Input id="name" placeholder="Tour du monde, ou presque" {...register("name")} />
