@@ -54,7 +54,24 @@ const nextConfig: NextConfig = {
     ],
   },
   async headers() {
-    return [{ source: "/(.*)", headers: securityHeaders }];
+    return [
+      // Le viewer de documents est exclu de la CSP globale : `object-src 'none'`
+      // + `frame-ancestors 'none'` sur la réponse PDF elle-même empêchent le
+      // viewer de Chrome de l'afficher (page grise) et bloquent notre iframe.
+      { source: "/((?!api/documents/).*)", headers: securityHeaders },
+      {
+        source: "/api/documents/:id/view",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value: "default-src 'none'; object-src 'self'; frame-ancestors 'self'",
+          },
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+        ],
+      },
+    ];
   },
 };
 

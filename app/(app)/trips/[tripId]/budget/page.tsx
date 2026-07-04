@@ -98,10 +98,12 @@ export default async function PurseExpensesPage({
         primaryCurrency={primary}
         secondaryCurrency={secondary}
         secondaryRate={secondaryRate}
-        members={(members ?? []).map((m) => ({
-          userId: m.user_id,
-          name: m.profiles?.display_name ?? "Voyageur",
-        }))}
+        members={(members ?? [])
+          .map((m) => ({
+            userId: m.user_id,
+            name: m.profiles?.display_name ?? "Voyageur",
+          }))
+          .sort((a, b) => a.name.localeCompare(b.name, "fr"))}
         events={events ?? []}
         myId={user.id}
         isOwner={me?.role === "OWNER"}

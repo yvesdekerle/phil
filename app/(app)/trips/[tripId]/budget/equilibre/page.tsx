@@ -87,10 +87,12 @@ export default async function PurseBalancePage({
         currency={primary}
         secondaryCurrency={secondary}
         secondaryRate={secondaryRate}
-        members={(members ?? []).map((m) => ({
-          userId: m.user_id,
-          name: m.profiles?.display_name ?? "Voyageur",
-        }))}
+        members={(members ?? [])
+          .map((m) => ({
+            userId: m.user_id,
+            name: m.profiles?.display_name ?? "Voyageur",
+          }))
+          .sort((a, b) => a.name.localeCompare(b.name, "fr"))}
         myId={user.id}
         isOwner={me?.role === "OWNER"}
         closedAt={trip?.purse_closed_at ?? null}

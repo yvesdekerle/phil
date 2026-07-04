@@ -87,13 +87,15 @@ export default async function EventDetailPage({
   const canDelete = me?.role === "OWNER" || event.created_by === user.id;
 
   const signedUpIds = new Set((signedUp ?? []).map((s) => s.user_id));
-  const participantOptions = (members ?? []).map((m) => ({
-    userId: m.user_id,
-    name: m.user_id === user.id ? "Toi" : (m.profiles?.display_name ?? "Voyageur"),
-    avatarUrl: m.profiles?.avatar_url ?? null,
-    isIn: signedUpIds.has(m.user_id),
-    canToggle: canEdit || m.user_id === user.id,
-  }));
+  const participantOptions = (members ?? [])
+    .map((m) => ({
+      userId: m.user_id,
+      name: m.user_id === user.id ? "Toi" : (m.profiles?.display_name ?? "Voyageur"),
+      avatarUrl: m.profiles?.avatar_url ?? null,
+      isIn: signedUpIds.has(m.user_id),
+      canToggle: canEdit || m.user_id === user.id,
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name, "fr"));
 
   const notes: EventNote[] = (noteRows ?? []).map((n) => ({
     id: n.id,

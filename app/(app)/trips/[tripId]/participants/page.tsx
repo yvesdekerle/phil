@@ -47,7 +47,10 @@ export default async function TripParticipantsPage({
     supabase.from("trips").select("whatsapp_group_url").eq("id", tripId).single(),
   ]);
 
-  const participants = data ?? [];
+  // PHIL-Q28 : équipage par ordre alphabétique
+  const participants = (data ?? []).sort((a, b) =>
+    (a.profiles?.display_name ?? "").localeCompare(b.profiles?.display_name ?? "", "fr"),
+  );
   const iAmOwner = participants.some((p) => p.user_id === user.id && p.role === "OWNER");
   const myRole = participants.find((p) => p.user_id === user.id)?.role;
   const canInvite = myRole === "OWNER" || myRole === "EDITOR";

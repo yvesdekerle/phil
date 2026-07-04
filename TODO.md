@@ -657,11 +657,19 @@ La carte (N01) existe mais n'est accessible que par un bouton sur le calendrier 
 Demande Yves (2026-07-04) : à côté des distances, un lien qui ouvre l'app de conduite (Google Maps retenu — ses liens universels ouvrent l'app native sur mobile). Sur : chaque trajet de la vue jour (origine → destination en coordonnées) et le Prochain départ du mode Aujourd'hui (destination seule → Google part de la position actuelle). La fiche événement avait déjà son bouton Itinéraire.
 > Note : `lib/geo/directions.ts` (`directionsUrl` origine→destination, `navigateUrl` destination seule, `travelmode=driving`, coordonnées à 6 décimales). Vue jour : lien "🧭 Itinéraire" sur chaque trajet. Mode Aujourd'hui : bouton **"Y aller"** bordeaux sur la carte Prochain départ (coordonnées si géocodé, sinon adresse texte). Le bouton Itinéraire de la fiche événement utilise désormais les coordonnées précises quand elles existent. Waze écarté (préférence Yves : Google Maps ; ses liens s'ouvrent dans l'app installée).
 
-### [~] PHIL-Q27 — Valise : onglets, catégories, sélection ligne à ligne
+### [x] PHIL-Q27 — Valise : onglets, catégories, sélection ligne à ligne *(fait le 2026-07-05)*
 Retours Yves (2026-07-05) : supprimer le bloc "Phil te souffle" ; **3 onglets** (À emporter / Avant le départ / Sur place) ; dans chaque onglet, **la liste** (items sélectionnés) puis en dessous **ce qu'on peut encore sélectionner**, chaque objet **sur sa propre ligne** avec bouton Ajouter/Supprimer ; plus de préfixe "À sélectionner —", juste le nom de la **catégorie** ; items groupés par catégorie ; pouvoir **ajouter ses éléments** dans n'importe quel onglet **et créer ses catégories** (colonne `category` sur les items).
+> Note : colonne `checklist_items.category` (≤ 40 car., libre) ; client réécrit — onglets pilules, liste groupée par catégorie (Divers en dernier), lignes avec case/échéance/badge événement/assignation/corbeille ; catalogue "Encore à sélectionner" ligne à ligne avec quantité ajustable + bouton Ajouter (la catégorie du catalogue suit l'item) ; formulaire d'ajout avec champ catégorie libre (datalist) ; bloc "Phil te souffle" supprimé, `catalog-rows.tsx` supprimé.
 
-### [ ] PHIL-Q28 — Voyageurs triés par ordre alphabétique
+### [x] PHIL-Q28 — Voyageurs triés par ordre alphabétique *(fait le 2026-07-05)*
 Partout où l'équipage est listé (participants, sélecteurs d'assignation, Bourse…).
+> Note : tri `localeCompare("fr")` sur : page Participants, membres de la Bourse (Dépenses + Équilibre), inscrits d'un événement, assignation Valise.
+
+### [~] PHIL-Q29 — Page Horloges transversale
+Remplacer le bandeau du calendrier (Q24) par une **page Horloges** hors voyage : une horloge **par ligne** (chez soi + chaque destination de mes voyages), triées par **décalage par rapport à Greenwich croissant** (le plus petit en haut).
+
+### [x] PHIL-Q30 — Fix : aperçu des documents du coffre bloqué par la CSP *(fait le 2026-07-05, livré dans le commit Q28)*
+Retour Yves : viewer cassé malgré des PDF valides (diagnostic mené jusque dans Chrome : réponse 200 `application/pdf` correcte). Cause : `X-Frame-Options: DENY`, `frame-ancestors 'none'` et `object-src 'none'` (PHIL-J01) appliqués **à la réponse PDF elle-même** → Chrome refuse de l'afficher (iframe et pleine page). Fix : `/api/documents/:id/view` exclu de la CSP globale dans `next.config.ts`, avec ses propres headers (`frame-ancestors 'self'`, `X-Frame-Options: SAMEORIGIN`, `object-src 'self'`, nosniff).
 
 ### [x] PHIL-Q24 — Horloges du voyage (heure de chez soi + heure locale) *(fait le 2026-07-05)*
 Comme les horloges monde d'un téléphone : afficher côte à côte l'heure de Paris (fuseau de l'utilisateur) et l'heure de la destination, en direct, sur la page du voyage.
