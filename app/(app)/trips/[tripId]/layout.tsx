@@ -23,6 +23,9 @@ export default async function TripLayout({
 }) {
   const { tripId } = await params;
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   const { data: trip } = await supabase.from("trips").select("*").eq("id", tripId).single();
 
   if (!trip) {
@@ -32,9 +35,50 @@ export default async function TripLayout({
 
   const status = tripStatus(trip);
 
+  // PHIL-N04 : validité du passeport vs dates du voyage (règle des 6 mois)
+  const { data: passports } = await supabase
+    .from("documents")
+    .select("expires_at")
+    .eq("owner_id", user?.id ?? "")
+    .eq("category", "passport")
+    .is("deleted_at", null)
+    .not("expires_at", "is", null)
+    .order("expires_at", { ascending: false })
+    .limit(1);
+  const passportExpiry = passports?.[0]?.expires_at ?? null;
+  let passportWarning: { level: "danger" | "warn"; text: string } | null = null;
+  if (passportExpiry) {
+    const expiry = new Date(passportExpiry);
+    const tripEnd = new Date(trip.end_date);
+    const sixMonthsAfter = new Date(tripEnd);
+    sixMonthsAfter.setMonth(sixMonthsAfter.getMonth() + 6);
+    if (expiry < tripEnd) {
+      passportWarning = {
+        level: "danger",
+        text: `Ton passeport expire le ${expiry.toLocaleDateString("fr-FR")} — avant la fin du voyage. Renouvelle-le sans attendre.`,
+      };
+    } else if (expiry < sixMonthsAfter) {
+      passportWarning = {
+        level: "warn",
+        text: `Ton passeport expire le ${expiry.toLocaleDateString("fr-FR")} — moins de 6 mois après le retour. Certains pays exigent 6 mois de validité après le séjour : vérifie les règles de la destination.`,
+      };
+    }
+  }
+
   return (
     <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6">
       <TripOfflineSync tripId={trip.id} />
+      {passportWarning ? (
+        <div
+          className={
+            passportWarning.level === "danger"
+              ? "mb-4 rounded-lg border border-bordeaux/40 bg-bordeaux/10 px-4 py-2.5 text-sm text-bordeaux"
+              : "mb-4 rounded-lg border border-laiton bg-laiton/10 px-4 py-2.5 text-sm text-encre"
+          }
+        >
+          {passportWarning.text}
+        </div>
+      ) : null}
       <header className="overflow-hidden rounded-lg border border-laiton-clair bg-papier">
         <div className="relative h-40 bg-encre sm:h-52">
           {trip.cover_image_url ? (

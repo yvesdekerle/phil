@@ -44,6 +44,7 @@ export function UploadForm({
   const [category, setCategory] = useState<DocumentCategory>(defaultCategory);
   const [expiresAt, setExpiresAt] = useState("");
   const [documentNumber, setDocumentNumber] = useState("");
+  const [mrzStatus, setMrzStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const [phase, setPhase] = useState<"idle" | "uploading">("idle");
@@ -62,6 +63,25 @@ export function UploadForm({
     }
     setError(null);
     setFile(candidate);
+
+    // PHIL-N04 : lecture MRZ des passeports (images) — pré-remplit n° et expiration
+    if (category === "passport" && candidate.type.startsWith("image/")) {
+      setMrzStatus("Phil lit la bande MRZ…");
+      import("@/lib/vault/mrz")
+        .then(({ recognizeMrz }) => recognizeMrz(candidate))
+        .then((mrz) => {
+          if (mrz?.valid) {
+            if (mrz.expirationDate) setExpiresAt(mrz.expirationDate);
+            if (mrz.documentNumber) setDocumentNumber(mrz.documentNumber);
+            setMrzStatus("Bande MRZ lue et vérifiée ✓ (sommes de contrôle valides)");
+          } else {
+            setMrzStatus(mrz ? "Lecture MRZ incertaine — vérifie les champs." : null);
+          }
+        })
+        .catch(() => setMrzStatus(null));
+    } else {
+      setMrzStatus(null);
+    }
   }
 
   async function submit(e: React.FormEvent) {
@@ -184,6 +204,7 @@ export function UploadForm({
       </div>
 
       <div className="flex flex-col gap-2">
+        {mrzStatus ? <p className="text-xs text-laiton">{mrzStatus}</p> : null}
         <Label htmlFor="expiresAt">Date d'expiration (optionnel)</Label>
         <Input
           id="expiresAt"
