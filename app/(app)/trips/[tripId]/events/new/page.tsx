@@ -76,7 +76,17 @@ export default async function NewEventPage({
       >
         ← Retour au calendrier
       </Link>
-      <h1 className="mt-3 mb-6 text-center font-display text-3xl text-encre">Nouvel événement</h1>
+      <h1 className="mt-3 mb-2 text-center font-display text-3xl text-encre">Nouvel événement</h1>
+      <p className="mb-6 text-center text-sm text-encre-douce">
+        Tu as la confirmation sous la main ?{" "}
+        <Link
+          href={`/trips/${tripId}/events/import`}
+          className="text-bordeaux underline underline-offset-4"
+        >
+          Importe-la
+        </Link>{" "}
+        et je pré-remplis tout.
+      </p>
 
       <div className="mb-6 flex justify-center gap-2">
         {TYPE_TABS.map((tab) => (
