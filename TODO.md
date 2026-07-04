@@ -677,8 +677,9 @@ Le bouton "Préparer pour le hors-ligne" cache les données du voyage et chaque 
 Conseils pratiques avant le départ : télécharger Google Maps hors-ligne, e-SIM, adaptateur, retraits/monnaie, santé/vaccins, copies des papiers dans le coffre Phil, etc. Accessible depuis les Paramètres du voyage et la liste des voyages.
 > Note : page `/conseils` — 7 rubriques (cartes & navigation, téléphone/e-SIM, papiers, argent, santé, vol & bagages, sur place) + "Dans Phil avant de partir", chaque conseil renvoie quand c'est pertinent vers la fonctionnalité Phil correspondante (coffre, valise, offline, fiches d'urgence). Liens d'accès : en-tête de la liste des voyages + Paramètres du voyage.
 
-### [ ] PHIL-Q18 — Rappel "la journée de demain est vide"
+### [x] PHIL-Q18 — Rappel "la journée de demain est vide" *(fait le 2026-07-05)*
 La veille au soir (cron 16h UTC existant), si le lendemain d'un voyage en cours n'a aucun événement → push "Demain est libre — on prépare ?". Préférence on/off dédiée ; l'heure n'est pas réglable (cron Hobby = un passage fixe par jour, documenté).
+> Note : préférence `empty_day_reminders` (défaut activé, 5e interrupteur au profil automatique) ; sweep dans le cron 16h UTC : "demain" = jour local de la destination (bornes converties via date-fns-tz), 0 événement → push vers le pool d'idées ("Demain est encore une page blanche"). **L'heure d'envoi n'est pas réglable** : le cron Hobby ne passe qu'une fois par jour à heure fixe — c'est l'interrupteur on/off qui pilote.
 
 ### [ ] PHIL-Q19 — Export / import JSON d'un voyage complet
 Export JSON d'un voyage (événements, idées, valise, candidats — sans documents ni données du coffre) + bouton d'import qui recrée un voyage complet depuis ce JSON (validation Zod stricte). Décision : bonne idée — ça donne la sauvegarde, la duplication de voyage et le partage de squelettes entre amis en un seul mécanisme.

@@ -9,7 +9,12 @@ import { parsePreferences } from "./preferences";
 export async function sendPushToUser(
   userId: string,
   payload: { title: string; body: string; url?: string },
-  prefKey?: "invitations" | "expiry_alerts" | "event_reminders" | "weather_alerts",
+  prefKey?:
+    | "invitations"
+    | "expiry_alerts"
+    | "event_reminders"
+    | "weather_alerts"
+    | "empty_day_reminders",
 ): Promise<void> {
   const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
   const privateKey = process.env.VAPID_PRIVATE_KEY;

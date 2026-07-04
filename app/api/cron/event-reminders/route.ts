@@ -1,3 +1,4 @@
+import { fromZonedTime } from "date-fns-tz";
 import { eventDayKey, eventTime } from "@/lib/events/datetime";
 import { ensureTripCoords } from "@/lib/geo/locate";
 import { sendPushToUser } from "@/lib/notifications/push";
@@ -104,9 +105,46 @@ export async function GET(request: Request) {
     }
   }
 
+  // PHIL-Q18 — la journée de demain est vide : rappel de préparer
+  let emptyDaySent = 0;
+  for (const trip of trips ?? []) {
+    const tomorrowKey = eventDayKey(
+      new Date(Date.now() + 24 * 3600 * 1000).toISOString(),
+      trip.default_timezone,
+    );
+    const dayStart = fromZonedTime(`${tomorrowKey}T00:00:00`, trip.default_timezone).toISOString();
+    const dayEnd = fromZonedTime(`${tomorrowKey}T23:59:59`, trip.default_timezone).toISOString();
+    const { count } = await admin
+      .from("trip_events")
+      .select("id", { count: "exact", head: true })
+      .eq("trip_id", trip.id)
+      .gte("starts_at", dayStart)
+      .lte("starts_at", dayEnd);
+    if ((count ?? 0) > 0) {
+      continue;
+    }
+    const { data: members } = await admin
+      .from("trip_participants")
+      .select("user_id")
+      .eq("trip_id", trip.id);
+    for (const member of members ?? []) {
+      await sendPushToUser(
+        member.user_id,
+        {
+          title: "Demain est encore une page blanche",
+          body: `Rien au programme de demain à ${trip.destination} — un tour dans les idées du groupe ?`,
+          url: `/trips/${trip.id}/ideas`,
+        },
+        "empty_day_reminders",
+      );
+      emptyDaySent++;
+    }
+  }
+
   return Response.json({
     events: (events ?? []).length,
     notifications: sent,
     weatherAlerts: weatherSent,
+    emptyDayReminders: emptyDaySent,
   });
 }
