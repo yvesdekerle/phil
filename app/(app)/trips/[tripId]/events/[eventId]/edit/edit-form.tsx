@@ -20,6 +20,7 @@ type Defaults = {
   timezone: string;
   locationName: string;
   locationAddress: string;
+  externalUrl: string;
   notes: string;
 };
 
@@ -105,6 +106,17 @@ export function EditEventForm({
             defaultValue={defaults.locationAddress}
           />
         </div>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="externalUrl">Lien externe (compagnie, réservation…)</Label>
+        <Input
+          id="externalUrl"
+          name="externalUrl"
+          type="url"
+          placeholder="https://…"
+          defaultValue={defaults.externalUrl}
+        />
       </div>
 
       <div className="flex flex-col gap-2">

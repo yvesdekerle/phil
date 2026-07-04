@@ -114,6 +114,16 @@ export function LodgingForm({
         </div>
       </div>
 
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="externalUrl">Lien de la réservation (optionnel)</Label>
+        <Input
+          id="externalUrl"
+          name="externalUrl"
+          type="url"
+          placeholder="https://… (Booking, Airbnb…)"
+        />
+      </div>
+
       <div className="flex items-center gap-4">
         <Button type="submit" disabled={pending}>
           {pending ? "Phil réserve la chambre…" : "Ajouter l'hébergement"}

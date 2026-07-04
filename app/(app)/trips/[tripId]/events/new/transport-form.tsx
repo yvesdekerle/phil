@@ -149,6 +149,16 @@ export function TransportForm({
         </div>
       </div>
 
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="externalUrl">Lien compagnie (optionnel)</Label>
+        <Input
+          id="externalUrl"
+          name="externalUrl"
+          type="url"
+          placeholder="https://… (statut du vol, appli de la compagnie)"
+        />
+      </div>
+
       <div className="flex items-center gap-4">
         <Button type="submit" disabled={pending}>
           {pending ? "Phil consigne le trajet…" : "Ajouter le transport"}

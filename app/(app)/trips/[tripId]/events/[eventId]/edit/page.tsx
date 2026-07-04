@@ -56,6 +56,9 @@ export default async function EditEventPage({
               timezone: event.timezone,
               locationName: event.location_name ?? "",
               locationAddress: event.location_address ?? "",
+              externalUrl: String(
+                (event.metadata as Record<string, unknown> | null)?.external_url ?? "",
+              ),
               notes: event.notes ?? "",
             }}
           />

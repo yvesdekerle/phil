@@ -518,8 +518,9 @@ Sur un événement (surtout ACTIVITY) : liste des choses à prendre ("snorkeling
 2. Sur le voyage : champ "lien du groupe WhatsApp" (`chat.whatsapp.com/…`) affiché en bonne place (en-tête du voyage ou onglet participants).
 > Note : colonne `profiles.whatsapp` (un seul champ : numéro **ou** @pseudo, ≤ 50 car., visible des co-voyageurs via la policy existante) + `trips.whatsapp_group_url` (check `chat.whatsapp.com/…` en base). `waContactLink()` : un numéro donne un lien wa.me cliquable ; un @pseudo s'affiche sans lien (pas de format d'URL public officiel stable pour les usernames). UI : champ au profil, champ Paramètres du voyage (OWNER/EDITOR), bouton "Groupe WhatsApp du voyage" + contact sous chaque participant (page Participants), ligne WhatsApp sur les fiches d'urgence. `verify:rls` 30/30.
 
-### [ ] PHIL-O07 — Lien opérateur sur les transports
+### [x] PHIL-O07 — Lien opérateur sur les transports *(fait le 2026-07-04)*
 Champ URL optionnel sur les événements TRANSPORT : lien vers l'app/le site de la compagnie (statut du vol, du train). Remplace le suivi de vol intégré, écarté (AeroAPI payant, AviationStack ~100 req/mois en gratuit). À trancher au ticket : champ URL générique sur **tous** les événements (resto → lien réservation) plutôt que TRANSPORT seul.
+> Note : **généralisé aux trois types** — `metadata.external_url` existait déjà (affiché "Lien externe" sur la fiche, saisi seulement pour ACTIVITY) ; ajouté aux formulaires TRANSPORT ("Lien compagnie") et LODGING ("Lien de la réservation"), et au formulaire d'édition commun (merge JSONB sans écraser les autres clés metadata ; champ vidé = lien supprimé). Aucune migration nécessaire.
 
 ### [x] PHIL-O08 — Renommer la Checklist en "Valise" *(fait le 2026-07-04)*
 Renommage produit : onglet, titres, microcopy, templates N03. Les sections restent (avant le départ / à emporter / sur place). Vérifier que "Valise" reste juste pour les items non-bagage ("réserver le taxi") — sinon un titre du type "Valise & to-do".

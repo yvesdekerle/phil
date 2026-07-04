@@ -24,6 +24,7 @@ const transportSchema = z
     }),
     bookingReference: z.string().trim().max(100).optional(),
     carrier: z.string().trim().max(120).optional(),
+    externalUrl: z.union([z.literal(""), z.string().url("Lien invalide.")]).optional(),
     notes: z.string().trim().max(2000).optional(),
   })
   .refine((v) => !v.endsAtLocal || v.endsAtLocal >= v.startsAtLocal, {
@@ -49,6 +50,7 @@ const lodgingSchema = z
     platform: z.enum(LODGING_PLATFORMS),
     bookingReference: z.string().trim().max(100).optional(),
     guests: z.union([z.literal(""), z.coerce.number().int().min(1).max(50)]).optional(),
+    externalUrl: z.union([z.literal(""), z.string().url("Lien invalide.")]).optional(),
     notes: z.string().trim().max(2000).optional(),
   })
   .refine((v) => v.checkOutLocal >= v.checkInLocal, {
@@ -180,6 +182,7 @@ export async function createLodgingEvent(
     platform: formData.get("platform"),
     bookingReference: formData.get("bookingReference") ?? "",
     guests: formData.get("guests") ?? "",
+    externalUrl: formData.get("externalUrl") ?? "",
     notes: formData.get("notes") ?? "",
   });
 
@@ -202,6 +205,9 @@ export async function createLodgingEvent(
   }
   if (d.guests) {
     metadata.guests = d.guests;
+  }
+  if (d.externalUrl) {
+    metadata.external_url = d.externalUrl;
   }
 
   const eventId = crypto.randomUUID();
@@ -247,6 +253,7 @@ export async function createTransportEvent(
     timezone: formData.get("timezone"),
     bookingReference: formData.get("bookingReference") ?? "",
     carrier: formData.get("carrier") ?? "",
+    externalUrl: formData.get("externalUrl") ?? "",
     notes: formData.get("notes") ?? "",
   });
 
@@ -273,6 +280,9 @@ export async function createTransportEvent(
   }
   if (d.carrier) {
     metadata.carrier = d.carrier;
+  }
+  if (d.externalUrl) {
+    metadata.external_url = d.externalUrl;
   }
 
   const eventId = crypto.randomUUID();

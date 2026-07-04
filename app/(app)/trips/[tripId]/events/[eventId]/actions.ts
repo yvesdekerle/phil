@@ -20,6 +20,7 @@ const updateEventSchema = z
     }),
     locationName: z.string().trim().max(150).optional(),
     locationAddress: z.string().trim().max(300).optional(),
+    externalUrl: z.union([z.literal(""), z.string().url("Lien invalide.")]).optional(),
     notes: z.string().trim().max(2000).optional(),
   })
   .refine((v) => !v.endsAtLocal || v.endsAtLocal >= v.startsAtLocal, {
@@ -45,6 +46,7 @@ export async function updateEvent(
     timezone: formData.get("timezone"),
     locationName: formData.get("locationName") ?? "",
     locationAddress: formData.get("locationAddress") ?? "",
+    externalUrl: formData.get("externalUrl") ?? "",
     notes: formData.get("notes") ?? "",
   });
 
@@ -61,6 +63,19 @@ export async function updateEvent(
   }
 
   const d = parsed.data;
+  // PHIL-O07 : external_url vit dans le JSONB metadata — merge sans écraser le reste
+  const { data: current } = await supabase
+    .from("trip_events")
+    .select("metadata")
+    .eq("id", d.eventId)
+    .single();
+  const metadata = { ...((current?.metadata as Record<string, string | number>) ?? {}) };
+  if (d.externalUrl) {
+    metadata.external_url = d.externalUrl;
+  } else {
+    delete metadata.external_url;
+  }
+
   const { error, count } = await supabase
     .from("trip_events")
     .update(
@@ -72,6 +87,7 @@ export async function updateEvent(
         location_name: d.locationName || null,
         location_address: d.locationAddress || null,
         notes: d.notes || null,
+        metadata,
       },
       { count: "exact" },
     )
