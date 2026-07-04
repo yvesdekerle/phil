@@ -3,6 +3,7 @@
 import { Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useActionState, useState, useTransition } from "react";
+import { Money } from "@/components/budget/money";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { Balance, Settlement } from "@/lib/budget/balances";
@@ -19,6 +20,8 @@ export type ExpenseRow = {
   title: string;
   amount: number;
   currency: string;
+  /** Montant converti dans la devise principale du voyage (null si taux inconnu). */
+  amountPrimary: number | null;
   paid_by: string;
   created_by: string;
   category: string;
@@ -33,6 +36,9 @@ export function BudgetClient({
   tripId,
   expenses,
   balancesByCurrency,
+  primaryCurrency,
+  secondaryCurrency,
+  secondaryRate,
   members,
   events,
   myId,
@@ -42,10 +48,14 @@ export function BudgetClient({
   expenses: ExpenseRow[];
   balancesByCurrency: {
     currency: string;
+    converted: boolean;
     total: number;
     balances: Balance[];
     settlements: Settlement[];
   }[];
+  primaryCurrency: string;
+  secondaryCurrency: string | null;
+  secondaryRate: number | null;
   members: Member[];
   events: EventOption[];
   myId: string;
@@ -53,6 +63,9 @@ export function BudgetClient({
 }) {
   const [showForm, setShowForm] = useState(false);
   const [category, setCategory] = useState<ExpenseCategory>("autre");
+  // PHIL-P01 : montant secondaire (petit, dessous) pour un montant en devise principale
+  const sub = (amountInPrimary: number) =>
+    secondaryCurrency && secondaryRate ? amountInPrimary * secondaryRate : null;
   const [state, formAction, formPending] = useActionState<ExpenseState, FormData>(addExpense, {
     status: "idle",
   });
@@ -101,7 +114,12 @@ export function BudgetClient({
                 placeholder="450"
                 required
               />
-              <Input name="currency" defaultValue="EUR" maxLength={3} className="w-20" />
+              <Input
+                name="currency"
+                defaultValue={primaryCurrency}
+                maxLength={3}
+                className="w-20"
+              />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -195,14 +213,29 @@ export function BudgetClient({
         </form>
       ) : null}
 
-      {balancesByCurrency.map(({ currency, total, balances, settlements }) => (
+      {balancesByCurrency.map(({ currency, converted, total, balances, settlements }) => (
         <section
           key={currency}
           className="rounded-lg border border-laiton-clair bg-papier px-4 py-3"
         >
           <h2 className="mb-2 flex items-baseline justify-between text-sm font-medium text-encre">
-            <span>Soldes ({currency})</span>
-            <span className="text-encre-douce">Total : {fmt(total, currency)}</span>
+            <span>
+              Soldes ({currency})
+              {converted ? (
+                <span className="ml-1.5 rounded-full bg-laiton/15 px-2 py-0.5 text-[0.65rem] font-normal text-laiton">
+                  devises converties
+                </span>
+              ) : null}
+            </span>
+            <span className="flex items-baseline gap-1 text-encre-douce">
+              Total :{" "}
+              <Money
+                amount={total}
+                currency={currency}
+                secondaryAmount={currency === primaryCurrency ? sub(total) : null}
+                secondaryCurrency={secondaryCurrency}
+              />
+            </span>
           </h2>
           <div className="flex flex-col gap-1">
             {balances.map((b) => (
@@ -223,8 +256,17 @@ export function BudgetClient({
                   key={`${s.from}-${s.to}`}
                   className="flex items-center justify-between gap-2 text-sm text-encre"
                 >
-                  <span>
-                    {nameOf(s.from)} doit {fmt(s.amount, currency)} à {nameOf(s.to)}
+                  <span className="flex flex-wrap items-baseline gap-x-1">
+                    {nameOf(s.from)} doit{" "}
+                    <Money
+                      amount={s.amount}
+                      currency={currency}
+                      secondaryAmount={currency === primaryCurrency ? sub(s.amount) : null}
+                      secondaryCurrency={secondaryCurrency}
+                      align="start"
+                      className="font-medium"
+                    />{" "}
+                    à {nameOf(s.to)}
                   </span>
                   <button
                     type="button"
@@ -274,7 +316,18 @@ export function BudgetClient({
                   ? `${nameOf(e.paid_by)} → ${nameOf(e.beneficiaries[0] ?? "")}`
                   : `${nameOf(e.paid_by)} · pour ${e.beneficiaries.length}`}
               </span>
-              <span className="shrink-0 font-medium text-encre">{fmt(e.amount, e.currency)}</span>
+              <Money
+                amount={e.amountPrimary ?? e.amount}
+                currency={e.amountPrimary !== null ? primaryCurrency : e.currency}
+                secondaryAmount={e.amountPrimary !== null ? sub(e.amountPrimary) : null}
+                secondaryCurrency={secondaryCurrency}
+                className="shrink-0 font-medium text-encre"
+                title={
+                  e.currency !== primaryCurrency
+                    ? `Saisi : ${fmt(e.amount, e.currency)}`
+                    : undefined
+                }
+              />
               {e.created_by === myId || e.paid_by === myId || isOwner ? (
                 <button
                   type="button"

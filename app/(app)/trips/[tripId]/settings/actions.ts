@@ -28,6 +28,16 @@ const tripUpdateSchema = z
           .startsWith("https://chat.whatsapp.com/", "Un lien d'invitation chat.whatsapp.com."),
       ])
       .optional(),
+    currencyPrimary: z
+      .string()
+      .trim()
+      .toUpperCase()
+      .regex(/^[A-Z]{3}$/, "Code devise à 3 lettres (EUR, MUR…)."),
+    currencySecondary: z
+      .string()
+      .trim()
+      .toUpperCase()
+      .regex(/^$|^[A-Z]{3}$/, "Code devise à 3 lettres, ou vide."),
     timezone: z.string().refine((tz) => Intl.supportedValuesOf("timeZone").includes(tz), {
       message: "Fuseau horaire inconnu.",
     }),
@@ -71,6 +81,8 @@ export async function updateTrip(
     endDate: formData.get("endDate"),
     coverImageUrl: formData.get("coverImageUrl") ?? "",
     whatsappGroupUrl: formData.get("whatsappGroupUrl") ?? "",
+    currencyPrimary: formData.get("currencyPrimary") ?? "EUR",
+    currencySecondary: formData.get("currencySecondary") ?? "",
     timezone: formData.get("timezone"),
   });
 
@@ -103,6 +115,8 @@ export async function updateTrip(
         end_date: parsed.data.endDate,
         cover_image_url: parsed.data.coverImageUrl || null,
         whatsapp_group_url: parsed.data.whatsappGroupUrl || null,
+        currency_primary: parsed.data.currencyPrimary,
+        currency_secondary: parsed.data.currencySecondary || null,
         default_timezone: parsed.data.timezone,
       },
       { count: "exact" },

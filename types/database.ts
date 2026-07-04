@@ -1083,6 +1083,8 @@ export type Database = {
           cover_image_url: string | null;
           created_at: string;
           created_by: string;
+          currency_primary: string;
+          currency_secondary: string | null;
           default_timezone: string;
           destination: string;
           destination_lat: number | null;
@@ -1098,6 +1100,8 @@ export type Database = {
           cover_image_url?: string | null;
           created_at?: string;
           created_by: string;
+          currency_primary?: string;
+          currency_secondary?: string | null;
           default_timezone?: string;
           destination: string;
           destination_lat?: number | null;
@@ -1113,6 +1117,8 @@ export type Database = {
           cover_image_url?: string | null;
           created_at?: string;
           created_by?: string;
+          currency_primary?: string;
+          currency_secondary?: string | null;
           default_timezone?: string;
           destination?: string;
           destination_lat?: number | null;

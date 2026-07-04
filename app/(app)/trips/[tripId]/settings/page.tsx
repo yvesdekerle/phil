@@ -55,6 +55,8 @@ export default async function TripSettingsPage({
           endDate: trip.end_date,
           coverImageUrl: trip.cover_image_url ?? "",
           whatsappGroupUrl: trip.whatsapp_group_url ?? "",
+          currencyPrimary: trip.currency_primary,
+          currencySecondary: trip.currency_secondary ?? "",
           timezone: trip.default_timezone,
         }}
       />

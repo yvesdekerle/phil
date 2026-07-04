@@ -48,6 +48,16 @@ const formSchema = z
           .startsWith("https://chat.whatsapp.com/", "Un lien d'invitation chat.whatsapp.com."),
       ])
       .optional(),
+    currencyPrimary: z
+      .string()
+      .trim()
+      .toUpperCase()
+      .regex(/^[A-Z]{3}$/, "Code devise à 3 lettres (EUR, MUR…)."),
+    currencySecondary: z
+      .string()
+      .trim()
+      .toUpperCase()
+      .regex(/^$|^[A-Z]{3}$/, "Code devise à 3 lettres, ou vide."),
     timezone: z.string().min(1),
   })
   .refine((v) => !v.startDate || !v.endDate || v.endDate >= v.startDate, {
@@ -137,6 +147,35 @@ export function TripSettingsForm({
           {errors.coverImageUrl ? (
             <p className="text-sm text-bordeaux">{errors.coverImageUrl.message}</p>
           ) : null}
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="currencyPrimary">Devise principale</Label>
+            <Input
+              id="currencyPrimary"
+              placeholder="EUR"
+              maxLength={3}
+              disabled={!canEdit}
+              {...register("currencyPrimary")}
+            />
+            {errors.currencyPrimary ? (
+              <p className="text-sm text-bordeaux">{errors.currencyPrimary.message}</p>
+            ) : null}
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="currencySecondary">Devise secondaire (optionnelle)</Label>
+            <Input
+              id="currencySecondary"
+              placeholder="MUR"
+              maxLength={3}
+              disabled={!canEdit}
+              {...register("currencySecondary")}
+            />
+            {errors.currencySecondary ? (
+              <p className="text-sm text-bordeaux">{errors.currencySecondary.message}</p>
+            ) : null}
+          </div>
         </div>
 
         <div className="flex flex-col gap-2">

@@ -6,6 +6,7 @@ import {
   EXPENSE_CATEGORIES,
   type ExpenseCategory,
 } from "@/lib/budget/categories";
+import { getRates, toBase } from "@/lib/budget/rates";
 import { createClient } from "@/lib/supabase/server";
 
 type Slice = { label: string; amount: number };
@@ -60,18 +61,30 @@ export default async function ExpenseTrackingPage({
       .select("amount, currency, category, spent_on, paid_by, expense_beneficiaries(user_id)")
       .eq("trip_id", tripId)
       .eq("is_settlement", false),
-    supabase.from("trips").select("start_date, end_date").eq("id", tripId).single(),
+    supabase
+      .from("trips")
+      .select("start_date, end_date, currency_primary, currency_secondary")
+      .eq("id", tripId)
+      .single(),
   ]);
+
+  // PHIL-P01 : tout est converti vers la devise principale du voyage
+  const primary = trip?.currency_primary ?? "EUR";
+  const rates = await getRates(primary);
 
   const expenses = (expensesData ?? []).map((e) => {
     const beneficiaries = (e.expense_beneficiaries ?? []).map((b) => b.user_id);
+    const raw = Number(e.amount);
+    const amount =
+      e.currency === primary ? raw : rates ? (toBase(raw, e.currency, rates) ?? raw) : raw;
+    const converted = e.currency === primary || (rates && toBase(raw, e.currency, rates) !== null);
     return {
-      amount: Number(e.amount),
-      currency: e.currency,
+      amount,
+      currency: converted ? primary : e.currency,
       category: asCategory(e.category),
       spentOn: e.spent_on,
       paidBy: e.paid_by,
-      myShare: beneficiaries.includes(user.id) ? Number(e.amount) / beneficiaries.length : 0,
+      myShare: beneficiaries.includes(user.id) ? amount / beneficiaries.length : 0,
     };
   });
 
