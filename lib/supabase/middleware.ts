@@ -11,7 +11,7 @@ const PUBLIC_PATHS = [
   "/privacy",
   "/legal",
 ];
-/** Préfixes publics : callback OAuth, invitations (D06), health check, assets PWA, crons (protégés par CRON_SECRET). */
+/** Préfixes publics : callback OAuth, invitations (D06), health check, assets PWA, crons (protégés par CRON_SECRET), webhook email (P02, secret) et partage public (P03, token). */
 const PUBLIC_PREFIXES = [
   "/auth/",
   "/invitations/",
@@ -19,6 +19,8 @@ const PUBLIC_PREFIXES = [
   "/icons/",
   "/api/cron/",
   "/api/trips/",
+  "/api/inbound-email",
+  "/p/",
 ];
 
 function isPublicPath(pathname: string): boolean {

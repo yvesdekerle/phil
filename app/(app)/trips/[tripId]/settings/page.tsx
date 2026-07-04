@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { CalendarFeed } from "./calendar-feed";
 import { CoverUpload } from "./cover-upload";
 import { EmailAliasCard } from "./email-alias";
+import { PublicShareCard } from "./public-share";
 import { TripSettingsForm } from "./settings-form";
 
 export default async function TripSettingsPage({
@@ -48,6 +49,9 @@ export default async function TripSettingsPage({
           alias={trip.email_alias}
           domain={process.env.NEXT_PUBLIC_INBOUND_EMAIL_DOMAIN ?? null}
         />
+      ) : null}
+      {isOwner ? (
+        <PublicShareCard tripId={trip.id} token={trip.public_token} baseUrl={baseUrl} />
       ) : null}
       {canEdit ? <CoverUpload tripId={trip.id} /> : null}
       <TripSettingsForm

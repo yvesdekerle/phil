@@ -1182,6 +1182,7 @@ export type Database = {
           end_date: string;
           id: string;
           name: string;
+          public_token: string | null;
           start_date: string;
           whatsapp_group_url: string | null;
         };
@@ -1200,6 +1201,7 @@ export type Database = {
           end_date: string;
           id?: string;
           name: string;
+          public_token?: string | null;
           start_date: string;
           whatsapp_group_url?: string | null;
         };
@@ -1218,6 +1220,7 @@ export type Database = {
           end_date?: string;
           id?: string;
           name?: string;
+          public_token?: string | null;
           start_date?: string;
           whatsapp_group_url?: string | null;
         };

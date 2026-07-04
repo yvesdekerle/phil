@@ -69,6 +69,23 @@ async function getMyRole(tripId: string): Promise<{ role: string | null; userId:
   return { role: data?.role ?? null, userId: user.id };
 }
 
+/** Active/révoque le partage public du voyage (PHIL-P03). OWNER uniquement. */
+export async function setPublicSharing(tripId: string, enabled: boolean): Promise<void> {
+  if (!z.string().uuid().safeParse(tripId).success) {
+    return;
+  }
+  const { role } = await getMyRole(tripId);
+  if (role !== "OWNER") {
+    return;
+  }
+  const supabase = await createClient();
+  await supabase
+    .from("trips")
+    .update({ public_token: enabled ? crypto.randomUUID() : null })
+    .eq("id", tripId);
+  revalidatePath(`/trips/${tripId}/settings`);
+}
+
 /** Génère l'alias d'import par email du voyage (PHIL-P02). RLS : OWNER/EDITOR. */
 export async function generateEmailAlias(tripId: string): Promise<void> {
   if (!z.string().uuid().safeParse(tripId).success) {
