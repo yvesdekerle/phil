@@ -406,34 +406,40 @@ export type Database = {
       expenses: {
         Row: {
           amount: number;
+          category: string;
           created_at: string;
           created_by: string;
           currency: string;
           event_id: string | null;
           id: string;
           paid_by: string;
+          spent_on: string;
           title: string;
           trip_id: string;
         };
         Insert: {
           amount: number;
+          category?: string;
           created_at?: string;
           created_by: string;
           currency?: string;
           event_id?: string | null;
           id?: string;
           paid_by: string;
+          spent_on?: string;
           title: string;
           trip_id: string;
         };
         Update: {
           amount?: number;
+          category?: string;
           created_at?: string;
           created_by?: string;
           currency?: string;
           event_id?: string | null;
           id?: string;
           paid_by?: string;
+          spent_on?: string;
           title?: string;
           trip_id?: string;
         };

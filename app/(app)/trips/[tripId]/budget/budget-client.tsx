@@ -1,10 +1,17 @@
 "use client";
 
 import { Trash2 } from "lucide-react";
+import Link from "next/link";
 import { useActionState, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { Balance, Settlement } from "@/lib/budget/balances";
+import {
+  CATEGORY_LABELS,
+  categoryForEventType,
+  EXPENSE_CATEGORIES,
+  type ExpenseCategory,
+} from "@/lib/budget/categories";
 import { addExpense, deleteExpense, type ExpenseState } from "./actions";
 
 export type ExpenseRow = {
@@ -14,9 +21,11 @@ export type ExpenseRow = {
   currency: string;
   paid_by: string;
   created_by: string;
+  category: string;
   beneficiaries: string[];
 };
 type Member = { userId: string; name: string };
+type EventOption = { id: string; title: string; type: "TRANSPORT" | "LODGING" | "ACTIVITY" };
 
 /** Budget partagé (PHIL-N09) : dépenses, soldes, règlements. */
 export function BudgetClient({
@@ -24,6 +33,7 @@ export function BudgetClient({
   expenses,
   balancesByCurrency,
   members,
+  events,
   myId,
   isOwner,
 }: {
@@ -36,10 +46,12 @@ export function BudgetClient({
     settlements: Settlement[];
   }[];
   members: Member[];
+  events: EventOption[];
   myId: string;
   isOwner: boolean;
 }) {
   const [showForm, setShowForm] = useState(false);
+  const [category, setCategory] = useState<ExpenseCategory>("autre");
   const [state, formAction, formPending] = useActionState<ExpenseState, FormData>(addExpense, {
     status: "idle",
   });
@@ -51,6 +63,17 @@ export function BudgetClient({
 
   return (
     <div className="flex flex-col gap-6">
+      <nav className="flex gap-1 text-sm" aria-label="Vues du budget">
+        <span className="rounded-full bg-bordeaux px-3 py-1 font-medium text-papier">
+          Équilibre
+        </span>
+        <Link
+          href={`/trips/${tripId}/budget/depenses`}
+          className="rounded-full px-3 py-1 text-encre-douce hover:bg-laiton/10 hover:text-encre"
+        >
+          Suivi des dépenses
+        </Link>
+      </nav>
       <div className="flex items-center justify-between">
         <p className="text-sm text-encre-douce">
           Qui a payé quoi — les comptes clairs, l'amitié durable.
@@ -80,6 +103,54 @@ export function BudgetClient({
               <Input name="currency" defaultValue="EUR" maxLength={3} className="w-20" />
             </div>
           </div>
+          <div className="grid grid-cols-2 gap-3">
+            <label className="flex flex-col gap-1 text-sm text-encre">
+              Catégorie
+              <select
+                name="category"
+                value={category}
+                onChange={(e) => setCategory(e.target.value as ExpenseCategory)}
+                className="rounded border border-laiton-clair bg-papier px-2 py-1.5 text-sm"
+              >
+                {EXPENSE_CATEGORIES.map((c) => (
+                  <option key={c} value={c}>
+                    {CATEGORY_LABELS[c]}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <div className="flex flex-col gap-1 text-sm text-encre">
+              <label htmlFor="spentOn">Date</label>
+              <Input
+                id="spentOn"
+                name="spentOn"
+                type="date"
+                defaultValue={new Date().toISOString().slice(0, 10)}
+                required
+              />
+            </div>
+          </div>
+          <label className="flex flex-col gap-1 text-sm text-encre">
+            Événement lié (optionnel)
+            <select
+              name="eventId"
+              defaultValue=""
+              onChange={(e) => {
+                const ev = events.find((x) => x.id === e.target.value);
+                if (ev) {
+                  setCategory(categoryForEventType(ev.type));
+                }
+              }}
+              className="rounded border border-laiton-clair bg-papier px-2 py-1.5 text-sm"
+            >
+              <option value="">Aucun</option>
+              {events.map((ev) => (
+                <option key={ev.id} value={ev.id}>
+                  {ev.title}
+                </option>
+              ))}
+            </select>
+          </label>
           <label className="flex items-center gap-2 text-sm text-encre">
             Payé par
             <select
@@ -168,7 +239,12 @@ export function BudgetClient({
               key={e.id}
               className="flex items-center gap-3 rounded-md border border-laiton-clair/60 bg-papier px-3 py-2 text-sm"
             >
-              <span className="min-w-0 flex-1 truncate text-encre">{e.title}</span>
+              <span className="min-w-0 flex-1 truncate text-encre">
+                {e.title}
+                <span className="ml-1.5 rounded-full bg-laiton/15 px-2 py-0.5 text-[0.65rem] text-laiton">
+                  {CATEGORY_LABELS[e.category as ExpenseCategory] ?? e.category}
+                </span>
+              </span>
               <span className="shrink-0 text-xs text-encre-douce">
                 {nameOf(e.paid_by)} · pour {e.beneficiaries.length}
               </span>

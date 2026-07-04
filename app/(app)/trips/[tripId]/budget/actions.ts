@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { EXPENSE_CATEGORIES } from "@/lib/budget/categories";
 import { createClient } from "@/lib/supabase/server";
 import { areUuids } from "@/lib/validation";
 
@@ -13,6 +14,9 @@ const expenseSchema = z.object({
   currency: z.string().trim().toUpperCase().length(3),
   paidBy: z.string().uuid(),
   beneficiaries: z.array(z.string().uuid()).min(1),
+  category: z.enum(EXPENSE_CATEGORIES),
+  eventId: z.union([z.literal(""), z.string().uuid()]).optional(),
+  spentOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date invalide."),
 });
 
 export type ExpenseState = { status: "idle" | "error"; message?: string };
@@ -26,6 +30,9 @@ export async function addExpense(_prev: ExpenseState, formData: FormData): Promi
     currency: formData.get("currency") || "EUR",
     paidBy: formData.get("paidBy"),
     beneficiaries: formData.getAll("beneficiaries"),
+    category: formData.get("category") ?? "autre",
+    eventId: formData.get("eventId") ?? "",
+    spentOn: formData.get("spentOn"),
   });
   if (!parsed.success) {
     return { status: "error", message: "Montant, payeur et au moins un bénéficiaire requis." };
@@ -48,6 +55,9 @@ export async function addExpense(_prev: ExpenseState, formData: FormData): Promi
     amount: d.amount,
     currency: d.currency,
     paid_by: d.paidBy,
+    category: d.category,
+    event_id: d.eventId || null,
+    spent_on: d.spentOn,
     created_by: user.id,
   });
   if (error) {
@@ -63,6 +73,7 @@ export async function addExpense(_prev: ExpenseState, formData: FormData): Promi
   }
 
   revalidatePath(`/trips/${d.tripId}/budget`);
+  revalidatePath(`/trips/${d.tripId}/budget/depenses`);
   return { status: "idle" };
 }
 
@@ -79,4 +90,5 @@ export async function deleteExpense(tripId: string, expenseId: string): Promise<
   }
   await supabase.from("expenses").delete().eq("id", expenseId).eq("trip_id", tripId);
   revalidatePath(`/trips/${tripId}/budget`);
+  revalidatePath(`/trips/${tripId}/budget/depenses`);
 }
