@@ -472,8 +472,9 @@ Le second slot cron Vercel (quotidien) parcourt les événements de demain et no
 ### [ ] PHIL-N09 — Budget partagé
 Sur un événement ou en dépense libre : montant, devise, **payé par**, **pour qui** (défaut : les participants F11 de l'événement, sinon tout l'équipage). Vue Budget du voyage : total, dépenses par personne, **soldes** ("Yves doit 42 € à Amelie") avec algorithme de règlement simplifié. Pas de paiement intégré — juste les comptes clairs.
 
-### [ ] PHIL-N10 — Mode "Aujourd'hui"
+### [x] PHIL-N10 — Mode "Aujourd'hui" *(fait le 2026-07-04)*
 Pendant le voyage, l'accueil du voyage devient la vue du jour : événement **en cours**, le **prochain départ** avec compte à rebours et lieu de RDV, les documents utiles du jour, accès à la carte du jour (N01). C'est l'écran qu'on regarde dix fois par jour sur place — pensé mobile d'abord.
+> Note : hero "Aujourd'hui" en tête du calendrier quand le voyage est en cours — carte "EN CE MOMENT" (bordeaux, événement dont on est entre début et fin) + "PROCHAIN DÉPART" (compte à rebours client rafraîchi 30 s, heure locale, lieu de RDV), lien "La journée heure par heure" (vue jour F02). **Écart** : les documents du jour ne sont pas remontés dans le hero (accessibles via la fiche événement à un tap). Vérifié en réel : voyage décalé sur aujourd'hui → les deux cartes rendues, puis démo restaurée.
 
 ### [x] PHIL-N11 — Checklist partagée *(fait le 2026-07-04)*
 Par voyage : items cochables, assignables à un participant ("Enceinte — Amelie"), sections (avant le départ / à emporter / sur place), progression visible. Alimentée par les templates N03.

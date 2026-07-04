@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { EventTypeIcon } from "@/components/calendar/event-type-icon";
+import { TodayHero } from "@/components/calendar/today-hero";
 import { Button } from "@/components/ui/button";
 import { eventDayKey, eventTime, groupEventsByDay } from "@/lib/events/datetime";
 import type { TripEvent } from "@/lib/events/types";
@@ -33,7 +34,11 @@ export default async function TripCalendarPage({
       .eq("trip_id", tripId)
       .eq("user_id", user.id)
       .single(),
-    supabase.from("trips").select("default_timezone").eq("id", tripId).single(),
+    supabase
+      .from("trips")
+      .select("default_timezone, start_date, end_date")
+      .eq("id", tripId)
+      .single(),
   ]);
 
   const events = (eventsData ?? []) as TripEvent[];
@@ -42,8 +47,35 @@ export default async function TripCalendarPage({
   // "Aujourd'hui" dans le fuseau du voyage
   const todayKey = trip ? eventDayKey(new Date().toISOString(), trip.default_timezone) : null;
 
+  // PHIL-N10 : vue « Aujourd'hui » pendant le voyage
+  const nowIso = new Date().toISOString();
+  const tripOngoing =
+    trip && trip.start_date <= nowIso.slice(0, 10) && nowIso.slice(0, 10) <= trip.end_date;
+  const heroOf = (e: TripEvent) => ({
+    id: e.id,
+    title: e.title,
+    type: e.type,
+    startsAt: e.starts_at,
+    time: eventTime(e.starts_at, e.timezone),
+    location: e.location_address ?? e.location_name,
+  });
+  const currentEvent = tripOngoing
+    ? (events.find(
+        (e) => e.starts_at <= nowIso && e.ends_at !== null && (e.ends_at as string) >= nowIso,
+      ) ?? null)
+    : null;
+  const nextEvent = tripOngoing ? (events.find((e) => e.starts_at > nowIso) ?? null) : null;
+
   return (
     <div className="flex flex-col gap-6">
+      {tripOngoing && todayKey ? (
+        <TodayHero
+          tripId={tripId}
+          current={currentEvent ? heroOf(currentEvent) : null}
+          next={nextEvent ? heroOf(nextEvent) : null}
+          dayKey={todayKey}
+        />
+      ) : null}
       <div className="flex items-center justify-end gap-3">
         <Button asChild variant="outline">
           <Link href={`/trips/${tripId}/map`}>Carte</Link>
