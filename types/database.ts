@@ -78,6 +78,7 @@ export type Database = {
           created_at: string;
           created_by: string;
           done: boolean;
+          due_date: string | null;
           event_id: string | null;
           id: string;
           section: string;
@@ -89,6 +90,7 @@ export type Database = {
           created_at?: string;
           created_by: string;
           done?: boolean;
+          due_date?: string | null;
           event_id?: string | null;
           id?: string;
           section?: string;
@@ -100,6 +102,7 @@ export type Database = {
           created_at?: string;
           created_by?: string;
           done?: boolean;
+          due_date?: string | null;
           event_id?: string | null;
           id?: string;
           section?: string;

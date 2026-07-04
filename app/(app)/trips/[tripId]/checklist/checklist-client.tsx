@@ -1,5 +1,7 @@
 "use client";
 
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 import { Trash2 } from "lucide-react";
 import { useActionState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
@@ -12,7 +14,7 @@ import {
   deleteChecklistItem,
   toggleChecklistItem,
 } from "./actions";
-import { WardrobeCatalog } from "./wardrobe-catalog";
+import { CatalogRows } from "./catalog-rows";
 
 export type ChecklistItem = {
   id: string;
@@ -24,6 +26,8 @@ export type ChecklistItem = {
   /** PHIL-O05 : item rattaché à un événement ("à emporter" d'une activité). */
   event_id: string | null;
   eventTitle: string | null;
+  /** PHIL-Q20 : échéance optionnelle ("vaccins avant le…"). */
+  due_date: string | null;
 };
 type Member = { userId: string; name: string };
 
@@ -72,7 +76,6 @@ export function ChecklistClient({
 
   return (
     <div className="flex flex-col gap-6">
-      <WardrobeCatalog tripId={tripId} items={items} nights={nights} />
       {suggestions.length > 0 ? (
         <section className="rounded-lg border border-laiton-clair bg-gradient-to-br from-papier to-parchemin px-4 py-3">
           <h2 className="mb-2 font-display text-sm text-encre italic">
@@ -145,6 +148,12 @@ export function ChecklistClient({
                     )}
                   >
                     {item.title}
+                    {item.due_date ? (
+                      <span className="ml-1.5 text-xs text-encre-douce">
+                        avant le{" "}
+                        {format(new Date(`${item.due_date}T12:00:00`), "d MMM", { locale: fr })}
+                      </span>
+                    ) : null}
                     {item.eventTitle ? (
                       <span className="ml-1.5 rounded-full bg-laiton/15 px-2 py-0.5 text-[0.65rem] text-laiton">
                         {item.eventTitle}
@@ -187,6 +196,12 @@ export function ChecklistClient({
                 </li>
               ))}
             </ul>
+            <CatalogRows
+              tripId={tripId}
+              section={section as "avant_depart" | "a_emporter" | "sur_place"}
+              items={items}
+              nights={nights}
+            />
             <form action={formAction} className="mt-2 flex items-center gap-2">
               <input type="hidden" name="tripId" value={tripId} />
               <input type="hidden" name="section" value={section} />
@@ -196,6 +211,13 @@ export function ChecklistClient({
                 className="h-8 flex-1 text-sm"
                 required
                 maxLength={200}
+              />
+              <Input
+                name="dueDate"
+                type="date"
+                className="h-8 w-36 text-sm"
+                aria-label="Échéance (optionnel)"
+                title="À faire avant le… (optionnel)"
               />
               <Button type="submit" size="sm" variant="outline">
                 Ajouter

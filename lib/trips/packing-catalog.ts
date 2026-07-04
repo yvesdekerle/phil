@@ -1,7 +1,8 @@
 /**
- * Garde-robe type (PHIL-Q10) — les affaires qu'on retrouve dans tous les
- * voyages, par catégorie, avec des quantités calées sur la durée du séjour
- * (ajustables avant l'ajout).
+ * Catalogue de la Valise (PHIL-Q10, réorganisé par PHIL-Q20) — les affaires
+ * et préparatifs qu'on retrouve dans tous les voyages, intégrés directement
+ * dans chaque section (avant le départ / à emporter / sur place), avec des
+ * quantités calées sur la durée du séjour (ajustables).
  */
 
 export type CatalogItem = {
@@ -10,17 +11,37 @@ export type CatalogItem = {
   qty: (nights: number) => number;
 };
 
+export type CatalogSection = "avant_depart" | "a_emporter" | "sur_place";
+
 const one = () => 1;
 const perNights =
   (max: number, div = 1) =>
   (nights: number) =>
     Math.max(1, Math.min(max, Math.ceil(nights / div)));
 
-export const PACKING_CATALOG: { category: string; items: CatalogItem[] }[] = [
+export const PACKING_CATALOG: {
+  category: string;
+  section: CatalogSection;
+  items: CatalogItem[];
+}[] = [
+  {
+    category: "Préparatifs",
+    section: "avant_depart",
+    items: [
+      { title: "Vaccins à jour", qty: one },
+      { title: "Passeports vérifiés (validité 6 mois après retour)", qty: one },
+      { title: "Assurance voyage vérifiée", qty: one },
+      { title: "Google Maps hors-ligne téléchargé", qty: one },
+      { title: "Copies des papiers dans le coffre Phil", qty: one },
+      { title: "Banque prévenue du voyage", qty: one },
+    ],
+  },
   {
     category: "Vêtements",
+    section: "a_emporter",
     items: [
       { title: "T-shirts", qty: perNights(10) },
+      { title: "Chemises ou tops", qty: perNights(4, 4) },
       { title: "Sous-vêtements", qty: (n) => Math.max(2, Math.min(12, n + 1)) },
       { title: "Paires de chaussettes", qty: perNights(8) },
       { title: "Shorts", qty: perNights(5, 3) },
@@ -34,6 +55,7 @@ export const PACKING_CATALOG: { category: string; items: CatalogItem[] }[] = [
   },
   {
     category: "Chaussures",
+    section: "a_emporter",
     items: [
       { title: "Baskets", qty: one },
       { title: "Tongs ou sandales", qty: one },
@@ -41,6 +63,7 @@ export const PACKING_CATALOG: { category: string; items: CatalogItem[] }[] = [
   },
   {
     category: "Trousse de toilette",
+    section: "a_emporter",
     items: [
       { title: "Brosse à dents", qty: one },
       { title: "Dentifrice", qty: one },
@@ -52,15 +75,25 @@ export const PACKING_CATALOG: { category: string; items: CatalogItem[] }[] = [
   },
   {
     category: "Indispensables",
+    section: "a_emporter",
     items: [
       { title: "Lunettes de soleil", qty: one },
       { title: "Crème solaire", qty: one },
+      { title: "Masque et tuba", qty: one },
       { title: "Chargeurs (téléphone, montre…)", qty: one },
       { title: "Batterie externe", qty: one },
       { title: "Adaptateur de prise", qty: one },
       { title: "Médicaments personnels", qty: one },
       { title: "Gourde", qty: one },
       { title: "Sac pour le linge sale", qty: one },
+    ],
+  },
+  {
+    category: "À l'arrivée",
+    section: "sur_place",
+    items: [
+      { title: "Carte SIM locale ou e-SIM activée", qty: one },
+      { title: "Espèces retirées en monnaie locale", qty: one },
     ],
   },
 ];

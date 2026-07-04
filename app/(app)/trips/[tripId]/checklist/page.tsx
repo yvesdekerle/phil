@@ -19,7 +19,9 @@ export default async function ChecklistPage({ params }: { params: Promise<{ trip
   const [{ data: items }, { data: members }, { data: me }] = await Promise.all([
     supabase
       .from("checklist_items")
-      .select("id, section, title, done, assigned_to, created_by, event_id, trip_events(title)")
+      .select(
+        "id, section, title, done, assigned_to, created_by, event_id, due_date, trip_events(title)",
+      )
       .eq("trip_id", tripId)
       .order("created_at", { ascending: true }),
     supabase
