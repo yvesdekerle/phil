@@ -11,6 +11,7 @@ import { formatMinutes, getTravelMinutes } from "@/lib/geo/travel-time";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 import { type DailyForecast, getDailyForecast } from "@/lib/weather/open-meteo";
+import { QuickAdd } from "./quick-add";
 
 export default async function TripCalendarPage({
   params,
@@ -130,6 +131,19 @@ export default async function TripCalendarPage({
           </Button>
         ) : null}
       </div>
+
+      {canEdit && trip ? (
+        <QuickAdd
+          tripId={tripId}
+          defaultDate={
+            tripOngoing && todayKey
+              ? todayKey
+              : trip.start_date >= nowIso.slice(0, 10)
+                ? trip.start_date
+                : trip.end_date
+          }
+        />
+      ) : null}
 
       {days.length > 0 ? (
         <p className="-mb-3 text-right text-xs text-encre-douce">
