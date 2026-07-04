@@ -54,3 +54,9 @@ supabase/.temp/
 public/sw.js
 public/sw.js.map
 public/swe-worker*.js
+
+# Tests e2e (Playwright)
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

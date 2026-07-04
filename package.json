@@ -14,7 +14,10 @@
     "db:push": "supabase db push",
     "db:types": "supabase gen types typescript --linked > types/database.ts",
     "verify:rls": "tsx scripts/verify-rls.ts",
-    "build:sw": "esbuild app/sw.ts --bundle --minify --outfile=public/sw.js"
+    "build:sw": "esbuild app/sw.ts --bundle --minify --outfile=public/sw.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
@@ -47,6 +50,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.10",
+    "@playwright/test": "^1.61.1",
     "@tailwindcss/postcss": "^4",
     "@types/leaflet": "^1.9.21",
     "@types/node": "^20",
@@ -60,6 +64,7 @@
     "supabase": "^2.109.0",
     "tailwindcss": "^4",
     "tsx": "^4.22.5",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.9"
   }
 }
