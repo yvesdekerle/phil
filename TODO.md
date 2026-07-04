@@ -661,8 +661,9 @@ Demande Yves (2026-07-04) : à côté des distances, un lien qui ouvre l'app de 
 Comme les horloges monde d'un téléphone : afficher côte à côte l'heure de Paris (fuseau de l'utilisateur) et l'heure de la destination, en direct, sur la page du voyage.
 > Note : bandeau 🕐 "14:32 Paris · 17:32 Île Maurice (+3 h)" en tête du calendrier — fuseau de chez soi = celui du profil, tick toutes les 15 s, décalage affiché ; masqué quand les deux fuseaux sont identiques (voyage en France).
 
-### [ ] PHIL-Q25 — Carte : départ de la maison + programme du jour sous la carte
+### [x] PHIL-Q25 — Carte : départ de la maison + programme du jour sous la carte *(fait le 2026-07-05)*
 1. Sur "Tout le voyage", ajouter le **point de départ** (l'origine du premier transport, ex. Paris CDG) au tracé. 2. Sous la carte, quand un jour est filtré : le **programme de la journée** listé dans l'ordre, avec **distance et temps de route depuis le point précédent**.
+> Note : point "Départ : Paris CDG" (maison encre, ordre -1 → le tracé part de chez soi) géocodé depuis le `from` du premier transport, uniquement en vue "Tout le voyage" ; géocodage Nominatim désormais **caché 24 h**. Jour filtré : encart "Programme de la journée" sous la carte — pastilles numérotées assorties à la carte, heure, et entre chaque étape "↓ 12 km · ≈ 18 min de route" (haversine + OSRM ; trajets < 300 m masqués). Clic → fiche événement.
 
 ### [x] PHIL-Q26 — Documents : lier à un événement à l'upload, libellé libre, billets démo *(fait le 2026-07-05)*
 1. Sur "Ajouter au voyage" : sélecteur **"Rattacher à un événement"** optionnel (le lien existe déjà dans l'autre sens via "Attacher un document" sur la fiche — et oui, plusieurs documents par événement sont déjà possibles). 2. Remplacer la **catégorie fermée** par un **libellé libre** pour les documents du voyage ("Forfait de ski") avec suggestions — les catégories restent au coffre où elles ont un sens (passeport, CNI…). 3. Seed : billets PDF attachés au Jardin de Pamplemousses.

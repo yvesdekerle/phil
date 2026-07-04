@@ -1,9 +1,13 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { EventTypeIcon } from "@/components/calendar/event-type-icon";
 import type { MapMarker } from "@/components/map/trip-map";
 import { TripMapLazy } from "@/components/map/trip-map-lazy";
 import { eventDayKey, eventTime, groupEventsByDay } from "@/lib/events/datetime";
 import type { TripEvent } from "@/lib/events/types";
+import { haversineKm } from "@/lib/geo/distance";
+import { geocode } from "@/lib/geo/geocode";
+import { formatMinutes, getTravelMinutes } from "@/lib/geo/travel-time";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 
@@ -104,6 +108,57 @@ export default async function TripMapPage({
       house: e.type === "LODGING",
       label: e.type === "LODGING" ? undefined : String(++step),
     }));
+
+    // PHIL-Q25 : le voyage part de la maison — origine du premier transport
+    if (!activeDay) {
+      const firstTransport = allEvents.find(
+        (e) => e.type === "TRANSPORT" && (e.metadata as { from?: string })?.from,
+      );
+      const from = (firstTransport?.metadata as { from?: string })?.from;
+      if (from) {
+        const homeCoords = await geocode(from);
+        if (homeCoords) {
+          markers.unshift({
+            id: "depart-maison",
+            lat: homeCoords.lat,
+            lng: homeCoords.lng,
+            title: `Départ : ${from}`,
+            subtitle: "Le point de départ de l'aventure",
+            color: "#1f2a44",
+            order: -1,
+            house: true,
+          });
+        }
+      }
+    }
+  }
+
+  // PHIL-Q25 : programme de la journée filtrée, avec distance et temps depuis le point d'avant
+  type DayLeg = { km: number; minutes: number | null };
+  let dayProgram: { event: TripEvent; leg: DayLeg | null }[] = [];
+  if (!showIdeas && activeDay) {
+    const dayEvents = allEvents.filter((e) => eventDayKey(e.starts_at, e.timezone) === activeDay);
+    dayProgram = await Promise.all(
+      dayEvents.map(async (e, i) => {
+        const prev = dayEvents[i - 1];
+        if (
+          !prev ||
+          prev.location_lat == null ||
+          prev.location_lng == null ||
+          e.location_lat == null ||
+          e.location_lng == null
+        ) {
+          return { event: e, leg: null };
+        }
+        const a = { lat: prev.location_lat, lng: prev.location_lng };
+        const b = { lat: e.location_lat, lng: e.location_lng };
+        const km = haversineKm(a, b);
+        return {
+          event: e,
+          leg: km < 0.3 ? null : { km, minutes: await getTravelMinutes(a, b) },
+        };
+      }),
+    );
   }
 
   const chip = (href: string, label: string, active: boolean) => (
@@ -150,6 +205,39 @@ export default async function TripMapPage({
       ) : null}
 
       <TripMapLazy markers={markers} drawPath={!showIdeas} distanceFrom={distanceFrom} />
+
+      {dayProgram.length > 0 ? (
+        <section className="rounded-lg border border-laiton-clair bg-papier px-4 py-3">
+          <h2 className="mb-2 text-sm font-medium text-encre">Programme de la journée</h2>
+          <ol className="flex flex-col">
+            {dayProgram.map(({ event, leg }, i) => (
+              <li key={event.id}>
+                {leg ? (
+                  <p className="my-1 ml-3.5 border-l-2 border-dashed border-laiton-clair py-0.5 pl-4 text-xs text-encre-douce">
+                    ↓ {leg.km.toFixed(leg.km < 10 ? 1 : 0)} km
+                    {leg.minutes !== null && leg.minutes >= 3
+                      ? ` · ${formatMinutes(leg.minutes)} de route`
+                      : ""}
+                  </p>
+                ) : null}
+                <Link
+                  href={`/trips/${tripId}/events/${event.id}`}
+                  className="flex items-center gap-2.5 rounded-md px-1 py-1 hover:bg-laiton/10"
+                >
+                  <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-bordeaux text-xs font-bold text-papier">
+                    {i + 1}
+                  </span>
+                  <EventTypeIcon type={event.type} className="size-6 shrink-0" />
+                  <span className="min-w-0 flex-1 truncate text-sm text-encre">{event.title}</span>
+                  <span className="shrink-0 text-xs text-encre-douce tabular-nums">
+                    {eventTime(event.starts_at, event.timezone)}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ol>
+        </section>
+      ) : null}
 
       <p className="text-xs text-encre-douce">
         {markers.length} lieu{markers.length > 1 ? "x" : ""} sur la carte

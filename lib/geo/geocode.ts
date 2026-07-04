@@ -13,6 +13,7 @@ export async function geocode(query: string): Promise<{ lat: number; lng: number
     const r = await fetch(url, {
       headers: { "User-Agent": "phil-travel-app/1.0 (carnet de voyage privé)" },
       signal: AbortSignal.timeout(4000),
+      next: { revalidate: 86_400 }, // les lieux ne bougent pas : cache 24 h par requête
     });
     if (!r.ok) {
       return null;
