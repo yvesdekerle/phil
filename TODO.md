@@ -686,6 +686,10 @@ Audit : la base de tests (25 unit + 8 e2e) n'était **imposée nulle part** — 
 Audit : pas de veille de vulnérabilités automatisée, version Node non épinglée.
 > Fix : `.github/dependabot.yml` (npm + github-actions, hebdo, bumps mineurs groupés), `.nvmrc` (24) et `engines.node` (`>=22 <25`) dans package.json.
 
+### [x] PHIL-Q58 — Gestion d'erreur : feedback utilisateur + try/catch cron *(fait le 2026-07-05)*
+Audit : plusieurs actions `void` avalaient les erreurs sans feedback ; cron sans try/catch de handler.
+> Fix : **toasts** (sonner, `Toaster` dans le layout) sur les mutations d'argent — `deleteExpense`, `markSettled`, `setPurseClosed` renvoient désormais `{ ok, message }` et l'UI affiche un toast d'erreur en cas d'échec (RLS/réseau). Cron `event-reminders` enveloppé dans un `try/catch` de handler qui logue (sans PII) et renvoie 500 au lieu d'une erreur brute. *(Reste : généraliser le feedback aux autres mutations mineures — votes, checklist — enjeu faible.)*
+
 ### [x] PHIL-Q57 — Concurrence : reconnexion Realtime + rollback optimiste carte *(fait le 2026-07-05)*
 Audit : `channel.subscribe()` ignorait son statut (un CHANNEL_ERROR coupait le temps réel jusqu'au remount) ; la carte du monde mutait sans rollback en cas d'échec serveur.
 > Fix : `RealtimeRefresh` gère le statut et **se reconnecte** sur CHANNEL_ERROR/TIMED_OUT (backoff exponentiel plafonné à 30 s). `toggleVisitedCountry` renvoie un booléen ; `world-map.tsx` **revient en arrière** (couleur du pays) si l'écriture échoue.

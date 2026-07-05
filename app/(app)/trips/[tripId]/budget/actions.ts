@@ -23,6 +23,9 @@ const expenseSchema = z.object({
 
 export type ExpenseState = { status: "idle" | "error"; message?: string };
 
+/** Résultat d'une mutation directe (PHIL-Q58) — remonté à l'UI pour un toast. */
+export type ActionResult = { ok: boolean; message?: string };
+
 /** Enregistre une dépense partagée (PHIL-N09, division PHIL-Q21). */
 export async function addExpense(_prev: ExpenseState, formData: FormData): Promise<ExpenseState> {
   const parsed = expenseSchema.safeParse({
@@ -111,9 +114,9 @@ export async function addExpense(_prev: ExpenseState, formData: FormData): Promi
 }
 
 /** Clore / rouvrir la Bourse (PHIL-Q21) — Capitaine uniquement. */
-export async function setPurseClosed(tripId: string, closed: boolean): Promise<void> {
+export async function setPurseClosed(tripId: string, closed: boolean): Promise<ActionResult> {
   if (!areUuids(tripId)) {
-    return;
+    return { ok: false, message: "Voyage invalide." };
   }
   const supabase = await createClient();
   const {
@@ -129,14 +132,18 @@ export async function setPurseClosed(tripId: string, closed: boolean): Promise<v
     .eq("user_id", user.id)
     .single();
   if (me?.role !== "OWNER") {
-    return;
+    return { ok: false, message: "Seul le Capitaine peut clore ou rouvrir la Bourse." };
   }
-  await supabase
+  const { error } = await supabase
     .from("trips")
     .update({ purse_closed_at: closed ? new Date().toISOString() : null })
     .eq("id", tripId);
+  if (error) {
+    return { ok: false, message: "Action impossible pour l'instant." };
+  }
   revalidatePath(`/trips/${tripId}/budget`);
   revalidatePath(`/trips/${tripId}/budget/equilibre`);
+  return { ok: true };
 }
 
 const settlementSchema = z.object({
@@ -154,10 +161,10 @@ export async function markSettled(
   toUserId: string,
   amount: number,
   currency: string,
-): Promise<void> {
+): Promise<ActionResult> {
   const parsed = settlementSchema.safeParse({ tripId, fromUserId, toUserId, amount, currency });
   if (!parsed.success || parsed.data.fromUserId === parsed.data.toUserId) {
-    return;
+    return { ok: false, message: "Règlement invalide." };
   }
   const supabase = await createClient();
   const {
@@ -181,16 +188,17 @@ export async function markSettled(
     p_beneficiaries: [{ user_id: d.toUserId, share: null }],
   });
   if (error) {
-    return;
+    return { ok: false, message: "Le règlement n'a pas pu être enregistré." };
   }
   revalidatePath(`/trips/${d.tripId}/budget`);
   revalidatePath(`/trips/${d.tripId}/budget/equilibre`);
   revalidatePath(`/trips/${d.tripId}/budget/depenses`);
+  return { ok: true };
 }
 
-export async function deleteExpense(tripId: string, expenseId: string): Promise<void> {
+export async function deleteExpense(tripId: string, expenseId: string): Promise<ActionResult> {
   if (!areUuids(tripId, expenseId)) {
-    return;
+    return { ok: false, message: "Dépense invalide." };
   }
   const supabase = await createClient();
   const {
@@ -199,8 +207,16 @@ export async function deleteExpense(tripId: string, expenseId: string): Promise<
   if (!user) {
     redirect("/login");
   }
-  await supabase.from("expenses").delete().eq("id", expenseId).eq("trip_id", tripId);
+  const { error } = await supabase
+    .from("expenses")
+    .delete()
+    .eq("id", expenseId)
+    .eq("trip_id", tripId);
+  if (error) {
+    return { ok: false, message: "Suppression impossible." };
+  }
   revalidatePath(`/trips/${tripId}/budget`);
   revalidatePath(`/trips/${tripId}/budget/equilibre`);
   revalidatePath(`/trips/${tripId}/budget/depenses`);
+  return { ok: true };
 }

@@ -2,6 +2,7 @@
 
 import { Lock, LockOpen } from "lucide-react";
 import { useTransition } from "react";
+import { toast } from "sonner";
 import { Money } from "@/components/budget/money";
 import { Button } from "@/components/ui/button";
 import type { Balance, Settlement } from "@/lib/budget/balances";
@@ -125,7 +126,12 @@ export function EquilibreClient({
                 type="button"
                 disabled={pending}
                 onClick={() =>
-                  startTransition(() => markSettled(tripId, s.from, s.to, s.amount, currency))
+                  startTransition(async () => {
+                    const r = await markSettled(tripId, s.from, s.to, s.amount, currency);
+                    if (!r.ok) {
+                      toast.error(r.message ?? "Action impossible.");
+                    }
+                  })
                 }
                 className="shrink-0 rounded-full border border-laiton-clair px-2.5 py-0.5 text-xs text-encre-douce transition-colors hover:border-bordeaux hover:text-bordeaux"
                 title="Enregistre le remboursement et remet les soldes à jour"
@@ -153,7 +159,14 @@ export function EquilibreClient({
                 type="button"
                 variant="outline"
                 disabled={pending}
-                onClick={() => startTransition(() => setPurseClosed(tripId, false))}
+                onClick={() =>
+                  startTransition(async () => {
+                    const r = await setPurseClosed(tripId, false);
+                    if (!r.ok) {
+                      toast.error(r.message ?? "Action impossible.");
+                    }
+                  })
+                }
               >
                 <LockOpen aria-hidden="true" /> Rouvrir
               </Button>
@@ -168,7 +181,14 @@ export function EquilibreClient({
                 type="button"
                 variant="outline"
                 disabled={pending}
-                onClick={() => startTransition(() => setPurseClosed(tripId, true))}
+                onClick={() =>
+                  startTransition(async () => {
+                    const r = await setPurseClosed(tripId, true);
+                    if (!r.ok) {
+                      toast.error(r.message ?? "Action impossible.");
+                    }
+                  })
+                }
               >
                 <Lock aria-hidden="true" /> Clore la Bourse
               </Button>

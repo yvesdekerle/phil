@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Search, Trash2 } from "lucide-react";
 import { useActionState, useMemo, useState, useTransition } from "react";
+import { toast } from "sonner";
 import { CurrencyInput } from "@/components/budget/currency-input";
 import { Money } from "@/components/budget/money";
 import { Button } from "@/components/ui/button";
@@ -432,7 +433,14 @@ export function ExpensesClient({
                     <button
                       type="button"
                       disabled={pending}
-                      onClick={() => startTransition(() => deleteExpense(tripId, e.id))}
+                      onClick={() =>
+                        startTransition(async () => {
+                          const r = await deleteExpense(tripId, e.id);
+                          if (!r.ok) {
+                            toast.error(r.message ?? "Suppression impossible.");
+                          }
+                        })
+                      }
                       className="text-encre-douce hover:text-bordeaux"
                       aria-label={`Supprimer ${e.title}`}
                     >

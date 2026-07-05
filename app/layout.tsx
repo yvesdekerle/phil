@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Bodoni_Moda, Figtree } from "next/font/google";
+import { Toaster } from "sonner";
 import "./globals.css";
 import { CookieNotice } from "@/components/cookie-notice";
 import { OfflineAuthGuard } from "@/components/offline/offline-auth-guard";
@@ -50,6 +51,8 @@ export default function RootLayout({
         <OfflineAuthGuard />
         <OfflineBanner />
         <CookieNotice />
+        <Toaster position="bottom-center" richColors />
+
         {/* Conteneur qui grandit : pousse le footer en bas même sur les pages courtes */}
         <div className="flex flex-1 flex-col">{children}</div>
         <footer className="border-t border-laiton-clair/50 px-4 py-4 text-center text-xs text-encre-douce">
