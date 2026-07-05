@@ -678,6 +678,10 @@ Retour Yves : viewer cassé malgré des PDF valides (diagnostic mené jusque dan
 Audit : un document du coffre passé offline était stocké **en clair** dans IndexedDB (contournant passkey/filigrane/audit), et **rien n'était purgé à la déconnexion** (base par navigateur) → sur poste partagé, l'utilisateur suivant pouvait rouvrir les pièces d'identité du précédent.
 > Fix : `lib/offline/clear.ts` (`clearOfflineData` = `offlineDb.delete()` + purge des caches `phil-*` du service worker). Appelé (1) à la déconnexion — bouton du menu profil converti en handler client qui purge **avant** `signOut` ; (2) via `OfflineAuthGuard` monté dans le layout racine, sur l'événement `SIGNED_OUT` (expiration/révocation). Toggle offline **retiré des documents du coffre** (les docs de voyage, moins sensibles et partagés au groupe, restent disponibles offline). `syncTrip` ne cachait déjà que `scope="TRIP"`.
 
+### [x] PHIL-Q43 — Sécurité : secrets en en-tête + comparaison constant-time *(fait le 2026-07-05)*
+Audit : le secret du webhook inbound-email transitait en **query string** (`?secret=`, journalisée par Vercel/proxys), et les comparaisons de secrets (webhook + crons) étaient timing-leaky (`!==`).
+> Fix : `lib/security/secret.ts` (`timingSafeEqualStr`, `checkBearer`). Le webhook lit désormais le secret via l'en-tête `x-webhook-secret` ou `Authorization: Bearer` (plus de query string), et les deux crons passent par `checkBearer` — toutes les comparaisons de secrets sont maintenant en temps constant et fail-closed.
+
 ### [x] PHIL-Q42 — Confidentialité : purge de rétention + PII hors des logs cron *(fait le 2026-07-05)*
 Audit : les documents soft-supprimés n'étaient **jamais purgés** du Storage (scans de pièces d'identité conservés à vie — violation de la limitation de conservation), et le cron d'expiration renvoyait les **noms de fichiers** (PII) dans ses logs Vercel.
 > Fix (dans le cron quotidien `document-expiry`, sans nouveau cron — limite Hobby à 2) : balayage des documents `deleted_at < now-30j` → suppression du blob Storage puis de la ligne (`purged_documents` dans la réponse). Résultats tracés par **id** de document, plus jamais par `file_name`.

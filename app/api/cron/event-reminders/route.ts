@@ -2,6 +2,7 @@ import { fromZonedTime } from "date-fns-tz";
 import { eventDayKey, eventTime } from "@/lib/events/datetime";
 import { ensureTripCoords } from "@/lib/geo/locate";
 import { sendPushToUser } from "@/lib/notifications/push";
+import { checkBearer } from "@/lib/security/secret";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getDailyForecast, isRainy, weatherLabel } from "@/lib/weather/open-meteo";
 
@@ -18,8 +19,7 @@ export const dynamic = "force-dynamic";
  *    assumée). Préférence `weather_alerts`.
  */
 export async function GET(request: Request) {
-  const secret = process.env.CRON_SECRET;
-  if (!secret || request.headers.get("authorization") !== `Bearer ${secret}`) {
+  if (!checkBearer(request, process.env.CRON_SECRET)) {
     return Response.json({ error: "Non autorisé" }, { status: 401 });
   }
 

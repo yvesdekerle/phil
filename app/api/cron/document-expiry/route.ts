@@ -1,6 +1,7 @@
 import { createResendClient, fromEmail } from "@/lib/email/resend";
 import { DocumentExpiryEmail } from "@/lib/email/templates/document-expiry";
 import { parsePreferences } from "@/lib/notifications/preferences";
+import { checkBearer } from "@/lib/security/secret";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { CATEGORY_LABELS } from "@/lib/vault/categories";
 
@@ -15,8 +16,7 @@ const THRESHOLD_DAYS = [180, 90, 30, 7];
  * table d'état. Respecte la préférence `expiry_alerts` (PHIL-K04).
  */
 export async function GET(request: Request) {
-  const secret = process.env.CRON_SECRET;
-  if (!secret || request.headers.get("authorization") !== `Bearer ${secret}`) {
+  if (!checkBearer(request, process.env.CRON_SECRET)) {
     return Response.json({ error: "Non autorisé" }, { status: 401 });
   }
 

@@ -1,4 +1,5 @@
 import { extractReservation, importEnabled } from "@/lib/import/reservation";
+import { timingSafeEqualStr } from "@/lib/security/secret";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
@@ -50,8 +51,13 @@ function aliasOf(p: InboundPayload): string | null {
  */
 export async function POST(request: Request) {
   const secret = process.env.INBOUND_EMAIL_SECRET;
-  const provided = new URL(request.url).searchParams.get("secret");
-  if (!secret || provided !== secret) {
+  // PHIL-Q43 : le secret passe par un en-tête, jamais en query string
+  // (les URLs sont journalisées par Vercel/proxys → fuite du secret).
+  const provided =
+    request.headers.get("x-webhook-secret") ??
+    request.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ??
+    "";
+  if (!secret || !timingSafeEqualStr(provided, secret)) {
     return Response.json({ error: "Non autorisé" }, { status: 401 });
   }
   if (!importEnabled()) {
