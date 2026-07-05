@@ -6,6 +6,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { CATEGORY_LABELS } from "@/lib/vault/categories";
 
 export const dynamic = "force-dynamic";
+// PHIL-Q50 : marge au-delà des 10 s par défaut (envois séquentiels + purge)
+export const maxDuration = 60;
 
 /** Seuils d'alerte avant expiration (PHIL-E07). */
 const THRESHOLD_DAYS = [180, 90, 30, 7];

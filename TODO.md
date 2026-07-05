@@ -682,6 +682,10 @@ Audit : la base de tests (25 unit + 8 e2e) n'était **imposée nulle part** — 
 Audit : pas de veille de vulnérabilités automatisée, version Node non épinglée.
 > Fix : `.github/dependabot.yml` (npm + github-actions, hebdo, bumps mineurs groupés), `.nvmrc` (24) et `engines.node` (`>=22 <25`) dans package.json.
 
+### [x] PHIL-Q50 — Coûts : marge de timeout sur les crons *(fait le 2026-07-05)*
+Audit : crons en envois séquentiels sans `maxDuration` → risque de dépasser la limite 10 s Hobby à mesure que les données grossissent.
+> Fix : `export const maxDuration = 60` sur les deux crons (autorisé sur Hobby, timeout par défaut désormais à 300 s côté plateforme). Remarque : `remotePatterns: "**"` laissé tel quel (les couvertures sont des URLs libres saisies par l'utilisateur — restreindre casserait la fonctionnalité ; à arbitrer si le quota d'optimisation d'images devient un souci).
+
 ### [x] PHIL-Q49 — Correction/Concurrence : écritures de la Bourse atomiques *(fait le 2026-07-05)*
 Audit : `addExpense`/`markSettled` inséraient la dépense puis les bénéficiaires en deux temps avec un DELETE compensatoire manuel → dépense orpheline possible faussant les soldes.
 > Fix : RPC Postgres `create_expense_with_beneficiaries` (plpgsql = transactionnelle, `security invoker` → RLS conservée, `search_path=''`), insère dépense + bénéficiaires en une transaction. `addExpense` et `markSettled` réécrits pour l'appeler. Params optionnels en `default null` (types Supabase optionnels, pas de cast). **Vérifié dans Chrome** : dépense de 12 € répartie sur 9 (chacun 1,33), totaux +12, puis supprimée — soldes revenus à l'identique.

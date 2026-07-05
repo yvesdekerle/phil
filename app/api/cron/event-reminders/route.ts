@@ -7,6 +7,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getDailyForecast, isRainy, weatherLabel } from "@/lib/weather/open-meteo";
 
 export const dynamic = "force-dynamic";
+// PHIL-Q50 : marge au-delà des 10 s par défaut (pushs + météo séquentiels)
+export const maxDuration = 60;
 
 /**
  * Cron quotidien 16h UTC (slot 2 — les 2 slots Hobby sont pris) :
