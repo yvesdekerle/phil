@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { type ClockEntry, WorldClocks } from "@/components/trips/world-clocks";
 import { createClient } from "@/lib/supabase/server";
+import { HomeTimezonePicker } from "./home-timezone-picker";
 
 /**
  * Horloges (PHIL-Q29) — transversal aux voyages, comme les horloges monde
@@ -43,6 +44,9 @@ export default async function ClocksPage() {
         <p className="mt-1 text-sm text-encre-douce">
           L'heure chez toi et à chacune de tes destinations — du fuseau le plus tôt au plus tard.
         </p>
+      </div>
+      <div className="rounded-lg border border-laiton-clair bg-papier px-4 py-3">
+        <HomeTimezonePicker value={homeTimezone} />
       </div>
       <WorldClocks clocks={clocks} />
       {clocks.length === 1 ? (

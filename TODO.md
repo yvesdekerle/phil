@@ -672,6 +672,10 @@ Remplacer le bandeau du calendrier (Q24) par une **page Horloges** hors voyage :
 ### [x] PHIL-Q30 — Fix : aperçu des documents du coffre bloqué par la CSP *(fait le 2026-07-05, livré dans le commit Q28)*
 Retour Yves : viewer cassé malgré des PDF valides (diagnostic mené jusque dans Chrome : réponse 200 `application/pdf` correcte). Cause : `X-Frame-Options: DENY`, `frame-ancestors 'none'` et `object-src 'none'` (PHIL-J01) appliqués **à la réponse PDF elle-même** → Chrome refuse de l'afficher (iframe et pleine page). Fix : `/api/documents/:id/view` exclu de la CSP globale dans `next.config.ts`, avec ses propres headers (`frame-ancestors 'self'`, `X-Frame-Options: SAMEORIGIN`, `object-src 'self'`, nosniff).
 
+### [x] PHIL-Q40 — Horloges : choisir "sa maison" *(fait le 2026-07-05)*
+Retour Yves : pouvoir choisir sa maison directement depuis la page Horloges (pas seulement via Profil).
+> Note : sélecteur "Ta maison" (`home-timezone-picker.tsx`, client) en tête de `/horloges` → action serveur `setHomeTimezone` (valide le fuseau IANA, met à jour `profiles.timezone` = source unique, revalidate). Sauvegarde immédiate au changement, badge "✓ enregistré". **Vérifié dans Chrome** : maison Paris→New York recalcule l'horloge de référence et les décalages ("+8 h par rapport à chez toi"), re-tri par fuseau ; réglage restauré à Europe/Paris après test.
+
 ### [x] PHIL-Q39 — Footer collé en bas + casse des horloges *(fait le 2026-07-05)*
 Retour Yves : sur les pages courtes (ex. Horloges), le footer flottait au milieu au lieu de rester en bas. Cause : aucune zone de contenu ne grandissait pour remplir la hauteur. Fix global dans `app/layout.tsx` — `{children}` enveloppé dans un `flex flex-1 flex-col` qui pousse le footer en bas partout. Au passage, casse corrigée sur les horloges ("Par Rapport À Chez Toi" → "par rapport à chez toi") : le `capitalize` CSS s'appliquait à toute la ligne, remplacé par une majuscule sur le seul jour. **Vérifié dans Chrome**.
 
