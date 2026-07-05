@@ -19,6 +19,9 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test"
   },
+  "engines": {
+    "node": ">=22 <25"
+  },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
     "@react-email/components": "^1.0.12",
