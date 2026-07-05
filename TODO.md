@@ -674,6 +674,10 @@ Retour Yves : viewer cassé malgré des PDF valides (diagnostic mené jusque dan
 
 ## Audit sécurité & qualité (2026-07-05) — correctifs
 
+### [x] PHIL-Q46 — Observabilité : error boundaries + logger structuré *(fait le 2026-07-05)*
+Audit : aucune error boundary (`app/error.tsx`/`global-error.tsx` absents), aucun logging structuré — un incident prod se diagnostiquait à l'aveugle.
+> Fix : `app/error.tsx` (segment) + `app/global-error.tsx` (racine) façon Verne avec bouton « Reprendre la route », logguant `error.digest` sans PII ; `lib/observability/logger.ts` (JSON une ligne, niveau/message/ts/contexte, règle « pas de PII dans le contexte »).
+
 ### [x] PHIL-Q41 — Sécurité : fuite du coffre par le cache offline *(fait le 2026-07-05)*
 Audit : un document du coffre passé offline était stocké **en clair** dans IndexedDB (contournant passkey/filigrane/audit), et **rien n'était purgé à la déconnexion** (base par navigateur) → sur poste partagé, l'utilisateur suivant pouvait rouvrir les pièces d'identité du précédent.
 > Fix : `lib/offline/clear.ts` (`clearOfflineData` = `offlineDb.delete()` + purge des caches `phil-*` du service worker). Appelé (1) à la déconnexion — bouton du menu profil converti en handler client qui purge **avant** `signOut` ; (2) via `OfflineAuthGuard` monté dans le layout racine, sur l'événement `SIGNED_OUT` (expiration/révocation). Toggle offline **retiré des documents du coffre** (les docs de voyage, moins sensibles et partagés au groupe, restent disponibles offline). `syncTrip` ne cachait déjà que `scope="TRIP"`.
