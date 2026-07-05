@@ -682,6 +682,10 @@ Audit : la base de tests (25 unit + 8 e2e) n'était **imposée nulle part** — 
 Audit : pas de veille de vulnérabilités automatisée, version Node non épinglée.
 > Fix : `.github/dependabot.yml` (npm + github-actions, hebdo, bumps mineurs groupés), `.nvmrc` (24) et `engines.node` (`>=22 <25`) dans package.json.
 
+### [x] PHIL-Q52 — Robustesse : ordre delete-account + borne votePoll *(fait le 2026-07-05)*
+Audit : `deleteMyAccount` se déconnectait **avant** de supprimer (un échec laissait l'utilisateur déconnecté avec un compte vivant) ; `votePoll` ne bornait pas l'index par le haut (vote fantôme gonflant le total).
+> Fix : suppression **puis** déconnexion (échec → reste connecté + message clair, erreur loguée via `logger` sans PII) ; `votePoll` vérifie `optionIndex < options.length`. *(Rollback optimiste de la carte du monde laissé en note — enjeu faible : un simple refresh recolle l'état, et ça demanderait de changer le type de retour de l'action.)*
+
 ### [x] PHIL-Q51 — Maintenabilité : README + .env.example à jour *(fait le 2026-07-05)*
 Audit : pas de README (point d'entrée install/run pour un contributeur humain).
 > Fix : `README.md` (présentation, stack, démarrage, commandes, note sécurité, renvois vers CLAUDE.md/TODO.md/docs). `.env.example` complété (CRON_SECRET, VAPID) et corrigé (webhook en en-tête, plus en query string).

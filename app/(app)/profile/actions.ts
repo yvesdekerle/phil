@@ -120,11 +120,14 @@ export async function deleteMyAccount(
   }
 
   const { deleteAccount } = await import("@/lib/account/deletion");
+  const { logger } = await import("@/lib/observability/logger");
   try {
-    await supabase.auth.signOut();
+    // PHIL-Q52 : supprimer D'ABORD, se déconnecter ensuite. Sinon un échec de
+    // suppression laisse l'utilisateur déconnecté avec un compte toujours vivant.
     await deleteAccount(user.id);
-  } catch (e) {
-    console.error("Suppression de compte échouée:", e);
+    await supabase.auth.signOut();
+  } catch (_e) {
+    logger.error("account_deletion_failed", { userId: user.id });
     return {
       status: "error",
       message: "La suppression a échoué — contacte yves.dekerle@gmail.com.",

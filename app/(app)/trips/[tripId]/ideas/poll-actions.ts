@@ -79,6 +79,13 @@ export async function votePoll(tripId: string, pollId: string, optionIndex: numb
     return;
   }
   const { supabase, user } = await requireUser();
+  // PHIL-Q52 : borne haute — un index hors options gonflerait le compteur total
+  // sans barre correspondante.
+  const { data: poll } = await supabase.from("polls").select("options").eq("id", pollId).single();
+  const options = (poll?.options ?? []) as unknown[];
+  if (optionIndex >= options.length) {
+    return;
+  }
   await supabase
     .from("poll_votes")
     .upsert(
