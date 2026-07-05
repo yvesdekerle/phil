@@ -2,9 +2,9 @@
 
 import { createContext, useContext, useMemo } from "react";
 import type { Locale } from "@/lib/i18n/config";
-import { type Messages, messages, translator } from "@/lib/i18n/messages";
+import { messages, type PartialMessages, translator } from "@/lib/i18n/messages";
 
-type Ctx = { locale: Locale; dict: Messages };
+type Ctx = { locale: Locale; dict: PartialMessages };
 const I18nContext = createContext<Ctx>({ locale: "fr", dict: messages.fr });
 
 /**
@@ -17,7 +17,7 @@ export function I18nProvider({
   children,
 }: {
   locale: Locale;
-  dict: Messages;
+  dict: PartialMessages;
   children: React.ReactNode;
 }) {
   const value = useMemo(() => ({ locale, dict }), [locale, dict]);

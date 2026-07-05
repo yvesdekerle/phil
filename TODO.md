@@ -781,7 +781,11 @@ Retours Yves : colonne des noms (transports/activités) **fixe** au scroll horiz
 
 ### [~] PHIL-Q37 — i18n : français / anglais (traduire toute l'app)
 Le profil a déjà le choix FR/EN (`profiles.locale`) mais rien n'est traduit. Mettre en place l'infrastructure i18n et traduire l'ensemble de l'UI (gros chantier, à cadrer). Conserver la microcopy Verne dans les deux langues.
-> **Vague 1 (fait le 2026-07-05) — infrastructure + coque.** Approche maison légère (pas de dépendance, Next 16 trop récent) : `lib/i18n/` (config, messages fr/en, `translator`, `getT` serveur) + `components/i18n/provider.tsx` (`I18nProvider`, `useT`, `useLocale`). Langue pilotée par le profil via cookie `NEXT_LOCALE` (posé par `updateProfile`, lu par `getLocale`) ; `<html lang>` dynamique. **Traduit** : nav, footer, menu profil, page de connexion (+ bouton Google), error boundary de segment, page Voyages (titre, CTA, état vide) et TripCard (badge de statut, voyageurs). **Vérifié dans Chrome** : bascule FR↔EN complète sur ces écrans. **Reste (vagues suivantes)** : tous les autres écrans (calendrier, coffre, Bourse, valise, idées, photos, paramètres…), la localisation des **dates** (date-fns locale), et `global-error` (hors provider, laissé en FR).
+> **Vague 1 (fait le 2026-07-05) — infrastructure + coque.** Approche maison légère (pas de dépendance, Next 16 trop récent) : `lib/i18n/` (config, messages fr/en, `translator`, `getT` serveur) + `components/i18n/provider.tsx` (`I18nProvider`, `useT`, `useLocale`). Langue pilotée par le profil via cookie `NEXT_LOCALE` (posé par `updateProfile`, lu par `getLocale`) ; `<html lang>` dynamique.
+> **Mécanique incrémentale (fait le 2026-07-05) :** repli automatique sur le français si une clé anglaise manque (`translator`), anglais typé `PartialMessages` (se remplit écran par écran), test unitaire du repli, **recette dans `lib/i18n/README.md`**. On traduit un écran sans jamais casser les autres.
+>
+> **Écrans traduits :** ✅ nav · footer · menu profil · connexion · error boundary · Voyages (liste + carte).
+> **Écrans restants :** ⬜ calendrier d'un voyage + onglets · fiche événement · Carte · Documents · Idées · Valise · Bourse · Photos · Participants · Paramètres · Coffre (liste + fiche + upload) · Amis · Conseils · Horloges · Explorateur · Timeline · pages d'urgence · emails · `global-error` (hors provider) · **localisation des dates** (date-fns locale).
 
 ### [x] PHIL-Q38 — Tests : review + unitaires + e2e *(fait le 2026-07-05)*
 Review des tests puis ajout de tests e2e (demande Yves).

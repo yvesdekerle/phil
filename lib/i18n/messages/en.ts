@@ -1,7 +1,11 @@
-import type { Messages } from "./fr";
+import type { PartialMessages } from ".";
 
-/** English messages (PHIL-Q37) — Verne-flavoured microcopy, mirrors fr.ts keys. */
-export const en: Messages = {
+/**
+ * English messages (PHIL-Q37) — Verne-flavoured microcopy. Peut être partiel :
+ * toute clé absente retombe automatiquement sur le français (voir `translator`).
+ * On traduit écran par écran.
+ */
+export const en: PartialMessages = {
   nav: {
     trips: "Trips",
     vault: "Vault",
