@@ -2,10 +2,9 @@
 
 import { fromZonedTime } from "date-fns-tz";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { z } from "zod";
+import { requireUser } from "@/lib/auth/require-user";
 import { geolocateEvent } from "@/lib/geo/locate";
-import { createClient } from "@/lib/supabase/server";
 import { areUuids } from "@/lib/validation";
 
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -26,17 +25,6 @@ const candidateSchema = z
   });
 
 export type CandidateState = { status: "idle" | "error"; message?: string };
-
-async function requireUser() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    redirect("/login");
-  }
-  return { supabase, user };
-}
 
 /** Propose une option d'hébergement (PHIL-L01). */
 export async function addCandidate(

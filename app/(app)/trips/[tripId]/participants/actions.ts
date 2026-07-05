@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/auth/require-user";
 import { areUuids } from "@/lib/validation";
 
 export type ParticipantActionState = {
@@ -12,17 +12,6 @@ export type ParticipantActionState = {
 };
 
 const roleSchema = z.enum(["OWNER", "EDITOR", "VIEWER"]);
-
-async function requireUser() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    redirect("/login");
-  }
-  return { supabase, user };
-}
 
 async function myRole(
   supabase: Awaited<ReturnType<typeof requireUser>>["supabase"],

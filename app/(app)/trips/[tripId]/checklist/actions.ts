@@ -1,9 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { z } from "zod";
-import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/auth/require-user";
 import { areUuids } from "@/lib/validation";
 
 export const SECTIONS = ["avant_depart", "a_emporter", "sur_place"] as const;
@@ -22,17 +21,6 @@ const addSchema = z.object({
 });
 
 export type ChecklistState = { status: "idle" | "error"; message?: string };
-
-async function requireUser() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    redirect("/login");
-  }
-  return { supabase, user };
-}
 
 export async function addChecklistItem(
   _prev: ChecklistState,

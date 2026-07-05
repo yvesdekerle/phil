@@ -6,9 +6,8 @@ import {
   verifyRegistrationResponse,
 } from "@simplewebauthn/server";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { requireUser } from "@/lib/auth/require-user";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { createClient } from "@/lib/supabase/server";
 import { areUuids } from "@/lib/validation";
 import { CHALLENGE_COOKIE, getRpConfig } from "@/lib/webauthn/config";
 
@@ -16,17 +15,6 @@ export type SecurityActionState = {
   status: "idle" | "success" | "error";
   message?: string;
 };
-
-async function requireUser() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    redirect("/login");
-  }
-  return { supabase, user };
-}
 
 /** Étape 1 : options d'enregistrement, challenge posé en cookie httpOnly (5 min). */
 export async function getRegistrationOptions() {

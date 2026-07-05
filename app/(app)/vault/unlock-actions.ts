@@ -6,9 +6,8 @@ import {
   verifyAuthenticationResponse,
 } from "@simplewebauthn/server";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { requireUser } from "@/lib/auth/require-user";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { createClient } from "@/lib/supabase/server";
 import { CHALLENGE_COOKIE, getRpConfig } from "@/lib/webauthn/config";
 import { createVaultSession } from "@/lib/webauthn/vault-session";
 
@@ -16,17 +15,6 @@ export type UnlockState = {
   status: "idle" | "error";
   message?: string;
 };
-
-async function requireUser() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    redirect("/login");
-  }
-  return { supabase, user };
-}
 
 /** Étape 1 : options d'authentification limitées aux passkeys de l'utilisateur. */
 export async function getAuthenticationOptionsAction() {

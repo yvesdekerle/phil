@@ -1,11 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { z } from "zod";
+import { requireUser } from "@/lib/auth/require-user";
 import { sendPushToUser } from "@/lib/notifications/push";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { createClient } from "@/lib/supabase/server";
 import { areUuids } from "@/lib/validation";
 
 const pollSchema = z.object({
@@ -15,17 +14,6 @@ const pollSchema = z.object({
 });
 
 export type PollState = { status: "idle" | "error"; message?: string };
-
-async function requireUser() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    redirect("/login");
-  }
-  return { supabase, user };
-}
 
 /** Ouvre un sondage éclair (PHIL-N12) + push à l'équipage. */
 export async function createPoll(_prev: PollState, formData: FormData): Promise<PollState> {

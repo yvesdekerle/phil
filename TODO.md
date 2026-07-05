@@ -682,6 +682,10 @@ Audit : la base de tests (25 unit + 8 e2e) n'était **imposée nulle part** — 
 Audit : pas de veille de vulnérabilités automatisée, version Node non épinglée.
 > Fix : `.github/dependabot.yml` (npm + github-actions, hebdo, bumps mineurs groupés), `.nvmrc` (24) et `engines.node` (`>=22 <25`) dans package.json.
 
+### [x] PHIL-Q54 — Architecture : factorisation du boilerplate d'auth *(fait le 2026-07-05)*
+Audit : `requireUser` (createClient + getUser + redirect) redéfini à l'identique dans 6 server actions, `lib/auth/` vide.
+> Fix : `lib/auth/require-user.ts` unique, adopté dans les 6 fichiers (security, participants, poll, checklist, lodging, vault/unlock) ; imports `createClient`/`redirect` devenus inutiles nettoyés. Build + lint + 25 tests OK.
+
 ### [x] PHIL-Q53 — Offline : invalidation des blobs révoqués à la synchro *(fait le 2026-07-05)*
 Audit : `syncTrip` reconstruisait les métadonnées mais **jamais** les blobs — un document supprimé/révoqué restait ouvrable offline indéfiniment.
 > Fix : à chaque `syncTrip`, calcul des ids de documents cachés pour ce voyage désormais absents de la liste (RLS) → `document_blobs.bulkDelete` dans la transaction. Combiné à la purge Q41 (déconnexion), l'offline ne conserve plus que ce à quoi l'utilisateur a droit.
