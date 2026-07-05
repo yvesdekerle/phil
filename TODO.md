@@ -686,6 +686,10 @@ Audit : la base de tests (25 unit + 8 e2e) n'était **imposée nulle part** — 
 Audit : pas de veille de vulnérabilités automatisée, version Node non épinglée.
 > Fix : `.github/dependabot.yml` (npm + github-actions, hebdo, bumps mineurs groupés), `.nvmrc` (24) et `engines.node` (`>=22 <25`) dans package.json.
 
+### [x] PHIL-Q57 — Concurrence : reconnexion Realtime + rollback optimiste carte *(fait le 2026-07-05)*
+Audit : `channel.subscribe()` ignorait son statut (un CHANNEL_ERROR coupait le temps réel jusqu'au remount) ; la carte du monde mutait sans rollback en cas d'échec serveur.
+> Fix : `RealtimeRefresh` gère le statut et **se reconnecte** sur CHANNEL_ERROR/TIMED_OUT (backoff exponentiel plafonné à 30 s). `toggleVisitedCountry` renvoie un booléen ; `world-map.tsx` **revient en arrière** (couleur du pays) si l'écriture échoue.
+
 ### [x] PHIL-Q55 — Offline : expiration 30 j + purge des voyages terminés *(fait le 2026-07-05)*
 Demande Yves : limite de temps sur le cache offline + purge auto d'un voyage fini.
 > Fix : `lib/offline/maintenance.ts` (`runOfflineMaintenance`, `purgeTripOffline`) — au chargement de l'app (via `OfflineAuthGuard`, best-effort) : les fichiers gardés offline **expirent à 30 jours**, et un **voyage terminé depuis plus de 7 jours** est entièrement purgé du cache (événements, docs, idées, fichiers, sync_meta).

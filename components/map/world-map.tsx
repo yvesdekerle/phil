@@ -75,7 +75,18 @@ export function WorldMap({ visited }: { visited: string[] }) {
                 visitedRef.current.delete(code);
               }
               pathLayer.setStyle(styleOf(code));
-              startTransition(() => toggleVisitedCountry(code, next));
+              // PHIL-Q57 : rollback si l'écriture serveur échoue
+              startTransition(async () => {
+                const ok = await toggleVisitedCountry(code, next);
+                if (!ok) {
+                  if (next) {
+                    visitedRef.current.delete(code);
+                  } else {
+                    visitedRef.current.add(code);
+                  }
+                  pathLayer.setStyle(styleOf(code));
+                }
+              });
             });
           },
         }).addTo(map);

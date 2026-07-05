@@ -17,21 +17,48 @@ export function RealtimeRefresh({ tables }: { tables: string[] }) {
 
   useEffect(() => {
     const supabase = createClient();
-    const channel = supabase.channel(`refresh-${key}`);
-    for (const table of key.split(",")) {
-      channel.on("postgres_changes", { event: "*", schema: "public", table }, () => {
-        if (timer.current) {
-          clearTimeout(timer.current);
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    let retry: ReturnType<typeof setTimeout> | null = null;
+    let attempt = 0;
+
+    // PHIL-Q57 : reconnexion sur erreur/timeout de canal (backoff plafonné à 30 s)
+    // — sinon un CHANNEL_ERROR coupe le temps réel silencieusement jusqu'au remount.
+    const connect = () => {
+      channel = supabase.channel(`refresh-${key}`);
+      for (const table of key.split(",")) {
+        channel.on("postgres_changes", { event: "*", schema: "public", table }, () => {
+          if (timer.current) {
+            clearTimeout(timer.current);
+          }
+          timer.current = setTimeout(() => router.refresh(), 400);
+        });
+      }
+      channel.subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          attempt = 0;
+        } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+          if (channel) {
+            supabase.removeChannel(channel);
+            channel = null;
+          }
+          const delay = Math.min(30_000, 1000 * 2 ** attempt);
+          attempt += 1;
+          retry = setTimeout(connect, delay);
         }
-        timer.current = setTimeout(() => router.refresh(), 400);
       });
-    }
-    channel.subscribe();
+    };
+    connect();
+
     return () => {
       if (timer.current) {
         clearTimeout(timer.current);
       }
-      supabase.removeChannel(channel);
+      if (retry) {
+        clearTimeout(retry);
+      }
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
     };
   }, [key, router]);
 

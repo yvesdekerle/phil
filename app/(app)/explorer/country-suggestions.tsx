@@ -21,7 +21,11 @@ export function CountrySuggestions({
           key={s.code}
           type="button"
           disabled={pending}
-          onClick={() => startTransition(() => toggleVisitedCountry(s.code, true))}
+          onClick={() =>
+            startTransition(async () => {
+              await toggleVisitedCountry(s.code, true);
+            })
+          }
           className="rounded-full border border-laiton-clair bg-papier px-3 py-1 text-xs text-encre transition-colors hover:border-bordeaux hover:text-bordeaux"
         >
           + {s.name}
