@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 
 const sheetSchema = z.object({
@@ -31,8 +32,9 @@ export async function saveEmergencySheet(
     allergies: formData.get("allergies") ?? "",
     notes: formData.get("notes") ?? "",
   });
+  const t = await getT();
   if (!parsed.success) {
-    return { status: "error", message: "Saisie invalide." };
+    return { status: "error", message: t("emergency.msg.invalidInput") };
   }
 
   const supabase = await createClient();
@@ -57,8 +59,8 @@ export async function saveEmergencySheet(
   });
 
   if (error) {
-    return { status: "error", message: "L'enregistrement a échoué." };
+    return { status: "error", message: t("emergency.msg.saveFailed") };
   }
   revalidatePath(`/trips/${d.tripId}/emergency`);
-  return { status: "success", message: "Fiche enregistrée." };
+  return { status: "success", message: t("emergency.msg.saved") };
 }

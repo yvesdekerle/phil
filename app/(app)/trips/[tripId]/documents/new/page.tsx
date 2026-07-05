@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { UploadForm } from "@/components/documents/upload-form";
 import { Card, CardContent } from "@/components/ui/card";
+import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { TRIP_CATEGORIES } from "@/lib/vault/categories";
 import { createTripDocument } from "./actions";
@@ -19,6 +20,7 @@ export default async function NewTripDocumentPage({
   if (!user) {
     redirect("/login");
   }
+  const t = await getT();
 
   const { data: trip } = await supabase.from("trips").select("id, name").eq("id", tripId).single();
   if (!trip) {
@@ -36,12 +38,10 @@ export default async function NewTripDocumentPage({
         href={`/trips/${tripId}/documents`}
         className="text-sm text-encre-douce underline underline-offset-4 hover:text-encre"
       >
-        ← Retour aux documents
+        {t("tripDocs.backToDocs")}
       </Link>
-      <h1 className="text-center font-display text-2xl text-encre">Ajouter au voyage</h1>
-      <p className="text-center text-sm text-encre-douce">
-        Ce document sera visible de tous les participants dès l'envoi.
-      </p>
+      <h1 className="text-center font-display text-2xl text-encre">{t("tripDocs.newTitle")}</h1>
+      <p className="text-center text-sm text-encre-douce">{t("tripDocs.newSubtitle")}</p>
       <Card>
         <CardContent>
           <UploadForm
@@ -50,8 +50,8 @@ export default async function NewTripDocumentPage({
             defaultCategory="other"
             categories={TRIP_CATEGORIES}
             tripId={trip.id}
-            submitLabel="Ajouter au voyage"
-            pendingLabel="Phil distribue le document…"
+            submitLabel={t("tripDocs.submit")}
+            pendingLabel={t("tripDocs.pending")}
             freeLabel
             events={events ?? []}
           />

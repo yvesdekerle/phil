@@ -2,12 +2,13 @@ import { CalendarPlus, Clock, Coins, ExternalLink, MapPin } from "lucide-react";
 import Link from "next/link";
 import { Linkify } from "@/components/ui/linkify";
 import { formatInTimezone } from "@/lib/events/datetime";
+import { getT } from "@/lib/i18n/server";
 import type { IdeaWithMeta } from "@/lib/ideas/types";
 import { cn } from "@/lib/utils";
 import { DismissButton } from "./dismiss-button";
 import { VoteButton } from "./vote-button";
 
-export function IdeaCard({
+export async function IdeaCard({
   idea,
   tripId,
   canPlan,
@@ -16,6 +17,7 @@ export function IdeaCard({
   tripId: string;
   canPlan: boolean;
 }) {
+  const t = await getT();
   return (
     <article
       className={cn(
@@ -33,7 +35,7 @@ export function IdeaCard({
                   href={`/trips/${tripId}/events/${idea.scheduledEvent.id}`}
                   className="rounded-full bg-laiton px-2 py-0.5 text-[0.65rem] font-medium text-papier uppercase hover:bg-laiton/80"
                 >
-                  Planifié le{" "}
+                  {t("ideas.scheduledOn")}{" "}
                   {formatInTimezone(
                     idea.scheduledEvent.starts_at,
                     idea.scheduledEvent.timezone,
@@ -42,7 +44,7 @@ export function IdeaCard({
                 </Link>
               ) : (
                 <span className="rounded-full bg-laiton px-2 py-0.5 text-[0.65rem] font-medium text-papier uppercase">
-                  Planifié
+                  {t("ideas.scheduled")}
                 </span>
               )
             ) : null}
@@ -60,7 +62,7 @@ export function IdeaCard({
               className="flex items-center gap-1.5 rounded-full border border-laiton-clair bg-papier px-3 py-1.5 text-sm font-medium text-encre-douce transition-colors hover:text-encre focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-laiton"
             >
               <CalendarPlus className="size-4" aria-hidden="true" />
-              Planifier
+              {t("ideas.plan")}
             </Link>
           ) : null}
           {canPlan && idea.status !== "SCHEDULED" ? (
@@ -103,10 +105,12 @@ export function IdeaCard({
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1 text-bordeaux underline underline-offset-4"
           >
-            <ExternalLink className="size-3.5" aria-hidden="true" /> Lien
+            <ExternalLink className="size-3.5" aria-hidden="true" /> {t("ideas.link")}
           </a>
         ) : null}
-        <span className="ml-auto">proposé par {idea.creatorName}</span>
+        <span className="ml-auto">
+          {t("ideas.proposedBy")} {idea.creatorName}
+        </span>
       </div>
 
       {idea.tags.length > 0 ? (

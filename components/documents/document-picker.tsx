@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState, useTransition } from "react";
+import { useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,7 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { createClient } from "@/lib/supabase/client";
-import { CATEGORY_LABELS, type DocumentCategory } from "@/lib/vault/categories";
+import { categoryLabel, type DocumentCategory } from "@/lib/vault/categories";
 
 type PickableDocument = {
   id: string;
@@ -29,6 +30,7 @@ type Props = {
 };
 
 export function DocumentPicker({ tripId, attachedIds, onAttach }: Props) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [tripDocs, setTripDocs] = useState<PickableDocument[]>([]);
   const [vaultDocs, setVaultDocs] = useState<PickableDocument[]>([]);
@@ -69,7 +71,7 @@ export function DocumentPicker({ tripId, attachedIds, onAttach }: Props) {
     startTransition(async () => {
       const result = await onAttach(documentId);
       if (result.status === "error") {
-        setError(result.message ?? "Une erreur est survenue.");
+        setError(result.message ?? t("documents.picker.genericError"));
       } else {
         setOpen(false);
       }
@@ -93,10 +95,14 @@ export function DocumentPicker({ tripId, attachedIds, onAttach }: Props) {
             >
               <span className="min-w-0">
                 <span className="block truncate font-medium text-encre">{doc.file_name}</span>
-                <span className="text-xs text-encre-douce">{CATEGORY_LABELS[doc.category]}</span>
+                <span className="text-xs text-encre-douce">{categoryLabel(t, doc.category)}</span>
               </span>
               <span className="shrink-0 text-xs text-encre-douce">
-                {alreadyAttached ? "Déjà attaché" : vaultHint ? "Attacher + partager" : "Attacher"}
+                {alreadyAttached
+                  ? t("documents.picker.alreadyAttached")
+                  : vaultHint
+                    ? t("documents.picker.attachShare")
+                    : t("documents.picker.attachOne")}
               </span>
             </button>
           );
@@ -108,34 +114,31 @@ export function DocumentPicker({ tripId, attachedIds, onAttach }: Props) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">Attacher un document</Button>
+        <Button variant="outline">{t("documents.picker.attach")}</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Attacher un document</DialogTitle>
-          <DialogDescription>
-            Depuis les documents du voyage, ou depuis ton coffre — Phil le partagera alors avec
-            l'équipage.
-          </DialogDescription>
+          <DialogTitle>{t("documents.picker.attach")}</DialogTitle>
+          <DialogDescription>{t("documents.picker.dialogDesc")}</DialogDescription>
         </DialogHeader>
         <Tabs defaultValue="trip">
           <TabsList className="w-full">
             <TabsTrigger value="trip" className="flex-1">
-              Documents du voyage
+              {t("documents.picker.tabTrip")}
             </TabsTrigger>
             <TabsTrigger value="vault" className="flex-1">
-              Mon coffre
+              {t("documents.picker.tabVault")}
             </TabsTrigger>
           </TabsList>
           <TabsContent value="trip">
-            {renderList(tripDocs, "Aucun document dans ce voyage pour l'instant.", false)}
+            {renderList(tripDocs, t("documents.picker.emptyTrip"), false)}
           </TabsContent>
           <TabsContent value="vault">
-            {renderList(vaultDocs, "Ton coffre est vide.", true)}
+            {renderList(vaultDocs, t("documents.picker.emptyVault"), true)}
             <p className="px-1 pt-1 text-xs text-encre-douce">
-              Un document du coffre attaché ici devient visible des participants du voyage.{" "}
+              {t("documents.picker.vaultNote")}{" "}
               <Link href="/vault/new" className="underline underline-offset-4">
-                Ajouter au coffre
+                {t("documents.picker.addToVault")}
               </Link>
             </p>
           </TabsContent>

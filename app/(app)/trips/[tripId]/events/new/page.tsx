@@ -2,17 +2,14 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import type { EventType } from "@/lib/events/types";
+import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 import { ActivityForm } from "./activity-form";
 import { LodgingForm } from "./lodging-form";
 import { TransportForm } from "./transport-form";
 
-const TYPE_TABS: { type: EventType; label: string }[] = [
-  { type: "TRANSPORT", label: "Transport" },
-  { type: "LODGING", label: "Hébergement" },
-  { type: "ACTIVITY", label: "Activité" },
-];
+const TYPE_TABS: EventType[] = ["TRANSPORT", "LODGING", "ACTIVITY"];
 
 export default async function NewEventPage({
   params,
@@ -22,6 +19,7 @@ export default async function NewEventPage({
   searchParams: Promise<{ type?: string; ideaId?: string }>;
 }) {
   const { tripId } = await params;
+  const t = await getT();
   const { type, ideaId } = await searchParams;
   const activeType: EventType =
     ideaId || type === "ACTIVITY" ? "ACTIVITY" : type === "LODGING" ? "LODGING" : "TRANSPORT";
@@ -74,33 +72,35 @@ export default async function NewEventPage({
         href={`/trips/${tripId}`}
         className="text-sm text-encre-douce underline underline-offset-4 hover:text-encre"
       >
-        ← Retour au calendrier
+        {t("calendar.backToCalendar")}
       </Link>
-      <h1 className="mt-3 mb-2 text-center font-display text-3xl text-encre">Nouvel événement</h1>
+      <h1 className="mt-3 mb-2 text-center font-display text-3xl text-encre">
+        {t("events.new.title")}
+      </h1>
       <p className="mb-6 text-center text-sm text-encre-douce">
-        Tu as la confirmation sous la main ?{" "}
+        {t("events.new.importPrompt")}{" "}
         <Link
           href={`/trips/${tripId}/events/import`}
           className="text-bordeaux underline underline-offset-4"
         >
-          Importe-la
+          {t("events.new.importLink")}
         </Link>{" "}
-        et je pré-remplis tout.
+        {t("events.new.importSuffix")}
       </p>
 
       <div className="mb-6 flex justify-center gap-2">
-        {TYPE_TABS.map((tab) => (
+        {TYPE_TABS.map((tabType) => (
           <Link
-            key={tab.type}
-            href={`/trips/${tripId}/events/new?type=${tab.type}`}
+            key={tabType}
+            href={`/trips/${tripId}/events/new?type=${tabType}`}
             className={cn(
               "rounded-full border px-4 py-1.5 text-sm font-medium transition-colors",
-              activeType === tab.type
+              activeType === tabType
                 ? "border-bordeaux bg-bordeaux text-papier"
                 : "border-laiton-clair bg-papier text-encre-douce hover:text-encre",
             )}
           >
-            {tab.label}
+            {t(`events.type.${tabType}`)}
           </Link>
         ))}
       </div>

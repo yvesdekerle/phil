@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatInTimezone } from "@/lib/events/datetime";
+import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { EditEventForm } from "./edit-form";
 
@@ -11,6 +12,7 @@ export default async function EditEventPage({
   params: Promise<{ tripId: string; eventId: string }>;
 }) {
   const { tripId, eventId } = await params;
+  const t = await getT();
   const supabase = await createClient();
   const {
     data: { user },
@@ -38,12 +40,10 @@ export default async function EditEventPage({
         href={`/trips/${tripId}/events/${eventId}`}
         className="text-sm text-encre-douce underline underline-offset-4 hover:text-encre"
       >
-        ← Retour à l'événement
+        {t("events.backToEvent")}
       </Link>
-      <h1 className="text-center font-display text-2xl text-encre">Modifier l'événement</h1>
-      <p className="text-center text-xs text-encre-douce">
-        Les champs spécifiques (n° de réservation, trajet…) ne sont pas encore modifiables ici.
-      </p>
+      <h1 className="text-center font-display text-2xl text-encre">{t("events.edit.title")}</h1>
+      <p className="text-center text-xs text-encre-douce">{t("events.edit.hint")}</p>
       <Card>
         <CardContent>
           <EditEventForm

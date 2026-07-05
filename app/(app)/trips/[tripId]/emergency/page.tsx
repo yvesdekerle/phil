@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { PrintButton } from "./print-button";
 import { SheetForm } from "./sheet-form";
@@ -10,6 +11,7 @@ import { SheetForm } from "./sheet-form";
  */
 export default async function EmergencyPage({ params }: { params: Promise<{ tripId: string }> }) {
   const { tripId } = await params;
+  const t = await getT();
   const supabase = await createClient();
   const {
     data: { user },
@@ -27,7 +29,8 @@ export default async function EmergencyPage({ params }: { params: Promise<{ trip
   ]);
 
   const nameOf = (id: string) =>
-    members?.find((m) => m.user_id === id)?.profiles?.display_name ?? "Voyageur";
+    members?.find((m) => m.user_id === id)?.profiles?.display_name ??
+    t("emergency.travelerFallback");
   const whatsappOf = (id: string) =>
     members?.find((m) => m.user_id === id)?.profiles?.whatsapp ?? null;
   const mySheet = sheets?.find((s) => s.user_id === user.id);
@@ -48,13 +51,13 @@ export default async function EmergencyPage({ params }: { params: Promise<{ trip
           href={`/trips/${tripId}/participants`}
           className="text-sm text-encre-douce underline underline-offset-4 hover:text-encre"
         >
-          ← Retour aux participants
+          {t("emergency.backToParticipants")}
         </Link>
         <PrintButton />
       </div>
 
       <section className="rounded-lg border border-laiton-clair bg-papier px-5 py-4 print:hidden">
-        <h2 className="mb-3 text-sm font-medium text-encre">Ma fiche d'urgence</h2>
+        <h2 className="mb-3 text-sm font-medium text-encre">{t("emergency.mySheet")}</h2>
         <SheetForm
           tripId={tripId}
           defaults={{
@@ -70,14 +73,14 @@ export default async function EmergencyPage({ params }: { params: Promise<{ trip
 
       <section>
         <h2 className="mb-3 font-display text-xl text-encre">
-          Fiches de l'équipage{" "}
+          {t("emergency.crewSheets")}{" "}
           <span className="text-sm text-encre-douce">
-            ({(sheets ?? []).length}/{members?.length ?? 0} remplies)
+            ({(sheets ?? []).length}/{members?.length ?? 0} {t("emergency.filled")})
           </span>
         </h2>
         {(sheets ?? []).length === 0 ? (
           <p className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-4 py-8 text-center text-sm text-encre-douce">
-            Aucune fiche pour l'instant — remplis la tienne, l'équipage suivra.
+            {t("emergency.empty")}
           </p>
         ) : (
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 print:grid-cols-2">
@@ -88,16 +91,16 @@ export default async function EmergencyPage({ params }: { params: Promise<{ trip
               >
                 <h3 className="mb-1.5 font-medium text-encre">
                   {nameOf(s.user_id)}
-                  {s.user_id === user.id ? " (toi)" : ""}
+                  {s.user_id === user.id ? t("emergency.you") : ""}
                 </h3>
                 <div className="flex flex-col gap-1">
-                  {row("WhatsApp", whatsappOf(s.user_id))}
-                  {row("Urgence", s.emergency_contacts)}
-                  {row("Assurance", s.insurance_policy)}
-                  {row("Assisteur", s.insurance_phone)}
-                  {row("Groupe sanguin", s.blood_group)}
-                  {row("Allergies", s.allergies)}
-                  {row("Notes", s.notes)}
+                  {row(t("emergency.row.whatsapp"), whatsappOf(s.user_id))}
+                  {row(t("emergency.row.emergency"), s.emergency_contacts)}
+                  {row(t("emergency.row.insurance"), s.insurance_policy)}
+                  {row(t("emergency.row.assistance"), s.insurance_phone)}
+                  {row(t("emergency.row.bloodGroup"), s.blood_group)}
+                  {row(t("emergency.row.allergies"), s.allergies)}
+                  {row(t("emergency.row.notes"), s.notes)}
                 </div>
               </article>
             ))}

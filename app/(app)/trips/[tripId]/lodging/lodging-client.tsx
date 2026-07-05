@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { CheckCircle2, ExternalLink, Trash2 } from "lucide-react";
 import { useActionState, useRef, useState, useTransition } from "react";
+import { useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -38,11 +39,15 @@ export type CandidateVote = {
   name: string;
 };
 
-const RATING_LABELS: Record<number, string> = {
-  2: "Vaut le coup",
-  1: "Optionnel",
-  [-1]: "Plutôt non",
-};
+type T = ReturnType<typeof useT>;
+
+function ratingLabels(t: T): Record<number, string> {
+  return {
+    2: t("lodging.ratingWorth"),
+    1: t("lodging.ratingOptional"),
+    [-1]: t("lodging.ratingNo"),
+  };
+}
 
 /** Avis pondérés d'un candidat (PHIL-L02) : score, mes boutons, avis des autres. */
 function CandidateVotes({
@@ -56,6 +61,8 @@ function CandidateVotes({
   votes: CandidateVote[];
   myId: string;
 }) {
+  const t = useT();
+  const labels = ratingLabels(t);
   const [, voteAction] = useActionState<CandidateState, FormData>(rateCandidate, {
     status: "idle",
   });
@@ -71,9 +78,10 @@ function CandidateVotes({
             "rounded-full px-2 py-0.5 text-xs font-medium tabular-nums",
             score > 0 ? "bg-bordeaux/10 text-bordeaux" : "bg-encre/10 text-encre-douce",
           )}
-          title={`${votes.length} avis`}
+          title={`${votes.length} ${t("lodging.reviews")}`}
         >
-          Score {score > 0 ? `+${score}` : score} · {votes.length} avis
+          {t("lodging.scoreLabel")} {score > 0 ? `+${score}` : score} · {votes.length}{" "}
+          {t("lodging.reviews")}
         </span>
         <form action={voteAction} className="flex flex-wrap items-center gap-1.5">
           <input type="hidden" name="tripId" value={tripId} />
@@ -92,12 +100,12 @@ function CandidateVotes({
                   : "border-laiton-clair text-encre-douce hover:text-encre",
               )}
             >
-              {RATING_LABELS[rating]}
+              {labels[rating]}
             </button>
           ))}
           <Input
             name="comment"
-            placeholder="Un mot ? (optionnel)"
+            placeholder={t("lodging.commentPlaceholder")}
             maxLength={300}
             defaultValue={myVote?.comment ?? ""}
             className="h-7 w-44 text-xs"
@@ -109,7 +117,7 @@ function CandidateVotes({
               onClick={() => startTransition(() => clearCandidateVote(tripId, candidateId))}
               className="text-xs text-encre-douce underline underline-offset-2 hover:text-encre"
             >
-              retirer
+              {t("lodging.removeVote")}
             </button>
           ) : null}
         </form>
@@ -118,8 +126,10 @@ function CandidateVotes({
         <ul className="mt-1.5 flex flex-col gap-0.5">
           {votes.map((v) => (
             <li key={v.userId} className="text-xs text-encre-douce">
-              <span className="font-medium text-encre">{v.userId === myId ? "Toi" : v.name}</span> —{" "}
-              {RATING_LABELS[v.rating] ?? v.rating}
+              <span className="font-medium text-encre">
+                {v.userId === myId ? t("lodging.you") : v.name}
+              </span>{" "}
+              — {labels[v.rating] ?? v.rating}
               {v.comment ? ` · « ${v.comment} »` : ""}
             </li>
           ))}
@@ -129,10 +139,10 @@ function CandidateVotes({
   );
 }
 
-function slotLabel(checkIn: string, checkOut: string): string {
+function slotLabel(checkIn: string, checkOut: string, t: T): string {
   const inLabel = format(new Date(`${checkIn}T12:00:00`), "d MMM", { locale: fr });
   const outLabel = format(new Date(`${checkOut}T12:00:00`), "d MMM yyyy", { locale: fr });
-  return `Du ${inLabel} au ${outLabel}`;
+  return `${t("lodging.slotFrom")} ${inLabel} ${t("lodging.slotTo")} ${outLabel}`;
 }
 
 /** Hébergements candidats (PHIL-L01) : options groupées par créneau. */
@@ -149,6 +159,7 @@ export function LodgingClient({
   myId: string;
   role: string;
 }) {
+  const t = useT();
   const [showForm, setShowForm] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const [state, formAction] = useActionState<CandidateState, FormData>(
@@ -173,7 +184,7 @@ export function LodgingClient({
     <div className="flex flex-col gap-6">
       <div>
         <Button type="button" onClick={() => setShowForm(!showForm)}>
-          {showForm ? "Annuler" : "Proposer une option"}
+          {showForm ? t("lodging.cancel") : t("lodging.proposeOption")}
         </Button>
       </div>
 
@@ -184,29 +195,25 @@ export function LodgingClient({
           className="flex flex-col gap-3 rounded-lg border border-laiton-clair bg-papier px-4 py-3"
         >
           <input type="hidden" name="tripId" value={tripId} />
-          <Input name="title" placeholder="Nom de l'hébergement" required maxLength={150} />
+          <Input name="title" placeholder={t("lodging.namePlaceholder")} required maxLength={150} />
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1 text-xs text-encre-douce">
-              <label htmlFor="candidate-check-in">Arrivée</label>
+              <label htmlFor="candidate-check-in">{t("lodging.checkIn")}</label>
               <Input id="candidate-check-in" name="checkIn" type="date" required />
             </div>
             <div className="flex flex-col gap-1 text-xs text-encre-douce">
-              <label htmlFor="candidate-check-out">Départ</label>
+              <label htmlFor="candidate-check-out">{t("lodging.checkOut")}</label>
               <Input id="candidate-check-out" name="checkOut" type="date" required />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <Input name="url" type="url" placeholder="Lien Booking/Airbnb…" />
-            <Input name="price" placeholder="Prix (ex : 620 € les 3 nuits)" maxLength={100} />
+            <Input name="url" type="url" placeholder={t("lodging.urlPlaceholder")} />
+            <Input name="price" placeholder={t("lodging.pricePlaceholder")} maxLength={100} />
           </div>
-          <Input
-            name="notes"
-            placeholder="Annulation gratuite, à 10 min de la plage…"
-            maxLength={1000}
-          />
+          <Input name="notes" placeholder={t("lodging.notesPlaceholder")} maxLength={1000} />
           <div className="flex items-center gap-3">
             <Button type="submit" size="sm">
-              Ajouter au comparatif
+              {t("lodging.addToCompare")}
             </Button>
             {state.status === "error" ? (
               <p className="text-xs text-bordeaux">{state.message}</p>
@@ -217,10 +224,8 @@ export function LodgingClient({
 
       {candidates.length === 0 ? (
         <div className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-6 py-14 text-center">
-          <p className="font-display text-xl text-encre italic">Aucune option en lice</p>
-          <p className="mt-2 text-sm text-encre-douce">
-            Trois Booking ouverts dans trois onglets ? Range-les ici et départagez-les.
-          </p>
+          <p className="font-display text-xl text-encre italic">{t("lodging.emptyTitle")}</p>
+          <p className="mt-2 text-sm text-encre-douce">{t("lodging.emptyBody")}</p>
         </div>
       ) : (
         slots.map((slot) => {
@@ -231,7 +236,7 @@ export function LodgingClient({
           return (
             <section key={slot}>
               <h2 className="mb-2 text-sm font-medium text-laiton uppercase tracking-wide">
-                {slotLabel(checkIn, checkOut)}
+                {slotLabel(checkIn, checkOut, t)}
               </h2>
               <ul className="flex flex-col gap-2">
                 {slotCandidates.map((c) => (
@@ -251,12 +256,13 @@ export function LodgingClient({
                         {c.title}
                         {c.status === "CHOSEN" ? (
                           <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-bordeaux px-2 py-0.5 text-[0.65rem] text-papier">
-                            <CheckCircle2 className="size-3" aria-hidden="true" /> Retenu
+                            <CheckCircle2 className="size-3" aria-hidden="true" />{" "}
+                            {t("lodging.chosen")}
                           </span>
                         ) : null}
                         {c.status === "REJECTED" ? (
                           <span className="ml-2 rounded-full bg-encre/10 px-2 py-0.5 text-[0.65rem] text-encre-douce">
-                            Écarté
+                            {t("lodging.rejected")}
                           </span>
                         ) : null}
                       </span>
@@ -269,7 +275,7 @@ export function LodgingClient({
                           target="_blank"
                           rel="noopener noreferrer"
                           className="shrink-0 text-encre-douce hover:text-encre"
-                          aria-label={`Ouvrir le lien de ${c.title}`}
+                          aria-label={`${t("lodging.openLinkPrefix")} ${c.title}`}
                         >
                           <ExternalLink className="size-4" aria-hidden="true" />
                         </a>
@@ -284,7 +290,8 @@ export function LodgingClient({
                     />
                     <div className="mt-2 flex flex-wrap items-center gap-2">
                       <span className="text-[0.65rem] text-encre-douce/70">
-                        proposé par {c.createdBy === myId ? "toi" : c.authorName}
+                        {t("lodging.proposedBy")}{" "}
+                        {c.createdBy === myId ? t("lodging.youLower") : c.authorName}
                       </span>
                       <span className="flex-1" />
                       {canDecide && c.status === "OPEN" ? (
@@ -295,7 +302,7 @@ export function LodgingClient({
                             disabled={pending}
                             onClick={() => startTransition(() => chooseCandidate(tripId, c.id))}
                           >
-                            Choisir → calendrier
+                            {t("lodging.chooseCalendar")}
                           </Button>
                           <Button
                             type="button"
@@ -306,7 +313,7 @@ export function LodgingClient({
                               startTransition(() => setCandidateStatus(tripId, c.id, "REJECTED"))
                             }
                           >
-                            Écarter
+                            {t("lodging.reject")}
                           </Button>
                         </>
                       ) : null}
@@ -320,7 +327,7 @@ export function LodgingClient({
                             startTransition(() => setCandidateStatus(tripId, c.id, "OPEN"))
                           }
                         >
-                          Remettre en lice
+                          {t("lodging.restore")}
                         </Button>
                       ) : null}
                       {(c.createdBy === myId || isOwner) && c.status !== "CHOSEN" ? (
@@ -329,7 +336,7 @@ export function LodgingClient({
                           disabled={pending}
                           onClick={() => startTransition(() => deleteCandidate(tripId, c.id))}
                           className="text-encre-douce hover:text-bordeaux"
-                          aria-label={`Supprimer ${c.title}`}
+                          aria-label={`${t("lodging.deletePrefix")} ${c.title}`}
                         >
                           <Trash2 className="size-4" aria-hidden="true" />
                         </button>

@@ -2,6 +2,7 @@
 
 import { Trash2 } from "lucide-react";
 import { useActionState, useRef, useTransition } from "react";
+import { useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -33,6 +34,7 @@ export function EventPacking({
   myId: string;
   isOwner: boolean;
 }) {
+  const t = useT();
   const formRef = useRef<HTMLFormElement>(null);
   const [, formAction] = useActionState<ChecklistState, FormData>(
     async (prev, formData) => {
@@ -48,7 +50,7 @@ export function EventPacking({
 
   return (
     <section>
-      <h2 className="mb-2 text-sm font-medium text-encre-douce">À emporter</h2>
+      <h2 className="mb-2 text-sm font-medium text-encre-douce">{t("events.packing.heading")}</h2>
       {items.length > 0 ? (
         <ul className="flex flex-col gap-1.5">
           {items.map((item) => (
@@ -66,7 +68,7 @@ export function EventPacking({
                   )
                 }
                 className="size-4 accent-[#6e1f2e]"
-                aria-label={`Pris : ${item.title}`}
+                aria-label={`${t("events.packing.takenAriaPrefix")}${item.title}`}
               />
               <span
                 className={cn(
@@ -84,7 +86,7 @@ export function EventPacking({
                     startTransition(() => deleteChecklistItem(tripId, item.id, eventId))
                   }
                   className="text-encre-douce hover:text-bordeaux"
-                  aria-label={`Supprimer ${item.title}`}
+                  aria-label={`${t("events.packing.deleteAriaPrefix")}${item.title}`}
                 >
                   <Trash2 className="size-4" aria-hidden="true" />
                 </button>
@@ -94,7 +96,7 @@ export function EventPacking({
         </ul>
       ) : (
         <p className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-4 py-4 text-center text-sm text-encre-douce">
-          Rien à prévoir pour l&apos;instant — maillot, crème solaire, passeport ?
+          {t("events.packing.empty")}
         </p>
       )}
       <form ref={formRef} action={formAction} className="mt-2 flex items-center gap-2">
@@ -103,18 +105,16 @@ export function EventPacking({
         <input type="hidden" name="section" value="a_emporter" />
         <Input
           name="title"
-          placeholder="Ajouter une chose à prendre…"
+          placeholder={t("events.packing.placeholder")}
           className="h-8 flex-1 text-sm"
           required
           maxLength={200}
         />
         <Button type="submit" size="sm" variant="outline">
-          Ajouter
+          {t("events.packing.add")}
         </Button>
       </form>
-      <p className="mt-1 text-xs text-encre-douce">
-        Ces éléments apparaissent aussi dans la Valise du voyage.
-      </p>
+      <p className="mt-1 text-xs text-encre-douce">{t("events.packing.footnote")}</p>
     </section>
   );
 }

@@ -3,6 +3,7 @@
 import { ImageUp } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
+import { useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 import { setCoverFromUpload } from "./actions";
@@ -12,6 +13,7 @@ const ALLOWED = ["image/jpeg", "image/png", "image/webp"];
 
 /** Upload d'image de couverture (PHIL-D09) — bucket public `covers`. */
 export function CoverUpload({ tripId }: { tripId: string }) {
+  const t = useT();
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -25,11 +27,11 @@ export function CoverUpload({ tripId }: { tripId: string }) {
       return;
     }
     if (!ALLOWED.includes(file.type)) {
-      setError("JPG, PNG ou WebP uniquement.");
+      setError(t("settings.cover.errType"));
       return;
     }
     if (file.size > MAX_BYTES) {
-      setError("3 Mo maximum — recadre ou compresse l'image.");
+      setError(t("settings.cover.errSize"));
       return;
     }
 
@@ -39,26 +41,23 @@ export function CoverUpload({ tripId }: { tripId: string }) {
       const supabase = createClient();
       const { error: uploadError } = await supabase.storage.from("covers").upload(path, file);
       if (uploadError) {
-        setError("L'envoi a échoué — il faut être capitaine ou éditeur.");
+        setError(t("settings.cover.errUpload"));
         return;
       }
       const result = await setCoverFromUpload(tripId, path);
       if (result.status === "error") {
-        setError(result.message ?? "Impossible d'enregistrer la couverture.");
+        setError(result.message ?? t("settings.cover.errSave"));
         return;
       }
-      setMessage("Nouvelle couverture en place.");
+      setMessage(t("settings.cover.done"));
       router.refresh();
     });
   }
 
   return (
     <div className="flex flex-col gap-2 rounded-lg border border-laiton-clair bg-papier px-5 py-4">
-      <p className="text-sm font-medium text-encre">Image de couverture</p>
-      <p className="text-xs text-encre-douce">
-        Téléverse une photo (JPG/PNG/WebP, 3 Mo max) — ou colle une URL dans le formulaire
-        ci-dessous.
-      </p>
+      <p className="text-sm font-medium text-encre">{t("settings.cover.title")}</p>
+      <p className="text-xs text-encre-douce">{t("settings.cover.desc")}</p>
       <div className="flex flex-wrap items-center gap-3">
         <input
           ref={inputRef}
@@ -74,7 +73,7 @@ export function CoverUpload({ tripId }: { tripId: string }) {
           onClick={() => inputRef.current?.click()}
         >
           <ImageUp aria-hidden="true" />
-          {pending ? "Envoi…" : "Choisir une image"}
+          {pending ? t("settings.cover.uploading") : t("settings.cover.choose")}
         </Button>
         {message ? <p className="text-xs text-encre-douce">{message}</p> : null}
         {error ? <p className="text-xs text-bordeaux">{error}</p> : null}

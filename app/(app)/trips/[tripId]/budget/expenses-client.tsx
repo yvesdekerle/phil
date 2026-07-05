@@ -7,10 +7,10 @@ import { useActionState, useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { CurrencyInput } from "@/components/budget/currency-input";
 import { Money } from "@/components/budget/money";
+import { useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  CATEGORY_LABELS,
   categoryForEventType,
   EXPENSE_CATEGORIES,
   type ExpenseCategory,
@@ -34,12 +34,9 @@ export type ExpenseRow = {
 };
 type Member = { userId: string; name: string };
 type EventOption = { id: string; title: string; type: "TRANSPORT" | "LODGING" | "ACTIVITY" };
+type SplitMode = "equal" | "shares" | "exact";
 
-const SPLIT_LABELS = {
-  equal: "Également",
-  shares: "En parts",
-  exact: "Montants exacts",
-} as const;
+const SPLIT_MODES: readonly SplitMode[] = ["equal", "shares", "exact"];
 
 /** La Bourse — onglet Dépenses (PHIL-Q21, à la Tricount). */
 export function ExpensesClient({
@@ -76,10 +73,20 @@ export function ExpensesClient({
     status: "idle",
   });
   const [pending, startTransition] = useTransition();
+  const t = useT();
+
+  const splitLabels: Record<SplitMode, string> = {
+    equal: t("budget.split.equal"),
+    shares: t("budget.split.shares"),
+    exact: t("budget.split.exact"),
+  };
 
   const nameOf = (id: string) =>
-    id === myId ? "Toi" : (members.find((m) => m.userId === id)?.name ?? "Voyageur");
-  const realNameOf = (id: string) => members.find((m) => m.userId === id)?.name ?? "Voyageur";
+    id === myId
+      ? t("budget.common.you")
+      : (members.find((m) => m.userId === id)?.name ?? t("budget.common.traveler"));
+  const realNameOf = (id: string) =>
+    members.find((m) => m.userId === id)?.name ?? t("budget.common.traveler");
   const fmt = (n: number, c: string) =>
     `${n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${c}`;
   const sub = (amountInPrimary: number) =>
@@ -123,16 +130,16 @@ export function ExpensesClient({
 
   function exportCsv() {
     const header = [
-      "Date",
-      "Titre",
-      "Catégorie",
-      "Montant",
-      "Devise",
-      `Montant (${primaryCurrency})`,
-      "Payé par",
-      "Bénéficiaires",
-      "Division",
-      "Remboursement",
+      t("budget.csv.date"),
+      t("budget.csv.title"),
+      t("budget.csv.category"),
+      t("budget.csv.amount"),
+      t("budget.csv.currency"),
+      `${t("budget.csv.amountIn")} (${primaryCurrency})`,
+      t("budget.csv.paidBy"),
+      t("budget.csv.beneficiaries"),
+      t("budget.csv.split"),
+      t("budget.csv.settlement"),
     ];
     const cell = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`;
     const lines = expenses.map((e) =>
@@ -145,8 +152,8 @@ export function ExpensesClient({
         e.amountPrimary !== null ? e.amountPrimary.toFixed(2).replace(".", ",") : "",
         realNameOf(e.paid_by),
         e.beneficiaries.map((b) => realNameOf(b.userId)).join(", "),
-        SPLIT_LABELS[e.splitMode],
-        e.isSettlement ? "oui" : "non",
+        splitLabels[e.splitMode],
+        e.isSettlement ? t("budget.csv.yes") : t("budget.csv.no"),
       ]
         .map(cell)
         .join(";"),
@@ -155,7 +162,7 @@ export function ExpensesClient({
     const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
     const a = document.createElement("a");
     a.href = url;
-    a.download = "bourse-phil.csv";
+    a.download = t("budget.csv.filename");
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -164,7 +171,7 @@ export function ExpensesClient({
     <div className="flex flex-col gap-5">
       <div className="grid grid-cols-2 gap-3">
         <div className="rounded-lg border border-laiton-clair bg-papier px-4 py-2.5 text-center">
-          <p className="text-xs text-encre-douce">Mes dépenses</p>
+          <p className="text-xs text-encre-douce">{t("budget.summary.myExpenses")}</p>
           <Money
             amount={myTotal}
             currency={primaryCurrency}
@@ -175,7 +182,7 @@ export function ExpensesClient({
           />
         </div>
         <div className="rounded-lg border border-laiton-clair bg-papier px-4 py-2.5 text-center">
-          <p className="text-xs text-encre-douce">Dépenses totales</p>
+          <p className="text-xs text-encre-douce">{t("budget.summary.totalExpenses")}</p>
           <Money
             amount={total}
             currency={primaryCurrency}
@@ -196,18 +203,18 @@ export function ExpensesClient({
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Rechercher une dépense…"
+            placeholder={t("budget.form.searchPlaceholder")}
             className="h-9 pl-8 text-sm"
           />
         </div>
         {expenses.length > 0 ? (
           <Button type="button" variant="outline" onClick={exportCsv}>
-            CSV
+            {t("budget.form.csv")}
           </Button>
         ) : null}
         {closed ? null : (
           <Button type="button" onClick={() => setShowForm(!showForm)}>
-            {showForm ? "Annuler" : "Ajouter une dépense"}
+            {showForm ? t("budget.common.cancel") : t("budget.form.addExpense")}
           </Button>
         )}
       </div>
@@ -219,14 +226,19 @@ export function ExpensesClient({
         >
           <input type="hidden" name="tripId" value={tripId} />
           <div className="grid grid-cols-2 gap-3">
-            <Input name="title" placeholder="Catamaran, courses…" required maxLength={200} />
+            <Input
+              name="title"
+              placeholder={t("budget.form.titlePlaceholder")}
+              required
+              maxLength={200}
+            />
             <div className="flex gap-2">
               <Input
                 name="amount"
                 type="number"
                 step="0.01"
                 min="0.01"
-                placeholder="450"
+                placeholder={t("budget.form.amountPlaceholder")}
                 required
                 onChange={(e) => setAmount(Number(e.target.value) || 0)}
               />
@@ -234,13 +246,13 @@ export function ExpensesClient({
                 name="currency"
                 defaultValue={primaryCurrency}
                 className="w-24"
-                aria-label="Devise"
+                aria-label={t("budget.form.currencyAria")}
               />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <label className="flex flex-col gap-1 text-sm text-encre">
-              Catégorie
+              {t("budget.form.category")}
               <select
                 name="category"
                 value={category}
@@ -249,13 +261,13 @@ export function ExpensesClient({
               >
                 {EXPENSE_CATEGORIES.map((c) => (
                   <option key={c} value={c}>
-                    {CATEGORY_LABELS[c]}
+                    {t(`budget.categories.${c}`)}
                   </option>
                 ))}
               </select>
             </label>
             <div className="flex flex-col gap-1 text-sm text-encre">
-              <label htmlFor="spentOn">Quand</label>
+              <label htmlFor="spentOn">{t("budget.form.when")}</label>
               <Input
                 id="spentOn"
                 name="spentOn"
@@ -267,7 +279,7 @@ export function ExpensesClient({
           </div>
           <div className="grid grid-cols-2 gap-3">
             <label className="flex flex-col gap-1 text-sm text-encre">
-              Payé par
+              {t("budget.form.paidBy")}
               <select
                 name="paidBy"
                 defaultValue={myId}
@@ -281,7 +293,7 @@ export function ExpensesClient({
               </select>
             </label>
             <label className="flex flex-col gap-1 text-sm text-encre">
-              Événement lié (optionnel)
+              {t("budget.form.linkedEvent")}
               <select
                 name="eventId"
                 defaultValue=""
@@ -293,7 +305,7 @@ export function ExpensesClient({
                 }}
                 className="rounded border border-laiton-clair bg-papier px-2 py-1.5 text-sm"
               >
-                <option value="">Aucun</option>
+                <option value="">{t("budget.form.none")}</option>
                 {events.map((ev) => (
                   <option key={ev.id} value={ev.id}>
                     {ev.title}
@@ -304,23 +316,23 @@ export function ExpensesClient({
           </div>
 
           <label className="flex items-center gap-2 text-sm text-encre">
-            Diviser
+            {t("budget.form.split")}
             <select
               name="splitMode"
               value={splitMode}
               onChange={(e) => setSplitMode(e.target.value as typeof splitMode)}
               className="rounded border border-laiton-clair bg-papier px-2 py-1.5 text-sm"
             >
-              {(Object.keys(SPLIT_LABELS) as (keyof typeof SPLIT_LABELS)[]).map((m) => (
+              {SPLIT_MODES.map((m) => (
                 <option key={m} value={m}>
-                  {SPLIT_LABELS[m]}
+                  {splitLabels[m]}
                 </option>
               ))}
             </select>
           </label>
 
           <fieldset className="flex flex-col gap-1">
-            <legend className="mb-1 text-sm text-encre">Pour qui :</legend>
+            <legend className="mb-1 text-sm text-encre">{t("budget.form.forWhom")}</legend>
             {members.map((m) => {
               const isIn = checked.has(m.userId);
               return (
@@ -345,7 +357,7 @@ export function ExpensesClient({
                       })
                     }
                     className="accent-[#6e1f2e]"
-                    aria-label={`Bénéficiaire : ${nameOf(m.userId)}`}
+                    aria-label={`${t("budget.form.beneficiaryAria")} ${nameOf(m.userId)}`}
                   />
                   <span className="min-w-0 flex-1 text-encre">{nameOf(m.userId)}</span>
                   {splitMode !== "equal" && isIn ? (
@@ -359,7 +371,11 @@ export function ExpensesClient({
                         setShares((prev) => ({ ...prev, [m.userId]: Number(e.target.value) || 0 }))
                       }
                       className="w-20 rounded border border-laiton-clair bg-papier px-1.5 py-0.5 text-right text-xs"
-                      aria-label={splitMode === "shares" ? "Parts" : "Montant exact"}
+                      aria-label={
+                        splitMode === "shares"
+                          ? t("budget.form.sharesAria")
+                          : t("budget.form.exactAria")
+                      }
                     />
                   ) : null}
                   <span className="w-20 shrink-0 text-right text-xs text-encre-douce tabular-nums">
@@ -372,7 +388,7 @@ export function ExpensesClient({
 
           <div className="flex items-center gap-3">
             <Button type="submit" size="sm" disabled={formPending}>
-              {formPending ? "Enregistrement…" : "Enregistrer"}
+              {formPending ? t("budget.form.saving") : t("budget.common.save")}
             </Button>
             {state.status === "error" ? (
               <p className="text-xs text-bordeaux">{state.message}</p>
@@ -383,9 +399,7 @@ export function ExpensesClient({
 
       {byDate.length === 0 ? (
         <p className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-4 py-8 text-center text-sm text-encre-douce">
-          {query
-            ? "Rien ne correspond à cette recherche."
-            : "Aucune dépense — le voyage n'a encore rien coûté, profites-en."}
+          {query ? t("budget.empty.noMatch") : t("budget.empty.noExpenses")}
         </p>
       ) : (
         byDate.map(([date, rows]) => (
@@ -404,18 +418,20 @@ export function ExpensesClient({
                     {e.title}
                     {e.isSettlement ? (
                       <span className="ml-1.5 rounded-full bg-encre/10 px-2 py-0.5 text-[0.65rem] text-encre-douce">
-                        entre voyageurs
+                        {t("budget.list.betweenTravelers")}
                       </span>
                     ) : (
                       <span className="ml-1.5 rounded-full bg-laiton/15 px-2 py-0.5 text-[0.65rem] text-laiton">
-                        {CATEGORY_LABELS[e.category as ExpenseCategory] ?? e.category}
+                        {EXPENSE_CATEGORIES.includes(e.category as ExpenseCategory)
+                          ? t(`budget.categories.${e.category}`)
+                          : e.category}
                       </span>
                     )}
                   </span>
                   <span className="shrink-0 text-xs text-encre-douce">
                     {e.isSettlement
                       ? `${nameOf(e.paid_by)} → ${nameOf(e.beneficiaries[0]?.userId ?? "")}`
-                      : `${nameOf(e.paid_by)} · pour ${e.beneficiaries.length}${e.splitMode !== "equal" ? ` (${SPLIT_LABELS[e.splitMode].toLowerCase()})` : ""}`}
+                      : `${nameOf(e.paid_by)} · ${t("budget.list.for")} ${e.beneficiaries.length}${e.splitMode !== "equal" ? ` (${splitLabels[e.splitMode].toLowerCase()})` : ""}`}
                   </span>
                   <Money
                     amount={e.amountPrimary ?? e.amount}
@@ -425,7 +441,7 @@ export function ExpensesClient({
                     className="shrink-0 font-medium text-encre"
                     title={
                       e.currency !== primaryCurrency
-                        ? `Saisi : ${fmt(e.amount, e.currency)}`
+                        ? `${t("budget.list.entered")} ${fmt(e.amount, e.currency)}`
                         : undefined
                     }
                   />
@@ -437,12 +453,12 @@ export function ExpensesClient({
                         startTransition(async () => {
                           const r = await deleteExpense(tripId, e.id);
                           if (!r.ok) {
-                            toast.error(r.message ?? "Suppression impossible.");
+                            toast.error(r.message ?? t("budget.toast.deleteFailed"));
                           }
                         })
                       }
                       className="text-encre-douce hover:text-bordeaux"
-                      aria-label={`Supprimer ${e.title}`}
+                      aria-label={`${t("budget.common.delete")} ${e.title}`}
                     >
                       <Trash2 className="size-4" aria-hidden="true" />
                     </button>

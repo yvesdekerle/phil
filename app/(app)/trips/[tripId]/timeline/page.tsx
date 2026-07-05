@@ -6,7 +6,7 @@ import { EventTypeIcon } from "@/components/calendar/event-type-icon";
 import { TripViewToggle } from "@/components/calendar/trip-view-toggle";
 import { eventDayKey } from "@/lib/events/datetime";
 import type { TripEvent } from "@/lib/events/types";
-import { EVENT_TYPE_LABELS } from "@/lib/events/types";
+import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 
@@ -17,6 +17,7 @@ const LANES = ["TRANSPORT", "LODGING", "ACTIVITY"] as const;
 /** Vue timeline (PHIL-F03) : Gantt horizontal du voyage entier. */
 export default async function TimelinePage({ params }: { params: Promise<{ tripId: string }> }) {
   const { tripId } = await params;
+  const t = await getT();
   const supabase = await createClient();
   const {
     data: { user },
@@ -73,15 +74,15 @@ export default async function TimelinePage({ params }: { params: Promise<{ tripI
     <div>
       <div className="mb-4 flex items-center justify-between gap-3">
         <TripViewToggle tripId={tripId} active="timeline" />
-        <h1 className="font-display text-2xl text-encre">Timeline</h1>
+        <h1 className="font-display text-2xl text-encre">{t("calendar.timeline.title")}</h1>
       </div>
 
       {bars.length === 0 ? (
         <div className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-6 py-14 text-center">
-          <p className="font-display text-xl text-encre italic">Rien à dérouler</p>
-          <p className="mt-2 text-sm text-encre-douce">
-            Ajoute des événements au calendrier : la frise se dessinera toute seule.
+          <p className="font-display text-xl text-encre italic">
+            {t("calendar.timeline.emptyTitle")}
           </p>
+          <p className="mt-2 text-sm text-encre-douce">{t("calendar.timeline.emptyBody")}</p>
         </div>
       ) : (
         <div className="overflow-x-auto rounded-lg border border-laiton-clair bg-papier pb-3">
@@ -114,7 +115,7 @@ export default async function TimelinePage({ params }: { params: Promise<{ tripI
               return (
                 <div key={lane} className="border-b border-laiton-clair/40 last:border-b-0">
                   <p className="sticky left-0 z-20 bg-papier px-3 pt-2.5 pb-1 text-[0.65rem] font-medium tracking-wide text-laiton uppercase">
-                    {EVENT_TYPE_LABELS[lane]}
+                    {t(`events.type.${lane}`)}
                   </p>
                   {laneBars.map(({ event, startIdx, span }) => (
                     <div

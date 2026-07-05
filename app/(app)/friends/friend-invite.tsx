@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -21,6 +22,7 @@ export function FriendInvite({
   friendUserId: string;
   trips: InvitableTrip[];
 }) {
+  const t = useT();
   const [tripId, setTripId] = useState(trips[0]?.id ?? "");
   const [state, setState] = useState<InviteFriendState>({ status: "idle" });
   const [pending, startTransition] = useTransition();
@@ -33,12 +35,12 @@ export function FriendInvite({
     <div className="flex flex-wrap items-center justify-end gap-2">
       <Select value={tripId} onValueChange={setTripId}>
         <SelectTrigger className="h-8 w-44 text-xs">
-          <SelectValue placeholder="Choisir un voyage" />
+          <SelectValue placeholder={t("friends.chooseTrip")} />
         </SelectTrigger>
         <SelectContent>
-          {trips.map((t) => (
-            <SelectItem key={t.id} value={t.id}>
-              {t.name}
+          {trips.map((tr) => (
+            <SelectItem key={tr.id} value={tr.id}>
+              {tr.name}
             </SelectItem>
           ))}
         </SelectContent>
@@ -52,7 +54,7 @@ export function FriendInvite({
           startTransition(async () => setState(await inviteFriend(friendUserId, tripId)))
         }
       >
-        {pending ? "…" : "Inviter"}
+        {pending ? t("friends.inviting") : t("friends.invite")}
       </Button>
       {state.status !== "idle" ? (
         <p

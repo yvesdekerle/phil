@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { RealtimeRefresh } from "@/components/realtime-refresh";
 import { fromBase, getRates, toBase } from "@/lib/budget/rates";
+import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { type ExpenseRow, ExpensesClient } from "./expenses-client";
 import { PurseNav } from "./purse-nav";
@@ -15,6 +16,7 @@ export default async function PurseExpensesPage({
 }) {
   const { tripId } = await params;
   const { tab } = await searchParams;
+  const t = await getT();
   const supabase = await createClient();
   const {
     data: { user },
@@ -101,7 +103,7 @@ export default async function PurseExpensesPage({
         members={(members ?? [])
           .map((m) => ({
             userId: m.user_id,
-            name: m.profiles?.display_name ?? "Voyageur",
+            name: m.profiles?.display_name ?? t("budget.common.traveler"),
           }))
           .sort((a, b) => a.name.localeCompare(b.name, "fr"))}
         events={events ?? []}

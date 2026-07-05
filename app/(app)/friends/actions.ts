@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { getT } from "@/lib/i18n/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { areUuids } from "@/lib/validation";
@@ -19,8 +20,9 @@ export async function inviteFriend(
   friendUserId: string,
   tripId: string,
 ): Promise<InviteFriendState> {
+  const t = await getT();
   if (!areUuids(friendUserId, tripId)) {
-    return { status: "error", message: "Identifiants invalides." };
+    return { status: "error", message: t("friends.msg.invalidIds") };
   }
 
   const supabase = await createClient();
@@ -39,7 +41,7 @@ export async function inviteFriend(
     .eq("user_id", friendUserId)
     .maybeSingle();
   if (existing) {
-    return { status: "error", message: "Déjà à bord de ce voyage." };
+    return { status: "error", message: t("friends.msg.alreadyAboard") };
   }
 
   // L'email vit dans auth.users : lecture via service role (ami = co-voyageur).
@@ -47,7 +49,7 @@ export async function inviteFriend(
   const { data: friend } = await admin.auth.admin.getUserById(friendUserId);
   const email = friend.user?.email;
   if (!email) {
-    return { status: "error", message: "Adresse introuvable pour cet ami." };
+    return { status: "error", message: t("friends.msg.noAddress") };
   }
 
   // Insert via le client de session : la RLS vérifie mon rôle OWNER/EDITOR.
@@ -61,8 +63,8 @@ export async function inviteFriend(
     return {
       status: "error",
       message: error?.message.includes("duplicate")
-        ? "Une invitation est déjà en attente pour ce voyage."
-        : "L'invitation a échoué.",
+        ? t("friends.msg.inviteDuplicate")
+        : t("friends.msg.inviteFailed"),
     };
   }
 
@@ -105,8 +107,6 @@ export async function inviteFriend(
   revalidatePath(`/trips/${tripId}/participants`);
   return {
     status: "success",
-    message: emailSent
-      ? "Invitation envoyée par email."
-      : "Invitation créée — le lien à partager est dans la liste des invitations.",
+    message: emailSent ? t("friends.msg.inviteSentEmail") : t("friends.msg.inviteCreated"),
   };
 }

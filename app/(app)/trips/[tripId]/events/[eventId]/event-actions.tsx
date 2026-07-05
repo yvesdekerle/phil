@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState, useTransition } from "react";
+import { useT } from "@/components/i18n/provider";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,31 +26,33 @@ export function EventActions({
   eventId: string;
   eventTitle: string;
 }) {
+  const t = useT();
   const [state, setState] = useState<EventActionState>({ status: "idle" });
   const [pending, startTransition] = useTransition();
 
   return (
     <div className="flex items-center gap-3">
       <Button asChild variant="outline">
-        <Link href={`/trips/${tripId}/events/${eventId}/edit`}>Modifier</Link>
+        <Link href={`/trips/${tripId}/events/${eventId}/edit`}>{t("events.actions.edit")}</Link>
       </Button>
 
       <AlertDialog>
         <AlertDialogTrigger asChild>
           <Button type="button" variant="destructive" disabled={pending}>
-            Supprimer
+            {t("events.actions.delete")}
           </Button>
         </AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Supprimer « {eventTitle} » ?</AlertDialogTitle>
-            <AlertDialogDescription>
-              L'événement quittera le calendrier. Les documents attachés ne sont pas supprimés,
-              seulement détachés.
-            </AlertDialogDescription>
+            <AlertDialogTitle>
+              {t("events.actions.deletePrefix")}
+              {eventTitle}
+              {t("events.actions.deleteSuffix")}
+            </AlertDialogTitle>
+            <AlertDialogDescription>{t("events.actions.deleteDescription")}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Garder l'événement</AlertDialogCancel>
+            <AlertDialogCancel>{t("events.actions.keep")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() =>
                 startTransition(async () => {
@@ -57,7 +60,7 @@ export function EventActions({
                 })
               }
             >
-              Supprimer
+              {t("events.actions.delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -2,24 +2,9 @@ import { format, parseISO, subDays } from "date-fns";
 import { fr } from "date-fns/locale";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
-
-const ACTION_LABELS: Record<string, string> = {
-  UPLOAD: "Ajout",
-  VIEW: "Consultation",
-  DOWNLOAD: "Téléchargement",
-  UPDATE: "Modification",
-  DELETE: "Suppression",
-  SHARE: "Partage",
-  UNSHARE: "Fin de partage",
-};
-
-const PERIODS = [
-  { key: "7", label: "7 jours" },
-  { key: "30", label: "30 jours" },
-  { key: "all", label: "Tout" },
-] as const;
 
 /** Vue « Activité de mon coffre » (PHIL-E08) : audit RLS de vault_access_log. */
 export default async function VaultActivityPage({
@@ -28,6 +13,23 @@ export default async function VaultActivityPage({
   searchParams: Promise<{ action?: string; document?: string; period?: string }>;
 }) {
   const { action, document: documentId, period = "30" } = await searchParams;
+  const t = await getT();
+
+  const ACTION_LABELS: Record<string, string> = {
+    UPLOAD: t("vault.activity.actions.UPLOAD"),
+    VIEW: t("vault.activity.actions.VIEW"),
+    DOWNLOAD: t("vault.activity.actions.DOWNLOAD"),
+    UPDATE: t("vault.activity.actions.UPDATE"),
+    DELETE: t("vault.activity.actions.DELETE"),
+    SHARE: t("vault.activity.actions.SHARE"),
+    UNSHARE: t("vault.activity.actions.UNSHARE"),
+  };
+
+  const PERIODS = [
+    { key: "7", label: t("vault.activity.periods.d7") },
+    { key: "30", label: t("vault.activity.periods.d30") },
+    { key: "all", label: t("vault.activity.periods.all") },
+  ] as const;
 
   const supabase = await createClient();
   const {
@@ -110,15 +112,13 @@ export default async function VaultActivityPage({
         href="/vault"
         className="text-sm text-encre-douce underline underline-offset-4 hover:text-encre"
       >
-        ← Retour au coffre
+        {t("vault.backLink")}
       </Link>
-      <h1 className="mt-3 font-display text-3xl text-encre">Activité de mon coffre</h1>
-      <p className="mt-1 mb-6 text-sm text-encre-douce">
-        Qui a consulté quoi, et quand — Phil tient le registre depuis le premier jour.
-      </p>
+      <h1 className="mt-3 font-display text-3xl text-encre">{t("vault.activity.title")}</h1>
+      <p className="mt-1 mb-6 text-sm text-encre-douce">{t("vault.activity.subtitle")}</p>
 
       <div className="mb-3 flex flex-wrap items-center gap-1.5">
-        {chip(buildHref({ action: undefined }), "Toutes actions", !action)}
+        {chip(buildHref({ action: undefined }), t("vault.activity.allActions"), !action)}
         {Object.entries(ACTION_LABELS).map(([key, label]) =>
           chip(buildHref({ action: key }), label, action === key),
         )}
@@ -128,7 +128,7 @@ export default async function VaultActivityPage({
       </div>
       {(myDocs ?? []).length > 0 ? (
         <div className="mb-6 flex flex-wrap items-center gap-1.5">
-          {chip(buildHref({ document: undefined }), "Tous documents", !documentId)}
+          {chip(buildHref({ document: undefined }), t("vault.activity.allDocuments"), !documentId)}
           {(myDocs ?? []).map((d) =>
             chip(buildHref({ document: d.id }), d.file_name, documentId === d.id),
           )}
@@ -137,10 +137,8 @@ export default async function VaultActivityPage({
 
       {(entries ?? []).length === 0 ? (
         <div className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-6 py-14 text-center">
-          <p className="font-display text-xl text-encre italic">Rien à signaler</p>
-          <p className="mt-2 text-sm text-encre-douce">
-            Aucune activité sur cette période — le coffre est resté fermé.
-          </p>
+          <p className="font-display text-xl text-encre italic">{t("vault.activity.emptyTitle")}</p>
+          <p className="mt-2 text-sm text-encre-douce">{t("vault.activity.emptyBody")}</p>
         </div>
       ) : (
         <ul className="flex flex-col gap-1.5">
@@ -156,10 +154,11 @@ export default async function VaultActivityPage({
                 {ACTION_LABELS[entry.action] ?? entry.action}
               </span>
               <span className="min-w-0 flex-1 truncate text-encre">
-                {entry.documents?.file_name ?? "Document supprimé"}
+                {entry.documents?.file_name ?? t("vault.activity.deletedDocument")}
               </span>
               <span className="shrink-0 text-xs text-encre-douce">
-                par {entry.profiles?.display_name ?? "?"}
+                {t("vault.activity.by")}{" "}
+                {entry.profiles?.display_name ?? t("vault.activity.unknownUser")}
               </span>
             </li>
           ))}

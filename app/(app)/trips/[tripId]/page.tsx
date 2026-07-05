@@ -10,6 +10,7 @@ import type { TripEvent } from "@/lib/events/types";
 import { navigateUrl } from "@/lib/geo/directions";
 import { ensureTripCoords } from "@/lib/geo/locate";
 import { formatMinutes, getTravelMinutes } from "@/lib/geo/travel-time";
+import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { type DailyForecast, getDailyForecast } from "@/lib/weather/open-meteo";
 import { CalendarDays } from "./calendar-days";
@@ -21,6 +22,7 @@ export default async function TripCalendarPage({
   params: Promise<{ tripId: string }>;
 }) {
   const { tripId } = await params;
+  const t = await getT();
   // PHIL-Q36 : vue préférée mémorisée — on atterrit direct sur la Timeline si choisie
   const view = (await cookies()).get("phil_trip_view")?.value;
   if (view === "timeline") {
@@ -107,7 +109,7 @@ export default async function TripCalendarPage({
       { lat: nextEvent.location_lat, lng: nextEvent.location_lng },
     );
     if (minutes !== null && minutes >= 3) {
-      travelToNext = `${formatMinutes(minutes)} de route`;
+      travelToNext = `${formatMinutes(minutes)} ${t("calendar.byRoad")}`;
     }
   }
   // PHIL-Q13 : lancer la navigation vers le prochain RDV (départ = position actuelle)
@@ -137,7 +139,7 @@ export default async function TripCalendarPage({
         <TripViewToggle tripId={tripId} active="calendar" />
         {canEdit ? (
           <Button asChild>
-            <Link href={`/trips/${tripId}/events/new`}>Ajouter un événement</Link>
+            <Link href={`/trips/${tripId}/events/new`}>{t("calendar.addEvent")}</Link>
           </Button>
         ) : null}
       </div>

@@ -3,6 +3,7 @@
 import { Heart } from "lucide-react";
 import { useTransition } from "react";
 import { toggleVote } from "@/app/(app)/trips/[tripId]/ideas/actions";
+import { useT } from "@/components/i18n/provider";
 import { cn } from "@/lib/utils";
 
 export function VoteButton({
@@ -16,6 +17,7 @@ export function VoteButton({
   count: number;
   hasVoted: boolean;
 }) {
+  const t = useT();
   const [pending, startTransition] = useTransition();
 
   return (
@@ -23,7 +25,7 @@ export function VoteButton({
       type="button"
       disabled={pending}
       onClick={() => startTransition(() => toggleVote(tripId, ideaId))}
-      aria-label={hasVoted ? "Retirer ma voix" : "Voter pour cette idée"}
+      aria-label={hasVoted ? t("ideas.removeVoteAria") : t("ideas.voteAria")}
       aria-pressed={hasVoted}
       className={cn(
         "flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-laiton disabled:opacity-50",

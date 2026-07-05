@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { OfflineDocToggle } from "@/components/offline/offline-doc-toggle";
 import { Button } from "@/components/ui/button";
 import { CategoryIcon } from "@/components/vault/category-icon";
+import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 import { CATEGORIES, CATEGORY_LABELS, isDocumentCategory } from "@/lib/vault/categories";
@@ -40,6 +41,7 @@ export default async function TripDocumentsPage({
   if (!user) {
     redirect("/login");
   }
+  const t = await getT();
 
   const [{ data: tripDocs }, { data: sharedRows }, { data: me }] = await Promise.all([
     supabase
@@ -74,7 +76,7 @@ export default async function TripDocumentsPage({
     label: d.label,
     uploaded_at: d.uploaded_at,
     scope: "TRIP" as const,
-    ownerName: d.profiles?.display_name ?? "Voyageur",
+    ownerName: d.profiles?.display_name ?? t("tripDocs.travelerFallback"),
     canDelete: isTripOwner || d.owner_id === user.id,
   }));
 
@@ -90,7 +92,7 @@ export default async function TripDocumentsPage({
       label: r.documents.label,
       uploaded_at: r.documents.uploaded_at,
       scope: "VAULT" as const,
-      ownerName: r.documents.profiles?.display_name ?? "Voyageur",
+      ownerName: r.documents.profiles?.display_name ?? t("tripDocs.travelerFallback"),
       canDelete: false, // un doc du coffre partagé se gère depuis le coffre
       forMeOnly: r.shared_with === user.id, // E09 : partage ciblé
     }));
@@ -118,12 +120,10 @@ export default async function TripDocumentsPage({
   return (
     <div className="flex flex-col gap-5">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-encre-douce">
-          Visibles de tout l'équipage — billets, vouchers, réservations.
-        </p>
+        <p className="text-sm text-encre-douce">{t("tripDocs.subtitle")}</p>
         {canUpload ? (
           <Button asChild>
-            <Link href={`/trips/${tripId}/documents/new`}>Ajouter un document</Link>
+            <Link href={`/trips/${tripId}/documents/new`}>{t("tripDocs.add")}</Link>
           </Button>
         ) : null}
       </div>
@@ -138,7 +138,7 @@ export default async function TripDocumentsPage({
               : "border-laiton-clair bg-papier text-encre-douce hover:text-encre",
           )}
         >
-          Toutes catégories
+          {t("tripDocs.allCategories")}
         </Link>
         {CATEGORIES.map((c) => (
           <Link
@@ -167,7 +167,7 @@ export default async function TripDocumentsPage({
                 : "border-laiton-clair bg-papier text-encre-douce hover:text-encre",
             )}
           >
-            Tous les voyageurs
+            {t("tripDocs.allTravelers")}
           </Link>
           {owners.map((o) => (
             <Link
@@ -188,10 +188,8 @@ export default async function TripDocumentsPage({
 
       {documents.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-6 py-14 text-center">
-          <p className="font-display text-xl text-encre italic">Aucun document pour l'instant</p>
-          <p className="max-w-sm text-sm text-encre-douce">
-            Les billets et réservations du groupe se rangeront ici, visibles de tous.
-          </p>
+          <p className="font-display text-xl text-encre italic">{t("tripDocs.emptyTitle")}</p>
+          <p className="max-w-sm text-sm text-encre-douce">{t("tripDocs.emptyBody")}</p>
         </div>
       ) : (
         <ul className="flex flex-col gap-2">
@@ -226,8 +224,8 @@ export default async function TripDocumentsPage({
                 )}
               >
                 {doc.scope === "VAULT"
-                  ? `Partagé par ${doc.ownerName}${doc.forMeOnly ? " — pour toi" : ""}`
-                  : `Ajouté par ${doc.ownerName}`}
+                  ? `${t("tripDocs.sharedBy")} ${doc.ownerName}${doc.forMeOnly ? ` ${t("tripDocs.forYou")}` : ""}`
+                  : `${t("tripDocs.addedBy")} ${doc.ownerName}`}
               </span>
               <OfflineDocToggle documentId={doc.id} fileName={doc.file_name} />
               {doc.canDelete ? (

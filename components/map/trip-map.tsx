@@ -3,6 +3,7 @@
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useEffect, useRef } from "react";
+import { useT } from "@/components/i18n/provider";
 
 export type MapMarker = {
   id: string;
@@ -36,6 +37,7 @@ export function TripMap({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
+  const t = useT();
 
   useEffect(() => {
     if (!containerRef.current) {
@@ -102,10 +104,10 @@ export function TripMap({
       });
       const distance =
         distanceFrom && (m.lat !== distanceFrom.lat || m.lng !== distanceFrom.lng)
-          ? `<br/><span style="color:#5a6379">${haversineKm(distanceFrom, m).toFixed(1)} km depuis ${escapeHtml(distanceFrom.label)}</span>`
+          ? `<br/><span style="color:#5a6379">${haversineKm(distanceFrom, m).toFixed(1)} km ${t("map.from")} ${escapeHtml(distanceFrom.label)}</span>`
           : "";
       const link = m.href
-        ? `<br/><a href="${m.href}" style="color:#6e1f2e">Voir la fiche →</a>`
+        ? `<br/><a href="${m.href}" style="color:#6e1f2e">${t("map.viewDetails")}</a>`
         : "";
       const marker = L.marker([m.lat, m.lng], { icon })
         .bindPopup(
@@ -137,7 +139,7 @@ export function TripMap({
     return () => {
       layer.remove();
     };
-  }, [markers, drawPath, distanceFrom, focusId]);
+  }, [markers, drawPath, distanceFrom, focusId, t]);
 
   return (
     <div

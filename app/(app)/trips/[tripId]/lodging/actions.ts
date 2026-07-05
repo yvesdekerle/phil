@@ -5,24 +5,10 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth/require-user";
 import { geolocateEvent } from "@/lib/geo/locate";
+import { getT } from "@/lib/i18n/server";
 import { areUuids } from "@/lib/validation";
 
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
-
-const candidateSchema = z
-  .object({
-    tripId: z.string().uuid(),
-    title: z.string().trim().min(1, "Donne un nom à cette option.").max(150),
-    url: z.union([z.literal(""), z.string().url("Lien invalide.")]).optional(),
-    price: z.string().trim().max(100).optional(),
-    notes: z.string().trim().max(1000).optional(),
-    checkIn: z.string().regex(DATE, "Date d'arrivée requise."),
-    checkOut: z.string().regex(DATE, "Date de départ requise."),
-  })
-  .refine((v) => v.checkOut >= v.checkIn, {
-    message: "Le départ ne peut pas précéder l'arrivée.",
-    path: ["checkOut"],
-  });
 
 export type CandidateState = { status: "idle" | "error"; message?: string };
 
@@ -31,6 +17,21 @@ export async function addCandidate(
   _prev: CandidateState,
   formData: FormData,
 ): Promise<CandidateState> {
+  const t = await getT();
+  const candidateSchema = z
+    .object({
+      tripId: z.string().uuid(),
+      title: z.string().trim().min(1, t("lodging.nameRequired")).max(150),
+      url: z.union([z.literal(""), z.string().url(t("lodging.linkInvalid"))]).optional(),
+      price: z.string().trim().max(100).optional(),
+      notes: z.string().trim().max(1000).optional(),
+      checkIn: z.string().regex(DATE, t("lodging.checkInRequired")),
+      checkOut: z.string().regex(DATE, t("lodging.checkOutRequired")),
+    })
+    .refine((v) => v.checkOut >= v.checkIn, {
+      message: t("lodging.checkoutBeforeCheckin"),
+      path: ["checkOut"],
+    });
   const parsed = candidateSchema.safeParse({
     tripId: formData.get("tripId"),
     title: formData.get("title"),
@@ -41,7 +42,10 @@ export async function addCandidate(
     checkOut: formData.get("checkOut"),
   });
   if (!parsed.success) {
-    return { status: "error", message: parsed.error.issues[0]?.message ?? "Saisie invalide." };
+    return {
+      status: "error",
+      message: parsed.error.issues[0]?.message ?? t("lodging.invalidInput"),
+    };
   }
   const { supabase, user } = await requireUser();
   const d = parsed.data;
@@ -56,7 +60,7 @@ export async function addCandidate(
     created_by: user.id,
   });
   if (error) {
-    return { status: "error", message: "Ajout impossible." };
+    return { status: "error", message: t("lodging.addFailed") };
   }
   revalidatePath(`/trips/${d.tripId}/lodging`);
   return { status: "idle" };
@@ -80,18 +84,18 @@ export async function setCandidateStatus(
   revalidatePath(`/trips/${tripId}/lodging`);
 }
 
-const voteSchema = z.object({
-  tripId: z.string().uuid(),
-  candidateId: z.string().uuid(),
-  rating: z.coerce.number().refine((r) => [-1, 1, 2].includes(r), "Avis inconnu."),
-  comment: z.string().trim().max(300).optional(),
-});
-
 /** Avis pondéré sur un candidat (PHIL-L02) : +2 / +1 / -1, modifiable. */
 export async function rateCandidate(
   _prev: CandidateState,
   formData: FormData,
 ): Promise<CandidateState> {
+  const t = await getT();
+  const voteSchema = z.object({
+    tripId: z.string().uuid(),
+    candidateId: z.string().uuid(),
+    rating: z.coerce.number().refine((r) => [-1, 1, 2].includes(r), t("lodging.ratingUnknown")),
+    comment: z.string().trim().max(300).optional(),
+  });
   const parsed = voteSchema.safeParse({
     tripId: formData.get("tripId"),
     candidateId: formData.get("candidateId"),
@@ -99,7 +103,7 @@ export async function rateCandidate(
     comment: formData.get("comment") ?? "",
   });
   if (!parsed.success) {
-    return { status: "error", message: "Avis invalide." };
+    return { status: "error", message: t("lodging.ratingInvalid") };
   }
   const { supabase, user } = await requireUser();
   const d = parsed.data;
@@ -111,7 +115,7 @@ export async function rateCandidate(
     updated_at: new Date().toISOString(),
   });
   if (error) {
-    return { status: "error", message: "Vote impossible." };
+    return { status: "error", message: t("lodging.voteFailed") };
   }
   revalidatePath(`/trips/${d.tripId}/lodging`);
   return { status: "idle" };

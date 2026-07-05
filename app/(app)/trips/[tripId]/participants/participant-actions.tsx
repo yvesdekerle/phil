@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useT } from "@/components/i18n/provider";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,6 +40,7 @@ export function ParticipantRowActions({
   userName: string;
   role: string;
 }) {
+  const t = useT();
   const [state, setState] = useState<ParticipantActionState>({ status: "idle" });
   const [pending, startTransition] = useTransition();
 
@@ -55,32 +57,34 @@ export function ParticipantRowActions({
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="EDITOR">Éditeur</SelectItem>
-          <SelectItem value="VIEWER">Lecteur</SelectItem>
+          <SelectItem value="EDITOR">{t("participants.roleEditor")}</SelectItem>
+          <SelectItem value="VIEWER">{t("participants.roleViewer")}</SelectItem>
         </SelectContent>
       </Select>
 
       <AlertDialog>
         <AlertDialogTrigger asChild>
           <Button type="button" variant="outline" size="sm" disabled={pending}>
-            Passer capitaine
+            {t("participants.actions.makeCaptain")}
           </Button>
         </AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Transmettre la barre à {userName} ?</AlertDialogTitle>
+            <AlertDialogTitle>
+              {t("participants.actions.transferTitle").replace("{name}", userName)}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              {userName} devient capitaine du voyage, et tu repasses éditeur.
+              {t("participants.actions.transferDesc").replace("{name}", userName)}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogCancel>{t("participants.actions.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() =>
                 startTransition(async () => setState(await transferOwnership(tripId, userId)))
               }
             >
-              Transmettre
+              {t("participants.actions.transfer")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -89,25 +93,26 @@ export function ParticipantRowActions({
       <AlertDialog>
         <AlertDialogTrigger asChild>
           <Button type="button" variant="destructive" size="sm" disabled={pending}>
-            Retirer
+            {t("participants.actions.remove")}
           </Button>
         </AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Débarquer {userName} ?</AlertDialogTitle>
+            <AlertDialogTitle>
+              {t("participants.actions.removeTitle").replace("{name}", userName)}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              {userName} n'aura plus accès au voyage. Ses documents personnels restent dans son
-              coffre.
+              {t("participants.actions.removeDesc").replace("{name}", userName)}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogCancel>{t("participants.actions.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() =>
                 startTransition(async () => setState(await removeParticipant(tripId, userId)))
               }
             >
-              Retirer du voyage
+              {t("participants.actions.removeConfirm")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -119,6 +124,7 @@ export function ParticipantRowActions({
 }
 
 export function LeaveTripButton({ tripId }: { tripId: string }) {
+  const t = useT();
   const [state, setState] = useState<ParticipantActionState>({ status: "idle" });
   const [pending, startTransition] = useTransition();
 
@@ -127,23 +133,20 @@ export function LeaveTripButton({ tripId }: { tripId: string }) {
       <AlertDialog>
         <AlertDialogTrigger asChild>
           <Button type="button" variant="outline" disabled={pending}>
-            Quitter le voyage
+            {t("participants.actions.leave")}
           </Button>
         </AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Quitter ce voyage ?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tu n'auras plus accès au calendrier ni aux documents du voyage. Tes documents
-              personnels restent dans ton coffre.
-            </AlertDialogDescription>
+            <AlertDialogTitle>{t("participants.actions.leaveTitle")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("participants.actions.leaveDesc")}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Rester à bord</AlertDialogCancel>
+            <AlertDialogCancel>{t("participants.actions.stay")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => startTransition(async () => setState(await leaveTrip(tripId)))}
             >
-              Quitter
+              {t("participants.actions.leaveConfirm")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

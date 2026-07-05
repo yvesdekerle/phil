@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { useT } from "@/components/i18n/provider";
 import { syncTrip } from "@/lib/offline/sync";
 
 /**
@@ -9,6 +10,7 @@ import { syncTrip } from "@/lib/offline/sync";
  * et automatique au retour du réseau avec notification discrète (PHIL-I06).
  */
 export function TripOfflineSync({ tripId }: { tripId: string }) {
+  const t = useT();
   const router = useRouter();
   const [resynced, setResynced] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -54,7 +56,7 @@ export function TripOfflineSync({ tripId }: { tripId: string }) {
       role="status"
       className="fixed right-4 bottom-4 z-50 rounded-lg border border-laiton-clair bg-papier px-4 py-2.5 text-sm text-encre shadow-[0_4px_20px_rgba(31,42,68,0.15)]"
     >
-      Données synchronisées.
+      {t("offline.synced")}
     </div>
   );
 }

@@ -3,24 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
-
-const profileSchema = z.object({
-  displayName: z
-    .string()
-    .trim()
-    .min(1, "Il faut bien un nom sur le carnet de bord.")
-    .max(80, "80 caractères maximum."),
-  locale: z.enum(["fr", "en"]),
-  timezone: z.string().refine((tz) => Intl.supportedValuesOf("timeZone").includes(tz), {
-    message: "Fuseau horaire inconnu.",
-  }),
-  whatsapp: z
-    .string()
-    .trim()
-    .max(50)
-    .regex(/^$|^\+?[\d\s.\-()]{6,20}$|^@?[\w.]{3,32}$/, "Un numéro (+33 6…) ou un @pseudo."),
-});
 
 export type ProfileFormState = {
   status: "idle" | "success" | "error";
@@ -31,6 +15,24 @@ export async function updateProfile(
   _prev: ProfileFormState,
   formData: FormData,
 ): Promise<ProfileFormState> {
+  const t = await getT();
+  const profileSchema = z.object({
+    displayName: z
+      .string()
+      .trim()
+      .min(1, t("profile.form.nameRequired"))
+      .max(80, t("profile.form.nameMax")),
+    locale: z.enum(["fr", "en"]),
+    timezone: z.string().refine((tz) => Intl.supportedValuesOf("timeZone").includes(tz), {
+      message: t("profile.form.unknownTimezone"),
+    }),
+    whatsapp: z
+      .string()
+      .trim()
+      .max(50)
+      .regex(/^$|^\+?[\d\s.\-()]{6,20}$|^@?[\w.]{3,32}$/, t("profile.form.whatsappInvalid")),
+  });
+
   const parsed = profileSchema.safeParse({
     displayName: formData.get("displayName"),
     locale: formData.get("locale"),
@@ -39,7 +41,10 @@ export async function updateProfile(
   });
 
   if (!parsed.success) {
-    return { status: "error", message: parsed.error.issues[0]?.message ?? "Saisie invalide." };
+    return {
+      status: "error",
+      message: parsed.error.issues[0]?.message ?? t("profile.form.invalidInput"),
+    };
   }
 
   const supabase = await createClient();
@@ -61,7 +66,7 @@ export async function updateProfile(
     .eq("id", user.id);
 
   if (error) {
-    return { status: "error", message: "L'enregistrement a échoué. Réessaie dans un instant." };
+    return { status: "error", message: t("profile.form.saveFailed") };
   }
 
   // PHIL-Q37 : synchronise le cookie de langue avec le profil
@@ -74,7 +79,7 @@ export async function updateProfile(
   });
 
   revalidatePath("/", "layout");
-  return { status: "success", message: "C'est noté dans le carnet." };
+  return { status: "success", message: t("profile.form.saved") };
 }
 
 export async function signOut() {
@@ -85,10 +90,11 @@ export async function signOut() {
 
 /** Préférences de notification (PHIL-K04). */
 export async function updateNotificationPreferences(raw: unknown): Promise<ProfileFormState> {
+  const t = await getT();
   const { notificationPreferencesSchema } = await import("@/lib/notifications/preferences");
   const parsed = notificationPreferencesSchema.safeParse(raw);
   if (!parsed.success) {
-    return { status: "error", message: "Préférences invalides." };
+    return { status: "error", message: t("profile.prefs.invalid") };
   }
 
   const supabase = await createClient();
@@ -105,7 +111,7 @@ export async function updateNotificationPreferences(raw: unknown): Promise<Profi
     .eq("id", user.id);
 
   if (error) {
-    return { status: "error", message: "Enregistrement impossible." };
+    return { status: "error", message: t("profile.prefs.saveFailed") };
   }
   revalidatePath("/profile");
   return { status: "success" };
@@ -116,8 +122,9 @@ export async function deleteMyAccount(
   _prev: ProfileFormState,
   formData: FormData,
 ): Promise<ProfileFormState> {
+  const t = await getT();
   if (formData.get("confirmation") !== "SUPPRIMER") {
-    return { status: "error", message: "Écris SUPPRIMER pour confirmer." };
+    return { status: "error", message: t("profile.delete.confirmError") };
   }
 
   const supabase = await createClient();
@@ -139,7 +146,7 @@ export async function deleteMyAccount(
     logger.error("account_deletion_failed", { userId: user.id });
     return {
       status: "error",
-      message: "La suppression a échoué — contacte yves.dekerle@gmail.com.",
+      message: t("profile.delete.deleteFailed"),
     };
   }
 

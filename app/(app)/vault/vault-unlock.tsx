@@ -3,6 +3,7 @@
 import { startAuthentication } from "@simplewebauthn/browser";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import { VaultDoor, type VaultDoorState } from "@/components/vault/vault-door";
 import {
@@ -13,6 +14,7 @@ import {
 
 /** Écran de déverrouillage du coffre (PHIL-C05, animé par PHIL-M01). */
 export function VaultUnlock() {
+  const t = useT();
   const router = useRouter();
   const [state, setState] = useState<UnlockState>({ status: "idle" });
   // La porte se referme à l'arrivée (verrouillage), s'ouvre après Touch ID.
@@ -34,7 +36,7 @@ export function VaultUnlock() {
         }
       } catch (e) {
         console.error(e);
-        setState({ status: "error", message: "Déverrouillage annulé." });
+        setState({ status: "error", message: t("vault.unlock.cancelled") });
       }
     });
   }
@@ -46,24 +48,22 @@ export function VaultUnlock() {
       <div className="w-full max-w-sm rounded-lg border border-laiton-clair bg-papier px-8 py-10 text-center shadow-[0_2px_16px_rgba(31,42,68,0.08)]">
         <VaultDoor state={doorState} />
         <h1 className="mt-5 font-display text-2xl text-encre italic">
-          {opening ? "Bienvenue dans ton coffre" : "Coffre verrouillé"}
+          {opening ? t("vault.unlock.openTitle") : t("vault.unlock.lockedTitle")}
         </h1>
         <p className="mt-2 mb-6 text-sm text-encre-douce">
-          {opening
-            ? "La porte pivote sur ses gonds…"
-            : "Phil garde tes papiers sous clé — déverrouille avec Face ID ou Touch ID."}
+          {opening ? t("vault.unlock.openingBody") : t("vault.unlock.lockedBody")}
         </p>
         {!opening ? (
           <>
             <Button type="button" className="w-full" disabled={pending} onClick={unlock}>
-              {pending ? "Vérification…" : "Déverrouiller le coffre"}
+              {pending ? t("vault.unlock.verifying") : t("vault.unlock.button")}
             </Button>
             {state.status === "error" ? (
               <p role="alert" className="mt-3 text-sm text-bordeaux">
                 {state.message}
               </p>
             ) : null}
-            <p className="mt-4 text-xs text-encre-douce">Le coffre reste ouvert 15 minutes.</p>
+            <p className="mt-4 text-xs text-encre-douce">{t("vault.unlock.duration")}</p>
           </>
         ) : null}
       </div>

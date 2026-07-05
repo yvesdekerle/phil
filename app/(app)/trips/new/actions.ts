@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { geocode } from "@/lib/geo/geocode";
+import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { getTemplate } from "@/lib/trips/templates";
 
@@ -46,8 +47,12 @@ export async function createTrip(
     timezone: formData.get("timezone"),
   });
 
+  const t = await getT();
   if (!parsed.success) {
-    return { status: "error", message: parsed.error.issues[0]?.message ?? "Saisie invalide." };
+    return {
+      status: "error",
+      message: parsed.error.issues[0]?.message ?? t("newTrip.msg.invalidInput"),
+    };
   }
 
   const supabase = await createClient();
@@ -77,7 +82,7 @@ export async function createTrip(
   });
 
   if (error) {
-    return { status: "error", message: "La création a échoué. Réessaie dans un instant." };
+    return { status: "error", message: t("newTrip.msg.createFailed") };
   }
 
   // PHIL-N03 : un template pré-remplit le pool d'idées

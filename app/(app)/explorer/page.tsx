@@ -5,6 +5,7 @@ import { WorldMapLazy } from "@/components/map/world-map-lazy";
 import { computeBadges } from "@/lib/gamification/badges";
 import { countryAt } from "@/lib/geo/country-lookup";
 import { haversineKm } from "@/lib/geo/distance";
+import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { CountrySuggestions } from "./country-suggestions";
 
@@ -22,6 +23,7 @@ function Stat({ value, label, hint }: { value: string; label: string; hint?: str
 
 /** Carnet de l'explorateur (PHIL-P09) : les chiffres de tes voyages. */
 export default async function ExplorerPage() {
+  const t = await getT();
   const supabase = await createClient();
   const {
     data: { user },
@@ -157,41 +159,49 @@ export default async function ExplorerPage() {
 
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-8">
-      <h1 className="font-display text-3xl text-encre">Carnet de l'explorateur</h1>
+      <h1 className="font-display text-3xl text-encre">{t("explorer.title")}</h1>
       <p className="mt-1 mb-6 text-sm text-encre-douce">
         {km > 0
-          ? `Tu as bouclé ${(worldShare * 100).toFixed(worldShare >= 0.1 ? 0 : 1)} % d'un tour du monde — Phileas l'a fait en 80 jours, rien ne presse.`
-          : "Chaque tour du monde commence par un premier événement géolocalisé."}
+          ? t("explorer.introWithKm").replace(
+              "{share}",
+              (worldShare * 100).toFixed(worldShare >= 0.1 ? 0 : 1),
+            )
+          : t("explorer.introEmpty")}
       </p>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-        <Stat value={String(allTrips.length)} label="voyages au carnet" />
+        <Stat value={String(allTrips.length)} label={t("explorer.stats.trips")} />
         <Stat
           value={String(doneTrips.length)}
-          label="voyages bouclés"
-          hint={allTrips.length > doneTrips.length ? "le reste est en préparation" : undefined}
+          label={t("explorer.stats.tripsDone")}
+          hint={allTrips.length > doneTrips.length ? t("explorer.stats.tripsDoneHint") : undefined}
         />
-        <Stat value={String(travelDays)} label="jours de voyage" hint="planifiés compris" />
-        <Stat value={String(destinations.size)} label="destinations" />
-        <Stat value={String(activityCount)} label="activités au programme" />
+        <Stat
+          value={String(travelDays)}
+          label={t("explorer.stats.travelDays")}
+          hint={t("explorer.stats.travelDaysHint")}
+        />
+        <Stat value={String(destinations.size)} label={t("explorer.stats.destinations")} />
+        <Stat value={String(activityCount)} label={t("explorer.stats.activities")} />
         <Stat
           value={
             km >= 100 ? `${Math.round(km).toLocaleString("fr-FR")} km` : `${Math.round(km)} km`
           }
-          label="parcourus (à vol d'oiseau)"
-          hint="entre les étapes géolocalisées"
+          label={t("explorer.stats.km")}
+          hint={t("explorer.stats.kmHint")}
         />
-        <Stat value={String(photoCount ?? 0)} label="photos partagées" />
-        <Stat value={String(journalCount ?? 0)} label="pages de journal" />
-        <Stat value={String(visited.length)} label="pays visités" hint="coche-les sur la carte" />
+        <Stat value={String(photoCount ?? 0)} label={t("explorer.stats.photos")} />
+        <Stat value={String(journalCount ?? 0)} label={t("explorer.stats.journalPages")} />
+        <Stat
+          value={String(visited.length)}
+          label={t("explorer.stats.countries")}
+          hint={t("explorer.stats.countriesHint")}
+        />
       </div>
 
       <section className="mt-8">
-        <h2 className="mb-1 font-display text-xl text-encre">Ta mappemonde</h2>
-        <p className="mb-3 text-sm text-encre-douce">
-          Clique un pays pour le marquer visité — en couleur les conquêtes, en parchemin le reste du
-          monde à découvrir.
-        </p>
+        <h2 className="mb-1 font-display text-xl text-encre">{t("explorer.mapTitle")}</h2>
+        <p className="mb-3 text-sm text-encre-douce">{t("explorer.mapIntro")}</p>
         <CountrySuggestions suggestions={suggestions} />
         <WorldMapLazy visited={visited} />
       </section>
@@ -200,7 +210,7 @@ export default async function ExplorerPage() {
 
       <p className="mt-6 text-sm text-encre-douce">
         <Link href="/trips" className="underline underline-offset-4 hover:text-encre">
-          ← Retour aux voyages
+          {t("explorer.backToTrips")}
         </Link>
       </p>
     </main>

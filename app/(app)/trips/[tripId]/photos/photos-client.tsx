@@ -2,6 +2,7 @@
 
 import { ChevronLeft, ChevronRight, MapPin, Trash2, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { useT } from "@/components/i18n/provider";
 import type { MapMarker } from "@/components/map/trip-map";
 import { TripMapLazy } from "@/components/map/trip-map-lazy";
 import { Button } from "@/components/ui/button";
@@ -48,6 +49,7 @@ export function PhotosClient({
   isOwner: boolean;
   quota: number;
 }) {
+  const t = useT();
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -91,7 +93,9 @@ export function PhotosClient({
     const list = Array.from(files);
     if (list.length > remaining) {
       setError(
-        `Plus que ${remaining} photo${remaining > 1 ? "s" : ""} possible${remaining > 1 ? "s" : ""} sur ce voyage (quota ${quota}).`,
+        (remaining <= 1 ? t("photos.remainingOne") : t("photos.remainingMany"))
+          .replace("{n}", String(remaining))
+          .replace("{quota}", String(quota)),
       );
       return;
     }
@@ -101,14 +105,22 @@ export function PhotosClient({
 
     for (const [index, file] of list.entries()) {
       if (!(PHOTO_MIME_TYPES as readonly string[]).includes(file.type)) {
-        setError(`${file.name} : format non pris en charge (JPEG, PNG ou WebP).`);
+        setError(t("photos.unsupportedFormat").replace("{name}", file.name));
         continue;
       }
       if (file.size > MAX_PHOTO_BYTES) {
-        setError(`${file.name} : trop lourde (max ${formatBytes(MAX_PHOTO_BYTES)}).`);
+        setError(
+          t("photos.tooLarge")
+            .replace("{name}", file.name)
+            .replace("{max}", formatBytes(MAX_PHOTO_BYTES)),
+        );
         continue;
       }
-      setProgress(`Envoi ${index + 1}/${list.length}…`);
+      setProgress(
+        t("photos.uploadProgress")
+          .replace("{i}", String(index + 1))
+          .replace("{n}", String(list.length)),
+      );
 
       const photoId = crypto.randomUUID();
       const storagePath = `${userId}/${photoId}.${photoExtension(file.type)}`;
@@ -116,7 +128,7 @@ export function PhotosClient({
         .from("photos")
         .upload(storagePath, file, { contentType: file.type });
       if (upErr) {
-        setError(`${file.name} : l'envoi a échoué.`);
+        setError(t("photos.uploadFailed").replace("{name}", file.name));
         continue;
       }
 
@@ -147,7 +159,7 @@ export function PhotosClient({
       formData.set("lng", gps ? String(gps.lng) : "");
       const result: PhotoState = await registerPhoto({ status: "idle" }, formData);
       if (result.status === "error") {
-        setError(result.message ?? "Enregistrement impossible.");
+        setError(result.message ?? t("photos.saveFailed"));
       }
     }
     setProgress(null);
@@ -160,9 +172,9 @@ export function PhotosClient({
     <div className="flex flex-col gap-5">
       <div className="text-sm text-encre-douce">
         <span className="font-medium text-encre">
-          {photos.length}/{quota} photos
+          {photos.length}/{quota} {t("photos.photos")}
         </span>{" "}
-        · {formatBytes(usedBytes)} — qualité d&apos;origine conservée, nombre limité.
+        · {formatBytes(usedBytes)} {t("photos.qualityNote")}
       </div>
 
       <div className="flex flex-col gap-2 rounded-lg border border-laiton-clair bg-papier px-4 py-3">
@@ -172,11 +184,11 @@ export function PhotosClient({
             disabled={remaining <= 0 || progress !== null}
             onClick={() => inputRef.current?.click()}
           >
-            {progress ?? (remaining <= 0 ? "Quota atteint" : "Ajouter des photos")}
+            {progress ?? (remaining <= 0 ? t("photos.quotaReachedShort") : t("photos.add"))}
           </Button>
           <Input
             ref={captionRef}
-            placeholder="Légende commune (optionnel)"
+            placeholder={t("photos.captionPlaceholder")}
             maxLength={300}
             className="h-9 min-w-40 flex-1 text-sm"
           />
@@ -184,9 +196,9 @@ export function PhotosClient({
             ref={eventRef}
             defaultValue=""
             className="h-9 rounded border border-laiton-clair bg-papier px-2 text-sm text-encre-douce"
-            aria-label="Rattacher à un événement"
+            aria-label={t("photos.attachEventAria")}
           >
-            <option value="">Rattacher à un événement (optionnel)</option>
+            <option value="">{t("photos.attachEventOption")}</option>
             {events.map((ev) => (
               <option key={ev.id} value={ev.id}>
                 {ev.title}
@@ -194,9 +206,7 @@ export function PhotosClient({
             ))}
           </select>
         </div>
-        <p className="text-xs text-encre-douce">
-          La légende et l&apos;événement choisis s&apos;appliquent aux photos du prochain envoi.
-        </p>
+        <p className="text-xs text-encre-douce">{t("photos.nextUploadNote")}</p>
       </div>
 
       <input
@@ -219,7 +229,7 @@ export function PhotosClient({
                 id: p.id,
                 lat: p.lat as number,
                 lng: p.lng as number,
-                title: p.caption ?? "Photo",
+                title: p.caption ?? t("photos.markerTitle"),
                 subtitle: p.uploaderName,
                 color: "#6e1f2e",
                 thumbUrl: `/api/photos/${p.id}/view${p.hasThumb ? "?thumb=1" : ""}`,
@@ -227,18 +237,18 @@ export function PhotosClient({
             )}
           />
           <p className="mt-1 text-xs text-encre-douce">
-            {located.length}/{photos.length} photo{located.length > 1 ? "s" : ""} géolocalisée
-            {located.length > 1 ? "s" : ""} — la position GPS est lue automatiquement dans les
-            photos qui en contiennent.
+            {located.length}/{photos.length}{" "}
+            {located.length > 1 ? t("photos.geolocatedCountMany") : t("photos.geolocatedCountOne")}{" "}
+            {t("photos.gpsNote")}
           </p>
         </div>
       ) : null}
 
       {photos.length === 0 ? (
         <div className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-6 py-14 text-center">
-          <p className="font-display text-xl text-encre italic">Aucune photo pour l&apos;instant</p>
+          <p className="font-display text-xl text-encre italic">{t("photos.emptyTitle")}</p>
           <p className="mt-2 text-sm text-encre-douce">
-            Les plus beaux souvenirs se rangent ici — {quota} par voyage, choisis bien.
+            {t("photos.emptyBody").replace("{quota}", String(quota))}
           </p>
         </div>
       ) : (
@@ -249,13 +259,13 @@ export function PhotosClient({
                 type="button"
                 onClick={() => setLightbox(index)}
                 className="block w-full overflow-hidden rounded-lg border border-laiton-clair bg-parchemin"
-                aria-label={`Ouvrir ${p.caption ?? "la photo"}`}
+                aria-label={t("photos.open").replace("{name}", p.caption ?? t("photos.thePhoto"))}
               >
                 {/* Vignette générée côté client ; l'original ne charge que dans la visionneuse */}
                 {/* biome-ignore lint/performance/noImgElement: source authentifiée dynamique, next/image inutile ici */}
                 <img
                   src={`/api/photos/${p.id}/view${p.hasThumb ? "?thumb=1" : ""}`}
-                  alt={p.caption ?? "Photo du voyage"}
+                  alt={p.caption ?? t("photos.altFallback")}
                   loading="lazy"
                   className="aspect-square w-full object-cover transition-transform group-hover:scale-[1.02]"
                 />
@@ -275,8 +285,8 @@ export function PhotosClient({
                       mapSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
                     }}
                     className="text-laiton hover:text-bordeaux"
-                    title="Voir sur la carte"
-                    aria-label="Voir cette photo sur la carte"
+                    title={t("photos.viewOnMapTitle")}
+                    aria-label={t("photos.viewOnMapAria")}
                   >
                     <MapPin className="size-3.5" aria-hidden="true" />
                   </button>
@@ -288,7 +298,7 @@ export function PhotosClient({
                   disabled={pending}
                   onClick={() => startTransition(() => deletePhoto(tripId, p.id))}
                   className="absolute top-1.5 right-1.5 rounded-full bg-encre/60 p-1.5 text-papier opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
-                  aria-label="Supprimer la photo"
+                  aria-label={t("photos.deleteAria")}
                 >
                   <Trash2 className="size-3.5" aria-hidden="true" />
                 </button>
@@ -303,7 +313,7 @@ export function PhotosClient({
           className="fixed inset-0 z-50 flex flex-col bg-encre/95"
           role="dialog"
           aria-modal="true"
-          aria-label="Visionneuse photos"
+          aria-label={t("photos.viewerAria")}
         >
           <div className="flex items-center justify-between px-4 py-3 text-papier">
             <span className="text-sm opacity-80">
@@ -312,7 +322,7 @@ export function PhotosClient({
             <button
               type="button"
               onClick={() => setLightbox(null)}
-              aria-label="Fermer"
+              aria-label={t("photos.close")}
               className="rounded-full p-2 hover:bg-papier/10"
             >
               <X className="size-5" aria-hidden="true" />
@@ -327,7 +337,7 @@ export function PhotosClient({
             {/* biome-ignore lint/performance/noImgElement: original authentifié, taille inconnue */}
             <img
               src={`/api/photos/${photos[lightbox].id}/view`}
-              alt={photos[lightbox].caption ?? "Photo du voyage"}
+              alt={photos[lightbox].caption ?? t("photos.altFallback")}
               className="max-h-full max-w-full object-contain"
             />
             {photos.length > 1 ? (
@@ -335,7 +345,7 @@ export function PhotosClient({
                 <button
                   type="button"
                   onClick={() => step(-1)}
-                  aria-label="Photo précédente"
+                  aria-label={t("photos.prev")}
                   className="absolute left-2 rounded-full bg-papier/10 p-2 text-papier hover:bg-papier/20"
                 >
                   <ChevronLeft className="size-6" aria-hidden="true" />
@@ -343,7 +353,7 @@ export function PhotosClient({
                 <button
                   type="button"
                   onClick={() => step(1)}
-                  aria-label="Photo suivante"
+                  aria-label={t("photos.next")}
                   className="absolute right-2 rounded-full bg-papier/10 p-2 text-papier hover:bg-papier/20"
                 >
                   <ChevronRight className="size-6" aria-hidden="true" />

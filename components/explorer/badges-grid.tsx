@@ -16,6 +16,7 @@ import {
   Wind,
 } from "lucide-react";
 import type { Badge } from "@/lib/gamification/badges";
+import { getT } from "@/lib/i18n/server";
 import { cn } from "@/lib/utils";
 
 const ICONS = {
@@ -36,20 +37,18 @@ const ICONS = {
 } as const;
 
 /** Grille des badges (PHIL-P12) : débloqués en couleur, le reste en promesse. */
-export function BadgesGrid({ badges }: { badges: Badge[] }) {
+export async function BadgesGrid({ badges }: { badges: Badge[] }) {
+  const t = await getT();
   const unlockedCount = badges.filter((b) => b.unlocked).length;
   return (
     <section className="mt-8">
       <h2 className="mb-1 font-display text-xl text-encre">
-        Médailles de l'explorateur{" "}
+        {t("explorer.badgesTitle")}{" "}
         <span className="text-sm text-encre-douce">
           ({unlockedCount}/{badges.length})
         </span>
       </h2>
-      <p className="mb-3 text-sm text-encre-douce">
-        Elles se gagnent en voyageant et en prenant soin de l'équipage — pas de course, chacun son
-        rythme.
-      </p>
+      <p className="mb-3 text-sm text-encre-douce">{t("explorer.badgesIntro")}</p>
       <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {badges.map((b) => {
           const Icon = ICONS[b.icon as keyof typeof ICONS] ?? Award;

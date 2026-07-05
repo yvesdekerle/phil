@@ -1,12 +1,8 @@
 import { redirect } from "next/navigation";
 import { beneficiaryShares } from "@/lib/budget/balances";
-import {
-  asCategory,
-  CATEGORY_LABELS,
-  EXPENSE_CATEGORIES,
-  type ExpenseCategory,
-} from "@/lib/budget/categories";
+import { asCategory, EXPENSE_CATEGORIES, type ExpenseCategory } from "@/lib/budget/categories";
 import { getRates, toBase } from "@/lib/budget/rates";
+import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { PurseNav } from "../purse-nav";
 
@@ -16,10 +12,19 @@ function fmt(n: number, c: string): string {
   return `${n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${c}`;
 }
 
-function Bars({ slices, total, currency }: { slices: Slice[]; total: number; currency: string }) {
+async function Bars({
+  slices,
+  total,
+  currency,
+}: {
+  slices: Slice[];
+  total: number;
+  currency: string;
+}) {
+  const t = await getT();
   const visible = slices.filter((s) => s.amount > 0);
   if (visible.length === 0) {
-    return <p className="text-sm text-encre-douce">Rien pour l'instant.</p>;
+    return <p className="text-sm text-encre-douce">{t("budget.tracking.nothingYet")}</p>;
   }
   return (
     <div className="flex flex-col gap-1.5">
@@ -48,6 +53,7 @@ export default async function ExpenseTrackingPage({
   params: Promise<{ tripId: string }>;
 }) {
   const { tripId } = await params;
+  const t = await getT();
   const supabase = await createClient();
   const {
     data: { user },
@@ -104,6 +110,12 @@ export default async function ExpenseTrackingPage({
 
   const currencies = [...new Set(expenses.map((e) => e.currency))];
 
+  const phaseLabel: Record<"avant" | "pendant" | "après", string> = {
+    avant: t("budget.tracking.before"),
+    pendant: t("budget.tracking.during"),
+    après: t("budget.tracking.after"),
+  };
+
   const phaseOf = (spentOn: string): "avant" | "pendant" | "après" => {
     if (!trip) {
       return "pendant";
@@ -120,7 +132,7 @@ export default async function ExpenseTrackingPage({
 
       {expenses.length === 0 ? (
         <p className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-4 py-10 text-center text-sm text-encre-douce">
-          Aucune dépense enregistrée — le suivi commencera avec la première.
+          {t("budget.tracking.empty")}
         </p>
       ) : (
         currencies.map((currency) => {
@@ -133,13 +145,13 @@ export default async function ExpenseTrackingPage({
 
           const byCategory = (getter: (e: (typeof inCurrency)[number]) => number): Slice[] =>
             EXPENSE_CATEGORIES.map((c: ExpenseCategory) => ({
-              label: CATEGORY_LABELS[c],
+              label: t(`budget.categories.${c}`),
               amount: inCurrency.filter((e) => e.category === c).reduce((s, e) => s + getter(e), 0),
             }));
 
           const byPhase = (getter: (e: (typeof inCurrency)[number]) => number): Slice[] =>
             (["avant", "pendant", "après"] as const).map((phase) => ({
-              label: phase.charAt(0).toUpperCase() + phase.slice(1),
+              label: phaseLabel[phase],
               amount: inCurrency
                 .filter((e) => phaseOf(e.spentOn) === phase)
                 .reduce((s, e) => s + getter(e), 0),
@@ -149,26 +161,33 @@ export default async function ExpenseTrackingPage({
             <section key={currency} className="flex flex-col gap-5">
               <div className="rounded-lg border border-laiton-clair bg-papier px-4 py-3">
                 <h2 className="mb-3 flex items-baseline justify-between text-sm font-medium text-encre">
-                  <span>Le voyage ({currency})</span>
-                  <span className="text-encre-douce">Total : {fmt(total, currency)}</span>
+                  <span>
+                    {t("budget.tracking.tripTitle")} ({currency})
+                  </span>
+                  <span className="text-encre-douce">
+                    {t("budget.tracking.total")} {fmt(total, currency)}
+                  </span>
                 </h2>
                 <Bars slices={byCategory((e) => e.amount)} total={total} currency={currency} />
                 <h3 className="mt-4 mb-2 text-xs font-medium text-laiton uppercase tracking-wide">
-                  Avant / pendant / après
+                  {t("budget.tracking.phases")}
                 </h3>
                 <Bars slices={byPhase((e) => e.amount)} total={total} currency={currency} />
               </div>
 
               <div className="rounded-lg border border-laiton-clair bg-papier px-4 py-3">
                 <h2 className="mb-3 flex items-baseline justify-between text-sm font-medium text-encre">
-                  <span>Mes dépenses ({currency})</span>
+                  <span>
+                    {t("budget.tracking.myExpenses")} ({currency})
+                  </span>
                   <span className="text-encre-douce">
-                    Ma part : {fmt(myTotal, currency)} · j'ai avancé {fmt(myPaid, currency)}
+                    {t("budget.tracking.myShare")} {fmt(myTotal, currency)}{" "}
+                    {t("budget.tracking.advanced")} {fmt(myPaid, currency)}
                   </span>
                 </h2>
                 <Bars slices={byCategory((e) => e.myShare)} total={myTotal} currency={currency} />
                 <h3 className="mt-4 mb-2 text-xs font-medium text-laiton uppercase tracking-wide">
-                  Avant / pendant / après
+                  {t("budget.tracking.phases")}
                 </h3>
                 <Bars slices={byPhase((e) => e.myShare)} total={myTotal} currency={currency} />
               </div>

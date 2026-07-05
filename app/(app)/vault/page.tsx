@@ -4,10 +4,11 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { CategoryIcon } from "@/components/vault/category-icon";
+import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 import {
-  CATEGORY_LABELS,
+  categoryLabel,
   isDocumentCategory,
   VAULT_CATEGORIES,
   type VaultDocument,
@@ -20,6 +21,7 @@ export default async function VaultPage({
 }) {
   const { category } = await searchParams;
   const activeCategory = category && isDocumentCategory(category) ? category : null;
+  const t = await getT();
 
   const supabase = await createClient();
   const {
@@ -44,13 +46,13 @@ export default async function VaultPage({
   return (
     <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="font-display text-3xl text-encre">Ton coffre</h1>
+        <h1 className="font-display text-3xl text-encre">{t("vault.title")}</h1>
         <div className="flex items-center gap-3">
           <Button asChild variant="outline">
-            <Link href="/vault/activity">Activité</Link>
+            <Link href="/vault/activity">{t("vault.activityLink")}</Link>
           </Button>
           <Button asChild>
-            <Link href="/vault/new">Ajouter un document</Link>
+            <Link href="/vault/new">{t("vault.add")}</Link>
           </Button>
         </div>
       </div>
@@ -65,7 +67,7 @@ export default async function VaultPage({
               : "border-laiton-clair bg-papier text-encre-douce hover:text-encre",
           )}
         >
-          Tous
+          {t("vault.filterAll")}
         </Link>
         {VAULT_CATEGORIES.map((c) => (
           <Link
@@ -78,7 +80,7 @@ export default async function VaultPage({
                 : "border-laiton-clair bg-papier text-encre-douce hover:text-encre",
             )}
           >
-            {CATEGORY_LABELS[c]}
+            {categoryLabel(t, c)}
           </Link>
         ))}
       </div>
@@ -86,14 +88,11 @@ export default async function VaultPage({
       {documents.length === 0 ? (
         <div className="flex flex-col items-center gap-4 rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-6 py-16 text-center">
           <p className="font-display text-2xl text-encre italic">
-            {activeCategory ? "Rien dans cette catégorie" : "Ton coffre est vide"}
+            {activeCategory ? t("vault.emptyCategoryTitle") : t("vault.emptyTitle")}
           </p>
-          <p className="max-w-sm text-sm text-encre-douce">
-            Passeport, carte d'identité, permis : confie-les à Phil, il les gardera sous clé et ne
-            les montrera qu'à qui tu décides.
-          </p>
+          <p className="max-w-sm text-sm text-encre-douce">{t("vault.emptyBody")}</p>
           <Button asChild className="mt-2">
-            <Link href="/vault/new">Ajouter un document</Link>
+            <Link href="/vault/new">{t("vault.add")}</Link>
           </Button>
         </div>
       ) : (
@@ -110,23 +109,24 @@ export default async function VaultPage({
                     {doc.file_name}
                   </span>
                   <span className="block text-xs text-encre-douce">
-                    {doc.label ?? CATEGORY_LABELS[doc.category]} · ajouté le{" "}
+                    {doc.label ?? categoryLabel(t, doc.category)} · {t("vault.addedOn")}{" "}
                     {format(parseISO(doc.uploaded_at), "d MMM yyyy", { locale: fr })}
                   </span>
                 </span>
                 {doc.expires_at ? (
                   parseISO(doc.expires_at) < new Date() ? (
                     <span className="shrink-0 rounded-full bg-bordeaux/10 px-2.5 py-0.5 text-xs font-medium text-bordeaux">
-                      Expiré
+                      {t("vault.expired")}
                     </span>
                   ) : parseISO(doc.expires_at) < addDays(new Date(), 90) ? (
                     <span className="shrink-0 rounded-full bg-laiton/20 px-2.5 py-0.5 text-xs font-medium text-laiton">
-                      Expire bientôt —{" "}
+                      {t("vault.expiresSoon")}{" "}
                       {format(parseISO(doc.expires_at), "d MMM yyyy", { locale: fr })}
                     </span>
                   ) : (
                     <span className="shrink-0 text-xs text-encre-douce">
-                      Expire le {format(parseISO(doc.expires_at), "d MMM yyyy", { locale: fr })}
+                      {t("vault.expiresOnPrefix")}{" "}
+                      {format(parseISO(doc.expires_at), "d MMM yyyy", { locale: fr })}
                     </span>
                   )
                 ) : null}

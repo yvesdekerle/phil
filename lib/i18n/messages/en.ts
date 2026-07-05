@@ -14,6 +14,18 @@ export const en: PartialMessages = {
     tips: "Tips",
     profileAria: "Your profile",
   },
+  tripTabs: {
+    aria: "Trip sections",
+    calendar: "Calendar",
+    map: "Map",
+    documents: "Documents",
+    ideas: "Ideas",
+    checklist: "Packing",
+    photos: "Photos",
+    budget: "Purse",
+    participants: "Travellers",
+    settings: "Settings",
+  },
   profileMenu: {
     profile: "Profile",
     exploration: "Exploration",

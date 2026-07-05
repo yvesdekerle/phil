@@ -4,6 +4,7 @@ import { Navigation } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { EventTypeIcon } from "@/components/calendar/event-type-icon";
+import { useT } from "@/components/i18n/provider";
 
 type HeroEvent = {
   id: string;
@@ -35,32 +36,37 @@ export function TodayHero({
   /** Lien Google Maps vers le prochain RDV (PHIL-Q13). */
   navigateToNext?: string | null;
 }) {
+  const t = useT();
   const [countdown, setCountdown] = useState<string | null>(null);
 
   useEffect(() => {
     if (!next) {
       return;
     }
+    const inWord = t("calendar.countdown.in");
+    const dayUnit = t("calendar.countdown.dayUnit");
+    const hourUnit = t("calendar.countdown.hourUnit");
+    const minUnit = t("calendar.countdown.minUnit");
     const tick = () => {
       const ms = new Date(next.startsAt).getTime() - Date.now();
       if (ms <= 0) {
-        setCountdown("c'est maintenant !");
+        setCountdown(t("calendar.countdown.now"));
         return;
       }
       const h = Math.floor(ms / 3_600_000);
       const m = Math.floor((ms % 3_600_000) / 60_000);
       setCountdown(
         h > 24
-          ? `dans ${Math.floor(h / 24)} j ${h % 24} h`
+          ? `${inWord} ${Math.floor(h / 24)} ${dayUnit} ${h % 24} ${hourUnit}`
           : h > 0
-            ? `dans ${h} h ${String(m).padStart(2, "0")}`
-            : `dans ${m} min`,
+            ? `${inWord} ${h} ${hourUnit} ${String(m).padStart(2, "0")}`
+            : `${inWord} ${m} ${minUnit}`,
       );
     };
     tick();
     const id = setInterval(tick, 30_000);
     return () => clearInterval(id);
-  }, [next]);
+  }, [next, t]);
 
   if (!current && !next) {
     return null;
@@ -70,14 +76,14 @@ export function TodayHero({
     <section className="rounded-lg border border-bordeaux/30 bg-gradient-to-br from-papier to-parchemin px-5 py-4">
       <div className="mb-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
         <span className="flex items-center gap-3">
-          <h2 className="font-display text-lg text-encre italic">Aujourd'hui</h2>
+          <h2 className="font-display text-lg text-encre italic">{t("calendar.today")}</h2>
           {weather}
         </span>
         <Link
           href={`/trips/${tripId}/day/${dayKey}`}
           className="text-xs text-encre-douce underline underline-offset-4 hover:text-encre"
         >
-          La journée heure par heure →
+          {t("calendar.todayHero.hourByHour")}
         </Link>
       </div>
       <div className="flex flex-col gap-2.5">
@@ -89,7 +95,7 @@ export function TodayHero({
             <EventTypeIcon type={current.type} className="size-8" />
             <span className="min-w-0 flex-1">
               <span className="block text-xs font-medium text-bordeaux uppercase">
-                En ce moment
+                {t("calendar.todayHero.now")}
               </span>
               <span className="block truncate text-sm font-medium text-encre">{current.title}</span>
               {current.location ? (
@@ -107,14 +113,15 @@ export function TodayHero({
               <EventTypeIcon type={next.type} className="size-8" />
               <span className="min-w-0 flex-1">
                 <span className="block text-xs font-medium text-laiton uppercase">
-                  Prochain départ {countdown ? `— ${countdown}` : ""}
+                  {t("calendar.todayHero.nextDeparture")} {countdown ? `— ${countdown}` : ""}
                 </span>
                 <span className="block truncate text-sm font-medium text-encre">
                   {next.time} · {next.title}
                 </span>
                 {next.location ? (
                   <span className="block truncate text-xs text-encre-douce">
-                    RDV : {next.location}
+                    {t("calendar.todayHero.meetPrefix")}
+                    {next.location}
                     {travelToNext ? ` · ${travelToNext}` : ""}
                   </span>
                 ) : travelToNext ? (
@@ -128,9 +135,9 @@ export function TodayHero({
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex shrink-0 items-center gap-1.5 rounded-full border border-bordeaux/40 bg-bordeaux/5 px-3 py-1.5 text-xs font-medium text-bordeaux transition-colors hover:bg-bordeaux hover:text-papier"
-                aria-label="Lancer la navigation Google Maps"
+                aria-label={t("calendar.todayHero.goAria")}
               >
-                <Navigation className="size-3.5" aria-hidden="true" /> Y aller
+                <Navigation className="size-3.5" aria-hidden="true" /> {t("calendar.todayHero.go")}
               </a>
             ) : null}
           </div>

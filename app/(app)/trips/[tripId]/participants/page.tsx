@@ -3,17 +3,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { waContactLink } from "@/lib/whatsapp";
 import { type FriendSuggestion, FriendSuggestions } from "./friend-suggestions";
 import { InviteSection } from "./invite-form";
 import { LeaveTripButton, ParticipantRowActions } from "./participant-actions";
-
-const ROLE_LABELS: Record<string, string> = {
-  OWNER: "Capitaine",
-  EDITOR: "Éditeur",
-  VIEWER: "Lecteur",
-};
 
 export default async function TripParticipantsPage({
   params,
@@ -21,6 +16,12 @@ export default async function TripParticipantsPage({
   params: Promise<{ tripId: string }>;
 }) {
   const { tripId } = await params;
+  const t = await getT();
+  const roleLabels: Record<string, string> = {
+    OWNER: t("participants.roleOwner"),
+    EDITOR: t("participants.roleEditor"),
+    VIEWER: t("participants.roleViewer"),
+  };
   const supabase = await createClient();
   const {
     data: { user },
@@ -67,12 +68,12 @@ export default async function TripParticipantsPage({
       .neq("id", tripId);
     const aboard = new Set(participants.map((p) => p.user_id));
     const seen = new Map<string, FriendSuggestion>();
-    for (const t of myTrips ?? []) {
-      for (const p of t.trip_participants) {
+    for (const tr of myTrips ?? []) {
+      for (const p of tr.trip_participants) {
         if (p.user_id !== user.id && !aboard.has(p.user_id) && !seen.has(p.user_id)) {
           seen.set(p.user_id, {
             userId: p.user_id,
-            name: p.profiles?.display_name ?? "Voyageur",
+            name: p.profiles?.display_name ?? t("participants.travelerFallback"),
             avatarUrl: p.profiles?.avatar_url ?? null,
           });
         }
@@ -87,7 +88,7 @@ export default async function TripParticipantsPage({
         <div>
           <Button asChild variant="outline">
             <a href={trip.whatsapp_group_url} target="_blank" rel="noopener noreferrer">
-              <MessageCircle aria-hidden="true" /> Groupe de discussion du voyage
+              <MessageCircle aria-hidden="true" /> {t("participants.groupChat")}
             </a>
           </Button>
         </div>
@@ -95,7 +96,7 @@ export default async function TripParticipantsPage({
       <ul className="flex flex-col gap-2">
         {participants.map((p) => {
           const profile = p.profiles;
-          const name = profile?.display_name ?? "Voyageur";
+          const name = profile?.display_name ?? t("participants.travelerFallback");
           const isMe = p.user_id === user.id;
           return (
             <li
@@ -117,7 +118,7 @@ export default async function TripParticipantsPage({
               )}
               <span className="min-w-0 flex-1 text-sm font-medium text-encre">
                 {name}
-                {isMe ? <span className="text-encre-douce"> (toi)</span> : null}
+                {isMe ? <span className="text-encre-douce">{t("participants.you")}</span> : null}
                 {profile?.whatsapp ? (
                   waContactLink(profile.whatsapp) ? (
                     <a
@@ -145,7 +146,7 @@ export default async function TripParticipantsPage({
                   role={p.role}
                 />
               ) : (
-                <span className="text-xs text-encre-douce">{ROLE_LABELS[p.role] ?? p.role}</span>
+                <span className="text-xs text-encre-douce">{roleLabels[p.role] ?? p.role}</span>
               )}
             </li>
           );
@@ -164,7 +165,7 @@ export default async function TripParticipantsPage({
           href={`/trips/${tripId}/emergency`}
           className="text-sm text-encre-douce underline underline-offset-4 hover:text-encre"
         >
-          Fiches d'urgence →
+          {t("participants.emergencyLink")}
         </Link>
       </div>
     </div>

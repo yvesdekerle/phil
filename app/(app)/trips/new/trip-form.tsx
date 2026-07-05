@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMemo, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -40,6 +41,7 @@ const formSchema = z
 type FormValues = z.infer<typeof formSchema>;
 
 export function TripForm({ defaultTimezone }: { defaultTimezone: string }) {
+  const t = useT();
   const [state, setState] = useState<CreateTripState>({ status: "idle" });
   const [pending, startTransition] = useTransition();
   const timezones = useMemo(() => Intl.supportedValuesOf("timeZone"), []);
@@ -79,7 +81,7 @@ export function TripForm({ defaultTimezone }: { defaultTimezone: string }) {
     <form onSubmit={onSubmit} className="flex flex-col gap-5">
       {/* PHIL-N03 : vierge ou template */}
       <div className="flex flex-col gap-2">
-        <Label>Point de départ</Label>
+        <Label>{t("newTrip.startPoint")}</Label>
         <div className="grid grid-cols-2 gap-2">
           <button
             type="button"
@@ -91,42 +93,48 @@ export function TripForm({ defaultTimezone }: { defaultTimezone: string }) {
                 : "border-laiton-clair bg-papier hover:bg-parchemin",
             )}
           >
-            <span className="block font-medium text-encre">Vierge</span>
-            <span className="text-xs text-encre-douce">Carnet blanc, tout à écrire.</span>
+            <span className="block font-medium text-encre">{t("newTrip.blank")}</span>
+            <span className="text-xs text-encre-douce">{t("newTrip.blankDesc")}</span>
           </button>
-          {TRIP_TEMPLATES.map((t) => (
+          {TRIP_TEMPLATES.map((tpl) => (
             <button
-              key={t.key}
+              key={tpl.key}
               type="button"
-              onClick={() => setTemplate(t.key)}
+              onClick={() => setTemplate(tpl.key)}
               className={cn(
                 "rounded-md border px-3 py-2.5 text-left text-sm transition-colors",
-                template === t.key
+                template === tpl.key
                   ? "border-bordeaux bg-bordeaux/5"
                   : "border-laiton-clair bg-papier hover:bg-parchemin",
               )}
             >
-              <span className="block font-medium text-encre">{t.name}</span>
-              <span className="text-xs text-encre-douce">{t.description}</span>
+              <span className="block font-medium text-encre">{tpl.name}</span>
+              <span className="text-xs text-encre-douce">{tpl.description}</span>
             </button>
           ))}
         </div>
         {template ? (
           <p className="text-xs text-encre-douce">
-            {TRIP_TEMPLATES.find((t) => t.key === template)?.ideas.length} idées seront pré-remplies
-            dans le carnet d'envies.
+            {t("newTrip.templateHint").replace(
+              "{count}",
+              String(TRIP_TEMPLATES.find((tpl) => tpl.key === template)?.ideas.length ?? 0),
+            )}
           </p>
         ) : null}
       </div>
       <div className="flex flex-col gap-2">
-        <Label htmlFor="name">Nom du voyage</Label>
-        <Input id="name" placeholder="Tour du monde, ou presque" {...register("name")} />
+        <Label htmlFor="name">{t("newTrip.name")}</Label>
+        <Input id="name" placeholder={t("newTrip.namePlaceholder")} {...register("name")} />
         {errors.name ? <p className="text-sm text-bordeaux">{errors.name.message}</p> : null}
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="destination">Destination</Label>
-        <Input id="destination" placeholder="Île Maurice" {...register("destination")} />
+        <Label htmlFor="destination">{t("newTrip.destination")}</Label>
+        <Input
+          id="destination"
+          placeholder={t("newTrip.destinationPlaceholder")}
+          {...register("destination")}
+        />
         {errors.destination ? (
           <p className="text-sm text-bordeaux">{errors.destination.message}</p>
         ) : null}
@@ -134,14 +142,14 @@ export function TripForm({ defaultTimezone }: { defaultTimezone: string }) {
 
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="startDate">Départ</Label>
+          <Label htmlFor="startDate">{t("newTrip.startDate")}</Label>
           <Input id="startDate" type="date" {...register("startDate")} />
           {errors.startDate ? (
             <p className="text-sm text-bordeaux">{errors.startDate.message}</p>
           ) : null}
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="endDate">Retour</Label>
+          <Label htmlFor="endDate">{t("newTrip.endDate")}</Label>
           <Input id="endDate" type="date" {...register("endDate")} />
           {errors.endDate ? (
             <p className="text-sm text-bordeaux">{errors.endDate.message}</p>
@@ -150,7 +158,7 @@ export function TripForm({ defaultTimezone }: { defaultTimezone: string }) {
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="coverImageUrl">Image de couverture (URL, optionnel)</Label>
+        <Label htmlFor="coverImageUrl">{t("newTrip.coverUrl")}</Label>
         <Input
           id="coverImageUrl"
           type="url"
@@ -163,7 +171,7 @@ export function TripForm({ defaultTimezone }: { defaultTimezone: string }) {
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="timezone">Fuseau horaire de la destination</Label>
+        <Label htmlFor="timezone">{t("newTrip.timezone")}</Label>
         <Select value={watch("timezone")} onValueChange={(v) => setValue("timezone", v)}>
           <SelectTrigger id="timezone" className="w-full">
             <SelectValue />
@@ -176,14 +184,12 @@ export function TripForm({ defaultTimezone }: { defaultTimezone: string }) {
             ))}
           </SelectContent>
         </Select>
-        <p className="text-xs text-encre-douce">
-          Les horaires des événements du voyage s'afficheront dans ce fuseau par défaut.
-        </p>
+        <p className="text-xs text-encre-douce">{t("newTrip.timezoneHint")}</p>
       </div>
 
       <div className="flex items-center gap-4">
         <Button type="submit" disabled={pending}>
-          {pending ? "Phil prépare les malles…" : "Créer le voyage"}
+          {pending ? t("newTrip.submitting") : t("newTrip.submit")}
         </Button>
         {state.status === "error" ? <p className="text-sm text-bordeaux">{state.message}</p> : null}
       </div>

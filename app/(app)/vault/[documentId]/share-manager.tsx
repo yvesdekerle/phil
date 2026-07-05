@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState, useTransition } from "react";
+import { useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -30,6 +31,7 @@ type Member = { userId: string; name: string };
  * (tout l'équipage, ou une personne précise).
  */
 export function ShareManager({ documentId, shares }: { documentId: string; shares: Share[] }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -77,7 +79,10 @@ export function ShareManager({ documentId, shares }: { documentId: string; share
     setMembers(
       (data ?? [])
         .filter((m) => m.user_id !== myId)
-        .map((m) => ({ userId: m.user_id, name: m.profiles?.display_name ?? "Voyageur" })),
+        .map((m) => ({
+          userId: m.user_id,
+          name: m.profiles?.display_name ?? t("documents.share.memberFallback"),
+        })),
     );
   }
 
@@ -107,22 +112,24 @@ export function ShareManager({ documentId, shares }: { documentId: string; share
   return (
     <section className="rounded-lg border border-laiton-clair bg-papier px-5 py-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-medium text-encre">Partages</h2>
+        <h2 className="text-sm font-medium text-encre">{t("documents.share.heading")}</h2>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button variant="outline" size="sm">
-              Partager avec un voyage
+              {t("documents.share.shareButton")}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
-                {selectedTrip ? `${selectedTrip.name} — avec qui ?` : "Partager avec un voyage"}
+                {selectedTrip
+                  ? `${selectedTrip.name}${t("documents.share.withWhoSuffix")}`
+                  : t("documents.share.dialogTitleDefault")}
               </DialogTitle>
               <DialogDescription>
                 {selectedTrip
-                  ? "Tout l'équipage, ou une seule personne (les autres ne verront rien)."
-                  : "Le document reste dans ton coffre ; tu choisis qui peut le consulter."}
+                  ? t("documents.share.dialogDescStep2")
+                  : t("documents.share.dialogDescStep1")}
               </DialogDescription>
             </DialogHeader>
 
@@ -130,7 +137,7 @@ export function ShareManager({ documentId, shares }: { documentId: string; share
               <div className="flex max-h-72 flex-col gap-2 overflow-y-auto py-1">
                 {trips.length === 0 ? (
                   <p className="px-2 py-6 text-center text-sm text-encre-douce">
-                    {loaded ? "Aucun voyage actif." : "Chargement…"}
+                    {loaded ? t("documents.share.noActiveTrip") : t("documents.share.loading")}
                   </p>
                 ) : (
                   trips.map((trip) => (
@@ -145,7 +152,9 @@ export function ShareManager({ documentId, shares }: { documentId: string; share
                         <span className="block truncate font-medium text-encre">{trip.name}</span>
                         <span className="text-xs text-encre-douce">{trip.destination}</span>
                       </span>
-                      <span className="shrink-0 text-xs text-encre-douce">Choisir →</span>
+                      <span className="shrink-0 text-xs text-encre-douce">
+                        {t("documents.share.choose")}
+                      </span>
                     </button>
                   ))
                 )}
@@ -154,8 +163,8 @@ export function ShareManager({ documentId, shares }: { documentId: string; share
               <div className="flex max-h-72 flex-col gap-2 overflow-y-auto py-1">
                 <label className="flex items-center justify-between gap-3 rounded-md border border-laiton-clair/60 bg-parchemin/40 px-3 py-2 text-xs text-encre-douce">
                   <span>
-                    Jusqu'au{" "}
-                    <span className="text-encre">(vide = permanent, défaut = fin du voyage)</span>
+                    {t("documents.share.until")}{" "}
+                    <span className="text-encre">{t("documents.share.untilHint")}</span>
                   </span>
                   <input
                     type="date"
@@ -170,16 +179,20 @@ export function ShareManager({ documentId, shares }: { documentId: string; share
                   onClick={() => share(selectedTrip.id, null)}
                   className="flex items-center justify-between gap-3 rounded-md border border-bordeaux/40 bg-bordeaux/5 px-3 py-2.5 text-left text-sm transition-colors hover:bg-bordeaux/10 disabled:opacity-50"
                 >
-                  <span className="font-medium text-encre">Tout l'équipage</span>
+                  <span className="font-medium text-encre">{t("documents.share.wholeCrew")}</span>
                   <span className="shrink-0 text-xs text-encre-douce">
-                    {crewShareTripIds.includes(selectedTrip.id) ? "Déjà partagé" : "Partager"}
+                    {crewShareTripIds.includes(selectedTrip.id)
+                      ? t("documents.share.alreadyShared")
+                      : t("documents.share.share")}
                   </span>
                 </button>
                 {members === null ? (
-                  <p className="px-2 py-4 text-center text-sm text-encre-douce">Chargement…</p>
+                  <p className="px-2 py-4 text-center text-sm text-encre-douce">
+                    {t("documents.share.loading")}
+                  </p>
                 ) : members.length === 0 ? (
                   <p className="px-2 py-4 text-center text-sm text-encre-douce">
-                    Personne d'autre à bord pour l'instant.
+                    {t("documents.share.noOneAboard")}
                   </p>
                 ) : (
                   members.map((m) => {
@@ -194,9 +207,14 @@ export function ShareManager({ documentId, shares }: { documentId: string; share
                         onClick={() => share(selectedTrip.id, m.userId)}
                         className="flex items-center justify-between gap-3 rounded-md border border-laiton-clair bg-papier px-3 py-2.5 text-left text-sm transition-colors hover:bg-parchemin disabled:opacity-50"
                       >
-                        <span className="font-medium text-encre">Seulement {m.name}</span>
+                        <span className="font-medium text-encre">
+                          {t("documents.share.onlyPrefix")}
+                          {m.name}
+                        </span>
                         <span className="shrink-0 text-xs text-encre-douce">
-                          {already ? "Déjà partagé" : "Partager"}
+                          {already
+                            ? t("documents.share.alreadyShared")
+                            : t("documents.share.share")}
                         </span>
                       </button>
                     );
@@ -207,7 +225,7 @@ export function ShareManager({ documentId, shares }: { documentId: string; share
                   onClick={() => setSelectedTrip(null)}
                   className="mt-1 text-left text-xs text-encre-douce underline underline-offset-4"
                 >
-                  ← Changer de voyage
+                  {t("documents.share.changeTrip")}
                 </button>
               </div>
             )}
@@ -216,7 +234,7 @@ export function ShareManager({ documentId, shares }: { documentId: string; share
       </div>
 
       {shares.length === 0 ? (
-        <p className="mt-3 text-sm text-encre-douce">Privé — toi seul peux voir ce document.</p>
+        <p className="mt-3 text-sm text-encre-douce">{t("documents.share.private")}</p>
       ) : (
         <ul className="mt-3 flex flex-col gap-2">
           {shares.map((s) => (
@@ -228,9 +246,11 @@ export function ShareManager({ documentId, shares }: { documentId: string; share
                 <span className="font-medium">{s.tripName}</span>
                 <span className="text-encre-douce">
                   {" — "}
-                  {s.recipientName ? `seulement ${s.recipientName}` : "tout l'équipage"}
+                  {s.recipientName
+                    ? `${t("documents.share.onlyRecipientPrefix")}${s.recipientName}`
+                    : t("documents.share.wholeCrewList")}
                   {s.expiresAt
-                    ? ` · expire le ${new Date(s.expiresAt).toLocaleDateString("fr-FR")}`
+                    ? ` · ${t("documents.share.expiresListPrefix")} ${new Date(s.expiresAt).toLocaleDateString("fr-FR")}`
                     : ""}
                 </span>
               </span>
@@ -241,7 +261,7 @@ export function ShareManager({ documentId, shares }: { documentId: string; share
                 disabled={pending}
                 onClick={() => unshare(s.shareId)}
               >
-                Retirer
+                {t("documents.share.remove")}
               </Button>
             </li>
           ))}

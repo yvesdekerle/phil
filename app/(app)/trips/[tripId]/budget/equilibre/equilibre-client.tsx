@@ -4,6 +4,7 @@ import { Lock, LockOpen } from "lucide-react";
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { Money } from "@/components/budget/money";
+import { useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import type { Balance, Settlement } from "@/lib/budget/balances";
 import { cn } from "@/lib/utils";
@@ -38,8 +39,11 @@ export function EquilibreClient({
   closedAt: string | null;
 }) {
   const [pending, startTransition] = useTransition();
+  const t = useT();
   const nameOf = (id: string) =>
-    id === myId ? "Toi" : (members.find((m) => m.userId === id)?.name ?? "Voyageur");
+    id === myId
+      ? t("budget.common.you")
+      : (members.find((m) => m.userId === id)?.name ?? t("budget.common.traveler"));
   const fmt = (n: number) =>
     `${n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`;
   const sub = (n: number) => (secondaryCurrency && secondaryRate ? n * secondaryRate : null);
@@ -62,23 +66,25 @@ export function EquilibreClient({
       >
         <p className="font-display text-xl text-encre">
           {myNet > 0.01
-            ? `🤑 On te doit ${fmt(myNet)}`
+            ? `🤑 ${t("budget.balance.owedToYou")} ${fmt(myNet)}`
             : myNet < -0.01
-              ? `Tu dois ${fmt(-myNet)}`
-              : "Tu es à l'équilibre — les comptes sont bons."}
+              ? `${t("budget.balance.youOwe")} ${fmt(-myNet)}`
+              : t("budget.balance.settled")}
         </p>
         {nextPayerId ? (
           <p className="mt-1 text-sm text-encre-douce">
-            La prochaine dépense devrait être payée par{" "}
-            <span className="font-medium text-encre">{nameOf(nextPayerId)}</span> — c'est lui/elle
-            qui rattrape le mieux les comptes.
+            {t("budget.balance.nextPayerPrefix")}{" "}
+            <span className="font-medium text-encre">{nameOf(nextPayerId)}</span>{" "}
+            {t("budget.balance.nextPayerSuffix")}
           </p>
         ) : null}
       </div>
 
       {/* Équilibres */}
       <section className="rounded-lg border border-laiton-clair bg-papier px-4 py-3">
-        <h2 className="mb-2 text-sm font-medium text-encre">Équilibres ({currency})</h2>
+        <h2 className="mb-2 text-sm font-medium text-encre">
+          {t("budget.balance.balancesTitle")} ({currency})
+        </h2>
         <div className="flex flex-col gap-1">
           {balances.map((b) => (
             <p key={b.userId} className="flex items-baseline justify-between gap-2 text-sm">
@@ -104,14 +110,16 @@ export function EquilibreClient({
       {/* Règlements */}
       {settlements.length > 0 ? (
         <section className="rounded-lg border border-laiton-clair bg-papier px-4 py-3">
-          <h2 className="mb-2 text-xs font-medium text-laiton uppercase">Pour s'équilibrer</h2>
+          <h2 className="mb-2 text-xs font-medium text-laiton uppercase">
+            {t("budget.balance.toSettle")}
+          </h2>
           {settlements.map((s) => (
             <p
               key={`${s.from}-${s.to}`}
               className="flex flex-wrap items-center justify-between gap-2 py-1 text-sm text-encre"
             >
               <span className="flex flex-wrap items-baseline gap-x-1">
-                {nameOf(s.from)} doit{" "}
+                {nameOf(s.from)} {t("budget.balance.owes")}{" "}
                 <Money
                   amount={s.amount}
                   currency={currency}
@@ -120,7 +128,7 @@ export function EquilibreClient({
                   align="start"
                   className="font-medium"
                 />{" "}
-                à {nameOf(s.to)}
+                {t("budget.balance.to")} {nameOf(s.to)}
               </span>
               <button
                 type="button"
@@ -129,20 +137,20 @@ export function EquilibreClient({
                   startTransition(async () => {
                     const r = await markSettled(tripId, s.from, s.to, s.amount, currency);
                     if (!r.ok) {
-                      toast.error(r.message ?? "Action impossible.");
+                      toast.error(r.message ?? t("budget.toast.actionFailed"));
                     }
                   })
                 }
                 className="shrink-0 rounded-full border border-laiton-clair px-2.5 py-0.5 text-xs text-encre-douce transition-colors hover:border-bordeaux hover:text-bordeaux"
-                title="Enregistre le remboursement et remet les soldes à jour"
+                title={t("budget.balance.markSettledTitle")}
               >
-                Marquer comme réglé
+                {t("budget.balance.markSettled")}
               </button>
             </p>
           ))}
         </section>
       ) : (
-        <p className="text-sm text-encre-douce">Rien à régler — l'équipage est à l'équilibre. 🎩</p>
+        <p className="text-sm text-encre-douce">{t("budget.balance.nothingToSettle")}</p>
       )}
 
       {/* Clore / rouvrir la Bourse */}
@@ -151,9 +159,9 @@ export function EquilibreClient({
           {closedAt ? (
             <>
               <p className="min-w-0 flex-1 text-xs text-encre-douce">
-                Bourse close le{" "}
+                {t("budget.close.closedOnPrefix")}{" "}
                 {new Intl.DateTimeFormat("fr-FR", { dateStyle: "long" }).format(new Date(closedAt))}
-                . Les règlements restent possibles, l'ajout de dépenses est gelé.
+                {t("budget.close.closedOnSuffix")}
               </p>
               <Button
                 type="button"
@@ -163,19 +171,18 @@ export function EquilibreClient({
                   startTransition(async () => {
                     const r = await setPurseClosed(tripId, false);
                     if (!r.ok) {
-                      toast.error(r.message ?? "Action impossible.");
+                      toast.error(r.message ?? t("budget.toast.actionFailed"));
                     }
                   })
                 }
               >
-                <LockOpen aria-hidden="true" /> Rouvrir
+                <LockOpen aria-hidden="true" /> {t("budget.close.reopen")}
               </Button>
             </>
           ) : (
             <>
               <p className="min-w-0 flex-1 text-xs text-encre-douce">
-                Quand les derniers relevés sont passés et que tout est saisi, clos la Bourse : plus
-                d&apos;ajout possible et tout le monde arrive directement sur cet écran.
+                {t("budget.close.closeHint")}
               </p>
               <Button
                 type="button"
@@ -185,12 +192,12 @@ export function EquilibreClient({
                   startTransition(async () => {
                     const r = await setPurseClosed(tripId, true);
                     if (!r.ok) {
-                      toast.error(r.message ?? "Action impossible.");
+                      toast.error(r.message ?? t("budget.toast.actionFailed"));
                     }
                   })
                 }
               >
-                <Lock aria-hidden="true" /> Clore la Bourse
+                <Lock aria-hidden="true" /> {t("budget.close.close")}
               </Button>
             </>
           )}

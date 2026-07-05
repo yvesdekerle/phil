@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
+import { useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import { offlineDb } from "@/lib/offline/db";
 import { isDocumentOffline, saveDocumentOffline } from "@/lib/offline/documents";
@@ -8,6 +9,7 @@ import { type SyncResult, syncTrip } from "@/lib/offline/sync";
 
 /** Bouton « Préparer pour offline » avec horodatage de dernière synchro (PHIL-I03). */
 export function PrepareOfflineButton({ tripId }: { tripId: string }) {
+  const t = useT();
   const [last, setLast] = useState<SyncResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [fullStatus, setFullStatus] = useState<string | null>(null);
@@ -30,10 +32,10 @@ export function PrepareOfflineButton({ tripId }: { tripId: string }) {
         if (result) {
           setLast(result);
         } else {
-          setError("Synchronisation impossible.");
+          setError(t("offline.syncFailed"));
         }
       } catch {
-        setError("Synchronisation impossible — vérifie ta connexion.");
+        setError(t("offline.syncFailedNet"));
       }
     });
   }
@@ -46,7 +48,7 @@ export function PrepareOfflineButton({ tripId }: { tripId: string }) {
       try {
         const result = await syncTrip(tripId);
         if (!result) {
-          setError("Synchronisation impossible.");
+          setError(t("offline.syncFailed"));
           return;
         }
         setLast(result);
@@ -55,7 +57,11 @@ export function PrepareOfflineButton({ tripId }: { tripId: string }) {
         let skipped = 0;
         let failed = 0;
         for (const [i, doc] of docs.entries()) {
-          setFullStatus(`Documents : ${i + 1}/${docs.length}…`);
+          setFullStatus(
+            t("offline.docsProgress")
+              .replace("{current}", String(i + 1))
+              .replace("{total}", String(docs.length)),
+          );
           if (await isDocumentOffline(doc.id)) {
             skipped++;
             continue;
@@ -68,11 +74,14 @@ export function PrepareOfflineButton({ tripId }: { tripId: string }) {
             setError(r.message);
           }
         }
-        setFullStatus(
-          `Tout est dans la malle : ${saved + skipped}/${docs.length} documents offline${failed > 0 ? ` (${failed} en échec)` : ""}.`,
-        );
+        const base = t("offline.allSaved")
+          .replace("{done}", String(saved + skipped))
+          .replace("{total}", String(docs.length));
+        const suffix =
+          failed > 0 ? t("offline.allSavedFailed").replace("{failed}", String(failed)) : "";
+        setFullStatus(`${base}${suffix}.`);
       } catch {
-        setError("Préparation impossible — vérifie ta connexion.");
+        setError(t("offline.prepareFailed"));
         setFullStatus(null);
       }
     });
@@ -80,26 +89,27 @@ export function PrepareOfflineButton({ tripId }: { tripId: string }) {
 
   return (
     <div className="flex flex-col gap-2 rounded-lg border border-laiton-clair bg-papier px-5 py-4">
-      <p className="text-sm font-medium text-encre">Lecture offline</p>
-      <p className="text-xs text-encre-douce">
-        Garde le programme, les documents et les idées consultables sans réseau — utile une fois sur
-        place.
-      </p>
+      <p className="text-sm font-medium text-encre">{t("offline.prepareTitle")}</p>
+      <p className="text-xs text-encre-douce">{t("offline.prepareHint")}</p>
       <div className="flex flex-wrap items-center gap-3">
         <Button type="button" variant="outline" disabled={pending} onClick={prepare}>
-          {pending ? "Phil remplit la malle…" : "Préparer pour offline"}
+          {pending ? t("offline.preparing") : t("offline.prepare")}
         </Button>
         <Button type="button" disabled={pending} onClick={prepareAll}>
-          Tout préparer (documents inclus)
+          {t("offline.prepareAll")}
         </Button>
         {fullStatus ? <p className="text-xs text-encre-douce">{fullStatus}</p> : null}
         {last ? (
           <p className="text-xs text-encre-douce">
-            Synchronisé le{" "}
+            {t("offline.syncedAt")}{" "}
             {new Intl.DateTimeFormat("fr-FR", { dateStyle: "short", timeStyle: "short" }).format(
               new Date(last.syncedAt),
             )}{" "}
-            · {last.eventCount} événements, {last.documentCount} documents, {last.ideaCount} idées
+            ·{" "}
+            {t("offline.syncSummary")
+              .replace("{events}", String(last.eventCount))
+              .replace("{documents}", String(last.documentCount))
+              .replace("{ideas}", String(last.ideaCount))}
           </p>
         ) : null}
         {error ? <p className="text-xs text-bordeaux">{error}</p> : null}

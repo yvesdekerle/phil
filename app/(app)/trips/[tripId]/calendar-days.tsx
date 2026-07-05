@@ -4,6 +4,7 @@ import { Search } from "lucide-react";
 import Link from "next/link";
 import { useDeferredValue, useMemo, useState } from "react";
 import { EventTypeIcon } from "@/components/calendar/event-type-icon";
+import { useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import { eventTime, groupEventsByDay } from "@/lib/events/datetime";
 import type { TripEvent } from "@/lib/events/types";
@@ -26,6 +27,7 @@ export function CalendarDays({
   todayKey: string | null;
   canEdit: boolean;
 }) {
+  const t = useT();
   const [query, setQuery] = useState("");
   const deferredQuery = useDeferredValue(query);
 
@@ -50,7 +52,7 @@ export function CalendarDays({
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Rechercher dans le programme…"
+            placeholder={t("calendar.searchPlaceholder")}
             className="h-8 w-full rounded-full border border-laiton-clair bg-papier pr-3 pl-8 text-sm text-encre placeholder:text-encre-douce/70 focus:outline-none focus:ring-1 focus:ring-laiton"
           />
         </div>
@@ -58,25 +60,21 @@ export function CalendarDays({
 
       {days.length > 0 ? (
         <p className="-mt-3 -mb-3 text-right text-xs text-encre-douce">
-          Heures affichées en heure locale de chaque événement.
+          {t("calendar.localTimeNote")}
         </p>
       ) : null}
 
       {days.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-6 py-14 text-center">
           <p className="font-display text-xl text-encre italic">
-            {deferredQuery
-              ? "Rien ne correspond à cette recherche"
-              : "Aucun événement pour l'instant"}
+            {deferredQuery ? t("calendar.searchEmptyTitle") : t("calendar.emptyTitle")}
           </p>
           <p className="max-w-sm text-sm text-encre-douce">
-            {deferredQuery
-              ? "Essaie un autre mot — la recherche tolère les accents et les petites fautes."
-              : "Même Phileas prenait des pauses — mais un vol, un hôtel ou une plongée, ça se note."}
+            {deferredQuery ? t("calendar.searchEmptyBody") : t("calendar.emptyBody")}
           </p>
           {canEdit && !deferredQuery ? (
             <Button asChild className="mt-1">
-              <Link href={`/trips/${tripId}/events/new`}>Ajouter un événement</Link>
+              <Link href={`/trips/${tripId}/events/new`}>{t("calendar.addEvent")}</Link>
             </Button>
           ) : null}
         </div>
@@ -93,13 +91,13 @@ export function CalendarDays({
                 <Link
                   href={`/trips/${tripId}/day/${day.dayKey}`}
                   className="underline-offset-4 hover:underline"
-                  title="Voir la journée heure par heure"
+                  title={t("calendar.dayLinkTitle")}
                 >
                   {day.label}
                 </Link>
                 {day.dayKey === todayKey ? (
                   <span className="rounded-full bg-bordeaux px-2 py-0.5 text-[0.65rem] font-medium text-papier uppercase">
-                    Aujourd'hui
+                    {t("calendar.today")}
                   </span>
                 ) : null}
               </h2>

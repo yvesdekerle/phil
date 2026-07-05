@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useT } from "@/components/i18n/provider";
 import { cn } from "@/lib/utils";
 
 /**
@@ -15,6 +16,7 @@ export function TripViewToggle({
   active: "calendar" | "timeline";
 }) {
   const router = useRouter();
+  const t = useT();
 
   const go = (view: "calendar" | "timeline") => {
     if (view === active) {
@@ -45,8 +47,8 @@ export function TripViewToggle({
 
   return (
     <div className="inline-flex items-center gap-0.5 rounded-full border border-laiton-clair bg-papier p-0.5">
-      {seg("calendar", "Calendrier")}
-      {seg("timeline", "Timeline")}
+      {seg("calendar", t("calendar.viewToggle.calendar"))}
+      {seg("timeline", t("calendar.viewToggle.timeline"))}
     </div>
   );
 }

@@ -1,20 +1,25 @@
 import Link from "next/link";
+import { getT } from "@/lib/i18n/server";
 
-export const metadata = { title: "Mentions légales — Phil" };
+export async function generateMetadata() {
+  const t = await getT();
+  return { title: t("legal.metaTitle") };
+}
 
-export default function LegalPage() {
+export default async function LegalPage() {
+  const t = await getT();
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-10">
       <Link href="/" className="text-sm text-encre-douce underline underline-offset-4">
-        ← Retour
+        {t("legal.back")}
       </Link>
-      <h1 className="mt-4 font-display text-3xl text-encre">Mentions légales</h1>
+      <h1 className="mt-4 font-display text-3xl text-encre">{t("legal.title")}</h1>
 
       <div className="mt-6 flex flex-col gap-6 text-sm leading-relaxed text-encre-douce">
         <section>
-          <h2 className="font-display text-xl text-encre">Éditeur</h2>
+          <h2 className="font-display text-xl text-encre">{t("legal.publisher")}</h2>
           <p className="mt-2">
-            Phil est un projet personnel et non commercial édité par Yves Dekerle. Contact :{" "}
+            {t("legal.publisherBody")}
             <a href="mailto:yves.dekerle@gmail.com" className="underline underline-offset-4">
               yves.dekerle@gmail.com
             </a>
@@ -23,35 +28,32 @@ export default function LegalPage() {
         </section>
 
         <section>
-          <h2 className="font-display text-xl text-encre">Hébergement</h2>
+          <h2 className="font-display text-xl text-encre">{t("legal.hosting")}</h2>
           <p className="mt-2">
-            Application : Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, États-Unis.
+            {t("legal.hostingApp")}
             <br />
-            Données et fichiers : Supabase (projet hébergé en Union européenne, Irlande).
+            {t("legal.hostingData")}
           </p>
         </section>
 
         <section>
-          <h2 className="font-display text-xl text-encre">Accès au service</h2>
-          <p className="mt-2">
-            Phil est réservé à un cercle privé, sur invitation. Il ne s'agit pas d'un service ouvert
-            au public ni d'une offre commerciale.
-          </p>
+          <h2 className="font-display text-xl text-encre">{t("legal.access")}</h2>
+          <p className="mt-2">{t("legal.accessBody")}</p>
         </section>
 
         <section>
-          <h2 className="font-display text-xl text-encre">Données personnelles</h2>
+          <h2 className="font-display text-xl text-encre">{t("legal.personalData")}</h2>
           <p className="mt-2">
-            Voir la{" "}
+            {t("legal.personalDataPre")}
             <Link href="/privacy" className="underline underline-offset-4">
-              politique de confidentialité
+              {t("legal.privacyLink")}
             </Link>
             .
           </p>
         </section>
       </div>
 
-      <p className="mt-10 text-xs text-encre-douce">Dernière mise à jour : juillet 2026.</p>
+      <p className="mt-10 text-xs text-encre-douce">{t("legal.updated")}</p>
     </main>
   );
 }

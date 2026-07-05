@@ -2,6 +2,7 @@
 
 import { Check, Copy, Globe } from "lucide-react";
 import { useState, useTransition } from "react";
+import { useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import { setPublicSharing } from "./actions";
 
@@ -15,6 +16,7 @@ export function PublicShareCard({
   token: string | null;
   baseUrl: string;
 }) {
+  const t = useT();
   const [pending, startTransition] = useTransition();
   const [copied, setCopied] = useState(false);
   const url = token ? `${baseUrl}/p/${token}` : null;
@@ -22,12 +24,10 @@ export function PublicShareCard({
   return (
     <section className="rounded-lg border border-laiton-clair bg-papier px-4 py-3">
       <h2 className="mb-1 flex items-center gap-2 text-sm font-medium text-encre">
-        <Globe className="size-4 text-laiton" aria-hidden="true" /> Partage public
+        <Globe className="size-4 text-laiton" aria-hidden="true" />{" "}
+        {t("settings.publicShare.title")}
       </h2>
-      <p className="text-xs text-encre-douce">
-        Un lien en lecture seule pour montrer l&apos;itinéraire et la carte à ceux qui restent au
-        port — jamais les documents, le budget ni les fiches d&apos;urgence.
-      </p>
+      <p className="text-xs text-encre-douce">{t("settings.publicShare.desc")}</p>
       {url ? (
         <div className="mt-2 flex flex-wrap items-center gap-2">
           <code className="min-w-0 flex-1 truncate rounded bg-parchemin px-2 py-1 text-xs">
@@ -44,7 +44,7 @@ export function PublicShareCard({
             }}
           >
             {copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
-            {copied ? "Copié" : "Copier"}
+            {copied ? t("settings.publicShare.copied") : t("settings.publicShare.copy")}
           </Button>
           <Button
             type="button"
@@ -53,7 +53,7 @@ export function PublicShareCard({
             disabled={pending}
             onClick={() => startTransition(() => setPublicSharing(tripId, false))}
           >
-            Révoquer
+            {t("settings.publicShare.revoke")}
           </Button>
         </div>
       ) : (
@@ -65,7 +65,7 @@ export function PublicShareCard({
             disabled={pending}
             onClick={() => startTransition(() => setPublicSharing(tripId, true))}
           >
-            {pending ? "Création…" : "Créer le lien public"}
+            {pending ? t("settings.publicShare.creating") : t("settings.publicShare.createBtn")}
           </Button>
         </div>
       )}

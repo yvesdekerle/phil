@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { getT } from "@/lib/i18n/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { areUuids } from "@/lib/validation";
@@ -21,8 +22,9 @@ export async function deleteTripDocument(
   tripId: string,
   documentId: string,
 ): Promise<TripDocActionState> {
+  const t = await getT();
   if (!areUuids(tripId, documentId)) {
-    return { status: "error", message: "Identifiants invalides." };
+    return { status: "error", message: t("tripDocs.invalidIds") };
   }
 
   const supabase = await createClient();
@@ -41,7 +43,7 @@ export async function deleteTripDocument(
 
   if (!doc || doc.scope !== "TRIP" || doc.trip_id !== tripId) {
     // Les documents du coffre partagés se gèrent depuis le coffre (partage/retrait).
-    return { status: "error", message: "Document introuvable dans ce voyage." };
+    return { status: "error", message: t("tripDocs.notFound") };
   }
 
   const { error, count } = await supabase
@@ -52,7 +54,7 @@ export async function deleteTripDocument(
   if (error || count === 0) {
     return {
       status: "error",
-      message: "Suppression refusée — il faut être l'auteur du document ou capitaine.",
+      message: t("tripDocs.deleteDenied"),
     };
   }
 
@@ -66,5 +68,5 @@ export async function deleteTripDocument(
   });
 
   revalidatePath(`/trips/${tripId}/documents`);
-  return { status: "success", message: "Document supprimé." };
+  return { status: "success", message: t("tripDocs.deleted") };
 }

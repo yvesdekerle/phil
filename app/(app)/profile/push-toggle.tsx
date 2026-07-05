@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
+import { useT } from "@/components/i18n/provider";
 import { Switch } from "@/components/ui/switch";
 import { deletePushSubscription, savePushSubscription } from "./push-actions";
 
@@ -10,6 +11,7 @@ import { deletePushSubscription, savePushSubscription } from "./push-actions";
  * ce réglage-ci décide seulement si l'appareil reçoit quelque chose.
  */
 export function PushToggle() {
+  const t = useT();
   const [supported, setSupported] = useState(false);
   const [enabled, setEnabled] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,7 +36,7 @@ export function PushToggle() {
         if (next) {
           const permission = await Notification.requestPermission();
           if (permission !== "granted") {
-            setError("Notifications refusées par le navigateur.");
+            setError(t("profile.push.denied"));
             return;
           }
           const sub = await reg.pushManager.subscribe({
@@ -44,7 +46,7 @@ export function PushToggle() {
           const result = await savePushSubscription(sub.toJSON());
           if (!result.ok) {
             await sub.unsubscribe();
-            setError("Enregistrement impossible.");
+            setError(t("profile.push.saveFailed"));
             return;
           }
           setEnabled(true);
@@ -58,29 +60,22 @@ export function PushToggle() {
         }
       } catch (e) {
         console.error(e);
-        setError("Cet appareil n'a pas pu s'abonner (service worker requis — en prod).");
+        setError(t("profile.push.subscribeFailed"));
       }
     });
   }
 
   if (!supported) {
-    return (
-      <p className="text-xs text-encre-douce">
-        Notifications push non prises en charge par ce navigateur.
-      </p>
-    );
+    return <p className="text-xs text-encre-douce">{t("profile.push.unsupported")}</p>;
   }
 
   return (
     <div className="flex flex-col gap-1.5">
       <label htmlFor="push-device" className="flex items-center justify-between gap-4">
-        <span className="text-sm text-encre">Recevoir les notifications sur cet appareil</span>
+        <span className="text-sm text-encre">{t("profile.push.label")}</span>
         <Switch id="push-device" checked={enabled} disabled={pending} onCheckedChange={toggle} />
       </label>
-      <p className="text-xs text-encre-douce">
-        Les types de notifications se règlent ci-dessus — cet interrupteur décide si cet appareil
-        les reçoit.
-      </p>
+      <p className="text-xs text-encre-douce">{t("profile.push.hint")}</p>
       {error ? <p className="text-xs text-bordeaux">{error}</p> : null}
     </div>
   );

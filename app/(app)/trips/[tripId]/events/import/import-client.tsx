@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState, useTransition } from "react";
+import { useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,11 +11,7 @@ import { createClient } from "@/lib/supabase/client";
 import { extensionFor } from "@/lib/vault/upload";
 import { createImportedEvent, finalizeDraft, type ImportedEventState } from "./actions";
 
-const KIND_LABELS = {
-  TRANSPORT: "Transport",
-  LODGING: "Hébergement",
-  ACTIVITY: "Activité",
-} as const;
+const KINDS = ["TRANSPORT", "LODGING", "ACTIVITY"] as const;
 
 /** Import de réservation (PHIL-O01) : analyse → formulaire pré-rempli → création. */
 export function ImportClient({
@@ -29,6 +26,7 @@ export function ImportClient({
   /** PHIL-P02 : brouillon reçu par email, pré-validé (pas de fichier à envoyer). */
   draft?: { id: string; extracted: ExtractedReservation; fileName: string | null };
 }) {
+  const t = useT();
   const [files, setFiles] = useState<File[]>([]);
   const [phase, setPhase] = useState<"pick" | "analyzing" | "review" | "saving">(
     draft ? "review" : "pick",
@@ -56,7 +54,7 @@ export function ImportClient({
       const r = await fetch(`/api/trips/${tripId}/import-reservation`, { method: "POST", body });
       const json = (await r.json()) as { extracted?: ExtractedReservation; error?: string };
       if (!r.ok || !json.extracted) {
-        setError(json.error ?? "L'analyse a échoué.");
+        setError(json.error ?? t("events.import.analyzeFailed"));
         setPhase("pick");
         return;
       }
@@ -64,7 +62,7 @@ export function ImportClient({
       setKind(json.extracted.kind);
       setPhase("review");
     } catch {
-      setError("L'analyse a échoué — réessaie dans un instant.");
+      setError(t("events.import.analyzeFailedRetry"));
       setPhase("pick");
     }
   }
@@ -80,7 +78,7 @@ export function ImportClient({
       startTransition(async () => {
         const result: ImportedEventState = await finalizeDraft({ status: "idle" }, formData);
         if (result.status === "error") {
-          setError(result.message ?? "La création a échoué.");
+          setError(result.message ?? t("events.import.createFailed"));
           setPhase("review");
         }
       });
@@ -102,7 +100,7 @@ export function ImportClient({
       .from("documents")
       .upload(storagePath, file, { contentType: file.type });
     if (upErr) {
-      setError("L'envoi du fichier a échoué.");
+      setError(t("events.import.uploadFailed"));
       setPhase("review");
       return;
     }
@@ -118,7 +116,7 @@ export function ImportClient({
     startTransition(async () => {
       const result: ImportedEventState = await createImportedEvent({ status: "idle" }, formData);
       if (result.status === "error") {
-        setError(result.message ?? "La création a échoué.");
+        setError(result.message ?? t("events.import.createFailed"));
         setPhase("review");
       }
     });
@@ -134,7 +132,7 @@ export function ImportClient({
         >
           {files.length > 0
             ? files.map((f) => f.name).join(", ")
-            : "Choisir le PDF ou les captures d'écran de la confirmation"}
+            : t("events.import.pickPlaceholder")}
         </button>
         <input
           ref={inputRef}
@@ -150,7 +148,7 @@ export function ImportClient({
           disabled={files.length === 0 || phase === "analyzing"}
           onClick={analyze}
         >
-          {phase === "analyzing" ? "Phil déchiffre la réservation…" : "Analyser"}
+          {phase === "analyzing" ? t("events.import.analyzing") : t("events.import.analyze")}
         </Button>
       </div>
     );
@@ -160,34 +158,34 @@ export function ImportClient({
   return (
     <form action={save} className="flex flex-col gap-4">
       <p className="rounded-md bg-laiton/10 px-3 py-2 text-xs text-encre-douce">
-        Vérifie ce que j&apos;ai lu — rien n&apos;est créé avant que tu confirmes.
+        {t("events.import.reviewNote")}
       </p>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="kind">Type</Label>
+        <Label htmlFor="kind">{t("events.form.type")}</Label>
         <select
           id="kind"
           value={kind}
           onChange={(ev) => setKind(ev.target.value as typeof kind)}
           className="rounded border border-laiton-clair bg-papier px-2 py-1.5 text-sm"
         >
-          {(Object.keys(KIND_LABELS) as (keyof typeof KIND_LABELS)[]).map((k) => (
+          {KINDS.map((k) => (
             <option key={k} value={k}>
-              {KIND_LABELS[k]}
+              {t(`events.type.${k}`)}
             </option>
           ))}
         </select>
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="title">Titre</Label>
+        <Label htmlFor="title">{t("events.form.title")}</Label>
         <Input id="title" name="title" defaultValue={e?.title ?? ""} required maxLength={150} />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col gap-2">
           <Label htmlFor="startsAtLocal">
-            {kind === "LODGING" ? "Check-in (heure locale)" : "Début (heure locale)"}
+            {kind === "LODGING" ? t("events.import.checkInLocal") : t("events.import.startLocal")}
           </Label>
           <Input
             id="startsAtLocal"
@@ -199,7 +197,7 @@ export function ImportClient({
         </div>
         <div className="flex flex-col gap-2">
           <Label htmlFor="endsAtLocal">
-            {kind === "LODGING" ? "Check-out (heure locale)" : "Fin (optionnel)"}
+            {kind === "LODGING" ? t("events.import.checkOutLocal") : t("events.import.endOptional")}
           </Label>
           <Input
             id="endsAtLocal"
@@ -211,7 +209,7 @@ export function ImportClient({
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="timezone">Fuseau horaire des heures saisies</Label>
+        <Label htmlFor="timezone">{t("events.form.timezoneEntered")}</Label>
         <select
           id="timezone"
           name="timezone"
@@ -232,16 +230,16 @@ export function ImportClient({
         <>
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-2">
-              <Label htmlFor="from">Départ</Label>
+              <Label htmlFor="from">{t("events.form.from")}</Label>
               <Input id="from" name="from" defaultValue={e?.from ?? ""} maxLength={120} />
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="to">Arrivée</Label>
+              <Label htmlFor="to">{t("events.form.to")}</Label>
               <Input id="to" name="to" defaultValue={e?.to ?? ""} maxLength={120} />
             </div>
           </div>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="transportMode">Mode</Label>
+            <Label htmlFor="transportMode">{t("events.form.mode")}</Label>
             <select
               id="transportMode"
               name="transportMode"
@@ -259,7 +257,7 @@ export function ImportClient({
       ) : (
         <div className="grid grid-cols-2 gap-4">
           <div className="flex flex-col gap-2">
-            <Label htmlFor="locationName">Lieu</Label>
+            <Label htmlFor="locationName">{t("events.form.location")}</Label>
             <Input
               id="locationName"
               name="locationName"
@@ -268,7 +266,7 @@ export function ImportClient({
             />
           </div>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="locationAddress">Adresse</Label>
+            <Label htmlFor="locationAddress">{t("events.form.address")}</Label>
             <Input
               id="locationAddress"
               name="locationAddress"
@@ -281,11 +279,11 @@ export function ImportClient({
 
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="carrier">Compagnie / plateforme</Label>
+          <Label htmlFor="carrier">{t("events.import.carrier")}</Label>
           <Input id="carrier" name="carrier" defaultValue={e?.carrier ?? ""} maxLength={120} />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="bookingReference">N° de réservation</Label>
+          <Label htmlFor="bookingReference">{t("events.import.bookingRef")}</Label>
           <Input
             id="bookingReference"
             name="bookingReference"
@@ -296,27 +294,27 @@ export function ImportClient({
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="notes">Notes</Label>
+        <Label htmlFor="notes">{t("events.form.notes")}</Label>
         <Input id="notes" name="notes" defaultValue={e?.notes ?? ""} maxLength={2000} />
       </div>
 
       {error ? <p className="text-sm text-bordeaux">{error}</p> : null}
       <div className="flex items-center gap-3">
         <Button type="submit" disabled={phase === "saving"}>
-          {phase === "saving" ? "Phil consigne tout ça…" : "Créer l'événement"}
+          {phase === "saving" ? t("events.import.saving") : t("events.import.create")}
         </Button>
         {!draft ? (
           <Button type="button" variant="ghost" onClick={() => setPhase("pick")}>
-            Reprendre l&apos;analyse
+            {t("events.import.restartAnalysis")}
           </Button>
         ) : null}
       </div>
       <p className="text-xs text-encre-douce">
         {draft
           ? draft.fileName
-            ? `La pièce jointe (${draft.fileName}) sera rangée dans les Documents du voyage et attachée à l'événement.`
-            : "Reçu par email, sans pièce jointe exploitable."
-          : "Le fichier sera rangé dans les Documents du voyage et attaché à l'événement."}
+            ? `${t("events.import.footnoteDraftFilePrefix")}${draft.fileName}${t("events.import.footnoteDraftFileSuffix")}`
+            : t("events.import.footnoteDraftNoFile")
+          : t("events.import.footnoteFile")}
       </p>
     </form>
   );

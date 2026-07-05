@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { redirect } from "next/navigation";
+import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { FriendInvite } from "./friend-invite";
 
@@ -12,6 +13,7 @@ type Friend = {
 
 /** Carnet d'amis (PHIL-D08) : compagnons extraits des voyages partagés. */
 export default async function FriendsPage() {
+  const t = await getT();
   const supabase = await createClient();
   const {
     data: { user },
@@ -38,7 +40,7 @@ export default async function FriendsPage() {
       }
       const entry = friends.get(p.user_id) ?? {
         userId: p.user_id,
-        name: p.profiles?.display_name ?? "Voyageur",
+        name: p.profiles?.display_name ?? t("friends.travelerFallback"),
         avatarUrl: p.profiles?.avatar_url ?? null,
         sharedTrips: [],
       };
@@ -54,22 +56,18 @@ export default async function FriendsPage() {
     (myRoles ?? []).filter((r) => r.role === "OWNER" || r.role === "EDITOR").map((r) => r.trip_id),
   );
   const invitableTrips = (trips ?? [])
-    .filter((t) => editableTripIds.has(t.id))
-    .map((t) => ({ id: t.id, name: t.name }));
+    .filter((tr) => editableTripIds.has(tr.id))
+    .map((tr) => ({ id: tr.id, name: tr.name }));
 
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-8">
-      <h1 className="font-display text-3xl text-encre">Carnet d'amis</h1>
-      <p className="mt-1 mb-6 text-sm text-encre-douce">
-        Celles et ceux qui ont déjà partagé la route — ré-invite-les en un clin d'œil.
-      </p>
+      <h1 className="font-display text-3xl text-encre">{t("friends.title")}</h1>
+      <p className="mt-1 mb-6 text-sm text-encre-douce">{t("friends.subtitle")}</p>
 
       {friendList.length === 0 ? (
         <div className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-6 py-14 text-center">
-          <p className="font-display text-xl text-encre italic">Personne pour l'instant</p>
-          <p className="mt-2 text-sm text-encre-douce">
-            Invite tes compagnons sur un voyage : ils apparaîtront ici pour les prochains départs.
-          </p>
+          <p className="font-display text-xl text-encre italic">{t("friends.emptyTitle")}</p>
+          <p className="mt-2 text-sm text-encre-douce">{t("friends.emptyBody")}</p>
         </div>
       ) : (
         <ul className="flex flex-col gap-2">
@@ -94,8 +92,9 @@ export default async function FriendsPage() {
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-sm font-medium text-encre">{friend.name}</span>
                 <span className="block truncate text-xs text-encre-douce">
-                  {friend.sharedTrips.length} voyage{friend.sharedTrips.length > 1 ? "s" : ""}{" "}
-                  ensemble · {friend.sharedTrips.slice(0, 2).join(", ")}
+                  {friend.sharedTrips.length}{" "}
+                  {friend.sharedTrips.length > 1 ? t("friends.tripsWord") : t("friends.tripWord")}{" "}
+                  {t("friends.together")} · {friend.sharedTrips.slice(0, 2).join(", ")}
                   {friend.sharedTrips.length > 2 ? "…" : ""}
                 </span>
               </span>

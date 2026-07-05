@@ -2,6 +2,7 @@
 
 import { Trash2 } from "lucide-react";
 import { useActionState, useTransition } from "react";
+import { useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import { deleteJournalEntry, type JournalState, saveJournalEntry } from "./journal-actions";
 
@@ -23,6 +24,7 @@ export function DayJournal({
   entries: JournalEntry[];
   myId: string;
 }) {
+  const t = useT();
   const [state, formAction] = useActionState<JournalState, FormData>(saveJournalEntry, {
     status: "idle",
   });
@@ -32,11 +34,11 @@ export function DayJournal({
 
   return (
     <section className="mt-6">
-      <h2 className="mb-2 font-display text-lg text-encre italic">Journal de bord</h2>
+      <h2 className="mb-2 font-display text-lg text-encre italic">
+        {t("calendar.journal.heading")}
+      </h2>
       {others.length === 0 && !mine ? (
-        <p className="mb-2 text-sm text-encre-douce">
-          Rien dans le carnet pour cette journée — quelques lignes suffisent à fixer un souvenir.
-        </p>
+        <p className="mb-2 text-sm text-encre-douce">{t("calendar.journal.empty")}</p>
       ) : null}
       {others.length > 0 ? (
         <ul className="mb-3 flex flex-col gap-2">
@@ -61,12 +63,12 @@ export function DayJournal({
           required
           maxLength={2000}
           rows={3}
-          placeholder="Ce que cette journée avait de mémorable…"
+          placeholder={t("calendar.journal.placeholder")}
           className="rounded-md border border-laiton-clair bg-papier px-3 py-2 text-sm text-encre placeholder:text-encre-douce/70 focus:outline-none focus:ring-1 focus:ring-laiton"
         />
         <div className="flex items-center gap-2">
           <Button type="submit" size="sm" variant="outline">
-            {mine ? "Mettre à jour mon entrée" : "Écrire dans le journal"}
+            {mine ? t("calendar.journal.update") : t("calendar.journal.write")}
           </Button>
           {mine ? (
             <button
@@ -75,7 +77,7 @@ export function DayJournal({
               onClick={() => startTransition(() => deleteJournalEntry(tripId, day))}
               className="flex items-center gap-1 text-xs text-encre-douce hover:text-bordeaux"
             >
-              <Trash2 className="size-3.5" aria-hidden="true" /> Effacer
+              <Trash2 className="size-3.5" aria-hidden="true" /> {t("calendar.journal.delete")}
             </button>
           ) : null}
           {state.status === "error" ? (

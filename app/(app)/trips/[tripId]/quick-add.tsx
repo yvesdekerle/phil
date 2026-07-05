@@ -2,12 +2,14 @@
 
 import { Zap } from "lucide-react";
 import { useActionState, useRef } from "react";
+import { useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { type QuickAddState, quickAddEvent } from "./quick-add-actions";
 
 /** Ajout rapide (PHIL-Q01) : titre + jour, le reste s'enrichit après. */
 export function QuickAdd({ tripId, defaultDate }: { tripId: string; defaultDate: string }) {
+  const t = useT();
   const formRef = useRef<HTMLFormElement>(null);
   const [state, formAction] = useActionState<QuickAddState, FormData>(
     async (prev, formData) => {
@@ -30,11 +32,11 @@ export function QuickAdd({ tripId, defaultDate }: { tripId: string; defaultDate:
       <input type="hidden" name="tripId" value={tripId} />
       <Input
         name="title"
-        placeholder="Ajout rapide : snorkeling, resto du soir…"
+        placeholder={t("calendar.quickAdd.titlePlaceholder")}
         required
         maxLength={150}
         className="h-8 min-w-40 flex-1 text-sm"
-        aria-label="Titre de l'activité"
+        aria-label={t("calendar.quickAdd.titleAria")}
       />
       <Input
         name="date"
@@ -42,11 +44,16 @@ export function QuickAdd({ tripId, defaultDate }: { tripId: string; defaultDate:
         defaultValue={defaultDate}
         required
         className="h-8 w-36 text-sm"
-        aria-label="Jour"
+        aria-label={t("calendar.quickAdd.dateAria")}
       />
-      <Input name="time" type="time" className="h-8 w-24 text-sm" aria-label="Heure (optionnel)" />
+      <Input
+        name="time"
+        type="time"
+        className="h-8 w-24 text-sm"
+        aria-label={t("calendar.quickAdd.timeAria")}
+      />
       <Button type="submit" size="sm" variant="outline">
-        Ajouter
+        {t("calendar.quickAdd.add")}
       </Button>
       {state.status === "error" ? (
         <p className="w-full text-xs text-bordeaux">{state.message}</p>

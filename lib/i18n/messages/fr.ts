@@ -8,6 +8,18 @@ export const fr = {
     tips: "Conseils",
     profileAria: "Ton profil",
   },
+  tripTabs: {
+    aria: "Sections du voyage",
+    calendar: "Calendrier",
+    map: "Carte",
+    documents: "Documents",
+    ideas: "Idées",
+    checklist: "Valise",
+    photos: "Photos",
+    budget: "Bourse",
+    participants: "Participants",
+    settings: "Paramètres",
+  },
   profileMenu: {
     profile: "Profil",
     exploration: "Exploration",
@@ -67,5 +79,3 @@ export const fr = {
     loading: "Chargement…",
   },
 };
-
-export type Messages = typeof fr;

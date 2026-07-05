@@ -2,9 +2,10 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { TripOfflineSync } from "@/components/offline/trip-sync";
 import { TripTabs } from "@/components/trips/trip-tabs";
+import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { formatDateRange } from "@/lib/trips/format";
-import { TRIP_STATUS_LABELS, tripStatus } from "@/lib/trips/status";
+import { tripStatus } from "@/lib/trips/status";
 import { cn } from "@/lib/utils";
 
 const STATUS_STYLES: Record<string, string> = {
@@ -34,6 +35,7 @@ export default async function TripLayout({
   }
 
   const status = tripStatus(trip);
+  const t = await getT();
 
   // PHIL-N04 : validité du passeport vs dates du voyage (règle des 6 mois)
   const { data: passports } = await supabase
@@ -106,7 +108,7 @@ export default async function TripLayout({
             </p>
           </div>
           <span className={cn("rounded-full px-3 py-1 text-xs font-medium", STATUS_STYLES[status])}>
-            {TRIP_STATUS_LABELS[status]}
+            {t(`trips.status.${status}`)}
           </span>
         </div>
         <div className="border-t border-laiton-clair/60 px-5">

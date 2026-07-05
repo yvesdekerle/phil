@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
+import { useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
-import { CATEGORIES, CATEGORY_LABELS, type DocumentCategory } from "@/lib/vault/categories";
+import { CATEGORIES, categoryLabel, type DocumentCategory } from "@/lib/vault/categories";
 import { extensionFor, validateFile } from "@/lib/vault/upload";
 
 const ID_CATEGORIES: DocumentCategory[] = ["passport", "id_card", "driving_license"];
@@ -35,16 +36,6 @@ type Props = {
   events?: { id: string; title: string }[];
 };
 
-const LABEL_SUGGESTIONS = [
-  "Billet",
-  "Voucher",
-  "Hébergement",
-  "Assurance",
-  "Forfait de ski",
-  "Location de voiture",
-  "Réservation restaurant",
-];
-
 export function UploadForm({
   userId,
   action,
@@ -56,6 +47,16 @@ export function UploadForm({
   freeLabel = false,
   events = [],
 }: Props) {
+  const t = useT();
+  const LABEL_SUGGESTIONS = [
+    t("documents.upload.suggestions.ticket"),
+    t("documents.upload.suggestions.voucher"),
+    t("documents.upload.suggestions.lodging"),
+    t("documents.upload.suggestions.insurance"),
+    t("documents.upload.suggestions.skiPass"),
+    t("documents.upload.suggestions.carRental"),
+    t("documents.upload.suggestions.restaurant"),
+  ];
   const [file, setFile] = useState<File | null>(null);
   const [category, setCategory] = useState<DocumentCategory>(defaultCategory);
   const [label, setLabel] = useState("");
@@ -84,16 +85,16 @@ export function UploadForm({
 
     // PHIL-N04 : lecture MRZ des passeports (images) — pré-remplit n° et expiration
     if (category === "passport" && candidate.type.startsWith("image/")) {
-      setMrzStatus("Phil lit la bande MRZ…");
+      setMrzStatus(t("documents.upload.mrz.reading"));
       import("@/lib/vault/mrz")
         .then(({ recognizeMrz }) => recognizeMrz(candidate))
         .then((mrz) => {
           if (mrz?.valid) {
             if (mrz.expirationDate) setExpiresAt(mrz.expirationDate);
             if (mrz.documentNumber) setDocumentNumber(mrz.documentNumber);
-            setMrzStatus("Bande MRZ lue et vérifiée ✓ (sommes de contrôle valides)");
+            setMrzStatus(t("documents.upload.mrz.verified"));
           } else {
-            setMrzStatus(mrz ? "Lecture MRZ incertaine — vérifie les champs." : null);
+            setMrzStatus(mrz ? t("documents.upload.mrz.uncertain") : null);
           }
         })
         .catch(() => setMrzStatus(null));
@@ -105,7 +106,7 @@ export function UploadForm({
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!file) {
-      setError("Choisis d'abord un fichier.");
+      setError(t("documents.upload.chooseFileFirst"));
       return;
     }
 
@@ -122,7 +123,7 @@ export function UploadForm({
 
     if (uploadError) {
       setPhase("idle");
-      setError("L'envoi du fichier a échoué. Vérifie ta connexion et réessaie.");
+      setError(t("documents.upload.uploadFailed"));
       return;
     }
 
@@ -145,7 +146,7 @@ export function UploadForm({
       const result: UploadActionState = await action({ status: "idle" }, formData);
       setPhase("idle");
       if (result.status === "error") {
-        setError(result.message ?? "Une erreur est survenue.");
+        setError(result.message ?? t("documents.upload.genericError"));
       }
     });
   }
@@ -174,7 +175,9 @@ export function UploadForm({
         {file ? (
           <>
             <p className="text-sm font-medium text-encre">{file.name}</p>
-            <p className="text-xs text-encre-douce">{(file.size / 1024 / 1024).toFixed(1)} Mo</p>
+            <p className="text-xs text-encre-douce">
+              {(file.size / 1024 / 1024).toFixed(1)} {t("documents.upload.sizeUnit")}
+            </p>
             <Button
               type="button"
               variant="ghost"
@@ -186,16 +189,16 @@ export function UploadForm({
                 }
               }}
             >
-              Changer de fichier
+              {t("documents.upload.changeFile")}
             </Button>
           </>
         ) : (
           <>
-            <p className="text-sm text-encre-douce">Glisse ton document ici, ou</p>
+            <p className="text-sm text-encre-douce">{t("documents.upload.dropHint")}</p>
             <Button type="button" variant="outline" onClick={() => inputRef.current?.click()}>
-              Parcourir…
+              {t("documents.upload.browse")}
             </Button>
-            <p className="text-xs text-encre-douce">PDF, JPG, PNG ou HEIC — 10 Mo max</p>
+            <p className="text-xs text-encre-douce">{t("documents.upload.fileConstraints")}</p>
           </>
         )}
         <input
@@ -209,12 +212,12 @@ export function UploadForm({
 
       {freeLabel ? (
         <div className="flex flex-col gap-2">
-          <Label htmlFor="doc-label">Type de document</Label>
+          <Label htmlFor="doc-label">{t("documents.upload.docType")}</Label>
           <Input
             id="doc-label"
             value={label}
             onChange={(e) => setLabel(e.target.value)}
-            placeholder="Billet, voucher, forfait de ski…"
+            placeholder={t("documents.upload.docTypePlaceholder")}
             maxLength={60}
             list="doc-label-suggestions"
             autoComplete="off"
@@ -227,7 +230,7 @@ export function UploadForm({
         </div>
       ) : (
         <div className="flex flex-col gap-2">
-          <Label htmlFor="category">Catégorie</Label>
+          <Label htmlFor="category">{t("documents.upload.category")}</Label>
           <Select value={category} onValueChange={(v) => setCategory(v as DocumentCategory)}>
             <SelectTrigger id="category" className="w-full">
               <SelectValue />
@@ -235,7 +238,7 @@ export function UploadForm({
             <SelectContent>
               {categories.map((c) => (
                 <SelectItem key={c} value={c}>
-                  {CATEGORY_LABELS[c]}
+                  {categoryLabel(t, c)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -245,10 +248,10 @@ export function UploadForm({
             <Input
               value={label}
               onChange={(e) => setLabel(e.target.value)}
-              placeholder="Précise le type (ex : carte de mutuelle)"
+              placeholder={t("documents.upload.otherPlaceholder")}
               maxLength={60}
               autoComplete="off"
-              aria-label="Libellé du document"
+              aria-label={t("documents.upload.otherAria")}
             />
           ) : null}
         </div>
@@ -256,14 +259,14 @@ export function UploadForm({
 
       {events.length > 0 ? (
         <div className="flex flex-col gap-2">
-          <Label htmlFor="doc-event">Rattacher à un événement (optionnel)</Label>
+          <Label htmlFor="doc-event">{t("documents.upload.attachEvent")}</Label>
           <select
             id="doc-event"
             value={eventId}
             onChange={(e) => setEventId(e.target.value)}
             className="rounded-md border border-laiton-clair bg-papier px-3 py-2 text-sm"
           >
-            <option value="">Aucun — juste dans les documents du voyage</option>
+            <option value="">{t("documents.upload.noEvent")}</option>
             {events.map((ev) => (
               <option key={ev.id} value={ev.id}>
                 {ev.title}
@@ -275,7 +278,7 @@ export function UploadForm({
 
       <div className="flex flex-col gap-2">
         {mrzStatus ? <p className="text-xs text-laiton">{mrzStatus}</p> : null}
-        <Label htmlFor="expiresAt">Date d'expiration (optionnel)</Label>
+        <Label htmlFor="expiresAt">{t("documents.upload.expiryOptional")}</Label>
         <Input
           id="expiresAt"
           type="date"
@@ -286,12 +289,12 @@ export function UploadForm({
 
       {ID_CATEGORIES.includes(category) ? (
         <div className="flex flex-col gap-2">
-          <Label htmlFor="documentNumber">Numéro du document (optionnel)</Label>
+          <Label htmlFor="documentNumber">{t("documents.upload.documentNumberOptional")}</Label>
           <Input
             id="documentNumber"
             value={documentNumber}
             onChange={(e) => setDocumentNumber(e.target.value)}
-            placeholder="Ex : 24FV12345"
+            placeholder={t("documents.upload.documentNumberPlaceholder")}
           />
         </div>
       ) : null}

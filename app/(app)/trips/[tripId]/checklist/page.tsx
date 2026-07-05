@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { ChecklistClient } from "./checklist-client";
 
@@ -12,6 +13,7 @@ export default async function ChecklistPage({ params }: { params: Promise<{ trip
   if (!user) {
     redirect("/login");
   }
+  const t = await getT();
 
   const [{ data: items }, { data: members }, { data: me }, { data: trip }] = await Promise.all([
     supabase
@@ -44,7 +46,7 @@ export default async function ChecklistPage({ params }: { params: Promise<{ trip
       members={(members ?? [])
         .map((m) => ({
           userId: m.user_id,
-          name: m.profiles?.display_name ?? "Voyageur",
+          name: m.profiles?.display_name ?? t("checklist.travelerFallback"),
         }))
         .sort((a, b) => a.name.localeCompare(b.name, "fr"))}
       myId={user.id}

@@ -3,6 +3,7 @@
 import { Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { useT } from "@/components/i18n/provider";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,6 +28,7 @@ export function DeleteDocButton({
   documentId: string;
   fileName: string;
 }) {
+  const t = useT();
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -38,7 +40,7 @@ export function DeleteDocButton({
           type="button"
           variant="ghost"
           size="sm"
-          aria-label={`Supprimer ${fileName}`}
+          aria-label={`${t("tripDocs.delete")} ${fileName}`}
           className="text-bordeaux hover:text-bordeaux-fonce"
         >
           <Trash2 aria-hidden="true" />
@@ -46,11 +48,10 @@ export function DeleteDocButton({
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Supprimer « {fileName} » ?</AlertDialogTitle>
-          <AlertDialogDescription>
-            Le fichier disparaîtra pour tout l'équipage, y compris des événements auxquels il est
-            rattaché. Pas de retour en arrière.
-          </AlertDialogDescription>
+          <AlertDialogTitle>
+            {t("tripDocs.confirmTitle").replace("{name}", fileName)}
+          </AlertDialogTitle>
+          <AlertDialogDescription>{t("tripDocs.confirmBody")}</AlertDialogDescription>
         </AlertDialogHeader>
         {error ? (
           <p role="alert" className="text-sm text-bordeaux">
@@ -58,7 +59,7 @@ export function DeleteDocButton({
           </p>
         ) : null}
         <AlertDialogFooter>
-          <AlertDialogCancel>Garder</AlertDialogCancel>
+          <AlertDialogCancel>{t("tripDocs.keep")}</AlertDialogCancel>
           <AlertDialogAction
             disabled={pending}
             onClick={(e) => {
@@ -67,14 +68,14 @@ export function DeleteDocButton({
               startTransition(async () => {
                 const result = await deleteTripDocument(tripId, documentId);
                 if (result.status === "error") {
-                  setError(result.message ?? "Suppression impossible.");
+                  setError(result.message ?? t("tripDocs.deleteFailed"));
                 } else {
                   router.refresh();
                 }
               });
             }}
           >
-            {pending ? "Suppression…" : "Supprimer"}
+            {pending ? t("tripDocs.deleting") : t("tripDocs.delete")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

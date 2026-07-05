@@ -5,6 +5,7 @@ import { type Poll, PollsSection } from "@/components/ideas/polls-section";
 import { RealtimeRefresh } from "@/components/realtime-refresh";
 import { SearchForm } from "@/components/search-form";
 import { Button } from "@/components/ui/button";
+import { getT } from "@/lib/i18n/server";
 import type { IdeaWithMeta } from "@/lib/ideas/types";
 import { fuzzyMatch } from "@/lib/search/fuzzy";
 import { createClient } from "@/lib/supabase/server";
@@ -29,6 +30,7 @@ export default async function TripIdeasPage({
   if (!user) {
     redirect("/login");
   }
+  const t = await getT();
 
   const [{ data: ideasData }, { data: me }, { data: pollsData }] = await Promise.all([
     supabase
@@ -70,7 +72,7 @@ export default async function TripIdeasPage({
       ...row,
       voteCount: votes.length,
       hasVoted: votes.some((v) => v.user_id === user.id),
-      creatorName: row.profiles?.display_name ?? "Voyageur",
+      creatorName: row.profiles?.display_name ?? t("ideas.travelerFallback"),
       scheduledEvent: row.trip_events ?? null,
     };
   });
@@ -104,12 +106,10 @@ export default async function TripIdeasPage({
       <RealtimeRefresh tables={["polls", "poll_votes", "idea_votes"]} />
       <PollsSection tripId={tripId} polls={polls} myId={user.id} isOwner={me?.role === "OWNER"} />
       <div className="flex items-center justify-between">
-        <p className="text-sm text-encre-douce">
-          Le carnet d'envies du groupe — on propose, on vote, on planifie.
-        </p>
+        <p className="text-sm text-encre-douce">{t("ideas.intro")}</p>
         {canPropose ? (
           <Button asChild>
-            <Link href={`/trips/${tripId}/ideas/new`}>Proposer une idée</Link>
+            <Link href={`/trips/${tripId}/ideas/new`}>{t("ideas.propose")}</Link>
           </Button>
         ) : null}
       </div>
@@ -118,14 +118,14 @@ export default async function TripIdeasPage({
         href={`/trips/${tripId}/lodging`}
         className="rounded-lg border border-laiton-clair bg-papier px-4 py-3 text-sm text-encre transition-shadow hover:shadow-[0_2px_12px_rgba(31,42,68,0.1)]"
       >
-        🏠 <span className="font-medium">Hébergements candidats</span>
-        <span className="text-encre-douce"> — comparer les options avant de trancher →</span>
+        🏠 <span className="font-medium">{t("ideas.lodgingLinkTitle")}</span>
+        <span className="text-encre-douce">{t("ideas.lodgingLinkDesc")}</span>
       </Link>
 
       <SearchForm
         action={`/trips/${tripId}/ideas`}
         q={q}
-        placeholder="Rechercher une idée (plongée, plnoge…)"
+        placeholder={t("ideas.searchPlaceholder")}
         hidden={{ sort, tag, dismissed }}
       />
 
@@ -139,7 +139,7 @@ export default async function TripIdeasPage({
               : "border-laiton-clair bg-papier text-encre-douce hover:text-encre",
           )}
         >
-          Les plus votées
+          {t("ideas.sortVotes")}
         </Link>
         <Link
           href={filterHref("recent", tag ?? null)}
@@ -150,7 +150,7 @@ export default async function TripIdeasPage({
               : "border-laiton-clair bg-papier text-encre-douce hover:text-encre",
           )}
         >
-          Les plus récentes
+          {t("ideas.sortRecent")}
         </Link>
         {allTags.length > 0 ? <span className="mx-1 text-laiton-clair">·</span> : null}
         {allTags.map((t) => (
@@ -177,19 +177,17 @@ export default async function TripIdeasPage({
               : "border-laiton-clair bg-papier text-encre-douce hover:text-encre",
           )}
         >
-          {showDismissed ? "← Retour aux idées" : "Voir les écartées"}
+          {showDismissed ? t("ideas.backToIdeas") : t("ideas.seeDismissed")}
         </Link>
       </div>
 
       {ideas.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-6 py-14 text-center">
-          <p className="font-display text-xl text-encre italic">Aucune idée pour l'instant</p>
-          <p className="max-w-sm text-sm text-encre-douce">
-            Plongée, marché local, resto de bord de mer : propose, le groupe votera.
-          </p>
+          <p className="font-display text-xl text-encre italic">{t("ideas.emptyTitle")}</p>
+          <p className="max-w-sm text-sm text-encre-douce">{t("ideas.emptyBody")}</p>
           {canPropose ? (
             <Button asChild className="mt-1">
-              <Link href={`/trips/${tripId}/ideas/new`}>Proposer une idée</Link>
+              <Link href={`/trips/${tripId}/ideas/new`}>{t("ideas.propose")}</Link>
             </Button>
           ) : null}
         </div>

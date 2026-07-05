@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { PlaceInput } from "@/components/geo/place-input";
+import { useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,6 +35,7 @@ export function ActivityForm({
   defaultTimezone: string;
   prefill?: ActivityPrefill;
 }) {
+  const t = useT();
   const [timezone, setTimezone] = useState(defaultTimezone);
   const [state, setState] = useState<CreateEventState>({ status: "idle" });
   const [pending, startTransition] = useTransition();
@@ -55,56 +57,56 @@ export function ActivityForm({
   return (
     <form onSubmit={submit} className="flex flex-col gap-5">
       <div className="flex flex-col gap-2">
-        <Label htmlFor="title">Titre</Label>
+        <Label htmlFor="title">{t("events.form.title")}</Label>
         <Input
           id="title"
           name="title"
           defaultValue={prefill?.title}
-          placeholder="Plongée épave Stella Maru"
+          placeholder={t("events.activity.titlePlaceholder")}
         />
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="description">Description (optionnel)</Label>
+        <Label htmlFor="description">{t("events.activity.descriptionOptional")}</Label>
         <Input
           id="description"
           name="description"
           defaultValue={prefill?.description}
-          placeholder="Deux bouteilles, niveau 1 requis…"
+          placeholder={t("events.activity.descriptionPlaceholder")}
         />
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="locationName">Lieu (optionnel)</Label>
+        <Label htmlFor="locationName">{t("events.activity.locationOptional")}</Label>
         <PlaceInput
           id="locationName"
           name="locationName"
           defaultValue={prefill?.locationName}
-          placeholder="Trou-aux-Biches"
+          placeholder={t("events.activity.locationPlaceholder")}
           maxLength={150}
         />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="startsAtLocal">Début (heure locale)</Label>
+          <Label htmlFor="startsAtLocal">{t("events.activity.startLocal")}</Label>
           <Input id="startsAtLocal" name="startsAtLocal" type="datetime-local" />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="durationMinutes">Durée estimée en minutes (optionnel)</Label>
+          <Label htmlFor="durationMinutes">{t("events.activity.duration")}</Label>
           <Input
             id="durationMinutes"
             name="durationMinutes"
             defaultValue={prefill?.durationMinutes}
             type="number"
             min={5}
-            placeholder="120"
+            placeholder={t("events.activity.durationPlaceholder")}
           />
         </div>
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="timezone">Fuseau horaire</Label>
+        <Label htmlFor="timezone">{t("events.form.timezone")}</Label>
         <Select value={timezone} onValueChange={setTimezone}>
           <SelectTrigger id="timezone" className="w-full">
             <SelectValue />
@@ -121,7 +123,7 @@ export function ActivityForm({
 
       <div className="grid grid-cols-3 gap-4">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="cost">Coût (optionnel)</Label>
+          <Label htmlFor="cost">{t("events.activity.cost")}</Label>
           <Input
             id="cost"
             name="cost"
@@ -129,34 +131,34 @@ export function ActivityForm({
             type="number"
             min={0}
             step="0.01"
-            placeholder="45"
+            placeholder={t("events.activity.costPlaceholder")}
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="costCurrency">Devise</Label>
+          <Label htmlFor="costCurrency">{t("events.activity.currency")}</Label>
           <Input
             id="costCurrency"
             name="costCurrency"
             defaultValue={prefill?.costCurrency}
-            placeholder="EUR"
+            placeholder={t("events.activity.currencyPlaceholder")}
             maxLength={3}
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="externalUrl">Lien (optionnel)</Label>
+          <Label htmlFor="externalUrl">{t("events.activity.link")}</Label>
           <Input
             id="externalUrl"
             name="externalUrl"
             type="url"
             defaultValue={prefill?.externalUrl}
-            placeholder="https://…"
+            placeholder={t("events.activity.linkPlaceholder")}
           />
         </div>
       </div>
 
       <div className="flex items-center gap-4">
         <Button type="submit" disabled={pending}>
-          {pending ? "Phil note l'activité…" : "Ajouter l'activité"}
+          {pending ? t("events.activity.submitting") : t("events.activity.submit")}
         </Button>
         {state.status === "error" ? <p className="text-sm text-bordeaux">{state.message}</p> : null}
       </div>

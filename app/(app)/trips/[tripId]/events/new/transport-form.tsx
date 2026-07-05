@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
+import { useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,6 +27,7 @@ export function TransportForm({
   tripId: string;
   defaultTimezone: string;
 }) {
+  const t = useT();
   const [mode, setMode] = useState<TransportMode>("plane");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
@@ -54,7 +56,7 @@ export function TransportForm({
     <form onSubmit={submit} className="flex flex-col gap-5">
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="mode">Type de transport</Label>
+          <Label htmlFor="mode">{t("events.transport.mode")}</Label>
           <Select value={mode} onValueChange={(v) => setMode(v as TransportMode)}>
             <SelectTrigger id="mode" className="w-full">
               <SelectValue />
@@ -69,28 +71,32 @@ export function TransportForm({
           </Select>
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="carrier">Transporteur (optionnel)</Label>
-          <Input id="carrier" name="carrier" placeholder="Air France, SNCF…" />
+          <Label htmlFor="carrier">{t("events.transport.carrier")}</Label>
+          <Input
+            id="carrier"
+            name="carrier"
+            placeholder={t("events.transport.carrierPlaceholder")}
+          />
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="from">Départ</Label>
+          <Label htmlFor="from">{t("events.form.from")}</Label>
           <Input
             id="from"
             name="from"
-            placeholder="Paris CDG"
+            placeholder={t("events.transport.fromPlaceholder")}
             value={from}
             onChange={(e) => setFrom(e.target.value)}
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="to">Arrivée</Label>
+          <Label htmlFor="to">{t("events.form.to")}</Label>
           <Input
             id="to"
             name="to"
-            placeholder="Maurice SSR"
+            placeholder={t("events.transport.toPlaceholder")}
             value={to}
             onChange={(e) => setTo(e.target.value)}
           />
@@ -98,7 +104,7 @@ export function TransportForm({
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="title">Titre</Label>
+        <Label htmlFor="title">{t("events.form.title")}</Label>
         <Input
           id="title"
           value={effectiveTitle}
@@ -106,24 +112,24 @@ export function TransportForm({
             setTitleTouched(true);
             setTitle(e.target.value);
           }}
-          placeholder="Avion Paris CDG → Maurice SSR"
+          placeholder={t("events.transport.titlePlaceholder")}
         />
-        <p className="text-xs text-encre-douce">Suggéré automatiquement, modifiable.</p>
+        <p className="text-xs text-encre-douce">{t("events.transport.titleHint")}</p>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="startsAtLocal">Départ (heure locale)</Label>
+          <Label htmlFor="startsAtLocal">{t("events.transport.startLocal")}</Label>
           <Input id="startsAtLocal" name="startsAtLocal" type="datetime-local" />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="endsAtLocal">Arrivée (heure locale, optionnel)</Label>
+          <Label htmlFor="endsAtLocal">{t("events.transport.endLocal")}</Label>
           <Input id="endsAtLocal" name="endsAtLocal" type="datetime-local" />
         </div>
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="timezone">Fuseau horaire des heures saisies</Label>
+        <Label htmlFor="timezone">{t("events.form.timezoneEntered")}</Label>
         <Select value={timezone} onValueChange={setTimezone}>
           <SelectTrigger id="timezone" className="w-full">
             <SelectValue />
@@ -140,28 +146,32 @@ export function TransportForm({
 
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="bookingReference">N° de réservation (optionnel)</Label>
-          <Input id="bookingReference" name="bookingReference" placeholder="ABC123" />
+          <Label htmlFor="bookingReference">{t("events.form.bookingRefOptional")}</Label>
+          <Input
+            id="bookingReference"
+            name="bookingReference"
+            placeholder={t("events.transport.bookingPlaceholder")}
+          />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="notes">Notes (optionnel)</Label>
-          <Input id="notes" name="notes" placeholder="Terminal 2E, siège 12A…" />
+          <Label htmlFor="notes">{t("events.form.notesOptional")}</Label>
+          <Input id="notes" name="notes" placeholder={t("events.transport.notesPlaceholder")} />
         </div>
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="externalUrl">Lien compagnie (optionnel)</Label>
+        <Label htmlFor="externalUrl">{t("events.transport.externalUrl")}</Label>
         <Input
           id="externalUrl"
           name="externalUrl"
           type="url"
-          placeholder="https://… (statut du vol, appli de la compagnie)"
+          placeholder={t("events.transport.externalUrlPlaceholder")}
         />
       </div>
 
       <div className="flex items-center gap-4">
         <Button type="submit" disabled={pending}>
-          {pending ? "Phil consigne le trajet…" : "Ajouter le transport"}
+          {pending ? t("events.transport.submitting") : t("events.transport.submit")}
         </Button>
         {state.status === "error" ? <p className="text-sm text-bordeaux">{state.message}</p> : null}
       </div>

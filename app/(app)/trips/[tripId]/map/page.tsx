@@ -8,6 +8,7 @@ import type { TripEvent } from "@/lib/events/types";
 import { haversineKm } from "@/lib/geo/distance";
 import { geocode } from "@/lib/geo/geocode";
 import { formatMinutes, getTravelMinutes } from "@/lib/geo/travel-time";
+import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 
@@ -28,6 +29,7 @@ export default async function TripMapPage({
   const { tripId } = await params;
   const { view, day } = await searchParams;
   const showIdeas = view === "ideas";
+  const t = await getT();
 
   const supabase = await createClient();
   const {
@@ -83,7 +85,7 @@ export default async function TripMapPage({
         lat: lodgingOfDay.location_lat as number,
         lng: lodgingOfDay.location_lng as number,
         title: lodgingOfDay.title,
-        subtitle: "Hébergement",
+        subtitle: t("map.lodging"),
         color: "#3f6e5a",
         house: true,
       });
@@ -122,8 +124,8 @@ export default async function TripMapPage({
             id: "depart-maison",
             lat: homeCoords.lat,
             lng: homeCoords.lng,
-            title: `Départ : ${from}`,
-            subtitle: "Le point de départ de l'aventure",
+            title: `${t("map.departure")} : ${from}`,
+            subtitle: t("map.departureSubtitle"),
             color: "#1f2a44",
             order: -1,
             house: true,
@@ -183,17 +185,17 @@ export default async function TripMapPage({
           href={`/trips/${tripId}`}
           className="text-sm text-encre-douce underline underline-offset-4 hover:text-encre"
         >
-          ← Retour au calendrier
+          {t("map.backToCalendar")}
         </Link>
         <div className="flex gap-1.5">
-          {chip(`/trips/${tripId}/map`, "Programme", !showIdeas)}
-          {chip(`/trips/${tripId}/map?view=ideas`, "Idées", showIdeas)}
+          {chip(`/trips/${tripId}/map`, t("map.programme"), !showIdeas)}
+          {chip(`/trips/${tripId}/map?view=ideas`, t("map.ideas"), showIdeas)}
         </div>
       </div>
 
       {!showIdeas && days.length > 1 ? (
         <div className="flex flex-wrap gap-1.5">
-          {chip(`/trips/${tripId}/map`, "Tout le voyage", !activeDay)}
+          {chip(`/trips/${tripId}/map`, t("map.wholeTrip"), !activeDay)}
           {days.map((d) =>
             chip(
               `/trips/${tripId}/map?day=${d.dayKey}`,
@@ -208,7 +210,7 @@ export default async function TripMapPage({
 
       {dayProgram.length > 0 ? (
         <section className="rounded-lg border border-laiton-clair bg-papier px-4 py-3">
-          <h2 className="mb-2 text-sm font-medium text-encre">Programme de la journée</h2>
+          <h2 className="mb-2 text-sm font-medium text-encre">{t("map.dayProgram")}</h2>
           <ol className="flex flex-col">
             {dayProgram.map(({ event, leg }, i) => (
               <li key={event.id}>
@@ -216,7 +218,7 @@ export default async function TripMapPage({
                   <p className="my-1 ml-3.5 border-l-2 border-dashed border-laiton-clair py-0.5 pl-4 text-xs text-encre-douce">
                     ↓ {leg.km.toFixed(leg.km < 10 ? 1 : 0)} km
                     {leg.minutes !== null && leg.minutes >= 3
-                      ? ` · ${formatMinutes(leg.minutes)} de route`
+                      ? ` · ${formatMinutes(leg.minutes)} ${t("map.byRoad")}`
                       : ""}
                   </p>
                 ) : null}
@@ -240,11 +242,9 @@ export default async function TripMapPage({
       ) : null}
 
       <p className="text-xs text-encre-douce">
-        {markers.length} lieu{markers.length > 1 ? "x" : ""} sur la carte
-        {missing > 0
-          ? ` · ${missing} sans position (précise le lieu dans la fiche pour les placer)`
-          : ""}
-        {distanceFrom ? ` · distances calculées depuis ${distanceFrom.label}` : ""}
+        {markers.length} {markers.length > 1 ? t("map.places") : t("map.place")} {t("map.onMap")}
+        {missing > 0 ? ` · ${missing} ${t("map.missingNote")}` : ""}
+        {distanceFrom ? ` · ${t("map.distancesFrom")} ${distanceFrom.label}` : ""}
       </p>
     </div>
   );

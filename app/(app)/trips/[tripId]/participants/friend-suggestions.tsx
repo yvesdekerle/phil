@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useState, useTransition } from "react";
 import { type InviteFriendState, inviteFriend } from "@/app/(app)/friends/actions";
+import { useT } from "@/components/i18n/provider";
 
 export type FriendSuggestion = {
   userId: string;
@@ -21,6 +22,7 @@ export function FriendSuggestions({
   tripId: string;
   friends: FriendSuggestion[];
 }) {
+  const t = useT();
   const [state, setState] = useState<InviteFriendState>({ status: "idle" });
   const [invited, setInvited] = useState<Set<string>>(new Set());
   const [pending, startTransition] = useTransition();
@@ -31,7 +33,7 @@ export function FriendSuggestions({
 
   return (
     <div className="rounded-lg border border-laiton-clair bg-papier px-4 py-3">
-      <h3 className="mb-2 text-sm font-medium text-encre">Tes compagnons de route</h3>
+      <h3 className="mb-2 text-sm font-medium text-encre">{t("participants.suggestions.title")}</h3>
       <div className="flex flex-wrap gap-2">
         {friends.map((f) => {
           const done = invited.has(f.userId);
@@ -50,7 +52,11 @@ export function FriendSuggestions({
                 })
               }
               className="flex items-center gap-2 rounded-full border border-laiton-clair bg-papier py-1 pr-3 pl-1 text-sm text-encre transition-colors hover:border-bordeaux hover:text-bordeaux disabled:opacity-60"
-              title={done ? "Invitation envoyée" : `Inviter ${f.name}`}
+              title={
+                done
+                  ? t("participants.suggestions.invited")
+                  : t("participants.suggestions.inviteName").replace("{name}", f.name)
+              }
             >
               {f.avatarUrl ? (
                 <Image

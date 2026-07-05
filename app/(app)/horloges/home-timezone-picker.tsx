@@ -2,10 +2,12 @@
 
 import { Home } from "lucide-react";
 import { useMemo, useState, useTransition } from "react";
+import { useT } from "@/components/i18n/provider";
 import { setHomeTimezone } from "./actions";
 
 /** Choix de "sa maison" sur la page Horloges (PHIL-Q40). */
 export function HomeTimezonePicker({ value }: { value: string }) {
+  const t = useT();
   const timezones = useMemo(() => Intl.supportedValuesOf("timeZone"), []);
   const [tz, setTz] = useState(value);
   const [saved, setSaved] = useState(false);
@@ -14,7 +16,7 @@ export function HomeTimezonePicker({ value }: { value: string }) {
   return (
     <label className="flex flex-wrap items-center gap-2 text-sm text-encre">
       <span className="flex items-center gap-1.5 text-encre-douce">
-        <Home className="size-4" aria-hidden="true" /> Ta maison
+        <Home className="size-4" aria-hidden="true" /> {t("clocks.home")}
       </span>
       <select
         value={tz}
@@ -39,7 +41,7 @@ export function HomeTimezonePicker({ value }: { value: string }) {
       {pending ? (
         <span className="text-xs text-encre-douce">…</span>
       ) : saved ? (
-        <span className="text-xs text-[#3f6e5a]">✓ enregistré</span>
+        <span className="text-xs text-[#3f6e5a]">{t("clocks.saved")}</span>
       ) : null}
     </label>
   );

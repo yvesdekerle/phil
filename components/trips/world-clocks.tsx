@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useT } from "@/components/i18n/provider";
 import { cn } from "@/lib/utils";
 
 export type ClockEntry = { timezone: string; label: string; isHome?: boolean };
@@ -10,6 +11,7 @@ export type ClockEntry = { timezone: string; label: string; isHome?: boolean };
  * une horloge par ligne, triées par décalage sur Greenwich croissant.
  */
 export function WorldClocks({ clocks }: { clocks: ClockEntry[] }) {
+  const t = useT();
   const [now, setNow] = useState<Date | null>(null);
 
   useEffect(() => {
@@ -19,7 +21,7 @@ export function WorldClocks({ clocks }: { clocks: ClockEntry[] }) {
   }, []);
 
   if (!now) {
-    return <p className="text-sm text-encre-douce">Phil remonte ses montres…</p>;
+    return <p className="text-sm text-encre-douce">{t("clocksExtra.winding")}</p>;
   }
 
   // Décalage UTC en heures (au quart d'heure près)
@@ -61,13 +63,15 @@ export function WorldClocks({ clocks }: { clocks: ClockEntry[] }) {
             <span className="min-w-0 flex-1">
               <span className="block truncate text-sm font-medium text-encre">
                 {c.label}
-                {c.isHome ? <span className="text-encre-douce"> — chez toi</span> : null}
+                {c.isHome ? (
+                  <span className="text-encre-douce"> {t("clocks.homeSuffix")}</span>
+                ) : null}
               </span>
               <span className="block text-xs text-encre-douce">
                 {dayIn(c.timezone)} · UTC{c.offset >= 0 ? "+" : ""}
                 {c.offset}
                 {!c.isHome && diff !== 0
-                  ? ` · ${diff > 0 ? "+" : ""}${diff} h par rapport à chez toi`
+                  ? ` · ${diff > 0 ? "+" : ""}${diff} h ${t("clocks.diff")}`
                   : ""}
               </span>
             </span>

@@ -2,6 +2,7 @@
 
 import { Mail } from "lucide-react";
 import { useTransition } from "react";
+import { useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import { generateEmailAlias } from "./actions";
 
@@ -15,31 +16,29 @@ export function EmailAliasCard({
   alias: string | null;
   domain: string | null;
 }) {
+  const t = useT();
   const [pending, startTransition] = useTransition();
   const address = alias ? `${alias}@${domain ?? "…"}` : null;
 
   return (
     <section className="rounded-lg border border-laiton-clair bg-papier px-4 py-3">
       <h2 className="mb-1 flex items-center gap-2 text-sm font-medium text-encre">
-        <Mail className="size-4 text-laiton" aria-hidden="true" /> Import par email
+        <Mail className="size-4 text-laiton" aria-hidden="true" /> {t("settings.email.title")}
       </h2>
       {alias ? (
         <>
           <p className="text-sm text-encre">
-            Transfère tes confirmations à{" "}
+            {t("settings.email.forward")}{" "}
             <code className="rounded bg-parchemin px-1.5 py-0.5 text-xs">{address}</code>
           </p>
           <p className="mt-1 text-xs text-encre-douce">
-            Seuls les emails des participants sont acceptés ; chaque réservation arrive en "à
-            valider" dans Importer une confirmation.
-            {domain ? "" : " Réception active dès que le domaine d'import sera configuré."}
+            {t("settings.email.note")}
+            {domain ? "" : t("settings.email.noteDomain")}
           </p>
         </>
       ) : (
         <div className="flex items-center justify-between gap-3">
-          <p className="text-xs text-encre-douce">
-            Crée l'adresse du voyage pour pouvoir y transférer tes confirmations de réservation.
-          </p>
+          <p className="text-xs text-encre-douce">{t("settings.email.create")}</p>
           <Button
             type="button"
             size="sm"
@@ -47,7 +46,7 @@ export function EmailAliasCard({
             disabled={pending}
             onClick={() => startTransition(() => generateEmailAlias(tripId))}
           >
-            {pending ? "Création…" : "Créer l'adresse"}
+            {pending ? t("settings.email.creating") : t("settings.email.createBtn")}
           </Button>
         </div>
       )}

@@ -4,6 +4,7 @@ import { startRegistration } from "@simplewebauthn/browser";
 import { Fingerprint } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import {
   deletePasskey,
@@ -20,6 +21,7 @@ type Passkey = {
 };
 
 export function PasskeyManager({ passkeys }: { passkeys: Passkey[] }) {
+  const t = useT();
   const router = useRouter();
   const [state, setState] = useState<SecurityActionState>({ status: "idle" });
   const [pending, startTransition] = useTransition();
@@ -30,7 +32,7 @@ export function PasskeyManager({ passkeys }: { passkeys: Passkey[] }) {
       try {
         const options = await getRegistrationOptions();
         const response = await startRegistration({ optionsJSON: options });
-        const deviceName = `${navigator.platform || "Appareil"} — ${new Date().toLocaleDateString("fr-FR")}`;
+        const deviceName = `${navigator.platform || t("security.device")} — ${new Date().toLocaleDateString("fr-FR")}`;
         const result = await verifyRegistration(response, deviceName);
         setState(result);
         if (result.status === "success") {
@@ -40,7 +42,7 @@ export function PasskeyManager({ passkeys }: { passkeys: Passkey[] }) {
         console.error(e);
         setState({
           status: "error",
-          message: "Enregistrement annulé ou non pris en charge par cet appareil.",
+          message: t("security.registerCancelled"),
         });
       }
     });
@@ -60,7 +62,7 @@ export function PasskeyManager({ passkeys }: { passkeys: Passkey[] }) {
     <div className="flex flex-col gap-4">
       <Button type="button" disabled={pending} onClick={register}>
         <Fingerprint aria-hidden="true" />
-        {pending ? "En attente de l'appareil…" : "Activer Face ID / Touch ID pour le coffre"}
+        {pending ? t("security.registering") : t("security.register")}
       </Button>
 
       {state.status !== "idle" ? (
@@ -81,12 +83,12 @@ export function PasskeyManager({ passkeys }: { passkeys: Passkey[] }) {
               className="flex items-center gap-3 rounded-md border border-laiton-clair bg-parchemin/50 px-3 py-2 text-sm"
             >
               <span className="min-w-0 flex-1 truncate text-encre">
-                {p.device_name ?? "Appareil"}
+                {p.device_name ?? t("security.device")}
                 <span className="text-xs text-encre-douce">
                   {" "}
-                  · ajoutée le {new Date(p.created_at).toLocaleDateString("fr-FR")}
+                  · {t("security.addedOn")} {new Date(p.created_at).toLocaleDateString("fr-FR")}
                   {p.last_used_at
-                    ? ` · utilisée le ${new Date(p.last_used_at).toLocaleDateString("fr-FR")}`
+                    ? ` · ${t("security.usedOn")} ${new Date(p.last_used_at).toLocaleDateString("fr-FR")}`
                     : ""}
                 </span>
               </span>
@@ -97,15 +99,13 @@ export function PasskeyManager({ passkeys }: { passkeys: Passkey[] }) {
                 disabled={pending}
                 onClick={() => revoke(p.id)}
               >
-                Révoquer
+                {t("security.revoke")}
               </Button>
             </li>
           ))}
         </ul>
       ) : (
-        <p className="text-sm text-encre-douce">
-          Aucune passkey — le coffre s'ouvre pour l'instant avec ta seule session Google.
-        </p>
+        <p className="text-sm text-encre-douce">{t("security.empty")}</p>
       )}
     </div>
   );

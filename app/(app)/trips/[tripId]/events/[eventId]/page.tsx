@@ -9,8 +9,8 @@ import { Linkify } from "@/components/ui/linkify";
 import { formatInTimezone } from "@/lib/events/datetime";
 import { LODGING_PLATFORM_LABELS, type LodgingPlatform } from "@/lib/events/lodging";
 import { TRANSPORT_MODE_LABELS, type TransportMode } from "@/lib/events/transport";
-import { EVENT_TYPE_LABELS } from "@/lib/events/types";
 import { navigateUrl } from "@/lib/geo/directions";
+import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { attachDocument, detachDocument } from "./actions";
 import { EventActions } from "./event-actions";
@@ -33,6 +33,7 @@ export default async function EventDetailPage({
   params: Promise<{ tripId: string; eventId: string }>;
 }) {
   const { tripId, eventId } = await params;
+  const t = await getT();
   const supabase = await createClient();
   const {
     data: { user },
@@ -90,7 +91,10 @@ export default async function EventDetailPage({
   const participantOptions = (members ?? [])
     .map((m) => ({
       userId: m.user_id,
-      name: m.user_id === user.id ? "Toi" : (m.profiles?.display_name ?? "Voyageur"),
+      name:
+        m.user_id === user.id
+          ? t("events.you")
+          : (m.profiles?.display_name ?? t("events.traveler")),
       avatarUrl: m.profiles?.avatar_url ?? null,
       isIn: signedUpIds.has(m.user_id),
       canToggle: canEdit || m.user_id === user.id,
@@ -102,7 +106,7 @@ export default async function EventDetailPage({
     body: n.body,
     created_at: n.created_at,
     author_id: n.author_id,
-    authorName: n.profiles?.display_name ?? "Voyageur",
+    authorName: n.profiles?.display_name ?? t("events.traveler"),
   }));
 
   const meta = (event.metadata ?? {}) as Record<string, string | number>;
@@ -126,54 +130,73 @@ export default async function EventDetailPage({
         href={`/trips/${tripId}`}
         className="text-sm text-encre-douce underline underline-offset-4 hover:text-encre"
       >
-        ← Retour au calendrier
+        {t("calendar.backToCalendar")}
       </Link>
 
       <div className="flex items-start gap-4">
         <EventTypeIcon type={event.type} />
         <div className="min-w-0 flex-1">
           <h1 className="font-display text-2xl text-encre">{event.title}</h1>
-          <p className="mt-0.5 text-sm text-encre-douce">{EVENT_TYPE_LABELS[event.type]}</p>
+          <p className="mt-0.5 text-sm text-encre-douce">{t(`events.type.${event.type}`)}</p>
         </div>
       </div>
 
       <Card>
         <CardContent className="divide-y divide-laiton-clair/50">
           <Row
-            label={event.type === "LODGING" ? "Check-in" : "Début"}
-            value={`${start} (heure locale ${event.timezone})`}
+            label={event.type === "LODGING" ? t("events.form.checkIn") : t("events.detail.start")}
+            value={`${start} (${t("events.detail.localTime")} ${event.timezone})`}
           />
-          {end ? <Row label={event.type === "LODGING" ? "Check-out" : "Fin"} value={end} /> : null}
+          {end ? (
+            <Row
+              label={event.type === "LODGING" ? t("events.form.checkOut") : t("events.detail.end")}
+              value={end}
+            />
+          ) : null}
 
           {event.type === "TRANSPORT" && meta.transport_mode ? (
             <Row
-              label="Mode"
+              label={t("events.form.mode")}
               value={
                 TRANSPORT_MODE_LABELS[meta.transport_mode as TransportMode] ?? meta.transport_mode
               }
             />
           ) : null}
-          {meta.from && meta.to ? <Row label="Trajet" value={`${meta.from} → ${meta.to}`} /> : null}
-          {meta.carrier ? <Row label="Transporteur" value={meta.carrier} /> : null}
+          {meta.from && meta.to ? (
+            <Row label={t("events.detail.route")} value={`${meta.from} → ${meta.to}`} />
+          ) : null}
+          {meta.carrier ? <Row label={t("events.detail.carrier")} value={meta.carrier} /> : null}
           {event.type === "LODGING" && meta.platform ? (
             <Row
-              label="Plateforme"
+              label={t("events.detail.platform")}
               value={LODGING_PLATFORM_LABELS[meta.platform as LodgingPlatform] ?? meta.platform}
             />
           ) : null}
-          {meta.guests ? <Row label="Voyageurs" value={meta.guests} /> : null}
+          {meta.guests ? <Row label={t("events.detail.guests")} value={meta.guests} /> : null}
           {meta.booking_reference ? (
-            <Row label="Réservation" value={meta.booking_reference} />
+            <Row label={t("events.detail.booking")} value={meta.booking_reference} />
           ) : null}
           {meta.duration_minutes ? (
-            <Row label="Durée estimée" value={`${meta.duration_minutes} min`} />
+            <Row
+              label={t("events.detail.duration")}
+              value={`${meta.duration_minutes} ${t("events.detail.minutesSuffix")}`}
+            />
           ) : null}
           {meta.cost ? (
-            <Row label="Coût" value={`${meta.cost} ${meta.cost_currency ?? ""}`} />
+            <Row
+              label={t("events.detail.cost")}
+              value={`${meta.cost} ${meta.cost_currency ?? ""}`}
+            />
           ) : null}
-          {event.location_name ? <Row label="Lieu" value={event.location_name} /> : null}
-          {event.location_address ? <Row label="Adresse" value={event.location_address} /> : null}
-          {event.notes ? <Row label="Notes" value={<Linkify text={event.notes} />} /> : null}
+          {event.location_name ? (
+            <Row label={t("events.form.location")} value={event.location_name} />
+          ) : null}
+          {event.location_address ? (
+            <Row label={t("events.form.address")} value={event.location_address} />
+          ) : null}
+          {event.notes ? (
+            <Row label={t("events.form.notes")} value={<Linkify text={event.notes} />} />
+          ) : null}
         </CardContent>
       </Card>
 
@@ -181,14 +204,14 @@ export default async function EventDetailPage({
         {navTarget ? (
           <Button asChild variant="outline">
             <a href={navigateUrl(navTarget)} target="_blank" rel="noopener noreferrer">
-              <MapPin aria-hidden="true" /> Itinéraire
+              <MapPin aria-hidden="true" /> {t("events.detail.directions")}
             </a>
           </Button>
         ) : null}
         {meta.external_url ? (
           <Button asChild variant="outline">
             <a href={String(meta.external_url)} target="_blank" rel="noopener noreferrer">
-              <ExternalLink aria-hidden="true" /> Lien externe
+              <ExternalLink aria-hidden="true" /> {t("events.detail.externalLink")}
             </a>
           </Button>
         ) : null}
@@ -218,7 +241,9 @@ export default async function EventDetailPage({
 
       <section>
         <div className="mb-2 flex items-center justify-between">
-          <h2 className="text-sm font-medium text-encre-douce">Documents attachés</h2>
+          <h2 className="text-sm font-medium text-encre-douce">
+            {t("events.detail.documentsHeading")}
+          </h2>
           {canEdit ? (
             <DocumentPicker
               tripId={tripId}
@@ -229,7 +254,7 @@ export default async function EventDetailPage({
         </div>
         {documents.length === 0 ? (
           <p className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-4 py-6 text-center text-sm text-encre-douce">
-            Aucun document attaché pour l'instant.
+            {t("events.detail.noDocuments")}
           </p>
         ) : (
           <ul className="flex flex-col gap-2">
@@ -254,7 +279,7 @@ export default async function EventDetailPage({
                     }}
                   >
                     <Button type="submit" variant="ghost" size="sm">
-                      Détacher
+                      {t("events.detail.detach")}
                     </Button>
                   </form>
                 ) : null}

@@ -1,11 +1,13 @@
 import { redirect } from "next/navigation";
 import { UploadForm } from "@/components/documents/upload-form";
 import { Card, CardContent } from "@/components/ui/card";
+import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { VAULT_CATEGORIES } from "@/lib/vault/categories";
 import { createDocument } from "./actions";
 
 export default async function NewDocumentPage() {
+  const t = await getT();
   const supabase = await createClient();
   const {
     data: { user },
@@ -16,13 +18,11 @@ export default async function NewDocumentPage() {
 
   return (
     <main className="mx-auto w-full max-w-lg flex-1 px-4 py-8">
-      <h1 className="mb-2 text-center font-display text-3xl text-encre">Ajouter au coffre</h1>
-      <p className="mb-2 text-center text-sm text-encre-douce">
-        Ton document reste privé — tu décideras plus tard de le partager, voyage par voyage.
-      </p>
+      <h1 className="mb-2 text-center font-display text-3xl text-encre">{t("vault.new.title")}</h1>
+      <p className="mb-2 text-center text-sm text-encre-douce">{t("vault.new.subtitle")}</p>
       <p className="mb-6 text-center text-xs text-encre-douce">
-        Billets, vouchers et réservations d'hébergement appartiennent au groupe : ajoute-les plutôt
-        dans les <strong>Documents du voyage</strong> concerné.
+        {t("vault.new.hintBefore")} <strong>{t("vault.new.hintTripDocs")}</strong>{" "}
+        {t("vault.new.hintAfter")}
       </p>
       <Card>
         <CardContent>
@@ -30,8 +30,8 @@ export default async function NewDocumentPage() {
             userId={user.id}
             action={createDocument}
             categories={VAULT_CATEGORIES}
-            submitLabel="Ajouter au coffre"
-            pendingLabel="Phil range ton document…"
+            submitLabel={t("vault.new.submit")}
+            pendingLabel={t("vault.new.pending")}
           />
         </CardContent>
       </Card>

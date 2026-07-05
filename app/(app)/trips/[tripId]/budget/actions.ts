@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { EXPENSE_CATEGORIES } from "@/lib/budget/categories";
+import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { areUuids } from "@/lib/validation";
 
@@ -28,6 +29,7 @@ export type ActionResult = { ok: boolean; message?: string };
 
 /** Enregistre une dépense partagée (PHIL-N09, division PHIL-Q21). */
 export async function addExpense(_prev: ExpenseState, formData: FormData): Promise<ExpenseState> {
+  const t = await getT();
   const parsed = expenseSchema.safeParse({
     tripId: formData.get("tripId"),
     title: formData.get("title"),
@@ -41,7 +43,7 @@ export async function addExpense(_prev: ExpenseState, formData: FormData): Promi
     splitMode: formData.get("splitMode") ?? "equal",
   });
   if (!parsed.success) {
-    return { status: "error", message: "Montant, payeur et au moins un bénéficiaire requis." };
+    return { status: "error", message: t("budget.errors.invalidExpense") };
   }
 
   // Parts / montants exacts par bénéficiaire (champs share-<userId>)
@@ -50,7 +52,7 @@ export async function addExpense(_prev: ExpenseState, formData: FormData): Promi
     for (const userId of parsed.data.beneficiaries) {
       const raw = Number(formData.get(`share-${userId}`));
       if (!Number.isFinite(raw) || raw < 0) {
-        return { status: "error", message: "Parts ou montants invalides." };
+        return { status: "error", message: t("budget.errors.invalidShares") };
       }
       shares.set(userId, raw);
     }
@@ -58,11 +60,11 @@ export async function addExpense(_prev: ExpenseState, formData: FormData): Promi
     if (parsed.data.splitMode === "exact" && Math.abs(total - parsed.data.amount) > 0.01) {
       return {
         status: "error",
-        message: `La somme des montants (${total.toFixed(2)}) doit faire ${parsed.data.amount.toFixed(2)}.`,
+        message: `${t("budget.errors.sumPrefix")}${total.toFixed(2)}${t("budget.errors.sumMiddle")}${parsed.data.amount.toFixed(2)}.`,
       };
     }
     if (parsed.data.splitMode === "shares" && total <= 0) {
-      return { status: "error", message: "Il faut au moins une part." };
+      return { status: "error", message: t("budget.errors.atLeastOneShare") };
     }
   }
 
@@ -83,7 +85,7 @@ export async function addExpense(_prev: ExpenseState, formData: FormData): Promi
     .eq("id", d.tripId)
     .single();
   if (trip?.purse_closed_at) {
-    return { status: "error", message: "La Bourse est close — rouvre-la pour ajouter." };
+    return { status: "error", message: t("budget.errors.purseClosed") };
   }
 
   // PHIL-Q49 : insertion atomique (dépense + bénéficiaires) via RPC transactionnelle
@@ -104,7 +106,7 @@ export async function addExpense(_prev: ExpenseState, formData: FormData): Promi
     })),
   });
   if (error) {
-    return { status: "error", message: "Enregistrement impossible." };
+    return { status: "error", message: t("budget.errors.saveFailed") };
   }
 
   revalidatePath(`/trips/${d.tripId}/budget`);
@@ -115,8 +117,9 @@ export async function addExpense(_prev: ExpenseState, formData: FormData): Promi
 
 /** Clore / rouvrir la Bourse (PHIL-Q21) — Capitaine uniquement. */
 export async function setPurseClosed(tripId: string, closed: boolean): Promise<ActionResult> {
+  const t = await getT();
   if (!areUuids(tripId)) {
-    return { ok: false, message: "Voyage invalide." };
+    return { ok: false, message: t("budget.errors.invalidTrip") };
   }
   const supabase = await createClient();
   const {
@@ -132,14 +135,14 @@ export async function setPurseClosed(tripId: string, closed: boolean): Promise<A
     .eq("user_id", user.id)
     .single();
   if (me?.role !== "OWNER") {
-    return { ok: false, message: "Seul le Capitaine peut clore ou rouvrir la Bourse." };
+    return { ok: false, message: t("budget.errors.onlyCaptain") };
   }
   const { error } = await supabase
     .from("trips")
     .update({ purse_closed_at: closed ? new Date().toISOString() : null })
     .eq("id", tripId);
   if (error) {
-    return { ok: false, message: "Action impossible pour l'instant." };
+    return { ok: false, message: t("budget.errors.actionUnavailable") };
   }
   revalidatePath(`/trips/${tripId}/budget`);
   revalidatePath(`/trips/${tripId}/budget/equilibre`);
@@ -162,9 +165,10 @@ export async function markSettled(
   amount: number,
   currency: string,
 ): Promise<ActionResult> {
+  const t = await getT();
   const parsed = settlementSchema.safeParse({ tripId, fromUserId, toUserId, amount, currency });
   if (!parsed.success || parsed.data.fromUserId === parsed.data.toUserId) {
-    return { ok: false, message: "Règlement invalide." };
+    return { ok: false, message: t("budget.errors.invalidSettlement") };
   }
   const supabase = await createClient();
   const {
@@ -178,7 +182,7 @@ export async function markSettled(
   // PHIL-Q49 : règlement inséré atomiquement (dépense + bénéficiaire) via RPC
   const { error } = await supabase.rpc("create_expense_with_beneficiaries", {
     p_trip_id: d.tripId,
-    p_title: "Remboursement",
+    p_title: t("budget.settlement.title"),
     p_amount: d.amount,
     p_currency: d.currency,
     p_paid_by: d.fromUserId,
@@ -188,7 +192,7 @@ export async function markSettled(
     p_beneficiaries: [{ user_id: d.toUserId, share: null }],
   });
   if (error) {
-    return { ok: false, message: "Le règlement n'a pas pu être enregistré." };
+    return { ok: false, message: t("budget.errors.settlementFailed") };
   }
   revalidatePath(`/trips/${d.tripId}/budget`);
   revalidatePath(`/trips/${d.tripId}/budget/equilibre`);
@@ -197,8 +201,9 @@ export async function markSettled(
 }
 
 export async function deleteExpense(tripId: string, expenseId: string): Promise<ActionResult> {
+  const t = await getT();
   if (!areUuids(tripId, expenseId)) {
-    return { ok: false, message: "Dépense invalide." };
+    return { ok: false, message: t("budget.errors.invalidExpenseId") };
   }
   const supabase = await createClient();
   const {
@@ -213,7 +218,7 @@ export async function deleteExpense(tripId: string, expenseId: string): Promise<
     .eq("id", expenseId)
     .eq("trip_id", tripId);
   if (error) {
-    return { ok: false, message: "Suppression impossible." };
+    return { ok: false, message: t("budget.errors.deleteFailed") };
   }
   revalidatePath(`/trips/${tripId}/budget`);
   revalidatePath(`/trips/${tripId}/budget/equilibre`);

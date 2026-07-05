@@ -4,6 +4,7 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useEffect, useRef, useTransition } from "react";
 import { toggleVisitedCountry } from "@/app/(app)/explorer/actions";
+import { useT } from "@/components/i18n/provider";
 
 /** Palette Phil pour les pays visités — teinte stable par pays. */
 const VISITED_COLORS = ["#6e1f2e", "#b08d3f", "#1f2a44", "#3f6e5a"];
@@ -25,6 +26,7 @@ export function WorldMap({ visited }: { visited: string[] }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const visitedRef = useRef(new Set(visited));
   const [, startTransition] = useTransition();
+  const t = useT();
 
   useEffect(() => {
     visitedRef.current = new Set(visited);
@@ -107,7 +109,7 @@ export function WorldMap({ visited }: { visited: string[] }) {
       ref={containerRef}
       role="application"
       className="h-[420px] w-full overflow-hidden rounded-lg border border-laiton-clair"
-      aria-label="Carte du monde — clique un pays pour le marquer visité"
+      aria-label={t("map.worldAria")}
     />
   );
 }

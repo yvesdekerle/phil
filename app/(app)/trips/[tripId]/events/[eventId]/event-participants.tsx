@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { useT } from "@/components/i18n/provider";
 import { cn } from "@/lib/utils";
 import { toggleEventParticipant } from "./actions";
 
@@ -24,6 +25,7 @@ export function EventParticipants({
   eventId: string;
   options: EventParticipantOption[];
 }) {
+  const t = useT();
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -38,7 +40,7 @@ export function EventParticipants({
     startTransition(async () => {
       const result = await toggleEventParticipant(tripId, eventId, option.userId, !option.isIn);
       if (result.status === "error") {
-        setError(result.message ?? "Impossible de mettre à jour.");
+        setError(result.message ?? t("events.participants.updateError"));
       } else {
         router.refresh();
       }
@@ -48,11 +50,11 @@ export function EventParticipants({
   return (
     <section className="flex flex-col gap-2">
       <div className="flex items-baseline justify-between">
-        <h2 className="text-sm font-medium text-encre">Qui est de la partie ?</h2>
+        <h2 className="text-sm font-medium text-encre">{t("events.participants.heading")}</h2>
         <span className="text-xs text-encre-douce">
           {count === 0
-            ? "Tout le groupe (personne d'inscrit)"
-            : `${count} inscrit${count > 1 ? "s" : ""}`}
+            ? t("events.participants.allGroup")
+            : `${count} ${count > 1 ? t("events.participants.signedUpPlural") : t("events.participants.signedUpSingular")}`}
         </span>
       </div>
       <div className="flex flex-wrap gap-2">
@@ -65,9 +67,9 @@ export function EventParticipants({
             title={
               option.canToggle
                 ? option.isIn
-                  ? "Retirer de l'événement"
-                  : "Inscrire à l'événement"
-                : "Seuls les capitaines/éditeurs peuvent inscrire les autres"
+                  ? t("events.participants.remove")
+                  : t("events.participants.add")
+                : t("events.participants.onlyCaptains")
             }
             className={cn(
               "flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-colors",

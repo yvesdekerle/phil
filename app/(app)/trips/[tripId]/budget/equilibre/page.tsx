@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { RealtimeRefresh } from "@/components/realtime-refresh";
 import { computeBalances, computeSettlements } from "@/lib/budget/balances";
 import { fromBase, getRates, toBase } from "@/lib/budget/rates";
+import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { PurseNav } from "../purse-nav";
 import { EquilibreClient } from "./equilibre-client";
@@ -13,6 +14,7 @@ export default async function PurseBalancePage({
   params: Promise<{ tripId: string }>;
 }) {
   const { tripId } = await params;
+  const t = await getT();
   const supabase = await createClient();
   const {
     data: { user },
@@ -90,7 +92,7 @@ export default async function PurseBalancePage({
         members={(members ?? [])
           .map((m) => ({
             userId: m.user_id,
-            name: m.profiles?.display_name ?? "Voyageur",
+            name: m.profiles?.display_name ?? t("budget.common.traveler"),
           }))
           .sort((a, b) => a.name.localeCompare(b.name, "fr"))}
         myId={user.id}

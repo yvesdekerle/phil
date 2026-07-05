@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMemo, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,22 +17,12 @@ import {
 } from "@/components/ui/select";
 import { type ProfileFormState, updateProfile } from "./actions";
 
-const formSchema = z.object({
-  displayName: z
-    .string()
-    .trim()
-    .min(1, "Il faut bien un nom sur le carnet de bord.")
-    .max(80, "80 caractères maximum."),
-  locale: z.enum(["fr", "en"]),
-  timezone: z.string().min(1),
-  whatsapp: z
-    .string()
-    .trim()
-    .max(50, "50 caractères maximum.")
-    .regex(/^$|^\+?[\d\s.\-()]{6,20}$|^@?[\w.]{3,32}$/, "Un numéro (+33 6…) ou un @pseudo."),
-});
-
-type FormValues = z.infer<typeof formSchema>;
+type FormValues = {
+  displayName: string;
+  locale: "fr" | "en";
+  timezone: string;
+  whatsapp: string;
+};
 
 const LOCALES = [
   { value: "fr", label: "Français" },
@@ -39,9 +30,28 @@ const LOCALES = [
 ] as const;
 
 export function ProfileForm({ defaultValues }: { defaultValues: FormValues }) {
+  const t = useT();
   const [state, setState] = useState<ProfileFormState>({ status: "idle" });
   const [pending, startTransition] = useTransition();
   const timezones = useMemo(() => Intl.supportedValuesOf("timeZone"), []);
+  const formSchema = useMemo(
+    () =>
+      z.object({
+        displayName: z
+          .string()
+          .trim()
+          .min(1, t("profile.form.nameRequired"))
+          .max(80, t("profile.form.nameMax")),
+        locale: z.enum(["fr", "en"]),
+        timezone: z.string().min(1),
+        whatsapp: z
+          .string()
+          .trim()
+          .max(50, t("profile.form.whatsappMax"))
+          .regex(/^$|^\+?[\d\s.\-()]{6,20}$|^@?[\w.]{3,32}$/, t("profile.form.whatsappInvalid")),
+      }),
+    [t],
+  );
 
   const {
     register,
@@ -68,7 +78,7 @@ export function ProfileForm({ defaultValues }: { defaultValues: FormValues }) {
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-5">
       <div className="flex flex-col gap-2">
-        <Label htmlFor="displayName">Nom affiché</Label>
+        <Label htmlFor="displayName">{t("profile.form.displayName")}</Label>
         <Input id="displayName" autoComplete="name" {...register("displayName")} />
         {errors.displayName ? (
           <p className="text-sm text-bordeaux">{errors.displayName.message}</p>
@@ -76,7 +86,7 @@ export function ProfileForm({ defaultValues }: { defaultValues: FormValues }) {
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="locale">Langue</Label>
+        <Label htmlFor="locale">{t("profile.form.language")}</Label>
         <Select
           value={watch("locale")}
           onValueChange={(v) => setValue("locale", v as FormValues["locale"])}
@@ -95,7 +105,7 @@ export function ProfileForm({ defaultValues }: { defaultValues: FormValues }) {
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="timezone">Fuseau horaire par défaut</Label>
+        <Label htmlFor="timezone">{t("profile.form.defaultTimezone")}</Label>
         <Select value={watch("timezone")} onValueChange={(v) => setValue("timezone", v)}>
           <SelectTrigger id="timezone" className="w-full">
             <SelectValue />
@@ -111,16 +121,14 @@ export function ProfileForm({ defaultValues }: { defaultValues: FormValues }) {
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="whatsapp">WhatsApp (numéro ou @pseudo)</Label>
+        <Label htmlFor="whatsapp">{t("profile.form.whatsapp")}</Label>
         <Input
           id="whatsapp"
-          placeholder="+33 6 12 34 56 78 ou @phileas"
+          placeholder={t("profile.form.whatsappPlaceholder")}
           autoComplete="tel"
           {...register("whatsapp")}
         />
-        <p className="text-xs text-encre-douce">
-          Visible uniquement de tes co-voyageurs, pour te joindre en un tap.
-        </p>
+        <p className="text-xs text-encre-douce">{t("profile.form.whatsappHint")}</p>
         {errors.whatsapp ? (
           <p className="text-sm text-bordeaux">{errors.whatsapp.message}</p>
         ) : null}
@@ -128,7 +136,7 @@ export function ProfileForm({ defaultValues }: { defaultValues: FormValues }) {
 
       <div className="flex items-center gap-4">
         <Button type="submit" disabled={pending}>
-          {pending ? "Enregistrement…" : "Enregistrer"}
+          {pending ? t("profile.form.saving") : t("profile.form.save")}
         </Button>
         {state.status === "success" ? (
           <p className="text-sm text-encre-douce">{state.message}</p>

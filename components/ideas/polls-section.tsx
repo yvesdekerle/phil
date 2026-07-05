@@ -7,6 +7,7 @@ import {
   type PollState,
   votePoll,
 } from "@/app/(app)/trips/[tripId]/ideas/poll-actions";
+import { useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -32,6 +33,7 @@ export function PollsSection({
   myId: string;
   isOwner: boolean;
 }) {
+  const t = useT();
   const [showForm, setShowForm] = useState(false);
   const [state, formAction, formPending] = useActionState<PollState, FormData>(createPoll, {
     status: "idle",
@@ -42,7 +44,7 @@ export function PollsSection({
     return (
       <div className="flex justify-end">
         <Button type="button" variant="outline" size="sm" onClick={() => setShowForm(true)}>
-          Sondage éclair
+          {t("ideas.pollQuick")}
         </Button>
       </div>
     );
@@ -51,26 +53,31 @@ export function PollsSection({
   return (
     <section className="flex flex-col gap-3 rounded-lg border border-laiton-clair bg-papier px-4 py-3">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-medium text-encre">Sondages éclair</h2>
+        <h2 className="text-sm font-medium text-encre">{t("ideas.pollSectionTitle")}</h2>
         <Button type="button" variant="outline" size="sm" onClick={() => setShowForm(!showForm)}>
-          {showForm ? "Annuler" : "Nouveau"}
+          {showForm ? t("ideas.cancel") : t("ideas.new")}
         </Button>
       </div>
 
       {showForm ? (
         <form action={formAction} className="flex flex-col gap-2 rounded-md bg-parchemin/50 p-3">
           <input type="hidden" name="tripId" value={tripId} />
-          <Input name="question" placeholder="Resto ce soir ?" required maxLength={200} />
+          <Input
+            name="question"
+            placeholder={t("ideas.questionPlaceholder")}
+            required
+            maxLength={200}
+          />
           <textarea
             name="options"
             rows={3}
             required
-            placeholder={"Créole\nItalien\nOn cuisine"}
+            placeholder={t("ideas.optionsPlaceholder")}
             className="rounded-md border border-laiton-clair bg-papier px-3 py-2 text-sm text-encre"
           />
-          <p className="text-xs text-encre-douce">Une option par ligne (2 à 5).</p>
+          <p className="text-xs text-encre-douce">{t("ideas.optionsHint")}</p>
           <Button type="submit" size="sm" disabled={formPending}>
-            {formPending ? "Ouverture…" : "Lancer le sondage"}
+            {formPending ? t("ideas.opening") : t("ideas.launchPoll")}
           </Button>
           {state.status === "error" ? (
             <p className="text-xs text-bordeaux">{state.message}</p>
@@ -87,8 +94,8 @@ export function PollsSection({
             <div className="flex items-center justify-between gap-2">
               <p className="text-sm font-medium text-encre">{poll.question}</p>
               <span className="flex items-center gap-2 text-xs text-encre-douce">
-                {total} vote{total > 1 ? "s" : ""}
-                {closed ? " · clos" : null}
+                {total} {total > 1 ? t("ideas.voteMany") : t("ideas.voteOne")}
+                {closed ? ` · ${t("ideas.closed")}` : null}
                 {!closed && (poll.created_by === myId || isOwner) ? (
                   <button
                     type="button"
@@ -96,7 +103,7 @@ export function PollsSection({
                     onClick={() => startTransition(() => closePoll(tripId, poll.id))}
                     className="underline underline-offset-4 hover:text-encre"
                   >
-                    Clore
+                    {t("ideas.close")}
                   </button>
                 ) : null}
               </span>

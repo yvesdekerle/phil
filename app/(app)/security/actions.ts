@@ -7,6 +7,7 @@ import {
 } from "@simplewebauthn/server";
 import { cookies } from "next/headers";
 import { requireUser } from "@/lib/auth/require-user";
+import { getT } from "@/lib/i18n/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { areUuids } from "@/lib/validation";
 import { CHALLENGE_COOKIE, getRpConfig } from "@/lib/webauthn/config";
@@ -18,6 +19,7 @@ export type SecurityActionState = {
 
 /** Étape 1 : options d'enregistrement, challenge posé en cookie httpOnly (5 min). */
 export async function getRegistrationOptions() {
+  const t = await getT();
   const { supabase, user } = await requireUser();
   const { rpName, rpID } = getRpConfig();
 
@@ -30,7 +32,7 @@ export async function getRegistrationOptions() {
     rpName,
     rpID,
     userName: user.email ?? user.id,
-    userDisplayName: user.email ?? "Voyageur Phil",
+    userDisplayName: user.email ?? t("security.defaultUserName"),
     attestationType: "none",
     excludeCredentials: (existing ?? []).map((p) => ({
       id: p.credential_id,
@@ -59,6 +61,7 @@ export async function verifyRegistration(
   response: RegistrationResponseJSON,
   deviceName: string,
 ): Promise<SecurityActionState> {
+  const t = await getT();
   const { user } = await requireUser();
   const { rpID, origin } = getRpConfig();
 
@@ -66,7 +69,7 @@ export async function verifyRegistration(
   const expectedChallenge = cookieStore.get(CHALLENGE_COOKIE)?.value;
   cookieStore.delete(CHALLENGE_COOKIE);
   if (!expectedChallenge) {
-    return { status: "error", message: "Challenge expiré — réessaie." };
+    return { status: "error", message: t("security.challengeExpired") };
   }
 
   let verification: Awaited<ReturnType<typeof verifyRegistrationResponse>>;
@@ -80,11 +83,11 @@ export async function verifyRegistration(
     });
   } catch (e) {
     console.error("Vérification WebAuthn échouée:", e);
-    return { status: "error", message: "L'enregistrement n'a pas pu être vérifié." };
+    return { status: "error", message: t("security.verifyFailed") };
   }
 
   if (!verification.verified || !verification.registrationInfo) {
-    return { status: "error", message: "Enregistrement refusé." };
+    return { status: "error", message: t("security.registerRefused") };
   }
 
   const { credential } = verification.registrationInfo;
@@ -99,15 +102,16 @@ export async function verifyRegistration(
   });
 
   if (error) {
-    return { status: "error", message: "Impossible d'enregistrer la passkey." };
+    return { status: "error", message: t("security.insertFailed") };
   }
 
-  return { status: "success", message: "Passkey enregistrée — ton coffre a désormais un verrou." };
+  return { status: "success", message: t("security.registered") };
 }
 
 export async function deletePasskey(passkeyId: string): Promise<SecurityActionState> {
+  const t = await getT();
   if (!areUuids(passkeyId)) {
-    return { status: "error", message: "Identifiant invalide." };
+    return { status: "error", message: t("security.invalidId") };
   }
   const { supabase } = await requireUser();
   const { error, count } = await supabase
@@ -116,7 +120,7 @@ export async function deletePasskey(passkeyId: string): Promise<SecurityActionSt
     .eq("id", passkeyId);
 
   if (error || count === 0) {
-    return { status: "error", message: "La révocation a échoué." };
+    return { status: "error", message: t("security.revokeFailed") };
   }
-  return { status: "success", message: "Passkey révoquée." };
+  return { status: "success", message: t("security.revoked") };
 }

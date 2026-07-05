@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { getT } from "@/lib/i18n/server";
 import { MAX_PHOTO_BYTES, PHOTOS_PER_TRIP } from "@/lib/photos/limits";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -36,6 +37,7 @@ async function removeBlobs(paths: (string | null | undefined)[]): Promise<void> 
  * Quota strict par voyage : au-delà, les blobs sont purgés et l'ajout refusé.
  */
 export async function registerPhoto(_prev: PhotoState, formData: FormData): Promise<PhotoState> {
+  const t = await getT();
   const parsed = registerSchema.safeParse({
     tripId: formData.get("tripId"),
     photoId: formData.get("photoId"),
@@ -48,7 +50,7 @@ export async function registerPhoto(_prev: PhotoState, formData: FormData): Prom
     lng: formData.get("lng") ?? "",
   });
   if (!parsed.success) {
-    return { status: "error", message: "Saisie invalide." };
+    return { status: "error", message: t("photos.invalidInput") };
   }
   const d = parsed.data;
 
@@ -66,7 +68,7 @@ export async function registerPhoto(_prev: PhotoState, formData: FormData): Prom
     (d.thumbPath && !d.thumbPath.startsWith(`${user.id}/${d.photoId}`))
   ) {
     await removeBlobs([d.storagePath, d.thumbPath]);
-    return { status: "error", message: "Chemin de fichier invalide." };
+    return { status: "error", message: t("photos.invalidPath") };
   }
 
   // Quota par voyage
@@ -78,7 +80,7 @@ export async function registerPhoto(_prev: PhotoState, formData: FormData): Prom
     await removeBlobs([d.storagePath, d.thumbPath]);
     return {
       status: "error",
-      message: `Quota atteint (${PHOTOS_PER_TRIP} photos par voyage) — supprime avant d'ajouter.`,
+      message: t("photos.quotaReachedMsg").replace("{n}", String(PHOTOS_PER_TRIP)),
     };
   }
 
@@ -96,7 +98,7 @@ export async function registerPhoto(_prev: PhotoState, formData: FormData): Prom
   });
   if (error) {
     await removeBlobs([d.storagePath, d.thumbPath]);
-    return { status: "error", message: "Enregistrement impossible." };
+    return { status: "error", message: t("photos.saveFailed") };
   }
 
   revalidatePath(`/trips/${d.tripId}/photos`);

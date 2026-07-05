@@ -3,8 +3,9 @@ import { fr } from "date-fns/locale";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { CategoryIcon } from "@/components/vault/category-icon";
+import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
-import { CATEGORY_LABELS } from "@/lib/vault/categories";
+import { categoryLabel } from "@/lib/vault/categories";
 import { DocumentActions } from "./document-actions";
 import { ShareManager } from "./share-manager";
 
@@ -14,6 +15,7 @@ export default async function VaultDocumentPage({
   params: Promise<{ documentId: string }>;
 }) {
   const { documentId } = await params;
+  const t = await getT();
   const supabase = await createClient();
   const {
     data: { user },
@@ -39,8 +41,10 @@ export default async function VaultDocumentPage({
   const shares = (shareRows ?? []).map((s) => ({
     shareId: s.id,
     tripId: s.trip_id,
-    tripName: s.trips?.name ?? "Voyage",
-    recipientName: s.shared_with ? (s.profiles?.display_name ?? "Un voyageur") : null,
+    tripName: s.trips?.name ?? t("documents.share.tripFallback"),
+    recipientName: s.shared_with
+      ? (s.profiles?.display_name ?? t("documents.share.travelerFallback"))
+      : null,
     expiresAt: s.expires_at,
     tripEndDate: s.trips?.end_date ?? null,
   }));
@@ -56,7 +60,7 @@ export default async function VaultDocumentPage({
         href="/vault"
         className="text-sm text-encre-douce underline underline-offset-4 hover:text-encre"
       >
-        ← Retour au coffre
+        {t("vault.backLink")}
       </Link>
 
       <div className="mt-4 mb-6 flex items-start gap-4">
@@ -64,15 +68,17 @@ export default async function VaultDocumentPage({
         <div className="min-w-0 flex-1">
           <h1 className="truncate font-display text-2xl text-encre">{doc.file_name}</h1>
           <p className="mt-1 text-sm text-encre-douce">
-            {doc.label ?? CATEGORY_LABELS[doc.category]} · ajouté le{" "}
+            {doc.label ?? categoryLabel(t, doc.category)} · {t("vault.addedOn")}{" "}
             {format(parseISO(doc.uploaded_at), "d MMMM yyyy", { locale: fr })} ·{" "}
-            {(doc.size_bytes / 1024 / 1024).toFixed(1)} Mo
+            {(doc.size_bytes / 1024 / 1024).toFixed(1)} {t("vault.detail.sizeUnit")}
           </p>
           <p className="mt-0.5 text-xs text-encre-douce">
             {doc.expires_at
-              ? `Expire le ${format(parseISO(doc.expires_at), "d MMMM yyyy", { locale: fr })}`
-              : "Pas de date d'expiration"}
-            {metadata.document_number ? ` · N° ${metadata.document_number}` : ""}
+              ? `${t("vault.detail.expiresOnPrefix")} ${format(parseISO(doc.expires_at), "d MMMM yyyy", { locale: fr })}`
+              : t("vault.detail.noExpiry")}
+            {metadata.document_number
+              ? ` · ${t("vault.detail.numberPrefix")} ${metadata.document_number}`
+              : ""}
           </p>
         </div>
       </div>
@@ -99,17 +105,15 @@ export default async function VaultDocumentPage({
           <img src={viewUrl} alt={doc.file_name} className="mx-auto max-h-[70vh] w-auto" />
         ) : (
           <div className="px-6 py-12 text-center text-sm text-encre-douce">
-            Aperçu indisponible pour ce format.{" "}
+            {t("vault.detail.previewUnavailable")}{" "}
             <a href={viewUrl} className="text-bordeaux underline underline-offset-4">
-              Ouvrir le fichier
+              {t("vault.detail.openFile")}
             </a>
           </div>
         )}
       </div>
 
-      <p className="mt-4 text-center text-xs text-encre-douce">
-        Chaque consultation de ton coffre est consignée dans le registre de bord.
-      </p>
+      <p className="mt-4 text-center text-xs text-encre-douce">{t("vault.detail.auditNote")}</p>
     </main>
   );
 }

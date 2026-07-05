@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { getT } from "@/lib/i18n/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -16,8 +17,9 @@ export type AcceptState = {
  * détenteur du lien = invité (lien magique).
  */
 export async function acceptInvitation(token: string): Promise<AcceptState> {
+  const t = await getT();
   if (!z.string().uuid().safeParse(token).success) {
-    return { status: "error", message: "Lien d'invitation invalide." };
+    return { status: "error", message: t("invitations.msg.invalidLink") };
   }
 
   const supabase = await createClient();
@@ -36,13 +38,13 @@ export async function acceptInvitation(token: string): Promise<AcceptState> {
     .single();
 
   if (!invitation) {
-    return { status: "error", message: "Cette invitation n'existe pas ou a été annulée." };
+    return { status: "error", message: t("invitations.msg.notFound") };
   }
   if (invitation.accepted_at) {
-    return { status: "error", message: "Cette invitation a déjà été utilisée." };
+    return { status: "error", message: t("invitations.msg.alreadyUsed") };
   }
   if (new Date(invitation.expires_at) < new Date()) {
-    return { status: "error", message: "Cette invitation a expiré — demande un nouveau lien." };
+    return { status: "error", message: t("invitations.msg.expired") };
   }
 
   const { data: existing } = await admin
@@ -63,7 +65,7 @@ export async function acceptInvitation(token: string): Promise<AcceptState> {
   });
 
   if (insertError) {
-    return { status: "error", message: "L'embarquement a échoué. Réessaie dans un instant." };
+    return { status: "error", message: t("invitations.msg.joinFailed") };
   }
 
   await admin

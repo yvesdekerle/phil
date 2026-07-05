@@ -11,6 +11,7 @@ import { directionsUrl } from "@/lib/geo/directions";
 import { ensureTripCoords } from "@/lib/geo/locate";
 import { formatMinutes, getTravelMinutes } from "@/lib/geo/travel-time";
 import { suggestVisitOrder } from "@/lib/geo/visit-order";
+import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 import { type DailyForecast, getDailyForecast } from "@/lib/weather/open-meteo";
@@ -50,6 +51,7 @@ export default async function DayViewPage({
   params: Promise<{ tripId: string; date: string }>;
 }) {
   const { tripId, date } = await params;
+  const t = await getT();
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
     notFound();
   }
@@ -155,7 +157,7 @@ export default async function DayViewPage({
         href={`/trips/${tripId}`}
         className="text-sm text-encre-douce underline underline-offset-4 hover:text-encre"
       >
-        ← Retour au calendrier
+        {t("calendar.backToCalendar")}
       </Link>
       <h1 className="mt-2 font-display text-2xl text-encre capitalize">{label}</h1>
       {dayWeather ? (
@@ -166,23 +168,23 @@ export default async function DayViewPage({
       {visitSuggestion ? (
         <div className="mt-2 rounded-md border border-laiton/50 bg-laiton/5 px-3 py-2">
           <p className="mb-0.5 text-[0.65rem] font-medium text-laiton uppercase tracking-wide">
-            Ordre de visite malin (indicatif)
+            {t("calendar.day.visitOrderLabel")}
           </p>
           <p className="text-xs text-encre">
-            {dayLodging ? "Depuis l'hébergement : " : ""}
+            {dayLodging ? t("calendar.day.fromLodging") : ""}
             {visitSuggestion.order.map((s) => s.title).join(" → ")}
           </p>
           <p className="text-[0.65rem] text-encre-douce">
-            ≈ {Math.round(visitSuggestion.suggestedKm)} km au lieu de{" "}
-            {Math.round(visitSuggestion.currentKm)} km à vol d'oiseau — à toi de voir, rien ne bouge
-            tout seul.
+            ≈ {Math.round(visitSuggestion.suggestedKm)} {t("calendar.day.kmUnit")}{" "}
+            {t("calendar.day.insteadOf")} {Math.round(visitSuggestion.currentKm)}{" "}
+            {t("calendar.day.asCrowFlies")}
           </p>
         </div>
       ) : null}
       {travelLegs.length > 0 ? (
         <div className="mt-2 rounded-md border border-laiton-clair/60 bg-papier px-3 py-2">
           <p className="mb-0.5 text-[0.65rem] font-medium text-laiton uppercase tracking-wide">
-            Trajets de la journée (en voiture)
+            {t("calendar.day.travelLegsLabel")}
           </p>
           {travelLegs.map((leg) => (
             <p key={`${leg.from}-${leg.to}`} className="text-xs text-encre-douce">
@@ -195,7 +197,7 @@ export default async function DayViewPage({
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-0.5 text-bordeaux underline underline-offset-2 hover:opacity-80"
               >
-                <Navigation className="size-3" aria-hidden="true" /> Itinéraire
+                <Navigation className="size-3" aria-hidden="true" /> {t("calendar.day.directions")}
               </a>
             </p>
           ))}
@@ -205,10 +207,8 @@ export default async function DayViewPage({
 
       {dayEvents.length === 0 ? (
         <div className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-6 py-14 text-center">
-          <p className="font-display text-xl text-encre italic">Journée libre</p>
-          <p className="mt-2 text-sm text-encre-douce">
-            Rien au programme — même Phileas prenait des pauses.
-          </p>
+          <p className="font-display text-xl text-encre italic">{t("calendar.day.freeDayTitle")}</p>
+          <p className="mt-2 text-sm text-encre-douce">{t("calendar.day.freeDayBody")}</p>
         </div>
       ) : (
         <div className="relative rounded-lg border border-laiton-clair bg-papier">
@@ -264,7 +264,7 @@ export default async function DayViewPage({
         entries={(journalRows ?? []).map(
           (r): JournalEntry => ({
             authorId: r.author_id,
-            authorName: r.profiles?.display_name ?? "Voyageur",
+            authorName: r.profiles?.display_name ?? t("calendar.traveler"),
             body: r.body,
           }),
         )}

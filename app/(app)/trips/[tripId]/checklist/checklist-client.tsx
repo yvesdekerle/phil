@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Plus, Trash2 } from "lucide-react";
 import { useActionState, useState, useTransition } from "react";
+import { useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -38,12 +39,7 @@ export type ChecklistItem = {
 };
 type Member = { userId: string; name: string };
 
-const SECTIONS: { key: CatalogSection; label: string }[] = [
-  { key: "a_emporter", label: "À emporter" },
-  { key: "avant_depart", label: "Avant le départ" },
-  { key: "sur_place", label: "Sur place" },
-];
-const MISC = "Divers";
+const SECTION_KEYS: CatalogSection[] = ["a_emporter", "avant_depart", "sur_place"];
 
 /** Valise partagée (PHIL-N11, refonte onglets/catégories PHIL-Q27). */
 export function ChecklistClient({
@@ -62,6 +58,8 @@ export function ChecklistClient({
   /** PHIL-Q10 : durée du séjour pour les quantités proposées. */
   nights?: number;
 }) {
+  const t = useT();
+  const MISC = t("checklist.misc");
   const [tab, setTab] = useState<CatalogSection>("a_emporter");
   const [qtyOverrides, setQtyOverrides] = useState<Record<string, number>>({});
   const [, formAction] = useActionState<ChecklistState, FormData>(addChecklistItem, {
@@ -103,20 +101,20 @@ export function ChecklistClient({
   return (
     <div className="flex flex-col gap-5">
       {/* Onglets */}
-      <nav className="flex gap-1 text-sm" aria-label="Sections de la valise">
-        {SECTIONS.map((s) => (
+      <nav className="flex gap-1 text-sm" aria-label={t("checklist.sectionsAria")}>
+        {SECTION_KEYS.map((key) => (
           <button
-            key={s.key}
+            key={key}
             type="button"
-            onClick={() => setTab(s.key)}
+            onClick={() => setTab(key)}
             className={cn(
               "rounded-full px-3 py-1",
-              tab === s.key
+              tab === key
                 ? "bg-bordeaux font-medium text-papier"
                 : "text-encre-douce hover:bg-laiton/10 hover:text-encre",
             )}
           >
-            {s.label}
+            {t(`checklist.tabs.${key}`)}
           </button>
         ))}
       </nav>
@@ -138,7 +136,7 @@ export function ChecklistClient({
       {/* La liste : les éléments sélectionnés, par catégorie */}
       {sectionItems.length === 0 ? (
         <p className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-4 py-6 text-center text-sm text-encre-douce">
-          Rien dans cette liste pour l'instant — sélectionne en dessous ou ajoute tes éléments.
+          {t("checklist.emptyList")}
         </p>
       ) : (
         categories.map((category) => (
@@ -169,7 +167,7 @@ export function ChecklistClient({
                         )
                       }
                       className="size-4 accent-[#6e1f2e]"
-                      aria-label={`Fait : ${item.title}`}
+                      aria-label={`${t("checklist.doneAria")} ${item.title}`}
                     />
                     <span
                       className={cn(
@@ -180,7 +178,7 @@ export function ChecklistClient({
                       {item.title}
                       {item.due_date ? (
                         <span className="ml-1.5 text-xs text-encre-douce">
-                          avant le{" "}
+                          {t("checklist.dueBefore")}{" "}
                           {format(new Date(`${item.due_date}T12:00:00`), "d MMM", { locale: fr })}
                         </span>
                       ) : null}
@@ -199,12 +197,12 @@ export function ChecklistClient({
                         )
                       }
                       className="rounded border border-laiton-clair bg-papier px-1.5 py-1 text-xs text-encre-douce"
-                      aria-label="Assigner à"
+                      aria-label={t("checklist.assignAria")}
                     >
-                      <option value="">Personne</option>
+                      <option value="">{t("checklist.assignNobody")}</option>
                       {members.map((m) => (
                         <option key={m.userId} value={m.userId}>
-                          {m.userId === myId ? "Toi" : m.name}
+                          {m.userId === myId ? t("checklist.you") : m.name}
                         </option>
                       ))}
                     </select>
@@ -218,7 +216,7 @@ export function ChecklistClient({
                           )
                         }
                         className="text-encre-douce hover:text-bordeaux"
-                        aria-label={`Retirer ${item.title} de la liste`}
+                        aria-label={`${t("checklist.removePrefix")} ${item.title} ${t("checklist.removeSuffix")}`}
                       >
                         <Trash2 className="size-4" aria-hidden="true" />
                       </button>
@@ -236,24 +234,22 @@ export function ChecklistClient({
         className="flex flex-col gap-2 rounded-lg border border-laiton-clair bg-papier px-4 py-3"
       >
         <p className="text-xs font-medium text-encre">
-          Ajouter ton propre élément{" "}
-          <span className="font-normal text-encre-douce">
-            — tape une catégorie existante ou invente-en une nouvelle
-          </span>
+          {t("checklist.addOwnTitle")}{" "}
+          <span className="font-normal text-encre-douce">{t("checklist.addOwnHint")}</span>
         </p>
         <input type="hidden" name="tripId" value={tripId} />
         <input type="hidden" name="section" value={tab} />
         <div className="flex flex-wrap items-center gap-2">
           <Input
             name="title"
-            placeholder="Ex : gourde filtrante"
+            placeholder={t("checklist.itemPlaceholder")}
             className="h-8 min-w-36 flex-1 text-sm"
             required
             maxLength={200}
           />
           <Input
             name="category"
-            placeholder="Catégorie (ex : Plongée)"
+            placeholder={t("checklist.categoryPlaceholder")}
             className="h-8 w-44 text-sm"
             maxLength={40}
             list={`categories-${tab}`}
@@ -268,11 +264,11 @@ export function ChecklistClient({
             name="dueDate"
             type="date"
             className="h-8 w-36 text-sm"
-            aria-label="Échéance (optionnel)"
-            title="À faire avant le… (optionnel)"
+            aria-label={t("checklist.dueDateAria")}
+            title={t("checklist.dueDateTitle")}
           />
           <Button type="submit" size="sm" variant="outline">
-            Ajouter
+            {t("checklist.add")}
           </Button>
         </div>
       </form>
@@ -281,7 +277,7 @@ export function ChecklistClient({
       {pendingGroups.length > 0 ? (
         <div className="flex flex-col gap-4 rounded-lg border border-dashed border-laiton-clair/80 bg-papier/50 px-4 py-3">
           <p className="text-xs text-encre-douce">
-            Encore à sélectionner — quantités proposées pour {nights} nuits :
+            {t("checklist.stillToSelectPrefix")} {nights} {t("checklist.stillToSelectSuffix")}
           </p>
           {pendingGroups.map((group) => (
             <div key={group.category}>
@@ -310,7 +306,7 @@ export function ChecklistClient({
                             }))
                           }
                           className="w-14 rounded border border-laiton-clair bg-papier px-1.5 py-0.5 text-right text-xs"
-                          aria-label={`Quantité de ${item.title}`}
+                          aria-label={`${t("checklist.qtyPrefix")} ${item.title}`}
                         />
                       ) : null}
                       <button
@@ -318,9 +314,9 @@ export function ChecklistClient({
                         disabled={pending}
                         onClick={() => addFromCatalog(item.title, qty, group.category)}
                         className="flex items-center gap-1 rounded-full border border-laiton-clair px-2.5 py-0.5 text-xs transition-colors hover:border-bordeaux hover:text-bordeaux"
-                        aria-label={`Ajouter ${item.title} à la liste`}
+                        aria-label={`${t("checklist.addItemPrefix")} ${item.title} ${t("checklist.addItemSuffix")}`}
                       >
-                        <Plus className="size-3.5" aria-hidden="true" /> Ajouter
+                        <Plus className="size-3.5" aria-hidden="true" /> {t("checklist.add")}
                       </button>
                     </li>
                   );

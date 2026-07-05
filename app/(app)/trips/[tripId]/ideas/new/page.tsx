@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
+import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { IdeaForm } from "./idea-form";
 
@@ -18,6 +19,7 @@ export default async function NewIdeaPage({ params }: { params: Promise<{ tripId
   if (!trip) {
     notFound();
   }
+  const t = await getT();
 
   return (
     <div className="mx-auto flex max-w-lg flex-col gap-5">
@@ -25,12 +27,10 @@ export default async function NewIdeaPage({ params }: { params: Promise<{ tripId
         href={`/trips/${tripId}/ideas`}
         className="text-sm text-encre-douce underline underline-offset-4 hover:text-encre"
       >
-        ← Retour aux idées
+        {t("ideas.backToIdeas")}
       </Link>
-      <h1 className="text-center font-display text-2xl text-encre">Proposer une idée</h1>
-      <p className="text-center text-sm text-encre-douce">
-        Pas de date à ce stade — on la planifiera si le groupe embarque.
-      </p>
+      <h1 className="text-center font-display text-2xl text-encre">{t("ideas.propose")}</h1>
+      <p className="text-center text-sm text-encre-douce">{t("ideas.newSubtitle")}</p>
       <Card>
         <CardContent>
           <IdeaForm tripId={trip.id} />

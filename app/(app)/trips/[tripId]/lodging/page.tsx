@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { type Candidate, LodgingClient } from "./lodging-client";
 
@@ -17,6 +18,7 @@ export default async function LodgingCandidatesPage({
   if (!user) {
     redirect("/login");
   }
+  const t = await getT();
 
   const [{ data: candidates }, { data: me }] = await Promise.all([
     supabase
@@ -53,13 +55,10 @@ export default async function LodgingCandidatesPage({
           href={`/trips/${tripId}/ideas`}
           className="text-sm text-encre-douce underline underline-offset-4 hover:text-encre"
         >
-          ← Retour aux idées
+          {t("ideas.backToIdeas")}
         </Link>
-        <h1 className="mt-2 font-display text-2xl text-encre">Hébergements candidats</h1>
-        <p className="mt-1 text-sm text-encre-douce">
-          Plusieurs options pour un même créneau — on compare, on vote, puis le capitaine tranche et
-          l&apos;élu rejoint le calendrier.
-        </p>
+        <h1 className="mt-2 font-display text-2xl text-encre">{t("lodging.title")}</h1>
+        <p className="mt-1 text-sm text-encre-douce">{t("lodging.subtitle")}</p>
       </div>
       <LodgingClient
         tripId={tripId}
@@ -74,7 +73,7 @@ export default async function LodgingCandidatesPage({
             checkOut: c.check_out,
             status: c.status as Candidate["status"],
             createdBy: c.created_by,
-            authorName: c.profiles?.display_name ?? "Voyageur",
+            authorName: c.profiles?.display_name ?? t("lodging.travelerFallback"),
           }),
         )}
         votes={(votes ?? []).map((v) => ({
@@ -82,7 +81,7 @@ export default async function LodgingCandidatesPage({
           userId: v.user_id,
           rating: v.rating,
           comment: v.comment,
-          name: v.profiles?.display_name ?? "Voyageur",
+          name: v.profiles?.display_name ?? t("lodging.travelerFallback"),
         }))}
         myId={user.id}
         role={me?.role ?? "VIEWER"}

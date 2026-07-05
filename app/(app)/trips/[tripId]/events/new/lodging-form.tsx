@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { PlaceInput } from "@/components/geo/place-input";
+import { useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,6 +27,7 @@ export function LodgingForm({
   tripId: string;
   defaultTimezone: string;
 }) {
+  const t = useT();
   const [platform, setPlatform] = useState<LodgingPlatform>("booking");
   const [address, setAddress] = useState("");
   const [timezone, setTimezone] = useState(defaultTimezone);
@@ -47,22 +49,22 @@ export function LodgingForm({
   return (
     <form onSubmit={submit} className="flex flex-col gap-5">
       <div className="flex flex-col gap-2">
-        <Label htmlFor="name">Nom de l'hébergement</Label>
+        <Label htmlFor="name">{t("events.lodging.name")}</Label>
         <PlaceInput
           id="name"
           name="name"
-          placeholder="Villa Trou-aux-Biches"
+          placeholder={t("events.lodging.namePlaceholder")}
           maxLength={150}
           onSelectAddress={setAddress}
         />
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="address">Adresse (optionnel)</Label>
+        <Label htmlFor="address">{t("events.lodging.addressOptional")}</Label>
         <Input
           id="address"
           name="address"
-          placeholder="Route côtière, Trou-aux-Biches"
+          placeholder={t("events.lodging.addressPlaceholder")}
           value={address}
           onChange={(e) => setAddress(e.target.value)}
         />
@@ -70,17 +72,17 @@ export function LodgingForm({
 
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="checkInLocal">Check-in</Label>
+          <Label htmlFor="checkInLocal">{t("events.form.checkIn")}</Label>
           <Input id="checkInLocal" name="checkInLocal" type="datetime-local" />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="checkOutLocal">Check-out</Label>
+          <Label htmlFor="checkOutLocal">{t("events.form.checkOut")}</Label>
           <Input id="checkOutLocal" name="checkOutLocal" type="datetime-local" />
         </div>
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="timezone">Fuseau horaire</Label>
+        <Label htmlFor="timezone">{t("events.form.timezone")}</Label>
         <Select value={timezone} onValueChange={setTimezone}>
           <SelectTrigger id="timezone" className="w-full">
             <SelectValue />
@@ -97,7 +99,7 @@ export function LodgingForm({
 
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="platform">Plateforme</Label>
+          <Label htmlFor="platform">{t("events.lodging.platform")}</Label>
           <Select value={platform} onValueChange={(v) => setPlatform(v as LodgingPlatform)}>
             <SelectTrigger id="platform" className="w-full">
               <SelectValue />
@@ -112,35 +114,46 @@ export function LodgingForm({
           </Select>
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="guests">Nombre de voyageurs (optionnel)</Label>
-          <Input id="guests" name="guests" type="number" min={1} max={50} placeholder="9" />
+          <Label htmlFor="guests">{t("events.lodging.guests")}</Label>
+          <Input
+            id="guests"
+            name="guests"
+            type="number"
+            min={1}
+            max={50}
+            placeholder={t("events.lodging.guestsPlaceholder")}
+          />
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="bookingReference">N° de réservation (optionnel)</Label>
-          <Input id="bookingReference" name="bookingReference" placeholder="HM8Q2K" />
+          <Label htmlFor="bookingReference">{t("events.form.bookingRefOptional")}</Label>
+          <Input
+            id="bookingReference"
+            name="bookingReference"
+            placeholder={t("events.lodging.bookingPlaceholder")}
+          />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="notes">Notes (optionnel)</Label>
-          <Input id="notes" name="notes" placeholder="Clés à la réception…" />
+          <Label htmlFor="notes">{t("events.form.notesOptional")}</Label>
+          <Input id="notes" name="notes" placeholder={t("events.lodging.notesPlaceholder")} />
         </div>
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="externalUrl">Lien de la réservation (optionnel)</Label>
+        <Label htmlFor="externalUrl">{t("events.lodging.externalUrl")}</Label>
         <Input
           id="externalUrl"
           name="externalUrl"
           type="url"
-          placeholder="https://… (Booking, Airbnb…)"
+          placeholder={t("events.lodging.externalUrlPlaceholder")}
         />
       </div>
 
       <div className="flex items-center gap-4">
         <Button type="submit" disabled={pending}>
-          {pending ? "Phil réserve la chambre…" : "Ajouter l'hébergement"}
+          {pending ? t("events.lodging.submitting") : t("events.lodging.submit")}
         </Button>
         {state.status === "error" ? <p className="text-sm text-bordeaux">{state.message}</p> : null}
       </div>

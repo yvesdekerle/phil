@@ -2,27 +2,29 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useT } from "@/components/i18n/provider";
 import { cn } from "@/lib/utils";
 
 const TABS = [
-  { segment: "", label: "Calendrier" },
-  { segment: "map", label: "Carte" },
-  { segment: "documents", label: "Documents" },
-  { segment: "ideas", label: "Idées" },
-  { segment: "checklist", label: "Valise" },
-  { segment: "photos", label: "Photos" },
-  { segment: "budget", label: "Bourse" },
-  { segment: "participants", label: "Participants" },
-  { segment: "settings", label: "Paramètres" },
+  { segment: "", key: "calendar" },
+  { segment: "map", key: "map" },
+  { segment: "documents", key: "documents" },
+  { segment: "ideas", key: "ideas" },
+  { segment: "checklist", key: "checklist" },
+  { segment: "photos", key: "photos" },
+  { segment: "budget", key: "budget" },
+  { segment: "participants", key: "participants" },
+  { segment: "settings", key: "settings" },
 ] as const;
 
 export function TripTabs({ tripId }: { tripId: string }) {
   const pathname = usePathname();
+  const t = useT();
   const base = `/trips/${tripId}`;
 
   return (
     <nav
-      aria-label="Sections du voyage"
+      aria-label={t("tripTabs.aria")}
       className="scrollbar-none -mb-px flex gap-1 overflow-x-auto"
     >
       {TABS.map((tab) => {
@@ -30,7 +32,7 @@ export function TripTabs({ tripId }: { tripId: string }) {
         const active = pathname === href;
         return (
           <Link
-            key={tab.label}
+            key={tab.key}
             href={href}
             aria-current={active ? "page" : undefined}
             className={cn(
@@ -40,7 +42,7 @@ export function TripTabs({ tripId }: { tripId: string }) {
                 : "border-transparent text-encre-douce hover:border-laiton-clair hover:text-encre",
             )}
           >
-            {tab.label}
+            {t(`tripTabs.${tab.key}`)}
           </Link>
         );
       })}

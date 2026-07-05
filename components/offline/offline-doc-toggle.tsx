@@ -2,6 +2,7 @@
 
 import { CloudDownload, CloudOff } from "lucide-react";
 import { useEffect, useState, useTransition } from "react";
+import { useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import {
   isDocumentOffline,
@@ -17,6 +18,7 @@ export function OfflineDocToggle({
   documentId: string;
   fileName: string;
 }) {
+  const t = useT();
   const [offline, setOffline] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -53,17 +55,17 @@ export function OfflineDocToggle({
       >
         {offline ? (
           <>
-            <CloudOff aria-hidden="true" /> Retirer d'offline
+            <CloudOff aria-hidden="true" /> {t("offline.removeOffline")}
           </>
         ) : (
           <>
-            <CloudDownload aria-hidden="true" /> Disponible offline
+            <CloudDownload aria-hidden="true" /> {t("offline.availableOffline")}
           </>
         )}
       </Button>
       {offline ? (
         <span className="rounded-full bg-encre/10 px-2 py-0.5 text-xs font-medium text-encre">
-          Offline
+          {t("offline.offlineBadge")}
         </span>
       ) : null}
       {error ? <span className="text-xs text-bordeaux">{error}</span> : null}

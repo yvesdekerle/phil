@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth/require-user";
+import { getT } from "@/lib/i18n/server";
 import { sendPushToUser } from "@/lib/notifications/push";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { areUuids } from "@/lib/validation";
@@ -26,8 +27,9 @@ export async function createPoll(_prev: PollState, formData: FormData): Promise<
     question: formData.get("question"),
     options,
   });
+  const t = await getT();
   if (!parsed.success) {
-    return { status: "error", message: "Il faut une question et 2 à 5 options." };
+    return { status: "error", message: t("ideas.pollNeeds") };
   }
 
   const { supabase, user } = await requireUser();
@@ -40,7 +42,7 @@ export async function createPoll(_prev: PollState, formData: FormData): Promise<
     created_by: user.id,
   });
   if (error) {
-    return { status: "error", message: "Création impossible." };
+    return { status: "error", message: t("ideas.pollCreateFailed") };
   }
 
   // Push aux autres membres (best effort)
@@ -52,7 +54,7 @@ export async function createPoll(_prev: PollState, formData: FormData): Promise<
     .neq("user_id", user.id);
   for (const m of members ?? []) {
     await sendPushToUser(m.user_id, {
-      title: "Sondage éclair",
+      title: t("ideas.pollQuick"),
       body: parsed.data.question,
       url: `/trips/${parsed.data.tripId}/ideas`,
     });

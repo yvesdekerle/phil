@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth/require-user";
+import { getT } from "@/lib/i18n/server";
 import { areUuids } from "@/lib/validation";
 
 export type ParticipantActionState = {
@@ -32,22 +33,23 @@ export async function changeParticipantRole(
   targetUserId: string,
   newRole: string,
 ): Promise<ParticipantActionState> {
+  const t = await getT();
   const parsed = roleSchema.safeParse(newRole);
   if (!parsed.success) {
-    return { status: "error", message: "Rôle invalide." };
+    return { status: "error", message: t("participants.msg.roleInvalid") };
   }
   const { supabase, user } = await requireUser();
 
   if ((await myRole(supabase, tripId, user.id)) !== "OWNER") {
-    return { status: "error", message: "Seul le capitaine peut changer les rôles." };
+    return { status: "error", message: t("participants.msg.onlyCaptainRole") };
   }
   if (targetUserId === user.id) {
-    return { status: "error", message: "Pour changer ton propre rôle, transfère la propriété." };
+    return { status: "error", message: t("participants.msg.ownRole") };
   }
   if (parsed.data === "OWNER") {
     return {
       status: "error",
-      message: "Utilise le transfert de propriété pour nommer un capitaine.",
+      message: t("participants.msg.useTransfer"),
     };
   }
 
@@ -58,24 +60,25 @@ export async function changeParticipantRole(
     .eq("user_id", targetUserId);
 
   if (error || count === 0) {
-    return { status: "error", message: "Le changement de rôle a échoué." };
+    return { status: "error", message: t("participants.msg.roleChangeFailed") };
   }
 
   revalidatePath(`/trips/${tripId}/participants`);
-  return { status: "success", message: "Rôle mis à jour." };
+  return { status: "success", message: t("participants.msg.roleUpdated") };
 }
 
 export async function removeParticipant(
   tripId: string,
   targetUserId: string,
 ): Promise<ParticipantActionState> {
+  const t = await getT();
   const { supabase, user } = await requireUser();
 
   if ((await myRole(supabase, tripId, user.id)) !== "OWNER") {
-    return { status: "error", message: "Seul le capitaine peut débarquer un voyageur." };
+    return { status: "error", message: t("participants.msg.onlyCaptainRemove") };
   }
   if (targetUserId === user.id) {
-    return { status: "error", message: "Pour partir, utilise « Quitter le voyage »." };
+    return { status: "error", message: t("participants.msg.toLeaveUse") };
   }
 
   const { error, count } = await supabase
@@ -85,11 +88,11 @@ export async function removeParticipant(
     .eq("user_id", targetUserId);
 
   if (error || count === 0) {
-    return { status: "error", message: "Le retrait a échoué." };
+    return { status: "error", message: t("participants.msg.removeFailed") };
   }
 
   revalidatePath(`/trips/${tripId}/participants`);
-  return { status: "success", message: "Voyageur débarqué." };
+  return { status: "success", message: t("participants.msg.removed") };
 }
 
 /**
@@ -100,13 +103,14 @@ export async function transferOwnership(
   tripId: string,
   newOwnerId: string,
 ): Promise<ParticipantActionState> {
+  const t = await getT();
   const { supabase, user } = await requireUser();
 
   if ((await myRole(supabase, tripId, user.id)) !== "OWNER") {
-    return { status: "error", message: "Seul le capitaine peut transmettre la barre." };
+    return { status: "error", message: t("participants.msg.onlyCaptainTransfer") };
   }
   if (newOwnerId === user.id) {
-    return { status: "error", message: "Tu es déjà capitaine." };
+    return { status: "error", message: t("participants.msg.alreadyCaptain") };
   }
 
   const { error: promoteError, count } = await supabase
@@ -116,7 +120,7 @@ export async function transferOwnership(
     .eq("user_id", newOwnerId);
 
   if (promoteError || count === 0) {
-    return { status: "error", message: "Le transfert a échoué." };
+    return { status: "error", message: t("participants.msg.transferFailed") };
   }
 
   const { error: demoteError } = await supabase
@@ -128,12 +132,12 @@ export async function transferOwnership(
   if (demoteError) {
     return {
       status: "error",
-      message: "Transfert partiel : vous êtes deux capitaines, réessaie de repasser éditeur.",
+      message: t("participants.msg.transferPartial"),
     };
   }
 
   revalidatePath(`/trips/${tripId}/participants`);
-  return { status: "success", message: "La barre est transmise." };
+  return { status: "success", message: t("participants.msg.transferred") };
 }
 
 const inviteSchema = z.object({
@@ -158,8 +162,12 @@ export async function createInvitation(
     role: formData.get("role"),
   });
 
+  const t = await getT();
   if (!parsed.success) {
-    return { status: "error", message: parsed.error.issues[0]?.message ?? "Saisie invalide." };
+    return {
+      status: "error",
+      message: parsed.error.issues[0]?.message ?? t("participants.msg.invalidInput"),
+    };
   }
 
   const { supabase, user } = await requireUser();
@@ -182,8 +190,8 @@ export async function createInvitation(
     return {
       status: "error",
       message: error?.message.includes("duplicate")
-        ? "Une invitation est déjà en attente pour cette adresse."
-        : "L'invitation a échoué — il faut être capitaine ou éditeur.",
+        ? t("participants.msg.inviteDuplicate")
+        : t("participants.msg.inviteFailed"),
     };
   }
 
@@ -236,8 +244,8 @@ export async function createInvitation(
   return {
     status: "success",
     message: emailSent
-      ? "Invitation envoyée par email — et voici le lien si besoin."
-      : "Invitation créée. L'email n'est pas parti (domaine non vérifié) : partage le lien.",
+      ? t("participants.msg.inviteSentEmail")
+      : t("participants.msg.inviteCreatedNoEmail"),
     inviteUrl,
   };
 }
@@ -246,8 +254,9 @@ export async function cancelInvitation(
   tripId: string,
   invitationId: string,
 ): Promise<ParticipantActionState> {
+  const t = await getT();
   if (!areUuids(tripId, invitationId)) {
-    return { status: "error", message: "Identifiants invalides." };
+    return { status: "error", message: t("participants.msg.invalidIds") };
   }
   const { supabase } = await requireUser();
   const { error, count } = await supabase
@@ -257,14 +266,15 @@ export async function cancelInvitation(
     .eq("trip_id", tripId);
 
   if (error || count === 0) {
-    return { status: "error", message: "L'annulation a échoué." };
+    return { status: "error", message: t("participants.msg.cancelFailed") };
   }
 
   revalidatePath(`/trips/${tripId}/participants`);
-  return { status: "success", message: "Invitation annulée." };
+  return { status: "success", message: t("participants.msg.canceled") };
 }
 
 export async function leaveTrip(tripId: string): Promise<ParticipantActionState> {
+  const t = await getT();
   const { supabase, user } = await requireUser();
 
   const role = await myRole(supabase, tripId, user.id);
@@ -277,7 +287,7 @@ export async function leaveTrip(tripId: string): Promise<ParticipantActionState>
     if ((owners ?? []).length <= 1) {
       return {
         status: "error",
-        message: "Dernier capitaine à bord : transfère la propriété avant de partir.",
+        message: t("participants.msg.lastCaptain"),
       };
     }
   }
@@ -289,7 +299,7 @@ export async function leaveTrip(tripId: string): Promise<ParticipantActionState>
     .eq("user_id", user.id);
 
   if (error || count === 0) {
-    return { status: "error", message: "Le départ a échoué." };
+    return { status: "error", message: t("participants.msg.leaveFailed") };
   }
 
   redirect("/trips");

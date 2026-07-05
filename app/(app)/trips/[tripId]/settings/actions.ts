@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { geocode } from "@/lib/geo/geocode";
+import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 
 const tripUpdateSchema = z
@@ -133,8 +134,12 @@ export async function updateTrip(
     timezone: formData.get("timezone"),
   });
 
+  const t = await getT();
   if (!parsed.success) {
-    return { status: "error", message: parsed.error.issues[0]?.message ?? "Saisie invalide." };
+    return {
+      status: "error",
+      message: parsed.error.issues[0]?.message ?? t("settings.msg.invalidInput"),
+    };
   }
 
   const supabase = await createClient();
@@ -173,12 +178,12 @@ export async function updateTrip(
   if (error || count === 0) {
     return {
       status: "error",
-      message: "La modification a échoué — il faut être capitaine ou éditeur du voyage.",
+      message: t("settings.msg.updateFailed"),
     };
   }
 
   revalidatePath(`/trips/${parsed.data.tripId}`);
-  return { status: "success", message: "C'est noté dans le carnet." };
+  return { status: "success", message: t("settings.msg.updated") };
 }
 
 /** Enregistre la couverture téléversée (PHIL-D09) : URL construite côté serveur. */
@@ -189,9 +194,10 @@ export async function setCoverFromUpload(
   const pathSchema = z
     .string()
     .regex(/^[0-9a-f-]{36}\/[0-9a-f-]{36}\.(jpg|png|webp)$/, "Chemin invalide.");
+  const t = await getT();
   const parsed = pathSchema.safeParse(storagePath);
   if (!parsed.success || !storagePath.startsWith(`${tripId}/`)) {
-    return { status: "error", message: "Chemin de fichier invalide." };
+    return { status: "error", message: t("settings.msg.invalidPath") };
   }
 
   const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -204,11 +210,11 @@ export async function setCoverFromUpload(
     .eq("id", tripId);
 
   if (error || count === 0) {
-    return { status: "error", message: "Impossible d'enregistrer la couverture." };
+    return { status: "error", message: t("settings.msg.coverSaveFailed") };
   }
 
   revalidatePath(`/trips/${tripId}`);
-  return { status: "success", message: "Couverture mise à jour." };
+  return { status: "success", message: t("settings.msg.coverUpdated") };
 }
 
 export async function setTripArchived(
@@ -217,9 +223,10 @@ export async function setTripArchived(
 ): Promise<TripSettingsState> {
   // Archivage réservé à l'OWNER : la policy RLS UPDATE couvre OWNER et EDITOR,
   // la restriction plus fine se fait ici.
+  const t = await getT();
   const { role } = await getMyRole(tripId);
   if (role !== "OWNER") {
-    return { status: "error", message: "Seul le capitaine peut archiver le voyage." };
+    return { status: "error", message: t("settings.msg.onlyCaptainArchive") };
   }
 
   const supabase = await createClient();
@@ -229,20 +236,21 @@ export async function setTripArchived(
     .eq("id", tripId);
 
   if (error) {
-    return { status: "error", message: "L'archivage a échoué. Réessaie dans un instant." };
+    return { status: "error", message: t("settings.msg.archiveFailed") };
   }
 
   revalidatePath(`/trips/${tripId}`);
   return {
     status: "success",
-    message: archived ? "Voyage rangé dans les archives." : "Voyage ressorti des archives.",
+    message: archived ? t("settings.msg.archived") : t("settings.msg.unarchived"),
   };
 }
 
 export async function deleteTrip(tripId: string): Promise<TripSettingsState> {
+  const t = await getT();
   const { role } = await getMyRole(tripId);
   if (role !== "OWNER") {
-    return { status: "error", message: "Seul le capitaine peut supprimer le voyage." };
+    return { status: "error", message: t("settings.msg.onlyCaptainDelete") };
   }
 
   const supabase = await createClient();
@@ -251,7 +259,7 @@ export async function deleteTrip(tripId: string): Promise<TripSettingsState> {
   const { error } = await supabase.from("trips").delete().eq("id", tripId);
 
   if (error) {
-    return { status: "error", message: "La suppression a échoué. Réessaie dans un instant." };
+    return { status: "error", message: t("settings.msg.deleteFailed") };
   }
 
   redirect("/trips");

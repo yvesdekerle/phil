@@ -5,6 +5,7 @@ import { useMemo, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { CurrencyInput } from "@/components/budget/currency-input";
+import { useT } from "@/components/i18n/provider";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -88,6 +89,7 @@ export function TripSettingsForm({
   canEdit,
   defaultValues,
 }: Props) {
+  const t = useT();
   const [state, setState] = useState<TripSettingsState>({ status: "idle" });
   const [pending, startTransition] = useTransition();
   const timezones = useMemo(() => Intl.supportedValuesOf("timeZone"), []);
@@ -118,13 +120,13 @@ export function TripSettingsForm({
     <div className="flex flex-col gap-8">
       <form onSubmit={onSubmit} className="flex flex-col gap-5">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="name">Nom du voyage</Label>
+          <Label htmlFor="name">{t("settings.form.name")}</Label>
           <Input id="name" disabled={!canEdit} {...register("name")} />
           {errors.name ? <p className="text-sm text-bordeaux">{errors.name.message}</p> : null}
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="destination">Destination</Label>
+          <Label htmlFor="destination">{t("settings.form.destination")}</Label>
           <Input id="destination" disabled={!canEdit} {...register("destination")} />
           {errors.destination ? (
             <p className="text-sm text-bordeaux">{errors.destination.message}</p>
@@ -133,11 +135,11 @@ export function TripSettingsForm({
 
         <div className="grid grid-cols-2 gap-4">
           <div className="flex flex-col gap-2">
-            <Label htmlFor="startDate">Départ</Label>
+            <Label htmlFor="startDate">{t("settings.form.startDate")}</Label>
             <Input id="startDate" type="date" disabled={!canEdit} {...register("startDate")} />
           </div>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="endDate">Retour</Label>
+            <Label htmlFor="endDate">{t("settings.form.endDate")}</Label>
             <Input id="endDate" type="date" disabled={!canEdit} {...register("endDate")} />
             {errors.endDate ? (
               <p className="text-sm text-bordeaux">{errors.endDate.message}</p>
@@ -146,7 +148,7 @@ export function TripSettingsForm({
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="coverImageUrl">Image de couverture (URL)</Label>
+          <Label htmlFor="coverImageUrl">{t("settings.form.coverUrl")}</Label>
           <Input id="coverImageUrl" type="url" disabled={!canEdit} {...register("coverImageUrl")} />
           {errors.coverImageUrl ? (
             <p className="text-sm text-bordeaux">{errors.coverImageUrl.message}</p>
@@ -155,7 +157,7 @@ export function TripSettingsForm({
 
         <div className="grid grid-cols-2 gap-4">
           <div className="flex flex-col gap-2">
-            <Label htmlFor="currencyPrimary">Devise principale</Label>
+            <Label htmlFor="currencyPrimary">{t("settings.form.currencyPrimary")}</Label>
             <CurrencyInput
               id="currencyPrimary"
               placeholder="EUR"
@@ -167,7 +169,7 @@ export function TripSettingsForm({
             ) : null}
           </div>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="currencySecondary">Devise secondaire (optionnelle)</Label>
+            <Label htmlFor="currencySecondary">{t("settings.form.currencySecondary")}</Label>
             <CurrencyInput
               id="currencySecondary"
               placeholder="MUR"
@@ -181,13 +183,11 @@ export function TripSettingsForm({
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="whatsappGroupUrl">
-            Groupe de discussion du voyage (WhatsApp ou Messenger)
-          </Label>
+          <Label htmlFor="whatsappGroupUrl">{t("settings.form.groupChat")}</Label>
           <Input
             id="whatsappGroupUrl"
             type="url"
-            placeholder="https://chat.whatsapp.com/… ou https://m.me/j/…"
+            placeholder={t("settings.form.groupChatPlaceholder")}
             disabled={!canEdit}
             {...register("whatsappGroupUrl")}
           />
@@ -197,7 +197,7 @@ export function TripSettingsForm({
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="timezone">Fuseau horaire par défaut</Label>
+          <Label htmlFor="timezone">{t("settings.form.timezone")}</Label>
           <Select
             value={watch("timezone")}
             onValueChange={(v) => setValue("timezone", v)}
@@ -219,7 +219,7 @@ export function TripSettingsForm({
         {canEdit ? (
           <div className="flex items-center gap-4">
             <Button type="submit" disabled={pending}>
-              {pending ? "Enregistrement…" : "Enregistrer"}
+              {pending ? t("settings.form.saving") : t("settings.form.save")}
             </Button>
             {state.status !== "idle" ? (
               <p
@@ -232,15 +232,13 @@ export function TripSettingsForm({
             ) : null}
           </div>
         ) : (
-          <p className="text-sm text-encre-douce">
-            En tant que lecteur, tu peux consulter mais pas modifier ce voyage.
-          </p>
+          <p className="text-sm text-encre-douce">{t("settings.form.viewerNote")}</p>
         )}
       </form>
 
       {isOwner ? (
         <div className="flex flex-col gap-3 rounded-lg border border-laiton-clair bg-papier px-5 py-4">
-          <p className="text-sm font-medium text-encre">Zone du capitaine</p>
+          <p className="text-sm font-medium text-encre">{t("settings.danger.title")}</p>
           <div className="flex flex-wrap items-center gap-3">
             <Button
               type="button"
@@ -252,26 +250,24 @@ export function TripSettingsForm({
                 })
               }
             >
-              {isArchived ? "Désarchiver" : "Archiver"}
+              {isArchived ? t("settings.danger.unarchive") : t("settings.danger.archive")}
             </Button>
 
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button type="button" variant="destructive" disabled={pending}>
-                  Supprimer le voyage
+                  {t("settings.danger.delete")}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Supprimer « {tripName} » ?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Tout part avec : participants, et bientôt événements, idées et documents du
-                    voyage. Cette action est définitive — même Phil ne pourra pas revenir en
-                    arrière.
-                  </AlertDialogDescription>
+                  <AlertDialogTitle>
+                    {t("settings.danger.deleteTitle").replace("{name}", tripName)}
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>{t("settings.danger.deleteDesc")}</AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Garder le voyage</AlertDialogCancel>
+                  <AlertDialogCancel>{t("settings.danger.keep")}</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={() =>
                       startTransition(async () => {
@@ -279,15 +275,13 @@ export function TripSettingsForm({
                       })
                     }
                   >
-                    Supprimer définitivement
+                    {t("settings.danger.deleteConfirm")}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
           </div>
-          <p className="text-xs text-encre-douce">
-            Archiver masque le voyage sans rien effacer. Supprimer efface tout.
-          </p>
+          <p className="text-xs text-encre-douce">{t("settings.danger.note")}</p>
         </div>
       ) : null}
     </div>

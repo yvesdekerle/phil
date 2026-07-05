@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PrepareOfflineButton } from "@/components/offline/prepare-offline-button";
+import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { CalendarFeed } from "./calendar-feed";
 import { CoverUpload } from "./cover-upload";
@@ -14,6 +15,7 @@ export default async function TripSettingsPage({
   params: Promise<{ tripId: string }>;
 }) {
   const { tripId } = await params;
+  const t = await getT();
   const supabase = await createClient();
 
   const {
@@ -48,7 +50,7 @@ export default async function TripSettingsPage({
           href="/conseils"
           className="text-encre-douce underline underline-offset-4 hover:text-encre"
         >
-          Conseils avant le départ (cartes hors-ligne, e-SIM, papiers…) →
+          {t("settings.tipsLink")}
         </Link>
       </p>
       {calendarUrl ? <CalendarFeed url={calendarUrl} /> : null}

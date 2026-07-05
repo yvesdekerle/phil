@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { getT } from "@/lib/i18n/server";
 import { type ExtractedReservation, importEnabled } from "@/lib/import/reservation";
 import { createClient } from "@/lib/supabase/server";
 import { dismissDraft } from "./actions";
@@ -15,6 +16,7 @@ export default async function ImportReservationPage({
   searchParams: Promise<{ draft?: string }>;
 }) {
   const { tripId } = await params;
+  const t = await getT();
   const { draft: draftId } = await searchParams;
   const supabase = await createClient();
   const {
@@ -45,19 +47,16 @@ export default async function ImportReservationPage({
         href={`/trips/${tripId}/events/new`}
         className="text-sm text-encre-douce underline underline-offset-4 hover:text-encre"
       >
-        ← Saisie manuelle
+        {t("events.import.backManual")}
       </Link>
       <div>
-        <h1 className="font-display text-2xl text-encre">Importer une confirmation</h1>
-        <p className="mt-1 text-sm text-encre-douce">
-          Dépose le PDF (ou des captures d&apos;écran) de ta réservation — je pré-remplis
-          l&apos;événement, tu vérifies, et la confirmation est rangée dans les documents du voyage.
-        </p>
+        <h1 className="font-display text-2xl text-encre">{t("events.import.title")}</h1>
+        <p className="mt-1 text-sm text-encre-douce">{t("events.import.intro")}</p>
       </div>
       {(drafts ?? []).length > 0 && !activeDraft ? (
         <section className="rounded-lg border border-laiton bg-laiton/5 px-4 py-3">
           <h2 className="mb-2 text-sm font-medium text-encre">
-            Reçues par email — à valider ({(drafts ?? []).length})
+            {t("events.import.emailToValidate")} ({(drafts ?? []).length})
           </h2>
           <ul className="flex flex-col gap-2">
             {(drafts ?? []).map((d) => {
@@ -65,15 +64,19 @@ export default async function ImportReservationPage({
               return (
                 <li key={d.id} className="flex flex-wrap items-center gap-2 text-sm">
                   <span className="min-w-0 flex-1 truncate text-encre">
-                    {extracted?.title ?? d.subject ?? "Réservation"}
-                    <span className="ml-1.5 text-xs text-encre-douce">de {d.sender}</span>
+                    {extracted?.title ?? d.subject ?? t("events.import.defaultReservation")}
+                    <span className="ml-1.5 text-xs text-encre-douce">
+                      {t("events.import.from")} {d.sender}
+                    </span>
                   </span>
                   <Button asChild size="sm" variant="outline">
-                    <Link href={`/trips/${tripId}/events/import?draft=${d.id}`}>Vérifier</Link>
+                    <Link href={`/trips/${tripId}/events/import?draft=${d.id}`}>
+                      {t("events.import.verify")}
+                    </Link>
                   </Button>
                   <form action={dismissDraft.bind(null, tripId, d.id)}>
                     <Button type="submit" size="sm" variant="ghost">
-                      Écarter
+                      {t("events.import.dismiss")}
                     </Button>
                   </form>
                 </li>
@@ -100,7 +103,7 @@ export default async function ImportReservationPage({
         />
       ) : (
         <p className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-4 py-8 text-center text-sm text-encre-douce">
-          L&apos;import n&apos;est pas configuré sur cet environnement (clé GEMINI_API_KEY absente).
+          {t("events.import.notConfigured")}
         </p>
       )}
     </div>

@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Trash2 } from "lucide-react";
 import { useActionState, useRef, useTransition } from "react";
+import { useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import { Linkify } from "@/components/ui/linkify";
 import { addEventNote, deleteEventNote, type NoteState } from "./note-actions";
@@ -30,6 +31,7 @@ export function EventNotes({
   myId: string;
   isOwner: boolean;
 }) {
+  const t = useT();
   const formRef = useRef<HTMLFormElement>(null);
   const [state, formAction] = useActionState<NoteState, FormData>(
     async (prev, formData) => {
@@ -45,10 +47,10 @@ export function EventNotes({
 
   return (
     <section>
-      <h2 className="mb-2 text-sm font-medium text-encre-douce">Notes de l&apos;équipage</h2>
+      <h2 className="mb-2 text-sm font-medium text-encre-douce">{t("events.notes.heading")}</h2>
       {notes.length === 0 ? (
         <p className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-4 py-4 text-center text-sm text-encre-douce">
-          Aucune note pour l&apos;instant — un détail à signaler aux autres ?
+          {t("events.notes.empty")}
         </p>
       ) : (
         <ul className="flex flex-col gap-2">
@@ -59,7 +61,7 @@ export function EventNotes({
             >
               <div className="flex items-baseline justify-between gap-2">
                 <span className="text-xs font-medium text-laiton">
-                  {note.author_id === myId ? "Toi" : note.authorName}
+                  {note.author_id === myId ? t("events.you") : note.authorName}
                 </span>
                 <span className="flex items-center gap-2 text-xs text-encre-douce">
                   {format(new Date(note.created_at), "d MMM, HH'h'mm", { locale: fr })}
@@ -71,7 +73,7 @@ export function EventNotes({
                         startTransition(() => deleteEventNote(tripId, eventId, note.id))
                       }
                       className="text-encre-douce hover:text-bordeaux"
-                      aria-label="Supprimer la note"
+                      aria-label={t("events.notes.deleteAria")}
                     >
                       <Trash2 className="size-3.5" aria-hidden="true" />
                     </button>
@@ -93,11 +95,11 @@ export function EventNotes({
           required
           maxLength={1000}
           rows={2}
-          placeholder="Ajouter une note pour l'équipage…"
+          placeholder={t("events.notes.placeholder")}
           className="flex-1 rounded-md border border-laiton-clair bg-papier px-3 py-2 text-sm text-encre placeholder:text-encre-douce/70 focus:outline-none focus:ring-1 focus:ring-laiton"
         />
         <Button type="submit" size="sm" variant="outline">
-          Publier
+          {t("events.notes.publish")}
         </Button>
       </form>
       {state.status === "error" ? (

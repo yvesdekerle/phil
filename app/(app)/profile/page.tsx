@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { getT } from "@/lib/i18n/server";
 import { parsePreferences } from "@/lib/notifications/preferences";
 import { getOwnProfile } from "@/lib/supabase/profiles";
 import { createClient } from "@/lib/supabase/server";
@@ -13,6 +14,7 @@ import { ProfileForm } from "./profile-form";
 import { PushToggle } from "./push-toggle";
 
 export default async function ProfilePage() {
+  const t = await getT();
   const supabase = await createClient();
   const {
     data: { user },
@@ -29,13 +31,13 @@ export default async function ProfilePage() {
   return (
     <main className="flex flex-1 flex-col items-center px-4 py-12">
       <div className="w-full max-w-lg">
-        <h1 className="mb-2 text-center font-display text-3xl text-encre">Ton profil</h1>
+        <h1 className="mb-2 text-center font-display text-3xl text-encre">{t("profile.title")}</h1>
         <p className="mb-6 text-center text-sm">
           <Link
             href="/explorer"
             className="text-encre-douce underline underline-offset-4 hover:text-encre"
           >
-            Carnet de l'explorateur →
+            {t("profile.explorerLink")}
           </Link>
         </p>
 
@@ -55,11 +57,9 @@ export default async function ProfilePage() {
               </span>
             )}
             <div>
-              <p className="font-medium text-encre">{displayName || "Voyageur anonyme"}</p>
+              <p className="font-medium text-encre">{displayName || t("profile.anonymous")}</p>
               <p className="text-sm text-encre-douce">{user.email}</p>
-              <p className="mt-0.5 text-xs text-encre-douce">
-                Email lié à ton compte Google — non modifiable ici.
-              </p>
+              <p className="mt-0.5 text-xs text-encre-douce">{t("profile.emailLinked")}</p>
             </div>
           </CardHeader>
           <CardContent>
@@ -76,7 +76,7 @@ export default async function ProfilePage() {
 
         <Card className="mt-6">
           <CardHeader>
-            <p className="text-sm font-medium text-encre">Notifications par email</p>
+            <p className="text-sm font-medium text-encre">{t("profile.emailNotifs")}</p>
           </CardHeader>
           <CardContent>
             <NotificationPreferencesForm
@@ -90,16 +90,16 @@ export default async function ProfilePage() {
 
         <div className="mt-6 flex items-center justify-center gap-4">
           <Button asChild variant="outline">
-            <Link href="/security">Sécurité du coffre</Link>
+            <Link href="/security">{t("profile.vaultSecurity")}</Link>
           </Button>
           <Button asChild variant="outline">
             <a href="/api/export" download>
-              Exporter mes données
+              {t("profile.exportData")}
             </a>
           </Button>
           <form action={signOut}>
             <Button type="submit" variant="outline">
-              Se déconnecter
+              {t("profile.signOut")}
             </Button>
           </form>
         </div>

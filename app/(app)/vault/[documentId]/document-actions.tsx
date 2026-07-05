@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useT } from "@/components/i18n/provider";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CATEGORY_LABELS, type DocumentCategory, VAULT_CATEGORIES } from "@/lib/vault/categories";
+import { categoryLabel, type DocumentCategory, VAULT_CATEGORIES } from "@/lib/vault/categories";
 import { type DocumentActionState, deleteDocument, updateDocument } from "./actions";
 
 type Props = {
@@ -35,6 +36,7 @@ type Props = {
 };
 
 export function DocumentActions({ documentId, ...defaults }: Props) {
+  const t = useT();
   const [editing, setEditing] = useState(false);
   const [fileName, setFileName] = useState(defaults.fileName);
   const [category, setCategory] = useState<DocumentCategory>(defaults.category);
@@ -64,25 +66,28 @@ export function DocumentActions({ documentId, ...defaults }: Props) {
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-3">
         <Button type="button" variant="outline" onClick={() => setEditing((v) => !v)}>
-          {editing ? "Fermer" : "Modifier"}
+          {editing ? t("documents.actions.close") : t("documents.actions.edit")}
         </Button>
 
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button type="button" variant="destructive" disabled={pending}>
-              Supprimer
+              {t("documents.actions.delete")}
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Supprimer « {defaults.fileName} » ?</AlertDialogTitle>
+              <AlertDialogTitle>
+                {t("documents.actions.confirmDeleteOpen")}
+                {defaults.fileName}
+                {t("documents.actions.confirmDeleteClose")}
+              </AlertDialogTitle>
               <AlertDialogDescription>
-                Le document quittera ton coffre et ne sera plus accessible — la suppression est
-                consignée dans le registre de bord.
+                {t("documents.actions.confirmDeleteBody")}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Garder le document</AlertDialogCancel>
+              <AlertDialogCancel>{t("documents.actions.keepDocument")}</AlertDialogCancel>
               <AlertDialogAction
                 onClick={() =>
                   startTransition(async () => {
@@ -90,7 +95,7 @@ export function DocumentActions({ documentId, ...defaults }: Props) {
                   })
                 }
               >
-                Supprimer
+                {t("documents.actions.delete")}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -112,7 +117,7 @@ export function DocumentActions({ documentId, ...defaults }: Props) {
           <CardContent>
             <form onSubmit={submit} className="flex flex-col gap-4">
               <div className="flex flex-col gap-2">
-                <Label htmlFor="fileName">Nom du document</Label>
+                <Label htmlFor="fileName">{t("documents.actions.fileName")}</Label>
                 <Input
                   id="fileName"
                   value={fileName}
@@ -121,7 +126,7 @@ export function DocumentActions({ documentId, ...defaults }: Props) {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="category">Catégorie</Label>
+                  <Label htmlFor="category">{t("documents.actions.category")}</Label>
                   <Select
                     value={category}
                     onValueChange={(v) => setCategory(v as DocumentCategory)}
@@ -132,14 +137,14 @@ export function DocumentActions({ documentId, ...defaults }: Props) {
                     <SelectContent>
                       {VAULT_CATEGORIES.map((c) => (
                         <SelectItem key={c} value={c}>
-                          {CATEGORY_LABELS[c]}
+                          {categoryLabel(t, c)}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="expiresAt">Expiration</Label>
+                  <Label htmlFor="expiresAt">{t("documents.actions.expiry")}</Label>
                   <Input
                     id="expiresAt"
                     type="date"
@@ -149,7 +154,7 @@ export function DocumentActions({ documentId, ...defaults }: Props) {
                 </div>
               </div>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="documentNumber">Numéro du document</Label>
+                <Label htmlFor="documentNumber">{t("documents.actions.documentNumber")}</Label>
                 <Input
                   id="documentNumber"
                   value={documentNumber}
@@ -158,7 +163,7 @@ export function DocumentActions({ documentId, ...defaults }: Props) {
               </div>
               <div>
                 <Button type="submit" disabled={pending}>
-                  {pending ? "Enregistrement…" : "Enregistrer"}
+                  {pending ? t("documents.actions.saving") : t("documents.actions.save")}
                 </Button>
               </div>
             </form>

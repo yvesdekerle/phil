@@ -3,6 +3,7 @@
 import { ArchiveRestore, ArchiveX } from "lucide-react";
 import { useTransition } from "react";
 import { setIdeaDismissed } from "@/app/(app)/trips/[tripId]/ideas/actions";
+import { useT } from "@/components/i18n/provider";
 
 /** Écarter / ressortir une idée (PHIL-H05). */
 export function DismissButton({
@@ -14,6 +15,7 @@ export function DismissButton({
   ideaId: string;
   dismissed: boolean;
 }) {
+  const t = useT();
   const [pending, startTransition] = useTransition();
 
   return (
@@ -26,12 +28,12 @@ export function DismissButton({
       {dismissed ? (
         <>
           <ArchiveRestore className="size-4" aria-hidden="true" />
-          Ressortir
+          {t("ideas.restore")}
         </>
       ) : (
         <>
           <ArchiveX className="size-4" aria-hidden="true" />
-          Pas pour ce voyage
+          {t("ideas.dismiss")}
         </>
       )}
     </button>

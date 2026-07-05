@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { getT } from "@/lib/i18n/server";
 import { PHOTOS_PER_TRIP } from "@/lib/photos/limits";
 import { createClient } from "@/lib/supabase/server";
 import { PhotosClient } from "./photos-client";
@@ -13,6 +14,7 @@ export default async function TripPhotosPage({ params }: { params: Promise<{ tri
   if (!user) {
     redirect("/login");
   }
+  const t = await getT();
 
   const [{ data: photos }, { data: me }, { data: events }] = await Promise.all([
     supabase
@@ -42,7 +44,7 @@ export default async function TripPhotosPage({ params }: { params: Promise<{ tri
         id: p.id,
         caption: p.caption,
         uploadedBy: p.uploaded_by,
-        uploaderName: p.profiles?.display_name ?? "Voyageur",
+        uploaderName: p.profiles?.display_name ?? t("photos.travelerFallback"),
         sizeBytes: p.size_bytes,
         hasThumb: p.thumb_path !== null,
         eventId: p.event_id,

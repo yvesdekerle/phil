@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth/require-user";
+import { getT } from "@/lib/i18n/server";
 import { areUuids } from "@/lib/validation";
 
 export const SECTIONS = ["avant_depart", "a_emporter", "sur_place"] as const;
@@ -34,8 +35,9 @@ export async function addChecklistItem(
     dueDate: formData.get("dueDate") ?? "",
     category: formData.get("category") ?? "",
   });
+  const t = await getT();
   if (!parsed.success) {
-    return { status: "error", message: "Saisie invalide." };
+    return { status: "error", message: t("checklist.invalidInput") };
   }
   const { supabase, user } = await requireUser();
   const { error } = await supabase.from("checklist_items").insert({
@@ -48,7 +50,7 @@ export async function addChecklistItem(
     created_by: user.id,
   });
   if (error) {
-    return { status: "error", message: "Ajout impossible." };
+    return { status: "error", message: t("checklist.addFailed") };
   }
   revalidatePath(`/trips/${parsed.data.tripId}/checklist`);
   if (parsed.data.eventId) {

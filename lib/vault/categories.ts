@@ -18,6 +18,14 @@ export const CATEGORY_LABELS: Record<DocumentCategory, string> = {
 
 export const CATEGORIES = Object.keys(CATEGORY_LABELS) as DocumentCategory[];
 
+/**
+ * Libellé traduit d'une catégorie (PHIL-Q37). Additif : `CATEGORY_LABELS`
+ * (français) reste la valeur de repli et l'API des écrans non encore traduits.
+ */
+export function categoryLabel(t: (key: string) => string, category: DocumentCategory): string {
+  return t(`documents.categories.${category}`);
+}
+
 export function isDocumentCategory(value: string): value is DocumentCategory {
   return value in CATEGORY_LABELS;
 }

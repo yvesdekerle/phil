@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { type ClockEntry, WorldClocks } from "@/components/trips/world-clocks";
+import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { HomeTimezonePicker } from "./home-timezone-picker";
 
@@ -8,6 +9,7 @@ import { HomeTimezonePicker } from "./home-timezone-picker";
  * d'un téléphone : chez soi + chaque destination, triées par décalage UTC.
  */
 export default async function ClocksPage() {
+  const t = await getT();
   const supabase = await createClient();
   const {
     data: { user },
@@ -40,20 +42,14 @@ export default async function ClocksPage() {
   return (
     <div className="mx-auto flex max-w-lg flex-col gap-5">
       <div>
-        <h1 className="font-display text-2xl text-encre">Horloges</h1>
-        <p className="mt-1 text-sm text-encre-douce">
-          L'heure chez toi et à chacune de tes destinations — du fuseau le plus tôt au plus tard.
-        </p>
+        <h1 className="font-display text-2xl text-encre">{t("clocks.title")}</h1>
+        <p className="mt-1 text-sm text-encre-douce">{t("clocks.subtitle")}</p>
       </div>
       <div className="rounded-lg border border-laiton-clair bg-papier px-4 py-3">
         <HomeTimezonePicker value={homeTimezone} />
       </div>
       <WorldClocks clocks={clocks} />
-      {clocks.length === 1 ? (
-        <p className="text-sm text-encre-douce">
-          Ajoute un voyage vers un autre fuseau et son horloge apparaîtra ici.
-        </p>
-      ) : null}
+      {clocks.length === 1 ? <p className="text-sm text-encre-douce">{t("clocks.empty")}</p> : null}
     </div>
   );
 }

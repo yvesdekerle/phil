@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { getT } from "@/lib/i18n/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { TRIP_CATEGORIES } from "@/lib/vault/categories";
@@ -58,8 +59,10 @@ export async function createTripDocument(
     eventId: formData.get("eventId") ?? "",
   });
 
+  const t = await getT();
   if (!parsed.success) {
-    return { status: "error", message: parsed.error.issues[0]?.message ?? "Saisie invalide." };
+    const isMime = parsed.error.issues.some((i) => i.path[0] === "mimeType");
+    return { status: "error", message: t(isMime ? "tripDocs.badFormat" : "tripDocs.invalidInput") };
   }
 
   const supabase = await createClient();
@@ -71,7 +74,7 @@ export async function createTripDocument(
   }
 
   if (!parsed.data.storagePath.startsWith(`${user.id}/${parsed.data.documentId}`)) {
-    return { status: "error", message: "Chemin de stockage invalide." };
+    return { status: "error", message: t("tripDocs.invalidStoragePath") };
   }
 
   const { error } = await supabase.from("documents").insert({
@@ -96,7 +99,7 @@ export async function createTripDocument(
     await admin.storage.from("documents").remove([parsed.data.storagePath]);
     return {
       status: "error",
-      message: "L'enregistrement a échoué — il faut être capitaine ou éditeur du voyage.",
+      message: t("tripDocs.saveFailed"),
     };
   }
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
+import { useT } from "@/components/i18n/provider";
 import { toggleVisitedCountry } from "./actions";
 
 /** Suggestions "d'après tes voyages" (PHIL-P13). */
@@ -9,13 +10,14 @@ export function CountrySuggestions({
 }: {
   suggestions: { code: string; name: string }[];
 }) {
+  const t = useT();
   const [pending, startTransition] = useTransition();
   if (suggestions.length === 0) {
     return null;
   }
   return (
     <div className="mb-3 flex flex-wrap items-center gap-1.5 text-sm text-encre-douce">
-      D'après tes voyages :
+      {t("explorer.suggestionsPrefix")}
       {suggestions.map((s) => (
         <button
           key={s.code}

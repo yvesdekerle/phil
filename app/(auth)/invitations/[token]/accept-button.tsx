@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import { type AcceptState, acceptInvitation } from "./actions";
 
 export function AcceptButton({ token }: { token: string }) {
+  const t = useT();
   const [state, setState] = useState<AcceptState>({ status: "idle" });
   const [pending, startTransition] = useTransition();
 
@@ -16,7 +18,7 @@ export function AcceptButton({ token }: { token: string }) {
         onClick={() => startTransition(async () => setState(await acceptInvitation(token)))}
         className="w-full"
       >
-        {pending ? "Embarquement…" : "Rejoindre le voyage"}
+        {pending ? t("invitations.boarding") : t("invitations.join")}
       </Button>
       {state.status === "error" ? (
         <p role="alert" className="text-sm text-bordeaux">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,6 +30,7 @@ export function InviteSection({
   pending: PendingInvitation[];
   baseUrl: string;
 }) {
+  const t = useT();
   const [role, setRole] = useState("EDITOR");
   const [state, setState] = useState<InviteState>({ status: "idle" });
   const [copied, setCopied] = useState<string | null>(null);
@@ -57,27 +59,33 @@ export function InviteSection({
 
   return (
     <section className="flex flex-col gap-4 rounded-lg border border-laiton-clair bg-papier px-5 py-4">
-      <h2 className="text-sm font-medium text-encre">Inviter un compagnon de route</h2>
+      <h2 className="text-sm font-medium text-encre">{t("participants.invite.title")}</h2>
 
       <form onSubmit={submit} className="flex flex-wrap items-end gap-3">
         <div className="flex min-w-52 flex-1 flex-col gap-2">
-          <Label htmlFor="email">Adresse email</Label>
-          <Input id="email" name="email" type="email" placeholder="ami@exemple.fr" required />
+          <Label htmlFor="email">{t("participants.invite.emailLabel")}</Label>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            placeholder={t("participants.invite.emailPlaceholder")}
+            required
+          />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="role">Rôle</Label>
+          <Label htmlFor="role">{t("participants.invite.roleLabel")}</Label>
           <Select value={role} onValueChange={setRole}>
             <SelectTrigger id="role" className="w-32">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="EDITOR">Éditeur</SelectItem>
-              <SelectItem value="VIEWER">Lecteur</SelectItem>
+              <SelectItem value="EDITOR">{t("participants.roleEditor")}</SelectItem>
+              <SelectItem value="VIEWER">{t("participants.roleViewer")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
         <Button type="submit" disabled={isPending}>
-          {isPending ? "Phil rédige…" : "Inviter"}
+          {isPending ? t("participants.invite.submitting") : t("participants.invite.submit")}
         </Button>
       </form>
 
@@ -97,7 +105,9 @@ export function InviteSection({
               size="sm"
               onClick={() => state.inviteUrl && copy(state.inviteUrl, "new")}
             >
-              {copied === "new" ? "Copié !" : "Copier le lien"}
+              {copied === "new"
+                ? t("participants.invite.copied")
+                : t("participants.invite.copyLink")}
             </Button>
           ) : null}
         </div>
@@ -115,11 +125,17 @@ export function InviteSection({
                 <span className="min-w-0 flex-1 truncate text-encre">
                   {inv.invited_email}{" "}
                   <span className="text-xs text-encre-douce">
-                    ({inv.role === "EDITOR" ? "éditeur" : "lecteur"} · en attente)
+                    (
+                    {inv.role === "EDITOR"
+                      ? t("participants.editorLower")
+                      : t("participants.viewerLower")}{" "}
+                    · {t("participants.invite.pending")})
                   </span>
                 </span>
                 <Button type="button" variant="ghost" size="sm" onClick={() => copy(url, inv.id)}>
-                  {copied === inv.id ? "Copié !" : "Copier le lien"}
+                  {copied === inv.id
+                    ? t("participants.invite.copied")
+                    : t("participants.invite.copyLink")}
                 </Button>
                 <Button
                   type="button"
@@ -132,7 +148,7 @@ export function InviteSection({
                     })
                   }
                 >
-                  Annuler
+                  {t("participants.invite.cancel")}
                 </Button>
               </li>
             );

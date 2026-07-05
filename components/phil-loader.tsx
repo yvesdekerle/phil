@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/components/i18n/provider";
+
 /**
  * Loader Jules Verne (PHIL-M02) : la montgolfière gravée traverse le
  * parchemin en se balançant, au-dessus d'une barre de progression en
@@ -25,6 +27,7 @@ const SEGMENT_KEYFRAMES = Array.from({ length: SEGMENTS }, (_, i) => {
 export type PhilLoaderScene = "balloon";
 
 export function PhilLoader(_props: { scene?: PhilLoaderScene }) {
+  const t = useT();
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-6 py-16">
       <div className="phil-loader flex h-52 w-80 items-center justify-center" aria-hidden="true">
@@ -47,7 +50,7 @@ export function PhilLoader(_props: { scene?: PhilLoaderScene }) {
       </div>
 
       <p role="status" className="font-display text-lg text-encre-douce italic">
-        Phil prend de l'altitude…
+        {t("misc.loaderMessage")}
       </p>
 
       <style>{`

@@ -21,12 +21,16 @@ export const DEFAULT_PREFERENCES: NotificationPreferences = {
   empty_day_reminders: true,
 };
 
+/**
+ * Clés i18n des libellés (PHIL-Q37) — traduites à l'affichage via `t()`.
+ * L'ordre des clés définit l'ordre des interrupteurs dans l'UI.
+ */
 export const PREFERENCE_LABELS: Record<keyof NotificationPreferences, string> = {
-  invitations: "Invitations à un voyage",
-  expiry_alerts: "Alertes d'expiration de documents",
-  event_reminders: "Rappels d'événements (J-1)",
-  weather_alerts: "Alerte météo de la veille (pluie annoncée)",
-  empty_day_reminders: "Rappel quand la journée de demain est vide",
+  invitations: "profile.prefs.invitations",
+  expiry_alerts: "profile.prefs.expiryAlerts",
+  event_reminders: "profile.prefs.eventReminders",
+  weather_alerts: "profile.prefs.weatherAlerts",
+  empty_day_reminders: "profile.prefs.emptyDayReminders",
 };
 
 /** Parse tolérant : valeurs inconnues → défauts. */
