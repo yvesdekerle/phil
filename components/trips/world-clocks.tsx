@@ -32,8 +32,11 @@ export function WorldClocks({ clocks }: { clocks: ClockEntry[] }) {
     new Intl.DateTimeFormat("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: tz }).format(
       now,
     );
-  const dayIn = (tz: string) =>
-    new Intl.DateTimeFormat("fr-FR", { weekday: "long", timeZone: tz }).format(now);
+  const dayIn = (tz: string) => {
+    const day = new Intl.DateTimeFormat("fr-FR", { weekday: "long", timeZone: tz }).format(now);
+    // Seul le jour prend une majuscule (pas "Par Rapport À Chez Toi")
+    return day.charAt(0).toUpperCase() + day.slice(1);
+  };
 
   const sorted = clocks
     .map((c) => ({ ...c, offset: offsetOf(c.timezone) }))
@@ -60,7 +63,7 @@ export function WorldClocks({ clocks }: { clocks: ClockEntry[] }) {
                 {c.label}
                 {c.isHome ? <span className="text-encre-douce"> — chez toi</span> : null}
               </span>
-              <span className="block text-xs text-encre-douce capitalize">
+              <span className="block text-xs text-encre-douce">
                 {dayIn(c.timezone)} · UTC{c.offset >= 0 ? "+" : ""}
                 {c.offset}
                 {!c.isHome && diff !== 0

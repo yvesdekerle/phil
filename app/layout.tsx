@@ -48,7 +48,8 @@ export default function RootLayout({
         <ServiceWorkerRegister />
         <OfflineBanner />
         <CookieNotice />
-        {children}
+        {/* Conteneur qui grandit : pousse le footer en bas même sur les pages courtes */}
+        <div className="flex flex-1 flex-col">{children}</div>
         <footer className="border-t border-laiton-clair/50 px-4 py-4 text-center text-xs text-encre-douce">
           Phil — carnet de voyage entre amis ·{" "}
           <a href="/privacy" className="underline underline-offset-4 hover:text-encre">
