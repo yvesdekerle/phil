@@ -365,8 +365,9 @@ Quand le réseau revient, refetch automatique des données voyage en cours. Noti
 Configuration Next.js (`next.config.js` ou middleware) : Content-Security-Policy stricte, Strict-Transport-Security, X-Frame-Options DENY, X-Content-Type-Options nosniff, Referrer-Policy strict-origin-when-cross-origin, Permissions-Policy pour limiter les API navigateur.
 > Note : `headers()` dans `next.config.ts`. CSP : `script-src 'self' 'unsafe-inline'` (requis par l'hydratation Next sans infra de nonces — durcissement possible plus tard), `connect-src` limité à l'origine Supabase, `img-src https:` (couvertures URL libre), `frame-src 'self' blob:` (viewer PDF + offline), `frame-ancestors 'none'`, `object-src 'none'`. HSTS 2 ans + sous-domaines. Vérifié sur build prod : les 6 headers présents, app fonctionnelle sous CSP.
 
-### [ ] PHIL-J02 — Rate limiting sur les endpoints critiques
+### [~] PHIL-J02 — Rate limiting sur les endpoints critiques *(socle fait en Q44)*
 Limitation par IP et par user sur : login, upload de document, accès à un document, création d'invitation. Implémentation avec Upstash Redis (free tier 10k commandes/jour) ou via les headers Vercel Edge Config.
+> Q44 a posé `lib/security/rate-limit.ts` (Upstash, dégradation gracieuse) et l'a câblé sur le webhook inbound-email. Reste : **activer Upstash** (2 variables d'env) et étendre le câblage aux invitations et à l'accès document si besoin.
 
 ### [x] PHIL-J03 — Validation Zod sur tous les endpoints *(fait le 2026-07-03)*
 Tout input utilisateur (formulaires, paramètres URL, body API) validé par un schéma Zod avant traitement. Erreurs renvoyées avec messages clairs côté client.
@@ -380,8 +381,9 @@ Pages `/privacy` et `/legal` avec : finalité du traitement, données collectée
 Bannière minimaliste au premier visite : pas de tracking analytics par défaut, donc pas de bannière "accepter / refuser" complexe. Mention "Ce site utilise des cookies techniques nécessaires à l'authentification" sans bouton.
 > Note : bandeau informatif à la première visite (cookies techniques uniquement, aucun tracking), bouton "Compris" mémorisé en localStorage, lien /privacy. Pas de recueil de consentement : rien d'optionnel ni de traçant. Vérifié en réel : affichée, disparaît, ne revient pas.
 
-### [ ] PHIL-J06 — Audit de dépendances
+### [x] PHIL-J06 — Audit de dépendances *(fait en Q48, le 2026-07-05)*
 Activation de Dependabot ou Renovate sur le repo GitHub pour les MAJ de sécurité automatiques (fonctionnalité GitHub native, sans CI). `npm audit` à lancer régulièrement en local, et systématiquement avant un déploiement important.
+> Fait : `.github/dependabot.yml` (npm + github-actions, hebdo, bumps mineurs groupés) en Q48.
 
 ### [ ] PHIL-J07 — Backup base de données
 Supabase fait des backups automatiques quotidiens (rétention 7 jours sur free tier). Documenter la procédure de restauration. Optionnel : export hebdomadaire vers un stockage tiers via cron.
@@ -734,8 +736,9 @@ Audit : un document du coffre passé offline était stocké **en clair** dans In
 Audit : aucun rate limiting. Modèle d'auth déjà robuste (Google OAuth + tokens UUID 122 bits), donc surface brute-force faible, mais les endpoints non authentifiés n'avaient aucun garde-fou anti-abus.
 > Fix : `lib/security/rate-limit.ts` (`rateLimitOk`, `clientIp`) sur Upstash Redis, **inerte tant que `UPSTASH_REDIS_REST_URL/TOKEN` ne sont pas posés** (autorise tout), s'active sans changement de code une fois l'env configuré. Câblé sur le webhook inbound-email (30 req/min/IP → 429). ⚠️ Action Yves : poser les variables Upstash pour l'activer.
 
-### [ ] PHIL-Q45 — Sécurité : chiffrement applicatif du coffre au repos
-Chantier de fond (non traité dans le sprint de correctifs). Les documents du coffre reposent sur bucket privé + RLS + filigrane + WebAuthn + audit, mais **pas de chiffrement applicatif** : un service_role fuité ou un bucket mal configuré exposerait les pièces d'identité en clair. À cadrer : chiffrement côté client avec clé dérivée d'une passkey (WebAuthn PRF), gestion des clés, re-chiffrement de l'existant, impact sur le filigrane serveur (qui a besoin du clair). Alternative : requalifier honnêtement la promesse « chiffrement » de CLAUDE.md.
+### [ ] PHIL-Q45 — Sécurité : chiffrement applicatif du coffre au repos *(pour la version payante / v2)*
+**Réservé à une future version payante** (décision Yves 2026-07-05). Chantier de fond : les documents du coffre reposent aujourd'hui sur bucket privé + RLS + filigrane + WebAuthn + audit, mais **pas de chiffrement applicatif** — un service_role fuité ou un bucket mal configuré exposerait les pièces d'identité en clair.
+> Reco d'implémentation : **chiffrement enveloppe côté serveur** avec une clé d'env dédiée (distincte du service_role), uploads du coffre routés par un endpoint serveur pour les fichiers ≤ 4,5 Mo, déchiffrement avant le filigrane. Protège contre une fuite du bucket **et** contre un service_role fuité seul. Conflit à gérer : l'upload direct navigateur→Storage (limite 4,5 Mo des fonctions) et le filigrane serveur (a besoin du clair). Prévoir la gestion des clés et le re-chiffrement de l'existant.
 
 ### [x] PHIL-Q43 — Sécurité : secrets en en-tête + comparaison constant-time *(fait le 2026-07-05)*
 Audit : le secret du webhook inbound-email transitait en **query string** (`?secret=`, journalisée par Vercel/proxys), et les comparaisons de secrets (webhook + crons) étaient timing-leaky (`!==`).
