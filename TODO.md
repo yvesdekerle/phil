@@ -674,6 +674,10 @@ Retour Yves : viewer cassé malgré des PDF valides (diagnostic mené jusque dan
 
 ## Audit sécurité & qualité (2026-07-05) — correctifs
 
+### [x] PHIL-Q56 — Tests : couverture élargie + coverage + e2e en CI *(fait le 2026-07-05)*
+Demande Yves : monter la note Tests (très important).
+> Fix : 25 → **53 tests unitaires** — ajout de `datetime` (fuseaux : bascule de minuit Maurice UTC+4, jour selon fuseau), `rates` (conversion + aller-retour), `trip-status` (statuts + tri), catégories, liens Google Maps, `parsePreferences`, secrets (constant-time, `checkBearer`). **Couverture 90%** (stmts) sur la logique pure via `@vitest/coverage-v8`, **seuil 85% imposé** (`vitest.config.ts`). CI : `test:coverage` remplace `test`, et un **job e2e Playwright** (Chromium) tourne sur push/PR. Deux hypothèses fausses de mes tests corrigées au passage (catégorie `resto`, coords à 6 décimales) — c'est le rôle des tests.
+
 ### [x] PHIL-Q47 — Tests : CI qui impose lint + types + build + tests *(fait le 2026-07-05)*
 Audit : la base de tests (25 unit + 8 e2e) n'était **imposée nulle part** — dérive garantie.
 > Fix : `.github/workflows/ci.yml` — sur push/PR : pnpm install (frozen), `lint`, `type-check`, `build` (env factices), `test` (Vitest). Job `rls` séparé qui lance `verify:rls` dès que les secrets Supabase sont fournis au dépôt. E2e Playwright à ajouter quand un Supabase de test sera câblé.

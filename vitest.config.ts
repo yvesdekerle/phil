@@ -13,5 +13,25 @@ export default defineConfig({
   test: {
     include: ["tests/unit/**/*.test.ts"],
     environment: "node",
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "html"],
+      // On mesure la logique métier pure (pas l'UI/pages) : c'est là que la
+      // couverture a du sens et protège des régressions.
+      include: [
+        "lib/budget/balances.ts",
+        "lib/budget/rates.ts",
+        "lib/budget/categories.ts",
+        "lib/search/fuzzy.ts",
+        "lib/events/datetime.ts",
+        "lib/geo/distance.ts",
+        "lib/geo/directions.ts",
+        "lib/trips/status.ts",
+        "lib/trips/packing-catalog.ts",
+        "lib/notifications/preferences.ts",
+        "lib/security/secret.ts",
+      ],
+      thresholds: { lines: 85, functions: 85, statements: 85, branches: 75 },
+    },
   },
 });

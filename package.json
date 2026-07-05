@@ -17,6 +17,7 @@
     "build:sw": "esbuild app/sw.ts --bundle --minify --outfile=public/sw.js",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test"
   },
   "engines": {
@@ -62,6 +63,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/web-push": "^3.6.4",
+    "@vitest/coverage-v8": "^4.1.9",
     "esbuild": "^0.28.1",
     "husky": "^9.1.7",
     "serwist": "^9.5.11",

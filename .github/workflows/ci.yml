@@ -39,8 +39,34 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder-anon-key
           NEXT_PUBLIC_APP_URL: http://localhost:3000
 
-      - name: Tests unitaires (Vitest)
-        run: pnpm test
+      - name: Tests unitaires + couverture (Vitest)
+        run: pnpm test:coverage
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Navigateur Playwright
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Tests e2e (surfaces non authentifiées)
+        run: pnpm test:e2e
+        env:
+          # Placeholder : les tests e2e couvrent les redirections/headers, pas
+          # de session réelle. getUser() renvoie null (pas de cookie) → redirections OK.
+          NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder-anon-key
+          NEXT_PUBLIC_APP_URL: http://localhost:3000
 
   # Vérification RLS — n'a de sens qu'avec un projet Supabase de test.
   # S'active dès que les secrets SUPABASE_* sont fournis au dépôt.
