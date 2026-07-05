@@ -1,4 +1,5 @@
 import { extractReservation, importEnabled } from "@/lib/import/reservation";
+import { clientIp, rateLimitOk } from "@/lib/security/rate-limit";
 import { timingSafeEqualStr } from "@/lib/security/secret";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -59,6 +60,10 @@ export async function POST(request: Request) {
     "";
   if (!secret || !timingSafeEqualStr(provided, secret)) {
     return Response.json({ error: "Non autorisé" }, { status: 401 });
+  }
+  // PHIL-Q44 : garde-fou anti-abus (si un secret fuite). Inerte sans Upstash.
+  if (!(await rateLimitOk("inbound-email", clientIp(request), { limit: 30, windowSec: 60 }))) {
+    return Response.json({ error: "Trop de requêtes" }, { status: 429 });
   }
   if (!importEnabled()) {
     return Response.json({ error: "GEMINI_API_KEY non configurée" }, { status: 503 });
