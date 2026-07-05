@@ -674,6 +674,14 @@ Retour Yves : viewer cassé malgré des PDF valides (diagnostic mené jusque dan
 
 ## Audit sécurité & qualité (2026-07-05) — correctifs
 
+### [x] PHIL-Q47 — Tests : CI qui impose lint + types + build + tests *(fait le 2026-07-05)*
+Audit : la base de tests (25 unit + 8 e2e) n'était **imposée nulle part** — dérive garantie.
+> Fix : `.github/workflows/ci.yml` — sur push/PR : pnpm install (frozen), `lint`, `type-check`, `build` (env factices), `test` (Vitest). Job `rls` séparé qui lance `verify:rls` dès que les secrets Supabase sont fournis au dépôt. E2e Playwright à ajouter quand un Supabase de test sera câblé.
+
+### [x] PHIL-Q48 — Dépendances : Dependabot + version Node épinglée *(fait le 2026-07-05)*
+Audit : pas de veille de vulnérabilités automatisée, version Node non épinglée.
+> Fix : `.github/dependabot.yml` (npm + github-actions, hebdo, bumps mineurs groupés), `.nvmrc` (24) et `engines.node` (`>=22 <25`) dans package.json.
+
 ### [x] PHIL-Q46 — Observabilité : error boundaries + logger structuré *(fait le 2026-07-05)*
 Audit : aucune error boundary (`app/error.tsx`/`global-error.tsx` absents), aucun logging structuré — un incident prod se diagnostiquait à l'aveugle.
 > Fix : `app/error.tsx` (segment) + `app/global-error.tsx` (racine) façon Verne avec bouton « Reprendre la route », logguant `error.digest` sans PII ; `lib/observability/logger.ts` (JSON une ligne, niveau/message/ts/contexte, règle « pas de PII dans le contexte »).
