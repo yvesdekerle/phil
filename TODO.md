@@ -682,6 +682,10 @@ Audit : la base de tests (25 unit + 8 e2e) n'était **imposée nulle part** — 
 Audit : pas de veille de vulnérabilités automatisée, version Node non épinglée.
 > Fix : `.github/dependabot.yml` (npm + github-actions, hebdo, bumps mineurs groupés), `.nvmrc` (24) et `engines.node` (`>=22 <25`) dans package.json.
 
+### [x] PHIL-Q53 — Offline : invalidation des blobs révoqués à la synchro *(fait le 2026-07-05)*
+Audit : `syncTrip` reconstruisait les métadonnées mais **jamais** les blobs — un document supprimé/révoqué restait ouvrable offline indéfiniment.
+> Fix : à chaque `syncTrip`, calcul des ids de documents cachés pour ce voyage désormais absents de la liste (RLS) → `document_blobs.bulkDelete` dans la transaction. Combiné à la purge Q41 (déconnexion), l'offline ne conserve plus que ce à quoi l'utilisateur a droit.
+
 ### [x] PHIL-Q52 — Robustesse : ordre delete-account + borne votePoll *(fait le 2026-07-05)*
 Audit : `deleteMyAccount` se déconnectait **avant** de supprimer (un échec laissait l'utilisateur déconnecté avec un compte vivant) ; `votePoll` ne bornait pas l'index par le haut (vote fantôme gonflant le total).
 > Fix : suppression **puis** déconnexion (échec → reste connecté + message clair, erreur loguée via `logger` sans PII) ; `votePoll` vérifie `optionIndex < options.length`. *(Rollback optimiste de la carte du monde laissé en note — enjeu faible : un simple refresh recolle l'état, et ça demanderait de changer le type de retour de l'action.)*

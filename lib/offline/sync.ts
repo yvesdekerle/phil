@@ -61,12 +61,19 @@ export async function syncTrip(tripId: string): Promise<SyncResult | null> {
       })),
   ];
 
+  // PHIL-Q53 : invalider les blobs devenus inaccessibles (document supprimé,
+  // partage retiré, sorti de la RLS) — sinon la copie offline reste ouvrable.
+  const freshIds = new Set(documents.map((d) => d.id));
+  const cachedIds = await offlineDb.documents_meta.where("trip_id").equals(tripId).primaryKeys();
+  const revokedIds = cachedIds.filter((id) => !freshIds.has(id));
+
   await offlineDb.transaction(
     "rw",
     [
       offlineDb.trips,
       offlineDb.events,
       offlineDb.documents_meta,
+      offlineDb.document_blobs,
       offlineDb.ideas,
       offlineDb.sync_meta,
     ],
@@ -76,6 +83,9 @@ export async function syncTrip(tripId: string): Promise<SyncResult | null> {
       await offlineDb.events.bulkPut(events ?? []);
       await offlineDb.documents_meta.where("trip_id").equals(tripId).delete();
       await offlineDb.documents_meta.bulkPut(documents);
+      if (revokedIds.length > 0) {
+        await offlineDb.document_blobs.bulkDelete(revokedIds);
+      }
       await offlineDb.ideas.where("trip_id").equals(tripId).delete();
       await offlineDb.ideas.bulkPut(ideas ?? []);
       await offlineDb.sync_meta.put({
