@@ -682,6 +682,10 @@ Audit : la base de tests (25 unit + 8 e2e) n'était **imposée nulle part** — 
 Audit : pas de veille de vulnérabilités automatisée, version Node non épinglée.
 > Fix : `.github/dependabot.yml` (npm + github-actions, hebdo, bumps mineurs groupés), `.nvmrc` (24) et `engines.node` (`>=22 <25`) dans package.json.
 
+### [x] PHIL-Q49 — Correction/Concurrence : écritures de la Bourse atomiques *(fait le 2026-07-05)*
+Audit : `addExpense`/`markSettled` inséraient la dépense puis les bénéficiaires en deux temps avec un DELETE compensatoire manuel → dépense orpheline possible faussant les soldes.
+> Fix : RPC Postgres `create_expense_with_beneficiaries` (plpgsql = transactionnelle, `security invoker` → RLS conservée, `search_path=''`), insère dépense + bénéficiaires en une transaction. `addExpense` et `markSettled` réécrits pour l'appeler. Params optionnels en `default null` (types Supabase optionnels, pas de cast). **Vérifié dans Chrome** : dépense de 12 € répartie sur 9 (chacun 1,33), totaux +12, puis supprimée — soldes revenus à l'identique.
+
 ### [x] PHIL-Q46 — Observabilité : error boundaries + logger structuré *(fait le 2026-07-05)*
 Audit : aucune error boundary (`app/error.tsx`/`global-error.tsx` absents), aucun logging structuré — un incident prod se diagnostiquait à l'aveugle.
 > Fix : `app/error.tsx` (segment) + `app/global-error.tsx` (racine) façon Verne avec bouton « Reprendre la route », logguant `error.digest` sans PII ; `lib/observability/logger.ts` (JSON une ligne, niveau/message/ts/contexte, règle « pas de PII dans le contexte »).

@@ -1388,7 +1388,22 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      create_expense_with_beneficiaries: {
+        Args: {
+          p_amount: number;
+          p_beneficiaries: Json;
+          p_category: string;
+          p_currency: string;
+          p_event_id?: string;
+          p_is_settlement?: boolean;
+          p_paid_by: string;
+          p_spent_on?: string;
+          p_split_mode?: string;
+          p_title: string;
+          p_trip_id: string;
+        };
+        Returns: string;
+      };
     };
     Enums: {
       document_category:

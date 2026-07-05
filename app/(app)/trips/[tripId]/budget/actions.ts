@@ -83,34 +83,25 @@ export async function addExpense(_prev: ExpenseState, formData: FormData): Promi
     return { status: "error", message: "La Bourse est close — rouvre-la pour ajouter." };
   }
 
-  const expenseId = crypto.randomUUID();
-  const { error } = await supabase.from("expenses").insert({
-    id: expenseId,
-    trip_id: d.tripId,
-    title: d.title,
-    amount: d.amount,
-    currency: d.currency,
-    paid_by: d.paidBy,
-    category: d.category,
-    event_id: d.eventId || null,
-    spent_on: d.spentOn,
-    split_mode: d.splitMode,
-    created_by: user.id,
-  });
-  if (error) {
-    return { status: "error", message: "Enregistrement impossible." };
-  }
-
-  const { error: benefError } = await supabase.from("expense_beneficiaries").insert(
-    d.beneficiaries.map((userId) => ({
-      expense_id: expenseId,
+  // PHIL-Q49 : insertion atomique (dépense + bénéficiaires) via RPC transactionnelle
+  const { error } = await supabase.rpc("create_expense_with_beneficiaries", {
+    p_trip_id: d.tripId,
+    p_title: d.title,
+    p_amount: d.amount,
+    p_currency: d.currency,
+    p_paid_by: d.paidBy,
+    p_category: d.category,
+    p_event_id: d.eventId || undefined,
+    p_spent_on: d.spentOn,
+    p_split_mode: d.splitMode,
+    p_is_settlement: false,
+    p_beneficiaries: d.beneficiaries.map((userId) => ({
       user_id: userId,
       share: d.splitMode === "equal" ? null : (shares.get(userId) ?? 0),
     })),
-  );
-  if (benefError) {
-    await supabase.from("expenses").delete().eq("id", expenseId);
-    return { status: "error", message: "Bénéficiaires invalides." };
+  });
+  if (error) {
+    return { status: "error", message: "Enregistrement impossible." };
   }
 
   revalidatePath(`/trips/${d.tripId}/budget`);
@@ -177,26 +168,19 @@ export async function markSettled(
   }
 
   const d = parsed.data;
-  const expenseId = crypto.randomUUID();
-  const { error } = await supabase.from("expenses").insert({
-    id: expenseId,
-    trip_id: d.tripId,
-    title: "Remboursement",
-    amount: d.amount,
-    currency: d.currency,
-    paid_by: d.fromUserId,
-    category: "autre",
-    is_settlement: true,
-    created_by: user.id,
+  // PHIL-Q49 : règlement inséré atomiquement (dépense + bénéficiaire) via RPC
+  const { error } = await supabase.rpc("create_expense_with_beneficiaries", {
+    p_trip_id: d.tripId,
+    p_title: "Remboursement",
+    p_amount: d.amount,
+    p_currency: d.currency,
+    p_paid_by: d.fromUserId,
+    p_category: "autre",
+    p_split_mode: "equal",
+    p_is_settlement: true,
+    p_beneficiaries: [{ user_id: d.toUserId, share: null }],
   });
   if (error) {
-    return;
-  }
-  const { error: benefError } = await supabase
-    .from("expense_beneficiaries")
-    .insert({ expense_id: expenseId, user_id: d.toUserId });
-  if (benefError) {
-    await supabase.from("expenses").delete().eq("id", expenseId);
     return;
   }
   revalidatePath(`/trips/${d.tripId}/budget`);
