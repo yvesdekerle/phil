@@ -2,7 +2,6 @@ import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { OfflineDocToggle } from "@/components/offline/offline-doc-toggle";
 import { CategoryIcon } from "@/components/vault/category-icon";
 import { createClient } from "@/lib/supabase/server";
 import { CATEGORY_LABELS } from "@/lib/vault/categories";
@@ -79,9 +78,9 @@ export default async function VaultDocumentPage({
       </div>
 
       <div className="mb-6 flex flex-col gap-4">
-        <div>
-          <OfflineDocToggle documentId={doc.id} fileName={doc.file_name} />
-        </div>
+        {/* PHIL-Q41 : pas de mise en cache offline des documents du coffre —
+            les stocker en clair sur l'appareil contournerait passkey, filigrane
+            et audit. La lecture offline reste possible pour les documents de voyage. */}
         <ShareManager documentId={doc.id} shares={shares} />
         <DocumentActions
           documentId={doc.id}

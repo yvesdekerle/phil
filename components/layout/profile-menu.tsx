@@ -3,8 +3,9 @@
 import { Compass, LogOut, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { signOut } from "@/app/(app)/profile/actions";
+import { clearOfflineData } from "@/lib/offline/clear";
 
 /**
  * Menu du profil (PHIL-Q31) — l'avatar ouvre un menu déroulant :
@@ -12,7 +13,15 @@ import { signOut } from "@/app/(app)/profile/actions";
  */
 export function ProfileMenu({ avatarUrl, initial }: { avatarUrl: string | null; initial: string }) {
   const [open, setOpen] = useState(false);
+  const [signingOut, startSignOut] = useTransition();
   const rootRef = useRef<HTMLDivElement>(null);
+
+  // PHIL-Q41 : purge la donnée locale AVANT de quitter la session
+  const handleSignOut = () =>
+    startSignOut(async () => {
+      await clearOfflineData();
+      await signOut();
+    });
 
   useEffect(() => {
     if (!open) {
@@ -86,11 +95,16 @@ export function ProfileMenu({ avatarUrl, initial }: { avatarUrl: string | null; 
             <Compass className="size-4 text-encre-douce" aria-hidden="true" /> Exploration
           </Link>
           <div className="my-1 border-t border-laiton-clair/60" />
-          <form action={signOut}>
-            <button type="submit" role="menuitem" className={`${itemClass} w-full text-left`}>
-              <LogOut className="size-4 text-encre-douce" aria-hidden="true" /> Déconnexion
-            </button>
-          </form>
+          <button
+            type="button"
+            role="menuitem"
+            disabled={signingOut}
+            onClick={handleSignOut}
+            className={`${itemClass} w-full text-left`}
+          >
+            <LogOut className="size-4 text-encre-douce" aria-hidden="true" />
+            {signingOut ? "Déconnexion…" : "Déconnexion"}
+          </button>
         </div>
       ) : null}
     </div>

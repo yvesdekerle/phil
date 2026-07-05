@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Bodoni_Moda, Figtree } from "next/font/google";
 import "./globals.css";
 import { CookieNotice } from "@/components/cookie-notice";
+import { OfflineAuthGuard } from "@/components/offline/offline-auth-guard";
 import { OfflineBanner } from "@/components/offline/offline-banner";
 import { ServiceWorkerRegister } from "@/components/pwa/sw-register";
 import { cn } from "@/lib/utils";
@@ -46,6 +47,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col font-sans">
         <ServiceWorkerRegister />
+        <OfflineAuthGuard />
         <OfflineBanner />
         <CookieNotice />
         {/* Conteneur qui grandit : pousse le footer en bas même sur les pages courtes */}

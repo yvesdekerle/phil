@@ -672,6 +672,12 @@ Remplacer le bandeau du calendrier (Q24) par une **page Horloges** hors voyage :
 ### [x] PHIL-Q30 — Fix : aperçu des documents du coffre bloqué par la CSP *(fait le 2026-07-05, livré dans le commit Q28)*
 Retour Yves : viewer cassé malgré des PDF valides (diagnostic mené jusque dans Chrome : réponse 200 `application/pdf` correcte). Cause : `X-Frame-Options: DENY`, `frame-ancestors 'none'` et `object-src 'none'` (PHIL-J01) appliqués **à la réponse PDF elle-même** → Chrome refuse de l'afficher (iframe et pleine page). Fix : `/api/documents/:id/view` exclu de la CSP globale dans `next.config.ts`, avec ses propres headers (`frame-ancestors 'self'`, `X-Frame-Options: SAMEORIGIN`, `object-src 'self'`, nosniff).
 
+## Audit sécurité & qualité (2026-07-05) — correctifs
+
+### [x] PHIL-Q41 — Sécurité : fuite du coffre par le cache offline *(fait le 2026-07-05)*
+Audit : un document du coffre passé offline était stocké **en clair** dans IndexedDB (contournant passkey/filigrane/audit), et **rien n'était purgé à la déconnexion** (base par navigateur) → sur poste partagé, l'utilisateur suivant pouvait rouvrir les pièces d'identité du précédent.
+> Fix : `lib/offline/clear.ts` (`clearOfflineData` = `offlineDb.delete()` + purge des caches `phil-*` du service worker). Appelé (1) à la déconnexion — bouton du menu profil converti en handler client qui purge **avant** `signOut` ; (2) via `OfflineAuthGuard` monté dans le layout racine, sur l'événement `SIGNED_OUT` (expiration/révocation). Toggle offline **retiré des documents du coffre** (les docs de voyage, moins sensibles et partagés au groupe, restent disponibles offline). `syncTrip` ne cachait déjà que `scope="TRIP"`.
+
 ### [x] PHIL-Q40 — Horloges : choisir "sa maison" *(fait le 2026-07-05)*
 Retour Yves : pouvoir choisir sa maison directement depuis la page Horloges (pas seulement via Profil).
 > Note : sélecteur "Ta maison" (`home-timezone-picker.tsx`, client) en tête de `/horloges` → action serveur `setHomeTimezone` (valide le fuseau IANA, met à jour `profiles.timezone` = source unique, revalidate). Sauvegarde immédiate au changement, badge "✓ enregistré". **Vérifié dans Chrome** : maison Paris→New York recalcule l'horloge de référence et les décalages ("+8 h par rapport à chez toi"), re-tri par fuseau ; réglage restauré à Europe/Paris après test.
