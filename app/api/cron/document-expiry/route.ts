@@ -28,6 +28,35 @@ export async function GET(request: Request) {
     .from("document_shares")
     .delete({ count: "exact" })
     .lt("expires_at", today.toISOString());
+
+  // PHIL-Q42 : purge de rétention — un document soft-supprimé depuis plus de
+  // 30 jours est effacé du Storage puis de la base (limitation de conservation
+  // RGPD ; sans ce balayage, les scans de pièces d'identité restaient à vie).
+  const RETENTION_DAYS = 30;
+  const cutoff = new Date(today);
+  cutoff.setUTCDate(cutoff.getUTCDate() - RETENTION_DAYS);
+  const { data: staleDocs } = await admin
+    .from("documents")
+    .select("id, storage_path")
+    .not("deleted_at", "is", null)
+    .lt("deleted_at", cutoff.toISOString());
+  let purgedDocuments = 0;
+  if (staleDocs && staleDocs.length > 0) {
+    const paths = staleDocs.map((d) => d.storage_path).filter(Boolean);
+    if (paths.length > 0) {
+      await admin.storage.from("documents").remove(paths);
+    }
+    const { count } = await admin
+      .from("documents")
+      .delete({ count: "exact" })
+      .in(
+        "id",
+        staleDocs.map((d) => d.id),
+      );
+    purgedDocuments = count ?? 0;
+  }
+
+  // PHIL-Q42 : on trace par id de document, jamais par nom de fichier (PII en logs)
   const results: { document: string; days: number; sent: boolean; reason?: string }[] = [];
 
   for (const days of THRESHOLD_DAYS) {
@@ -44,14 +73,14 @@ export async function GET(request: Request) {
     for (const doc of docs ?? []) {
       const prefs = parsePreferences(doc.profiles?.notification_preferences);
       if (!prefs.expiry_alerts) {
-        results.push({ document: doc.file_name, days, sent: false, reason: "préférence off" });
+        results.push({ document: doc.id, days, sent: false, reason: "préférence off" });
         continue;
       }
 
       const { data: owner } = await admin.auth.admin.getUserById(doc.owner_id);
       const email = owner.user?.email;
       if (!email) {
-        results.push({ document: doc.file_name, days, sent: false, reason: "email introuvable" });
+        results.push({ document: doc.id, days, sent: false, reason: "email introuvable" });
         continue;
       }
 
@@ -70,13 +99,13 @@ export async function GET(request: Request) {
           }),
         });
         results.push({
-          document: doc.file_name,
+          document: doc.id,
           days,
           sent: !error,
           reason: error?.message,
         });
       } catch (e) {
-        results.push({ document: doc.file_name, days, sent: false, reason: String(e) });
+        results.push({ document: doc.id, days, sent: false, reason: String(e) });
       }
     }
   }
@@ -85,5 +114,6 @@ export async function GET(request: Request) {
     checked_at: today.toISOString(),
     alerts: results,
     purged_shares: purgedShares ?? 0,
+    purged_documents: purgedDocuments,
   });
 }
