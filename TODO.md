@@ -682,6 +682,10 @@ Audit : la base de tests (25 unit + 8 e2e) n'était **imposée nulle part** — 
 Audit : pas de veille de vulnérabilités automatisée, version Node non épinglée.
 > Fix : `.github/dependabot.yml` (npm + github-actions, hebdo, bumps mineurs groupés), `.nvmrc` (24) et `engines.node` (`>=22 <25`) dans package.json.
 
+### [x] PHIL-Q55 — Offline : expiration 30 j + purge des voyages terminés *(fait le 2026-07-05)*
+Demande Yves : limite de temps sur le cache offline + purge auto d'un voyage fini.
+> Fix : `lib/offline/maintenance.ts` (`runOfflineMaintenance`, `purgeTripOffline`) — au chargement de l'app (via `OfflineAuthGuard`, best-effort) : les fichiers gardés offline **expirent à 30 jours**, et un **voyage terminé depuis plus de 7 jours** est entièrement purgé du cache (événements, docs, idées, fichiers, sync_meta).
+
 ### [x] PHIL-Q54 — Architecture : factorisation du boilerplate d'auth *(fait le 2026-07-05)*
 Audit : `requireUser` (createClient + getUser + redirect) redéfini à l'identique dans 6 server actions, `lib/auth/` vide.
 > Fix : `lib/auth/require-user.ts` unique, adopté dans les 6 fichiers (security, participants, poll, checklist, lodging, vault/unlock) ; imports `createClient`/`redirect` devenus inutiles nettoyés. Build + lint + 25 tests OK.
