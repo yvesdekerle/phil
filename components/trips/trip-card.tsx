@@ -1,7 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
+import { getT } from "@/lib/i18n/server";
 import { formatDateRange } from "@/lib/trips/format";
-import { TRIP_STATUS_LABELS, type Trip, tripStatus } from "@/lib/trips/status";
+import { type Trip, tripStatus } from "@/lib/trips/status";
 import { cn } from "@/lib/utils";
 
 const STATUS_STYLES: Record<string, string> = {
@@ -11,9 +12,16 @@ const STATUS_STYLES: Record<string, string> = {
   archive: "bg-encre-douce/15 text-encre-douce",
 };
 
-export function TripCard({ trip, participantCount }: { trip: Trip; participantCount: number }) {
+export async function TripCard({
+  trip,
+  participantCount,
+}: {
+  trip: Trip;
+  participantCount: number;
+}) {
   const status = tripStatus(trip);
   const isPast = status === "passe" || status === "archive";
+  const t = await getT();
 
   return (
     <Link
@@ -45,7 +53,7 @@ export function TripCard({ trip, participantCount }: { trip: Trip; participantCo
             STATUS_STYLES[status],
           )}
         >
-          {TRIP_STATUS_LABELS[status]}
+          {t(`trips.status.${status}`)}
         </span>
       </div>
 
@@ -55,7 +63,7 @@ export function TripCard({ trip, participantCount }: { trip: Trip; participantCo
         <div className="mt-2.5 flex items-center justify-between text-xs text-encre-douce">
           <span>{formatDateRange(trip.start_date, trip.end_date)}</span>
           <span>
-            {participantCount} {participantCount > 1 ? "voyageurs" : "voyageur"}
+            {participantCount} {participantCount > 1 ? t("trips.travelers") : t("trips.traveler")}
           </span>
         </div>
       </div>

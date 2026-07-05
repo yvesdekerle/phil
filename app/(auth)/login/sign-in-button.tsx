@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useT } from "@/components/i18n/provider";
 import { createClient } from "@/lib/supabase/client";
 
 export function SignInButton({ next = "/trips" }: { next?: string }) {
+  const t = useT();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -22,7 +24,7 @@ export function SignInButton({ next = "/trips" }: { next?: string }) {
       },
     });
     if (signInError) {
-      setError("L'embarquement n'a pas abouti. Réessaie dans un instant.");
+      setError(t("login.authError"));
       setLoading(false);
     }
   }
@@ -55,7 +57,7 @@ export function SignInButton({ next = "/trips" }: { next?: string }) {
             />
           </svg>
         </span>
-        {loading ? "Embarquement…" : "Continuer avec Google"}
+        {loading ? t("login.googleLoading") : t("login.google")}
       </button>
       {error ? (
         <p role="alert" className="text-sm text-bordeaux">

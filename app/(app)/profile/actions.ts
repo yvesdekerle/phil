@@ -64,7 +64,16 @@ export async function updateProfile(
     return { status: "error", message: "L'enregistrement a échoué. Réessaie dans un instant." };
   }
 
-  revalidatePath("/profile");
+  // PHIL-Q37 : synchronise le cookie de langue avec le profil
+  const { cookies } = await import("next/headers");
+  const { LOCALE_COOKIE } = await import("@/lib/i18n/config");
+  (await cookies()).set(LOCALE_COOKIE, parsed.data.locale, {
+    path: "/",
+    maxAge: 31_536_000,
+    sameSite: "lax",
+  });
+
+  revalidatePath("/", "layout");
   return { status: "success", message: "C'est noté dans le carnet." };
 }
 

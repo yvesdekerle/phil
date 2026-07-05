@@ -1,6 +1,5 @@
+import { getT } from "@/lib/i18n/server";
 import { SignInButton } from "./sign-in-button";
-
-const ROUTE_FOGG = "Londres — Bombay — Yokohama — Londres";
 
 export default async function LoginPage({
   searchParams,
@@ -8,6 +7,7 @@ export default async function LoginPage({
   searchParams: Promise<{ error?: string; next?: string }>;
 }) {
   const { error, next } = await searchParams;
+  const t = await getT();
   // Anti open-redirect : uniquement des chemins internes.
   const safeNext = next?.startsWith("/") && !next.startsWith("//") ? next : "/trips";
 
@@ -29,29 +29,29 @@ export default async function LoginPage({
           <header className="text-center">
             <p className="font-display text-5xl text-encre">Phil</p>
             <p className="mt-3 text-[0.65rem] font-medium tracking-[0.18em] text-laiton uppercase">
-              {ROUTE_FOGG}
+              {t("login.subtitle")}
             </p>
           </header>
 
           <div aria-hidden="true" className="my-7 border-t border-dashed border-laiton-clair" />
 
-          <h1 className="text-center font-display text-2xl text-encre italic">Bienvenue à bord</h1>
+          <h1 className="text-center font-display text-2xl text-encre italic">
+            {t("login.welcome")}
+          </h1>
           <p className="mt-2 mb-7 text-center text-sm text-encre-douce">
-            Connecte-toi pour préparer le prochain départ.
+            {t("login.connectPrompt")}
           </p>
 
           <SignInButton next={safeNext} />
 
           {error === "auth" ? (
             <p role="alert" className="mt-4 text-center text-sm text-bordeaux">
-              L'embarquement n'a pas abouti. Réessaie dans un instant.
+              {t("login.authError")}
             </p>
           ) : null}
         </div>
 
-        <p className="mt-6 text-center text-xs text-encre-douce">
-          Phil garde l'heure exacte depuis 1872.
-        </p>
+        <p className="mt-6 text-center text-xs text-encre-douce">{t("login.tagline")}</p>
       </div>
     </main>
   );

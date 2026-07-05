@@ -1,0 +1,71 @@
+/** Messages français (PHIL-Q37) — source de vérité des clés. */
+export const fr = {
+  nav: {
+    trips: "Voyages",
+    vault: "Coffre",
+    friends: "Amis",
+    clocks: "Horloges",
+    tips: "Conseils",
+    profileAria: "Ton profil",
+  },
+  profileMenu: {
+    profile: "Profil",
+    exploration: "Exploration",
+    signOut: "Déconnexion",
+    signingOut: "Déconnexion…",
+  },
+  footer: {
+    tagline: "Phil — carnet de voyage entre amis",
+    privacy: "Confidentialité",
+    legal: "Mentions légales",
+  },
+  login: {
+    welcome: "Bienvenue à bord",
+    subtitle: "Londres — Bombay — Yokohama — Londres",
+    connectPrompt: "Connecte-toi pour préparer le prochain départ.",
+    google: "Continuer avec Google",
+    googleLoading: "Embarquement…",
+    authError: "L'embarquement n'a pas abouti. Réessaie dans un instant.",
+    tagline: "Phil garde l'heure exacte depuis 1872.",
+  },
+  error: {
+    title: "Phil a perdu le fil",
+    body: "Une escale imprévue — même Phileas a connu quelques contretemps. Réessaie dans un instant.",
+    bodyGlobal: "Une avarie inattendue. Recharge la page — l'aventure reprend.",
+    retry: "Reprendre la route",
+  },
+  trips: {
+    title: "Tes voyages",
+    create: "Créer un voyage",
+    emptyTitle: "Phil est prêt à partir, où va-t-on ?",
+    emptyBody:
+      "80 jours, ça commence par un premier pas : crée ton premier voyage et embarque tes compagnons de route.",
+    travelers: "voyageurs",
+    traveler: "voyageur",
+    status: {
+      en_cours: "En cours",
+      a_venir: "À venir",
+      passe: "Passé",
+      archive: "Archivé",
+    },
+  },
+  clocks: {
+    title: "Horloges",
+    subtitle:
+      "L'heure chez toi et à chacune de tes destinations — du fuseau le plus tôt au plus tard.",
+    home: "Ta maison",
+    saved: "✓ enregistré",
+    homeSuffix: "— chez toi",
+    diff: "par rapport à chez toi",
+    empty: "Ajoute un voyage vers un autre fuseau et son horloge apparaîtra ici.",
+  },
+  common: {
+    save: "Enregistrer",
+    cancel: "Annuler",
+    add: "Ajouter",
+    delete: "Supprimer",
+    loading: "Chargement…",
+  },
+};
+
+export type Messages = typeof fr;

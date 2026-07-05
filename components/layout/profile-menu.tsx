@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { signOut } from "@/app/(app)/profile/actions";
+import { useT } from "@/components/i18n/provider";
 import { clearOfflineData } from "@/lib/offline/clear";
 
 /**
@@ -15,6 +16,7 @@ export function ProfileMenu({ avatarUrl, initial }: { avatarUrl: string | null; 
   const [open, setOpen] = useState(false);
   const [signingOut, startSignOut] = useTransition();
   const rootRef = useRef<HTMLDivElement>(null);
+  const t = useT();
 
   // PHIL-Q41 : purge la donnée locale AVANT de quitter la session
   const handleSignOut = () =>
@@ -55,7 +57,7 @@ export function ProfileMenu({ avatarUrl, initial }: { avatarUrl: string | null; 
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="menu"
         aria-expanded={open}
-        aria-label="Ton profil"
+        aria-label={t("nav.profileAria")}
         className="rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-laiton"
       >
         {avatarUrl ? (
@@ -84,7 +86,8 @@ export function ProfileMenu({ avatarUrl, initial }: { avatarUrl: string | null; 
             className={itemClass}
             onClick={() => setOpen(false)}
           >
-            <User className="size-4 text-encre-douce" aria-hidden="true" /> Profil
+            <User className="size-4 text-encre-douce" aria-hidden="true" />{" "}
+            {t("profileMenu.profile")}
           </Link>
           <Link
             href="/explorer"
@@ -92,7 +95,8 @@ export function ProfileMenu({ avatarUrl, initial }: { avatarUrl: string | null; 
             className={itemClass}
             onClick={() => setOpen(false)}
           >
-            <Compass className="size-4 text-encre-douce" aria-hidden="true" /> Exploration
+            <Compass className="size-4 text-encre-douce" aria-hidden="true" />{" "}
+            {t("profileMenu.exploration")}
           </Link>
           <div className="my-1 border-t border-laiton-clair/60" />
           <button
@@ -103,7 +107,7 @@ export function ProfileMenu({ avatarUrl, initial }: { avatarUrl: string | null; 
             className={`${itemClass} w-full text-left`}
           >
             <LogOut className="size-4 text-encre-douce" aria-hidden="true" />
-            {signingOut ? "Déconnexion…" : "Déconnexion"}
+            {signingOut ? t("profileMenu.signingOut") : t("profileMenu.signOut")}
           </button>
         </div>
       ) : null}

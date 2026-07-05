@@ -1,20 +1,22 @@
 import Link from "next/link";
 import { ProfileMenu } from "@/components/layout/profile-menu";
+import { getT } from "@/lib/i18n/server";
 import { getOwnProfile } from "@/lib/supabase/profiles";
 import { createClient } from "@/lib/supabase/server";
-
-const NAV_LINKS = [
-  { href: "/trips", label: "Voyages" },
-  { href: "/vault", label: "Coffre" },
-  { href: "/friends", label: "Amis" },
-  { href: "/horloges", label: "Horloges" },
-  { href: "/conseils", label: "Conseils" },
-];
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
   const profile = await getOwnProfile(supabase);
+  const t = await getT();
   const initial = (profile?.display_name ?? "?").charAt(0).toUpperCase();
+
+  const navLinks = [
+    { href: "/trips", label: t("nav.trips") },
+    { href: "/vault", label: t("nav.vault") },
+    { href: "/friends", label: t("nav.friends") },
+    { href: "/horloges", label: t("nav.clocks") },
+    { href: "/conseils", label: t("nav.tips") },
+  ];
 
   return (
     <>
@@ -28,7 +30,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               Phil
             </Link>
             <nav className="flex items-center gap-4 text-sm">
-              {NAV_LINKS.map((link) => (
+              {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
