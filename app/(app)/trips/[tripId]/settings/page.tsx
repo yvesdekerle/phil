@@ -42,22 +42,6 @@ export default async function TripSettingsPage({
 
   return (
     <div className="mx-auto flex max-w-lg flex-col gap-6">
-      <PrepareOfflineButton tripId={trip.id} />
-      {calendarUrl ? <CalendarFeed url={calendarUrl} /> : null}
-      {canEdit ? (
-        <EmailAliasCard
-          tripId={trip.id}
-          alias={trip.email_alias}
-          domain={process.env.NEXT_PUBLIC_INBOUND_EMAIL_DOMAIN ?? null}
-        />
-      ) : null}
-      {isOwner ? (
-        <PublicShareCard tripId={trip.id} token={trip.public_token} baseUrl={baseUrl} />
-      ) : null}
-      {canEdit ? <CoverUpload tripId={trip.id} /> : null}
-      {canEdit && trip.cover_image_url ? (
-        <CoverPosition tripId={trip.id} src={trip.cover_image_url} />
-      ) : null}
       <TripSettingsForm
         tripId={trip.id}
         tripName={trip.name}
@@ -74,7 +58,24 @@ export default async function TripSettingsPage({
           currencySecondary: trip.currency_secondary ?? "",
           timezone: trip.default_timezone,
         }}
-      />
+      >
+        {canEdit ? <CoverUpload tripId={trip.id} /> : null}
+        {canEdit && trip.cover_image_url ? (
+          <CoverPosition tripId={trip.id} src={trip.cover_image_url} />
+        ) : null}
+        {calendarUrl ? <CalendarFeed url={calendarUrl} /> : null}
+        {canEdit ? (
+          <EmailAliasCard
+            tripId={trip.id}
+            alias={trip.email_alias}
+            domain={process.env.NEXT_PUBLIC_INBOUND_EMAIL_DOMAIN ?? null}
+          />
+        ) : null}
+        {isOwner ? (
+          <PublicShareCard tripId={trip.id} token={trip.public_token} baseUrl={baseUrl} />
+        ) : null}
+        <PrepareOfflineButton tripId={trip.id} />
+      </TripSettingsForm>
     </div>
   );
 }

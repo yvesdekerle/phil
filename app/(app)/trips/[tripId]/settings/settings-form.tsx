@@ -73,6 +73,8 @@ type Props = {
   isArchived: boolean;
   canEdit: boolean;
   defaultValues: FormValues;
+  /** Cartes intercalées entre les champs et le bouton Enregistrer (couverture, agenda…). */
+  children?: React.ReactNode;
 };
 
 export function TripSettingsForm({
@@ -82,6 +84,7 @@ export function TripSettingsForm({
   isArchived,
   canEdit,
   defaultValues,
+  children,
 }: Props) {
   const t = useT();
   const [state, setState] = useState<TripSettingsState>({ status: "idle" });
@@ -111,8 +114,8 @@ export function TripSettingsForm({
   });
 
   return (
-    <div className="flex flex-col gap-8">
-      <form onSubmit={onSubmit} className="flex flex-col gap-5">
+    <div className="flex flex-col gap-6">
+      <form id="trip-settings-form" onSubmit={onSubmit} className="flex flex-col gap-5">
         <div className="flex flex-col gap-2">
           <Label htmlFor="name">{t("settings.form.name")}</Label>
           <Input id="name" disabled={!canEdit} {...register("name")} />
@@ -201,26 +204,28 @@ export function TripSettingsForm({
             </SelectContent>
           </Select>
         </div>
-
-        {canEdit ? (
-          <div className="flex items-center gap-4">
-            <Button type="submit" disabled={pending}>
-              {pending ? t("settings.form.saving") : t("settings.form.save")}
-            </Button>
-            {state.status !== "idle" ? (
-              <p
-                className={
-                  state.status === "error" ? "text-sm text-bordeaux" : "text-sm text-encre-douce"
-                }
-              >
-                {state.message}
-              </p>
-            ) : null}
-          </div>
-        ) : (
-          <p className="text-sm text-encre-douce">{t("settings.form.viewerNote")}</p>
-        )}
       </form>
+
+      {children}
+
+      {canEdit ? (
+        <div className="flex items-center gap-4">
+          <Button type="submit" form="trip-settings-form" disabled={pending}>
+            {pending ? t("settings.form.saving") : t("settings.form.save")}
+          </Button>
+          {state.status !== "idle" ? (
+            <p
+              className={
+                state.status === "error" ? "text-sm text-bordeaux" : "text-sm text-encre-douce"
+              }
+            >
+              {state.message}
+            </p>
+          ) : null}
+        </div>
+      ) : (
+        <p className="text-sm text-encre-douce">{t("settings.form.viewerNote")}</p>
+      )}
 
       {isOwner ? (
         <div className="flex flex-col gap-3 rounded-lg border border-laiton-clair bg-papier px-5 py-4">
