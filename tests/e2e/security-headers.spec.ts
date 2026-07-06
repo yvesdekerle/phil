@@ -14,10 +14,9 @@ test.describe("en-têtes de sécurité", () => {
   });
 
   test("le viewer de documents autorise le framing same-origin (Q30)", async ({ request }) => {
-    const res = await request.get(
-      "/api/documents/00000000-0000-0000-0000-000000000000/view",
-      { maxRedirects: 0 },
-    );
+    const res = await request.get("/api/documents/00000000-0000-0000-0000-000000000000/view", {
+      maxRedirects: 0,
+    });
     expect(res.headers()["x-frame-options"]).toBe("SAMEORIGIN");
     const csp = res.headers()["content-security-policy"] ?? "";
     expect(csp).toContain("frame-ancestors 'self'");

@@ -23,7 +23,7 @@ for (const line of readFileSync(join(process.cwd(), ".env.local"), "utf8").split
 }
 
 import { createClient } from "@supabase/supabase-js";
-import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
+import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import type { Database } from "../types/database";
 
 const BASE = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -133,7 +133,9 @@ async function main() {
     .from("trip_photos")
     .select("storage_path, thumb_path")
     .eq("trip_id", tripId);
-  const photoBlobs = (oldPhotos ?? []).flatMap((p) => [p.storage_path, p.thumb_path]).filter(Boolean) as string[];
+  const photoBlobs = (oldPhotos ?? [])
+    .flatMap((p) => [p.storage_path, p.thumb_path])
+    .filter(Boolean) as string[];
   if (photoBlobs.length) {
     await admin.storage.from("photos").remove(photoBlobs);
   }
@@ -374,7 +376,11 @@ async function main() {
       lat: -20.095,
       lng: 57.611,
       notes: "Demeure coloniale de 1859, vergers, distillerie — dégustation de rhums arrangés.",
-      meta: { cost: 12, cost_currency: "EUR", external_url: "https://www.chateaulabourdonnais.com" },
+      meta: {
+        cost: 12,
+        cost_currency: "EUR",
+        external_url: "https://www.chateaulabourdonnais.com",
+      },
     },
     {
       type: "ACTIVITY",
@@ -384,7 +390,8 @@ async function main() {
       loc: "Plage de Mont Choisy",
       lat: -20.044,
       lng: 57.561,
-      notes: "La plus longue plage du nord, filaos et sable blanc — parfaite pour finir la journée.",
+      notes:
+        "La plus longue plage du nord, filaos et sable blanc — parfaite pour finir la journée.",
     },
     {
       type: "ACTIVITY",
@@ -501,7 +508,8 @@ async function main() {
   const ideas = [
     {
       title: "Sous-marin Blue Safari (vrai sous-marin à -35 m)",
-      description: "Unique au monde : descente à 35 m, épave du Star Hope. Aucune compétence requise — diplôme remis à la fin ! ~110 €/pers. https://blue-safari.com",
+      description:
+        "Unique au monde : descente à 35 m, épave du Star Hope. Aucune compétence requise — diplôme remis à la fin ! ~110 €/pers. https://blue-safari.com",
       loc: "Trou aux Biches",
       lat: -20.036,
       lng: 57.545,
@@ -510,7 +518,8 @@ async function main() {
     },
     {
       title: "💎 Snorkeling avec les cachalots (Lokal Adventures)",
-      description: "Un des rares spots au monde où c'est légal et encadré. Novembre = transition, à confirmer 48h avant selon les sightings. 150-250 €/pers.",
+      description:
+        "Un des rares spots au monde où c'est légal et encadré. Novembre = transition, à confirmer 48h avant selon les sightings. 150-250 €/pers.",
       loc: "Au large de Tamarin",
       lat: -20.35,
       lng: 57.32,
@@ -519,7 +528,8 @@ async function main() {
     },
     {
       title: "Plongée à l'Île Ronde — requins (plongeurs confirmés)",
-      description: "LE spot avancé : requins gris, raies aigle, visibilité 35-50 m. Open Water minimum — pour Mathieu et Yves seulement ?",
+      description:
+        "LE spot avancé : requins gris, raies aigle, visibilité 35-50 m. Open Water minimum — pour Mathieu et Yves seulement ?",
       loc: "Cap Malheureux",
       lat: -19.984,
       lng: 57.614,
@@ -528,7 +538,8 @@ async function main() {
     },
     {
       title: "Sortie pêche traditionnelle avec un pêcheur (5h du matin)",
-      description: "Embarquer sur une pirogue, pêche au filet, déjeuner du poisson à la maison. 40-70 €/pers.",
+      description:
+        "Embarquer sur une pirogue, pêche au filet, déjeuner du poisson à la maison. 40-70 €/pers.",
       loc: "Tamarin",
       lat: -20.3253,
       lng: 57.3708,
@@ -546,7 +557,8 @@ async function main() {
     },
     {
       title: "Kitesurf initiation au Morne",
-      description: "Le spot mythique — lagon plat, vent régulier en novembre. Cours débutant ~90 €.",
+      description:
+        "Le spot mythique — lagon plat, vent régulier en novembre. Cours débutant ~90 €.",
       loc: "Le Morne",
       lat: -20.456,
       lng: 57.309,
@@ -662,32 +674,131 @@ async function main() {
     },
   ]);
   await admin.from("candidate_votes").insert([
-    { candidate_id: candChosen, user_id: yvesId, rating: 2, comment: "Le lagon au réveil, on ne va pas se mentir." },
+    {
+      candidate_id: candChosen,
+      user_id: yvesId,
+      rating: 2,
+      comment: "Le lagon au réveil, on ne va pas se mentir.",
+    },
     { candidate_id: candChosen, user_id: ids.amelie, rating: 2, comment: null },
-    { candidate_id: candChosen, user_id: ids.julie, rating: 2, comment: "Les kayaks inclus font la différence." },
+    {
+      candidate_id: candChosen,
+      user_id: ids.julie,
+      rating: 2,
+      comment: "Les kayaks inclus font la différence.",
+    },
     { candidate_id: candChosen, user_id: ids.mathieu, rating: 1, comment: "Un peu cher mais ok." },
-    { candidate_id: candOpen, user_id: ids.mathieu, rating: 2, comment: "270 € d'écart quand même !" },
+    {
+      candidate_id: candOpen,
+      user_id: ids.mathieu,
+      rating: 2,
+      comment: "270 € d'écart quand même !",
+    },
     { candidate_id: candOpen, user_id: ids.amelie, rating: 1, comment: null },
-    { candidate_id: candOpen, user_id: ids.chloe, rating: -1, comment: "Sans vue mer, bof pour la dernière semaine." },
-    { candidate_id: candRejected, user_id: ids.audrey, rating: -1, comment: "Coupés en deux appartements, non." },
+    {
+      candidate_id: candOpen,
+      user_id: ids.chloe,
+      rating: -1,
+      comment: "Sans vue mer, bof pour la dernière semaine.",
+    },
+    {
+      candidate_id: candRejected,
+      user_id: ids.audrey,
+      rating: -1,
+      comment: "Coupés en deux appartements, non.",
+    },
   ]);
   console.log("✓ 3 hébergements candidats (retenu / en lice / écarté) + avis pondérés");
 
   // ————— Valise (checklist) + à-emporter par activité —————
   await admin.from("checklist_items").insert([
-    { trip_id: tripId, section: "avant_depart", title: "Vérifier les passeports (6 mois après le retour)", done: true, created_by: yvesId },
-    { trip_id: tripId, section: "avant_depart", title: "Réserver le canyoning (encadrement obligatoire)", done: true, assigned_to: ids.mathieu, created_by: ids.mathieu },
-    { trip_id: tripId, section: "avant_depart", title: "Confirmer le catamaran 48h avant", assigned_to: ids.alexandre, created_by: yvesId },
-    { trip_id: tripId, section: "a_emporter", title: "Adaptateurs prise (type UK)", assigned_to: ids.audrey, created_by: ids.audrey },
-    { trip_id: tripId, section: "a_emporter", title: "Trousse à pharmacie du groupe", assigned_to: ids.chloe, created_by: ids.amelie, done: true },
-    { trip_id: tripId, section: "a_emporter", title: "Enceinte bluetooth", assigned_to: ids.amelie, created_by: ids.quentin },
-    { trip_id: tripId, section: "sur_place", title: "Récupérer les 2 voitures de location à l'aéroport", assigned_to: yvesId, created_by: yvesId },
-    { trip_id: tripId, section: "sur_place", title: "Acheter des cartes SIM locales (my.t ou Emtel)", created_by: ids.ade },
+    {
+      trip_id: tripId,
+      section: "avant_depart",
+      title: "Vérifier les passeports (6 mois après le retour)",
+      done: true,
+      created_by: yvesId,
+    },
+    {
+      trip_id: tripId,
+      section: "avant_depart",
+      title: "Réserver le canyoning (encadrement obligatoire)",
+      done: true,
+      assigned_to: ids.mathieu,
+      created_by: ids.mathieu,
+    },
+    {
+      trip_id: tripId,
+      section: "avant_depart",
+      title: "Confirmer le catamaran 48h avant",
+      assigned_to: ids.alexandre,
+      created_by: yvesId,
+    },
+    {
+      trip_id: tripId,
+      section: "a_emporter",
+      title: "Adaptateurs prise (type UK)",
+      assigned_to: ids.audrey,
+      created_by: ids.audrey,
+    },
+    {
+      trip_id: tripId,
+      section: "a_emporter",
+      title: "Trousse à pharmacie du groupe",
+      assigned_to: ids.chloe,
+      created_by: ids.amelie,
+      done: true,
+    },
+    {
+      trip_id: tripId,
+      section: "a_emporter",
+      title: "Enceinte bluetooth",
+      assigned_to: ids.amelie,
+      created_by: ids.quentin,
+    },
+    {
+      trip_id: tripId,
+      section: "sur_place",
+      title: "Récupérer les 2 voitures de location à l'aéroport",
+      assigned_to: yvesId,
+      created_by: yvesId,
+    },
+    {
+      trip_id: tripId,
+      section: "sur_place",
+      title: "Acheter des cartes SIM locales (my.t ou Emtel)",
+      created_by: ids.ade,
+    },
     // À emporter rattachés à une activité (PHIL-O05)
-    { trip_id: tripId, section: "a_emporter", title: "Masques et tubas (ou location sur place)", event_id: snorkelingId, created_by: ids.amelie },
-    { trip_id: tripId, section: "a_emporter", title: "Crème solaire reef-safe", event_id: snorkelingId, done: true, created_by: ids.chloe },
-    { trip_id: tripId, section: "a_emporter", title: "Chaussures de marche", event_id: morneId, created_by: yvesId },
-    { trip_id: tripId, section: "a_emporter", title: "2L d'eau par personne", event_id: morneId, created_by: ids.mathieu },
+    {
+      trip_id: tripId,
+      section: "a_emporter",
+      title: "Masques et tubas (ou location sur place)",
+      event_id: snorkelingId,
+      created_by: ids.amelie,
+    },
+    {
+      trip_id: tripId,
+      section: "a_emporter",
+      title: "Crème solaire reef-safe",
+      event_id: snorkelingId,
+      done: true,
+      created_by: ids.chloe,
+    },
+    {
+      trip_id: tripId,
+      section: "a_emporter",
+      title: "Chaussures de marche",
+      event_id: morneId,
+      created_by: yvesId,
+    },
+    {
+      trip_id: tripId,
+      section: "a_emporter",
+      title: "2L d'eau par personne",
+      event_id: morneId,
+      created_by: ids.mathieu,
+    },
   ]);
   console.log("✓ valise : 12 items (dont 4 rattachés au snorkeling et au Morne)");
 
@@ -725,17 +836,84 @@ async function main() {
       .from("expense_beneficiaries")
       .insert((e.beneficiaries ?? everyone).map((k) => ({ expense_id: id, user_id: ids[k] })));
   };
-  await addExpense({ title: "Vols Paris–Maurice (x7)", amount: 5530, category: "transport", paidBy: "yves", spentOn: "2026-06-12", beneficiaries: ["yves", "amelie", "alexandre", "audrey", "ade", "mathieu", "chloe"] });
-  await addExpense({ title: "Vols Julie & Quentin", amount: 1640, category: "transport", paidBy: "quentin", spentOn: "2026-06-20", beneficiaries: ["quentin", "julie"] });
-  await addExpense({ title: "Villa Les Filaos — 11 nuits", amount: 3300, category: "logement", paidBy: "mathieu", spentOn: "2026-07-01" });
-  await addExpense({ title: "Acompte villa Blue Bay", amount: 725, category: "logement", paidBy: "audrey", spentOn: "2026-07-02" });
-  await addExpense({ title: "Location 2 voitures (16 jours)", amount: 1240, category: "transport", paidBy: "yves", spentOn: "2026-11-05" });
-  await addExpense({ title: "Catamaran dauphins (bateau privatisé)", amount: 585, category: "activite", paidBy: "alexandre", spentOn: "2026-11-10", eventId: catamaranId });
-  await addExpense({ title: "Courses Super U Tamarin", amount: 8400, currency: "MUR", paidBy: "amelie", category: "courses", spentOn: "2026-11-06" });
-  await addExpense({ title: "Street food Divali", amount: 3150, currency: "MUR", paidBy: "quentin", category: "resto", spentOn: "2026-11-08" });
-  await addExpense({ title: "Dégustation rhumerie", amount: 135, category: "resto", paidBy: "ade", spentOn: "2026-11-11" });
+  await addExpense({
+    title: "Vols Paris–Maurice (x7)",
+    amount: 5530,
+    category: "transport",
+    paidBy: "yves",
+    spentOn: "2026-06-12",
+    beneficiaries: ["yves", "amelie", "alexandre", "audrey", "ade", "mathieu", "chloe"],
+  });
+  await addExpense({
+    title: "Vols Julie & Quentin",
+    amount: 1640,
+    category: "transport",
+    paidBy: "quentin",
+    spentOn: "2026-06-20",
+    beneficiaries: ["quentin", "julie"],
+  });
+  await addExpense({
+    title: "Villa Les Filaos — 11 nuits",
+    amount: 3300,
+    category: "logement",
+    paidBy: "mathieu",
+    spentOn: "2026-07-01",
+  });
+  await addExpense({
+    title: "Acompte villa Blue Bay",
+    amount: 725,
+    category: "logement",
+    paidBy: "audrey",
+    spentOn: "2026-07-02",
+  });
+  await addExpense({
+    title: "Location 2 voitures (16 jours)",
+    amount: 1240,
+    category: "transport",
+    paidBy: "yves",
+    spentOn: "2026-11-05",
+  });
+  await addExpense({
+    title: "Catamaran dauphins (bateau privatisé)",
+    amount: 585,
+    category: "activite",
+    paidBy: "alexandre",
+    spentOn: "2026-11-10",
+    eventId: catamaranId,
+  });
+  await addExpense({
+    title: "Courses Super U Tamarin",
+    amount: 8400,
+    currency: "MUR",
+    paidBy: "amelie",
+    category: "courses",
+    spentOn: "2026-11-06",
+  });
+  await addExpense({
+    title: "Street food Divali",
+    amount: 3150,
+    currency: "MUR",
+    paidBy: "quentin",
+    category: "resto",
+    spentOn: "2026-11-08",
+  });
+  await addExpense({
+    title: "Dégustation rhumerie",
+    amount: 135,
+    category: "resto",
+    paidBy: "ade",
+    spentOn: "2026-11-11",
+  });
   // Remboursement déjà réglé (PHIL-P04)
-  await addExpense({ title: "Remboursement", amount: 650, category: "autre", paidBy: "julie", spentOn: "2026-07-03", beneficiaries: ["yves"], isSettlement: true });
+  await addExpense({
+    title: "Remboursement",
+    amount: 650,
+    category: "autre",
+    paidBy: "julie",
+    spentOn: "2026-07-03",
+    beneficiaries: ["yves"],
+    isSettlement: true,
+  });
   console.log("✓ budget : 9 dépenses (EUR + MUR, 5 catégories) + 1 remboursement");
 
   // ————— Journal de bord —————
@@ -817,31 +995,57 @@ async function main() {
   console.log("✓ fiches d'urgence : 3 remplies");
 
   // ————— Documents PDF (générés) + rattachements —————
-  const docs: { title: string; lines: string[]; category: string; fileName: string; eventId?: string }[] = [
+  const docs: {
+    title: string;
+    lines: string[];
+    category: string;
+    fileName: string;
+    eventId?: string;
+  }[] = [
     {
       title: "Billets d'avion — groupe (x7)",
-      lines: ["Air France AF 934 - 4 nov 2026, 20h05", "Paris CDG - Maurice SSR", "Dossier : AF6KYZ", "Passagers : Yves, Amelie, Alexandre, Audrey, Ade, Mathieu, Chloe"],
+      lines: [
+        "Air France AF 934 - 4 nov 2026, 20h05",
+        "Paris CDG - Maurice SSR",
+        "Dossier : AF6KYZ",
+        "Passagers : Yves, Amelie, Alexandre, Audrey, Ade, Mathieu, Chloe",
+      ],
       category: "ticket",
       fileName: "billets-avion-groupe.pdf",
       eventId: volAllerId,
     },
     {
       title: "Voucher catamaran dauphins",
-      lines: ["Catamaran Cruises Mauritius", "10 nov 2026 — 8h00, ponton de Black River", "9 personnes — bateau privatisé", "Référence : CCM-2026-1187"],
+      lines: [
+        "Catamaran Cruises Mauritius",
+        "10 nov 2026 — 8h00, ponton de Black River",
+        "9 personnes — bateau privatisé",
+        "Référence : CCM-2026-1187",
+      ],
       category: "voucher",
       fileName: "voucher-catamaran.pdf",
       eventId: catamaranId,
     },
     {
       title: "Billets — Jardin de Pamplemousses (x9)",
-      lines: ["SSR Botanical Garden — entrees adultes x9", "13 nov 2026 - 9h30", "Reference : SSRBG-44120", "Presenter ce billet a l'entree (QR simule)"],
+      lines: [
+        "SSR Botanical Garden — entrees adultes x9",
+        "13 nov 2026 - 9h30",
+        "Reference : SSRBG-44120",
+        "Presenter ce billet a l'entree (QR simule)",
+      ],
       category: "ticket",
       fileName: "billets-jardin-pamplemousses.pdf",
       eventId: pamplemoussesId,
     },
     {
       title: "Assurance voyage groupe",
-      lines: ["Contrat multirisque voyage", "Du 4 au 22 novembre 2026 — 9 assurés", "Police n° AXA-TRV-90112", "Assistance 24/7 : +33 1 55 92 40 00"],
+      lines: [
+        "Contrat multirisque voyage",
+        "Du 4 au 22 novembre 2026 — 9 assurés",
+        "Police n° AXA-TRV-90112",
+        "Assistance 24/7 : +33 1 55 92 40 00",
+      ],
       category: "insurance",
       fileName: "assurance-voyage-groupe.pdf",
     },
@@ -875,16 +1079,60 @@ async function main() {
       await admin.from("event_documents").insert({ event_id: d.eventId, document_id: documentId });
     }
   }
-  console.log(`✓ ${docs.length} documents PDF (billets avion, voucher, assurance, billets Pamplemousses) attachés`);
+  console.log(
+    `✓ ${docs.length} documents PDF (billets avion, voucher, assurance, billets Pamplemousses) attachés`,
+  );
 
   // ————— Photos (basse qualité, décision O10) —————
   const photoDefs = [
-    { seed: "maurice-lagon", caption: "Le lagon depuis la villa", by: "yves", eventId: null, lat: -20.3253, lng: 57.3708 },
-    { seed: "maurice-morne", caption: "Sommet du Morne — ça valait le réveil", by: "mathieu", eventId: morneId, lat: -20.456, lng: 57.311 },
-    { seed: "maurice-dauphins", caption: "Ils étaient une vingtaine autour du bateau 🐬", by: "alexandre", eventId: catamaranId, lat: -20.345, lng: 57.35 },
-    { seed: "maurice-chamarel", caption: "Terres des 7 couleurs", by: "amelie", eventId: null, lat: -20.4245, lng: 57.374 },
-    { seed: "maurice-plage", caption: "Tamarin au couchant", by: "julie", eventId: null, lat: -20.3266, lng: 57.3705 },
-    { seed: "maurice-marche", caption: "Le marché de Port Louis, dholl puri en main", by: "chloe", eventId: null, lat: -20.159, lng: 57.5028 },
+    {
+      seed: "maurice-lagon",
+      caption: "Le lagon depuis la villa",
+      by: "yves",
+      eventId: null,
+      lat: -20.3253,
+      lng: 57.3708,
+    },
+    {
+      seed: "maurice-morne",
+      caption: "Sommet du Morne — ça valait le réveil",
+      by: "mathieu",
+      eventId: morneId,
+      lat: -20.456,
+      lng: 57.311,
+    },
+    {
+      seed: "maurice-dauphins",
+      caption: "Ils étaient une vingtaine autour du bateau 🐬",
+      by: "alexandre",
+      eventId: catamaranId,
+      lat: -20.345,
+      lng: 57.35,
+    },
+    {
+      seed: "maurice-chamarel",
+      caption: "Terres des 7 couleurs",
+      by: "amelie",
+      eventId: null,
+      lat: -20.4245,
+      lng: 57.374,
+    },
+    {
+      seed: "maurice-plage",
+      caption: "Tamarin au couchant",
+      by: "julie",
+      eventId: null,
+      lat: -20.3266,
+      lng: 57.3705,
+    },
+    {
+      seed: "maurice-marche",
+      caption: "Le marché de Port Louis, dholl puri en main",
+      by: "chloe",
+      eventId: null,
+      lat: -20.159,
+      lng: 57.5028,
+    },
   ];
   let photosOk = 0;
   for (const p of photoDefs) {

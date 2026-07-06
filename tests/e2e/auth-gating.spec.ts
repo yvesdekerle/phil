@@ -31,10 +31,9 @@ test.describe("visiteur non connecté", () => {
   }) => {
     // Le proxy (PHIL-C02) intercepte avant le handler : redirection vers /login,
     // le document n'est jamais servi. Défense en profondeur.
-    const res = await request.get(
-      "/api/documents/00000000-0000-0000-0000-000000000000/view",
-      { maxRedirects: 0 },
-    );
+    const res = await request.get("/api/documents/00000000-0000-0000-0000-000000000000/view", {
+      maxRedirects: 0,
+    });
     expect(res.status()).toBe(307);
     expect(res.headers().location).toContain("/login");
   });

@@ -52,8 +52,7 @@ async function main() {
     .single();
   const { data: allUsers } = await admin.auth.admin.listUsers();
   const yvesId =
-    maurice?.created_by ??
-    allUsers.users.find((u) => u.email === "yves.dekerle@gmail.com")?.id;
+    maurice?.created_by ?? allUsers.users.find((u) => u.email === "yves.dekerle@gmail.com")?.id;
   if (!yvesId) {
     throw new Error("Compte Yves introuvable (ni via Maurice 2026 ni via l'email).");
   }
@@ -186,7 +185,8 @@ async function main() {
       addr: "Grensásvegur 18, 108 Reykjavík",
       lat: 64.1334,
       lng: -21.8919,
-      notes: "Hôtel *** au cœur de Reykjavík. Réception 24/7 — prévenir de l'arrivée tardive (+354 419 0200). Réf. 5942727680.",
+      notes:
+        "Hôtel *** au cœur de Reykjavík. Réception 24/7 — prévenir de l'arrivée tardive (+354 419 0200). Réf. 5942727680.",
       meta: { platform: "booking", booking_reference: "5942727680", guests: 2 },
     },
     {
@@ -198,7 +198,8 @@ async function main() {
       addr: "Móar, route 51, Hvalfjörður",
       lat: 64.3208,
       lng: -22.0734,
-      notes: "Cottage en bois sur le promontoire, vue Akrafjall. Code porte 6169. Dîner au Bónus d'Akranes.",
+      notes:
+        "Cottage en bois sur le promontoire, vue Akrafjall. Code porte 6169. Dîner au Bónus d'Akranes.",
       meta: { platform: "airbnb", booking_reference: "6169", guests: 2 },
     },
     {
@@ -246,7 +247,8 @@ async function main() {
       addr: "Borgarhöfn, route 1",
       lat: 64.2942,
       lng: -15.7919,
-      notes: "Ferme face au glacier, idéale entre Zodiac et glacier hike. Code 2899. Check-in strict 16h–19h.",
+      notes:
+        "Ferme face au glacier, idéale entre Zodiac et glacier hike. Code 2899. Check-in strict 16h–19h.",
       meta: { platform: "booking", booking_reference: "2899", guests: 2 },
     },
     {
@@ -258,7 +260,8 @@ async function main() {
       addr: "Landbrot, route 204 · 8 km à l'ouest de Klaustur",
       lat: 63.7644,
       lng: -17.9952,
-      notes: "Maison d'hôtes dans la lande noire du Skaftáreldahraun. Code 9827. Restaurant Systrakaffi.",
+      notes:
+        "Maison d'hôtes dans la lande noire du Skaftáreldahraun. Code 9827. Restaurant Systrakaffi.",
       meta: { platform: "booking", booking_reference: "9827", guests: 2 },
     },
     {
@@ -282,7 +285,8 @@ async function main() {
       addr: "Úthlíð, route 37 · Biskupstungur",
       lat: 64.2603,
       lng: -20.5572,
-      notes: "Hub stratégique pour solstice et Kerlingarfjöll. Bains privatifs 24/24. Check-in sur place.",
+      notes:
+        "Hub stratégique pour solstice et Kerlingarfjöll. Bains privatifs 24/24. Check-in sur place.",
       meta: { platform: "booking", booking_reference: "UTHLID", guests: 2 },
     },
     {
@@ -307,7 +311,8 @@ async function main() {
       loc: "Reykjavík",
       lat: 64.1417,
       lng: -21.9266,
-      notes: "Montée au sommet du beffroi (1 200 ISK, vue 360°). Rue arc-en-ciel Skólavörðustígur, Harpa, Sun Voyager au bord de mer.",
+      notes:
+        "Montée au sommet du beffroi (1 200 ISK, vue 360°). Rue arc-en-ciel Skólavörðustígur, Harpa, Sun Voyager au bord de mer.",
       meta: { cost: 1200, cost_currency: "ISK" },
     },
     {
@@ -319,7 +324,8 @@ async function main() {
       addr: "Frakkastígur 26 A",
       lat: 64.142,
       lng: -21.9268,
-      notes: "Face à Hallgrímskirkja. Petites assiettes à partager : agneau, morue, betterave fumée. ~50-70 € à deux.",
+      notes:
+        "Face à Hallgrímskirkja. Petites assiettes à partager : agneau, morue, betterave fumée. ~50-70 € à deux.",
       meta: { cost: 60, cost_currency: "EUR" },
     },
     {
@@ -330,7 +336,8 @@ async function main() {
       loc: "Seltún · Krýsuvík",
       lat: 63.894,
       lng: -22.054,
-      notes: "Boue qui bout, vapeurs jaune-soufre, passerelles en bois. Boucle 45 min. Parking 750 ISK.",
+      notes:
+        "Boue qui bout, vapeurs jaune-soufre, passerelles en bois. Boucle 45 min. Parking 750 ISK.",
       meta: { cost: 750, cost_currency: "ISK" },
     },
 
@@ -354,7 +361,8 @@ async function main() {
       loc: "Akureyri",
       lat: 65.6835,
       lng: -18.0878,
-      notes: "Déjeuner sandwich rapide. Brynja pour une glace, Bláa Kannan pour un café. Disque 90 min gratuit.",
+      notes:
+        "Déjeuner sandwich rapide. Brynja pour une glace, Bláa Kannan pour un café. Disque 90 min gratuit.",
     },
     {
       type: "ACTIVITY",
@@ -364,7 +372,8 @@ async function main() {
       loc: "Goðafoss",
       lat: 65.6828,
       lng: -17.55,
-      notes: "Au Xe siècle, le chef païen Þorgeir y jeta les statues des anciens dieux après la christianisation. Gratuit, WC.",
+      notes:
+        "Au Xe siècle, le chef païen Þorgeir y jeta les statues des anciens dieux après la christianisation. Gratuit, WC.",
     },
 
     // — J4 · Mývatn —
@@ -376,7 +385,8 @@ async function main() {
       loc: "Skútustaðir · Dimmuborgir",
       lat: 65.5906,
       lng: -16.911,
-      notes: "Boucle 1h autour des faux cratères, puis sentier Kirkjuhringur 45 min à travers les « châteaux noirs » de lave figée. Gratuit.",
+      notes:
+        "Boucle 1h autour des faux cratères, puis sentier Kirkjuhringur 45 min à travers les « châteaux noirs » de lave figée. Gratuit.",
     },
     {
       type: "ACTIVITY",
@@ -386,7 +396,8 @@ async function main() {
       loc: "Hverfjall",
       lat: 65.6017,
       lng: -16.8747,
-      notes: "Ascension 40 min, panorama 360° sur Mývatn. Déjeuner sandwich au sommet. Parking 1 000 ISK.",
+      notes:
+        "Ascension 40 min, panorama 360° sur Mývatn. Déjeuner sandwich au sommet. Parking 1 000 ISK.",
       meta: { cost: 1000, cost_currency: "ISK" },
     },
     {
@@ -397,7 +408,8 @@ async function main() {
       loc: "Hverir + Krafla",
       lat: 65.6407,
       lng: -16.809,
-      notes: "Hverir : marmites de boue. Krafla : vue sur le cratère Víti turquoise (320 m). Parkings 1 200 + 800 ISK.",
+      notes:
+        "Hverir : marmites de boue. Krafla : vue sur le cratère Víti turquoise (320 m). Parkings 1 200 + 800 ISK.",
       meta: { cost: 2000, cost_currency: "ISK" },
     },
     {
@@ -408,7 +420,8 @@ async function main() {
       loc: "GeoSea · Húsavík",
       lat: 66.049,
       lng: -17.338,
-      notes: "Eau de mer chauffée, vue sur Skjálfandi — possibles baleines depuis le bain. Puis dîner à Skúlagarður.",
+      notes:
+        "Eau de mer chauffée, vue sur Skjálfandi — possibles baleines depuis le bain. Puis dîner à Skúlagarður.",
       meta: { cost: 12400, cost_currency: "ISK" },
     },
 
@@ -421,7 +434,8 @@ async function main() {
       loc: "Dettifoss — rive ouest (route 862)",
       lat: 65.8145,
       lng: -16.385,
-      notes: "193 m³/s qui s'écrasent 44 m plus bas. Rive ouest = route bitume, point de vue plus net. Gratuit.",
+      notes:
+        "193 m³/s qui s'écrasent 44 m plus bas. Rive ouest = route bitume, point de vue plus net. Gratuit.",
     },
     {
       type: "ACTIVITY",
@@ -431,7 +445,8 @@ async function main() {
       loc: "Stuðlagil · route 923",
       lat: 65.109,
       lng: -15.326,
-      notes: "30 min de marche depuis le parking est. Orgues basaltiques verticales — révélé en 2009 par la baisse du barrage Kárahnjúkar. Parking 1 000 ISK.",
+      notes:
+        "30 min de marche depuis le parking est. Orgues basaltiques verticales — révélé en 2009 par la baisse du barrage Kárahnjúkar. Parking 1 000 ISK.",
       meta: { cost: 1000, cost_currency: "ISK" },
     },
     {
@@ -442,7 +457,8 @@ async function main() {
       loc: "Hengifoss · Lagarfljót",
       lat: 65.077,
       lng: -14.885,
-      notes: "2h30 aller-retour, dénivelé 250 m. Couches d'argile rouge entre les strates basaltiques. Parking 1 000 ISK.",
+      notes:
+        "2h30 aller-retour, dénivelé 250 m. Couches d'argile rouge entre les strates basaltiques. Parking 1 000 ISK.",
       meta: { cost: 1000, cost_currency: "ISK" },
     },
 
@@ -455,7 +471,8 @@ async function main() {
       loc: "Stokksnes · Vestrahorn",
       lat: 64.247,
       lng: -14.967,
-      notes: "Péage 1 200 ISK au Viking Café — 4×4 conseillé sur les derniers mètres. Marée basse = miroir géant sous le Vestrahorn.",
+      notes:
+        "Péage 1 200 ISK au Viking Café — 4×4 conseillé sur les derniers mètres. Marée basse = miroir géant sous le Vestrahorn.",
       meta: { cost: 1200, cost_currency: "ISK" },
     },
     {
@@ -466,7 +483,8 @@ async function main() {
       loc: "Diamond Beach · Fjallsárlón",
       lat: 64.044,
       lng: -16.176,
-      notes: "Blocs de glace détachés du glacier sur le sable noir. Préférer le parking côté est (gratuit). Puis Fjallsárlón, lagune plus intime, vue sur le Fjallsjökull.",
+      notes:
+        "Blocs de glace détachés du glacier sur le sable noir. Préférer le parking côté est (gratuit). Puis Fjallsárlón, lagune plus intime, vue sur le Fjallsjökull.",
     },
     {
       id: zodiacId,
@@ -477,7 +495,8 @@ async function main() {
       loc: "Zodiac Tour Jökulsárlón",
       lat: 64.0784,
       lng: -16.2306,
-      notes: "45 min entre les icebergs millénaires du Vatnajökull. Check-in 18h max au Ice Lagoon Truck (grand parking est). Combinaison + gilet fournis. Réf ICE-T127042699. icelagoon.com",
+      notes:
+        "45 min entre les icebergs millénaires du Vatnajökull. Check-in 18h max au Ice Lagoon Truck (grand parking est). Combinaison + gilet fournis. Réf ICE-T127042699. icelagoon.com",
       meta: { cost: 263.23, cost_currency: "EUR", booking_reference: "ICE-T127042699" },
     },
 
@@ -490,7 +509,8 @@ async function main() {
       loc: "Múlagljúfur Canyon",
       lat: 63.968,
       lng: -16.42,
-      notes: "Trail peu connu (2h A/R) qui s'ouvre sur un canyon spectaculaire avec cascade et arche basaltique. Sentier raide — bonnes chaussures. Piste 2 km, parking 1 000 ISK.",
+      notes:
+        "Trail peu connu (2h A/R) qui s'ouvre sur un canyon spectaculaire avec cascade et arche basaltique. Sentier raide — bonnes chaussures. Piste 2 km, parking 1 000 ISK.",
       meta: { cost: 1000, cost_currency: "ISK" },
     },
     {
@@ -503,7 +523,8 @@ async function main() {
       addr: "RDV Freysnes Orkan / Shell",
       lat: 63.990591,
       lng: -16.896465,
-      notes: "3h30 de marche guidée sur la langue glaciaire du Falljökull. Crevasses, moulins, séracs. Crampons + casque + piolet + chaussures fournis. 13h15 IMPÉRATIVE. Réf LGV-T127049569 · +354 894-1317.",
+      notes:
+        "3h30 de marche guidée sur la langue glaciaire du Falljökull. Crevasses, moulins, séracs. Crampons + casque + piolet + chaussures fournis. 13h15 IMPÉRATIVE. Réf LGV-T127049569 · +354 894-1317.",
       meta: { cost: 325.9, cost_currency: "EUR", booking_reference: "LGV-T127049569" },
     },
 
@@ -516,7 +537,8 @@ async function main() {
       loc: "Fjaðrárgljúfur",
       lat: 63.771,
       lng: -18.172,
-      notes: "100 m de profondeur. Sentier en crête 45 min A/R. Arriver tôt pour le site désert. Parking 1 000 ISK.",
+      notes:
+        "100 m de profondeur. Sentier en crête 45 min A/R. Arriver tôt pour le site désert. Parking 1 000 ISK.",
       meta: { cost: 1000, cost_currency: "ISK" },
     },
     {
@@ -527,7 +549,8 @@ async function main() {
       loc: "Vík · Reynisfjara",
       lat: 63.403,
       lng: -19.044,
-      notes: "Pause au café Skool Beans à Vík, puis grotte aux orgues basaltiques à l'ouest de Reynisfjara. ⚠️ sneaker waves. Parking 1 000 ISK.",
+      notes:
+        "Pause au café Skool Beans à Vík, puis grotte aux orgues basaltiques à l'ouest de Reynisfjara. ⚠️ sneaker waves. Parking 1 000 ISK.",
       meta: { cost: 1000, cost_currency: "ISK" },
     },
     {
@@ -538,7 +561,8 @@ async function main() {
       loc: "Dyrhólaey · Skógafoss",
       lat: 63.532,
       lng: -19.511,
-      notes: "Dyrhólaey : phare, arche, falaises, macareux (jumelles utiles). Puis Skógafoss — 60 m, 527 marches pour la vue plongeante. Parkings 750 + 1 000 ISK.",
+      notes:
+        "Dyrhólaey : phare, arche, falaises, macareux (jumelles utiles). Puis Skógafoss — 60 m, 527 marches pour la vue plongeante. Parkings 750 + 1 000 ISK.",
       meta: { cost: 1750, cost_currency: "ISK" },
     },
     {
@@ -549,7 +573,8 @@ async function main() {
       loc: "Seljalandsfoss",
       lat: 63.6156,
       lng: -19.9886,
-      notes: "On passe derrière la chute (poncho). Crochet par Gljúfrabúi si le temps le permet. Parking 1 000 ISK.",
+      notes:
+        "On passe derrière la chute (poncho). Crochet par Gljúfrabúi si le temps le permet. Parking 1 000 ISK.",
       meta: { cost: 1000, cost_currency: "ISK" },
     },
 
@@ -562,7 +587,8 @@ async function main() {
       loc: "Þingvellir",
       lat: 64.2559,
       lng: -21.13,
-      notes: "Plaques Amérique et Eurasie s'écartent de 2 cm/an. Ancien Alþingi (930), site UNESCO. Boucle 1h30 — gorge Almannagjá, chute Öxarárfoss, faille Silfra. Parking 1 000 ISK.",
+      notes:
+        "Plaques Amérique et Eurasie s'écartent de 2 cm/an. Ancien Alþingi (930), site UNESCO. Boucle 1h30 — gorge Almannagjá, chute Öxarárfoss, faille Silfra. Parking 1 000 ISK.",
       meta: { cost: 1000, cost_currency: "ISK" },
     },
     {
@@ -573,7 +599,8 @@ async function main() {
       loc: "Gullfoss",
       lat: 64.3271,
       lng: -20.1199,
-      notes: "Deux belvédères : le haut pour le panorama, le bas pour les embruns. Plokkfiskur au Gullfoss Kaffi. Gratuit, WC. Photo nocturne au solstice vers 23h30.",
+      notes:
+        "Deux belvédères : le haut pour le panorama, le bas pour les embruns. Plokkfiskur au Gullfoss Kaffi. Gratuit, WC. Photo nocturne au solstice vers 23h30.",
     },
     {
       type: "ACTIVITY",
@@ -583,7 +610,8 @@ async function main() {
       loc: "Geysir · Strokkur",
       lat: 64.3104,
       lng: -20.3024,
-      notes: "Strokkur souffle 20-30 m. Position : à 3 m du bassin côté ouest, vent dans le dos. Parking 1 000 ISK.",
+      notes:
+        "Strokkur souffle 20-30 m. Position : à 3 m du bassin côté ouest, vent dans le dos. Parking 1 000 ISK.",
       meta: { cost: 1000, cost_currency: "ISK" },
     },
 
@@ -596,11 +624,13 @@ async function main() {
       loc: "Hveradalir · Kerlingarfjöll",
       lat: 64.638,
       lng: -19.339,
-      notes: "F35 + F347 (4×4 obligatoire, vérifier road.is le matin). Boucle 7 km, 3h, +400 m : crête au-dessus de la « vallée des marmites », rhyolites orange & ocre. Pique-nique au sommet. Parking 1 000 ISK.",
+      notes:
+        "F35 + F347 (4×4 obligatoire, vérifier road.is le matin). Boucle 7 km, 3h, +400 m : crête au-dessus de la « vallée des marmites », rhyolites orange & ocre. Pique-nique au sommet. Parking 1 000 ISK.",
       meta: {
         cost: 1000,
         cost_currency: "ISK",
-        external_url: "https://www.alltrails.com/trail/iceland/southern/kerlingarfjoll-hveradalir-via-hveradalshnukur",
+        external_url:
+          "https://www.alltrails.com/trail/iceland/southern/kerlingarfjoll-hveradalir-via-hveradalshnukur",
       },
     },
 
@@ -613,7 +643,8 @@ async function main() {
       loc: "Kerið Crater",
       lat: 64.041,
       lng: -20.885,
-      notes: "Boucle facile autour du cratère (30 min) + descente jusqu'au lac. Roche rouge contrastant avec l'eau turquoise. 700 ISK/pers.",
+      notes:
+        "Boucle facile autour du cratère (30 min) + descente jusqu'au lac. Roche rouge contrastant avec l'eau turquoise. 700 ISK/pers.",
       meta: { cost: 1400, cost_currency: "ISK" },
     },
     {
@@ -624,7 +655,8 @@ async function main() {
       loc: "Háifoss · Granni",
       lat: 64.213,
       lng: -19.689,
-      notes: "Approche par la route 32 puis piste 332 (cabossée mais OK en CR-V à 30 km/h). Sentier court 15 min sur l'arête est. Granni, sa voisine, tombe juste à côté. Pique-nique. Gratuit, 4×4.",
+      notes:
+        "Approche par la route 32 puis piste 332 (cabossée mais OK en CR-V à 30 km/h). Sentier court 15 min sur l'arête est. Granni, sa voisine, tombe juste à côté. Pique-nique. Gratuit, 4×4.",
     },
     {
       type: "ACTIVITY",
@@ -634,7 +666,8 @@ async function main() {
       loc: "Gjáin",
       lat: 64.187,
       lng: -19.654,
-      notes: "Petit canyon avec sept cascades, rivière qui serpente entre les blocs basaltiques. On y descend en 5 min. Piste 327. Gratuit.",
+      notes:
+        "Petit canyon avec sept cascades, rivière qui serpente entre les blocs basaltiques. On y descend en 5 min. Piste 327. Gratuit.",
     },
 
     // — J12 · Landmannalaugar · Bláhnúkur —
@@ -646,9 +679,11 @@ async function main() {
       loc: "Landmannalaugar",
       lat: 63.984,
       lng: -19.061,
-      notes: "Approche par le NORD (F26 → F208 N, pas de gué dangereux). Boucle 8,5 km, +500 m, difficulté ★★. Bláhnúkur (945 m), Brennisteinsalda (rhyolite multicolore), champ de lave Laugahraun. Vérifier la météo.",
+      notes:
+        "Approche par le NORD (F26 → F208 N, pas de gué dangereux). Boucle 8,5 km, +500 m, difficulté ★★. Bláhnúkur (945 m), Brennisteinsalda (rhyolite multicolore), champ de lave Laugahraun. Vérifier la météo.",
       meta: {
-        external_url: "https://www.alltrails.com/trail/iceland/southern/landmannalaugar-blahnukur-brennisteinsalda",
+        external_url:
+          "https://www.alltrails.com/trail/iceland/southern/landmannalaugar-blahnukur-brennisteinsalda",
       },
     },
     {
@@ -659,7 +694,8 @@ async function main() {
       loc: "Sources chaudes de Landmannalaugar",
       lat: 63.9855,
       lng: -19.064,
-      notes: "Source à côté du camp — bain dans la rivière chaude (35-40 °C) après 5h de marche. Maillot + sandales obligatoires (passage sur passerelle de bois).",
+      notes:
+        "Source à côté du camp — bain dans la rivière chaude (35-40 °C) après 5h de marche. Maillot + sandales obligatoires (passage sur passerelle de bois).",
     },
 
     // — J13 · Blue Lagoon · dernier souffle —
@@ -671,7 +707,8 @@ async function main() {
       loc: "Blue Lagoon · Grindavík",
       lat: 63.8804,
       lng: -22.4495,
-      notes: "Session pré-réservée. Eau silicate à 38 °C, masque silice inclus. 2h30 de pause bien méritée avant le vol. Vestiaires, douches, casiers fournis.",
+      notes:
+        "Session pré-réservée. Eau silicate à 38 °C, masque silice inclus. 2h30 de pause bien méritée avant le vol. Vestiaires, douches, casiers fournis.",
       meta: { cost: 300, cost_currency: "EUR" },
     },
     {
@@ -683,7 +720,8 @@ async function main() {
       addr: "Víkurbraut 62, 240 Grindavík",
       lat: 63.833,
       lng: -22.437,
-      notes: "Café végétarien à 5 min du Blue Lagoon. Soupes maison, salades généreuses, gâteaux locaux. Bien plus tranquille que le terminal.",
+      notes:
+        "Café végétarien à 5 min du Blue Lagoon. Soupes maison, salades généreuses, gâteaux locaux. Bien plus tranquille que le terminal.",
     },
   ];
 
@@ -709,7 +747,9 @@ async function main() {
       throw new Error(`Événement "${e.title}" : ${error.message}`);
     }
   }
-  console.log(`✓ ${events.length} événements (2 vols, 10 logements, ${events.length - 12} activités)`);
+  console.log(
+    `✓ ${events.length} événements (2 vols, 10 logements, ${events.length - 12} activités)`,
+  );
 
   // ————— Budget : EUR (primaire) + ISK (secondaire), partagé à deux —————
   const both = ["yves", "adelaide"];
@@ -745,56 +785,289 @@ async function main() {
   };
 
   // Transports
-  await addExpense({ title: "Vol Transavia TO 7480 · Orly → KEF", amount: 477, category: "transport", spentOn: "2026-04-02" });
-  await addExpense({ title: "Vol Transavia — frais de changement", amount: 240, category: "transport", spentOn: "2026-05-10" });
-  await addExpense({ title: "Vol EasyJet EJU 4628 · KEF → CDG", amount: 246.69, category: "transport", paidBy: "adelaide", spentOn: "2026-04-02" });
-  await addExpense({ title: "Voiture Honda CR-V — Lotus (12 j)", amount: 2000, category: "transport", spentOn: "2026-06-14" });
+  await addExpense({
+    title: "Vol Transavia TO 7480 · Orly → KEF",
+    amount: 477,
+    category: "transport",
+    spentOn: "2026-04-02",
+  });
+  await addExpense({
+    title: "Vol Transavia — frais de changement",
+    amount: 240,
+    category: "transport",
+    spentOn: "2026-05-10",
+  });
+  await addExpense({
+    title: "Vol EasyJet EJU 4628 · KEF → CDG",
+    amount: 246.69,
+    category: "transport",
+    paidBy: "adelaide",
+    spentOn: "2026-04-02",
+  });
+  await addExpense({
+    title: "Voiture Honda CR-V — Lotus (12 j)",
+    amount: 2000,
+    category: "transport",
+    spentOn: "2026-06-14",
+  });
   // Logements
-  await addExpense({ title: "Reykjavík — ODDSSON Midtown", amount: 177.04, category: "logement", spentOn: "2026-03-01" });
-  await addExpense({ title: "Akranes — Móar Cottage", amount: 103.7, category: "logement", paidBy: "adelaide", spentOn: "2026-03-01" });
-  await addExpense({ title: "Mývatn — Staðarhóll Guesthouse", amount: 103.68, category: "logement", spentOn: "2026-03-01" });
-  await addExpense({ title: "Garður — Skúlagarður Country Hotel", amount: 166.46, category: "logement", spentOn: "2026-03-01" });
-  await addExpense({ title: "Eiðar — Hjartarstaðir Guesthouse", amount: 222.22, category: "logement", paidBy: "adelaide", spentOn: "2026-03-01" });
-  await addExpense({ title: "Borgarhöfn — Lækjarhús Farm", amount: 296.51, category: "logement", spentOn: "2026-03-01" });
-  await addExpense({ title: "Klaustur — Landbrot Guesthouse", amount: 261.36, category: "logement", spentOn: "2026-03-01" });
-  await addExpense({ title: "Hella — Hekla Cabin 3", amount: 200, category: "logement", paidBy: "adelaide", spentOn: "2026-03-01" });
-  await addExpense({ title: "Cercle d'Or — Úthlíð Cottages (2 n.)", amount: 421, category: "logement", spentOn: "2026-03-01" });
-  await addExpense({ title: "Þjórsárdalur — Ásólfsstaðir-Miðhóll (2 n.)", amount: 500, category: "logement", spentOn: "2026-03-01" });
+  await addExpense({
+    title: "Reykjavík — ODDSSON Midtown",
+    amount: 177.04,
+    category: "logement",
+    spentOn: "2026-03-01",
+  });
+  await addExpense({
+    title: "Akranes — Móar Cottage",
+    amount: 103.7,
+    category: "logement",
+    paidBy: "adelaide",
+    spentOn: "2026-03-01",
+  });
+  await addExpense({
+    title: "Mývatn — Staðarhóll Guesthouse",
+    amount: 103.68,
+    category: "logement",
+    spentOn: "2026-03-01",
+  });
+  await addExpense({
+    title: "Garður — Skúlagarður Country Hotel",
+    amount: 166.46,
+    category: "logement",
+    spentOn: "2026-03-01",
+  });
+  await addExpense({
+    title: "Eiðar — Hjartarstaðir Guesthouse",
+    amount: 222.22,
+    category: "logement",
+    paidBy: "adelaide",
+    spentOn: "2026-03-01",
+  });
+  await addExpense({
+    title: "Borgarhöfn — Lækjarhús Farm",
+    amount: 296.51,
+    category: "logement",
+    spentOn: "2026-03-01",
+  });
+  await addExpense({
+    title: "Klaustur — Landbrot Guesthouse",
+    amount: 261.36,
+    category: "logement",
+    spentOn: "2026-03-01",
+  });
+  await addExpense({
+    title: "Hella — Hekla Cabin 3",
+    amount: 200,
+    category: "logement",
+    paidBy: "adelaide",
+    spentOn: "2026-03-01",
+  });
+  await addExpense({
+    title: "Cercle d'Or — Úthlíð Cottages (2 n.)",
+    amount: 421,
+    category: "logement",
+    spentOn: "2026-03-01",
+  });
+  await addExpense({
+    title: "Þjórsárdalur — Ásólfsstaðir-Miðhóll (2 n.)",
+    amount: 500,
+    category: "logement",
+    spentOn: "2026-03-01",
+  });
   // Activités & excursions
-  await addExpense({ title: "Zodiac Jökulsárlón", amount: 263.23, category: "activite", spentOn: "2026-05-02", eventId: zodiacId });
-  await addExpense({ title: "Glacier Discovery Skaftafell", amount: 325.9, category: "activite", paidBy: "adelaide", spentOn: "2026-05-02", eventId: glacierId });
-  await addExpense({ title: "Blue Lagoon (2 entrées)", amount: 300, category: "activite", spentOn: "2026-05-05" });
-  await addExpense({ title: "GeoSea Húsavík — bains marins (2 pax)", amount: 100, category: "activite", spentOn: "2026-06-16" });
-  await addExpense({ title: "Kerið — entrée cratère (2 pax)", amount: 9.75, category: "activite", spentOn: "2026-06-23" });
+  await addExpense({
+    title: "Zodiac Jökulsárlón",
+    amount: 263.23,
+    category: "activite",
+    spentOn: "2026-05-02",
+    eventId: zodiacId,
+  });
+  await addExpense({
+    title: "Glacier Discovery Skaftafell",
+    amount: 325.9,
+    category: "activite",
+    paidBy: "adelaide",
+    spentOn: "2026-05-02",
+    eventId: glacierId,
+  });
+  await addExpense({
+    title: "Blue Lagoon (2 entrées)",
+    amount: 300,
+    category: "activite",
+    spentOn: "2026-05-05",
+  });
+  await addExpense({
+    title: "GeoSea Húsavík — bains marins (2 pax)",
+    amount: 100,
+    category: "activite",
+    spentOn: "2026-06-16",
+  });
+  await addExpense({
+    title: "Kerið — entrée cratère (2 pax)",
+    amount: 9.75,
+    category: "activite",
+    spentOn: "2026-06-23",
+  });
   // Vie sur place (essence & courses en ISK pour le double affichage)
-  await addExpense({ title: "Essence (Orkan / N1 / KEF)", amount: 42210, currency: "ISK", category: "transport", spentOn: "2026-06-20" });
-  await addExpense({ title: "Courses (Bónus, Krónan, Krambúðin…)", amount: 65194, currency: "ISK", paidBy: "adelaide", category: "courses", spentOn: "2026-06-17" });
-  await addExpense({ title: "Restaurants & cafés", amount: 470, category: "resto", spentOn: "2026-06-19" });
-  await addExpense({ title: "Parkings (Parka, EasyPark, Bílastæði)", amount: 110, category: "autre", spentOn: "2026-06-22" });
+  await addExpense({
+    title: "Essence (Orkan / N1 / KEF)",
+    amount: 42210,
+    currency: "ISK",
+    category: "transport",
+    spentOn: "2026-06-20",
+  });
+  await addExpense({
+    title: "Courses (Bónus, Krónan, Krambúðin…)",
+    amount: 65194,
+    currency: "ISK",
+    paidBy: "adelaide",
+    category: "courses",
+    spentOn: "2026-06-17",
+  });
+  await addExpense({
+    title: "Restaurants & cafés",
+    amount: 470,
+    category: "resto",
+    spentOn: "2026-06-19",
+  });
+  await addExpense({
+    title: "Parkings (Parka, EasyPark, Bílastæði)",
+    amount: 110,
+    category: "autre",
+    spentOn: "2026-06-22",
+  });
   console.log("✓ budget : 23 dépenses (EUR + ISK, 5 catégories) — total ≈ 7 742 €");
 
   // ————— Valise (checklist Yves & Adélaïde) —————
   await admin.from("checklist_items").insert([
     // Avant le départ — papiers
-    { trip_id: tripId, section: "avant_depart", title: "Cartes d'identité en cours de validité", done: true, assigned_to: yvesId, created_by: yvesId },
-    { trip_id: tripId, section: "avant_depart", title: "Permis de conduire (F-roads = 4×4)", done: true, assigned_to: yvesId, created_by: yvesId },
-    { trip_id: tripId, section: "avant_depart", title: "Réservations imprimées (vols, voiture, logements)", assigned_to: adeId, created_by: yvesId },
-    { trip_id: tripId, section: "avant_depart", title: "Email confirmation Zodiac + Glacier Discovery", done: true, assigned_to: yvesId, created_by: yvesId },
-    { trip_id: tripId, section: "avant_depart", title: "Confirmer assurance GRAVEL + SABLE (Lotus)", assigned_to: yvesId, created_by: yvesId },
+    {
+      trip_id: tripId,
+      section: "avant_depart",
+      title: "Cartes d'identité en cours de validité",
+      done: true,
+      assigned_to: yvesId,
+      created_by: yvesId,
+    },
+    {
+      trip_id: tripId,
+      section: "avant_depart",
+      title: "Permis de conduire (F-roads = 4×4)",
+      done: true,
+      assigned_to: yvesId,
+      created_by: yvesId,
+    },
+    {
+      trip_id: tripId,
+      section: "avant_depart",
+      title: "Réservations imprimées (vols, voiture, logements)",
+      assigned_to: adeId,
+      created_by: yvesId,
+    },
+    {
+      trip_id: tripId,
+      section: "avant_depart",
+      title: "Email confirmation Zodiac + Glacier Discovery",
+      done: true,
+      assigned_to: yvesId,
+      created_by: yvesId,
+    },
+    {
+      trip_id: tripId,
+      section: "avant_depart",
+      title: "Confirmer assurance GRAVEL + SABLE (Lotus)",
+      assigned_to: yvesId,
+      created_by: yvesId,
+    },
     // À emporter
-    { trip_id: tripId, section: "a_emporter", title: "Masque de nuit opaque — soleil de minuit", done: true, assigned_to: adeId, created_by: adeId },
-    { trip_id: tripId, section: "a_emporter", title: "Hardshell imperméable Gore-Tex", assigned_to: yvesId, created_by: yvesId },
-    { trip_id: tripId, section: "a_emporter", title: "T-shirts mérinos (manches longues + courtes)", assigned_to: adeId, created_by: adeId },
-    { trip_id: tripId, section: "a_emporter", title: "Chaussures de rando imperméables tige haute", assigned_to: yvesId, created_by: yvesId },
-    { trip_id: tripId, section: "a_emporter", title: "Sandales légères (gué de Landmannalaugar)", assigned_to: adeId, created_by: yvesId },
-    { trip_id: tripId, section: "a_emporter", title: "Maillot de bain (hot pots & bains géothermiques)", done: true, assigned_to: yvesId, created_by: adeId },
-    { trip_id: tripId, section: "a_emporter", title: "Power bank 10 000 mAh + câbles", assigned_to: yvesId, created_by: yvesId },
-    { trip_id: tripId, section: "a_emporter", title: "Appareil photo + 2 batteries + carte SD 64 Go", assigned_to: adeId, created_by: adeId },
-    { trip_id: tripId, section: "a_emporter", title: "Crème solaire SPF 50 + stick lèvres", assigned_to: adeId, created_by: adeId },
+    {
+      trip_id: tripId,
+      section: "a_emporter",
+      title: "Masque de nuit opaque — soleil de minuit",
+      done: true,
+      assigned_to: adeId,
+      created_by: adeId,
+    },
+    {
+      trip_id: tripId,
+      section: "a_emporter",
+      title: "Hardshell imperméable Gore-Tex",
+      assigned_to: yvesId,
+      created_by: yvesId,
+    },
+    {
+      trip_id: tripId,
+      section: "a_emporter",
+      title: "T-shirts mérinos (manches longues + courtes)",
+      assigned_to: adeId,
+      created_by: adeId,
+    },
+    {
+      trip_id: tripId,
+      section: "a_emporter",
+      title: "Chaussures de rando imperméables tige haute",
+      assigned_to: yvesId,
+      created_by: yvesId,
+    },
+    {
+      trip_id: tripId,
+      section: "a_emporter",
+      title: "Sandales légères (gué de Landmannalaugar)",
+      assigned_to: adeId,
+      created_by: yvesId,
+    },
+    {
+      trip_id: tripId,
+      section: "a_emporter",
+      title: "Maillot de bain (hot pots & bains géothermiques)",
+      done: true,
+      assigned_to: yvesId,
+      created_by: adeId,
+    },
+    {
+      trip_id: tripId,
+      section: "a_emporter",
+      title: "Power bank 10 000 mAh + câbles",
+      assigned_to: yvesId,
+      created_by: yvesId,
+    },
+    {
+      trip_id: tripId,
+      section: "a_emporter",
+      title: "Appareil photo + 2 batteries + carte SD 64 Go",
+      assigned_to: adeId,
+      created_by: adeId,
+    },
+    {
+      trip_id: tripId,
+      section: "a_emporter",
+      title: "Crème solaire SPF 50 + stick lèvres",
+      assigned_to: adeId,
+      created_by: adeId,
+    },
     // Sur place
-    { trip_id: tripId, section: "sur_place", title: "Télécharger cartes Google Maps offline (Highlands)", done: true, assigned_to: yvesId, created_by: yvesId },
-    { trip_id: tripId, section: "sur_place", title: "Faire le plein avant les F-roads (pas de station après F35)", assigned_to: yvesId, created_by: yvesId },
-    { trip_id: tripId, section: "sur_place", title: "Vérifier road.is chaque matin (état des pistes)", assigned_to: adeId, created_by: yvesId },
+    {
+      trip_id: tripId,
+      section: "sur_place",
+      title: "Télécharger cartes Google Maps offline (Highlands)",
+      done: true,
+      assigned_to: yvesId,
+      created_by: yvesId,
+    },
+    {
+      trip_id: tripId,
+      section: "sur_place",
+      title: "Faire le plein avant les F-roads (pas de station après F35)",
+      assigned_to: yvesId,
+      created_by: yvesId,
+    },
+    {
+      trip_id: tripId,
+      section: "sur_place",
+      title: "Vérifier road.is chaque matin (état des pistes)",
+      assigned_to: adeId,
+      created_by: yvesId,
+    },
   ]);
   console.log("✓ valise : 17 items (papiers, à-emporter, sur place)");
 
@@ -802,7 +1075,8 @@ async function main() {
   const ideas = [
     {
       title: "Reykjadalur — rivière chaude (1h de marche)",
-      description: "Vallée fumante au-dessus de Hveragerði : on se baigne dans une rivière naturellement chaude. Plan B si le F35 vers Kerlingarfjöll est fermé.",
+      description:
+        "Vallée fumante au-dessus de Hveragerði : on se baigne dans une rivière naturellement chaude. Plan B si le F35 vers Kerlingarfjöll est fermé.",
       loc: "Hveragerði",
       lat: 64.019,
       lng: -21.203,
@@ -811,7 +1085,8 @@ async function main() {
     },
     {
       title: "Seljavallalaug — piscine 1923 sous l'Eyjafjallajökull",
-      description: "Une des plus vieilles piscines d'Islande, cachée dans une vallée près de Skógar. Eau tiède, ambiance hors du temps.",
+      description:
+        "Une des plus vieilles piscines d'Islande, cachée dans une vallée près de Skógar. Eau tiède, ambiance hors du temps.",
       loc: "Près de Skógar",
       lat: 63.5665,
       lng: -19.6094,
@@ -820,7 +1095,8 @@ async function main() {
     },
     {
       title: "Fríðheimar — dîner sous serre à tomates",
-      description: "Restaurant dans une serre géothermique (route 35) : soupe de tomates à volonté, pâtes fraîches. Sur la route du Cercle d'Or.",
+      description:
+        "Restaurant dans une serre géothermique (route 35) : soupe de tomates à volonté, pâtes fraîches. Sur la route du Cercle d'Or.",
       loc: "Reykholt",
       lat: 64.1667,
       lng: -20.2333,
@@ -829,7 +1105,8 @@ async function main() {
     },
     {
       title: "Þórsmörk via F249 — vallée entre trois glaciers",
-      description: "Plan B si Landmannalaugar (F26/F208) est impraticable. Rando du Valahnúkur, panorama sur Eyjafjallajökull et Mýrdalsjökull.",
+      description:
+        "Plan B si Landmannalaugar (F26/F208) est impraticable. Rando du Valahnúkur, panorama sur Eyjafjallajökull et Mýrdalsjökull.",
       loc: "Þórsmörk",
       lat: 63.6833,
       lng: -19.5167,

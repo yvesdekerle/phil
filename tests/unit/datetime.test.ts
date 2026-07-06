@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { TripEvent } from "@/lib/events/types";
 import { eventDayKey, eventTime, groupEventsByDay } from "@/lib/events/datetime";
+import type { TripEvent } from "@/lib/events/types";
 
 /**
  * Fuseaux horaires (PHIL-F09) — la règle du projet : stocker en UTC, afficher

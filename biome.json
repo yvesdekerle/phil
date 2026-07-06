@@ -31,6 +31,15 @@
     }
   },
   "files": {
-    "includes": ["app/**", "components/**", "lib/**", "types/**", "*.ts", "*.json"]
+    "includes": [
+      "app/**",
+      "components/**",
+      "lib/**",
+      "types/**",
+      "scripts/**",
+      "tests/**",
+      "*.ts",
+      "*.json"
+    ]
   }
 }

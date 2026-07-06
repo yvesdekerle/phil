@@ -27,7 +27,7 @@ Le développement suit un cycle strict par ticket, piloté par `TODO.md` (source
 
 1. Reprendre le ticket `[~]` en cours s'il existe, sinon le premier `[ ]` dans l'ordre des phases (les tickets hors phases attendent la fin de projet ou une demande explicite)
 2. Marquer `[~]`, annoncer le plan avant de coder, implémenter
-3. `npm run build` + `npm run lint` doivent passer avant toute suite
+3. `pnpm build` + `pnpm lint` (Biome) doivent passer avant toute suite
 4. Marquer `[x]` avec la date + note éventuelle dans TODO.md
 5. **Un commit par ticket** (TODO.md inclus dans le commit) : `feat(scope): description (PHIL-XXX)`
 6. Les travaux découverts en cours de route deviennent de **nouveaux tickets** dans TODO.md, jamais du code non tracé
@@ -53,7 +53,8 @@ Le développement suit un cycle strict par ticket, piloté par `TODO.md` (source
 | Dates | date-fns + date-fns-tz | Manipulations et fuseaux horaires |
 | Vérification RLS | Script manuel (SQL ou tsx) | Sécurité des politiques d'accès, sans CI |
 
-**Différé volontairement (voir Backlog dans TODO.md)** : Sentry (les logs Vercel suffisent pour un cercle d'amis), CI GitHub Actions (Vercel builde déjà chaque push/PR), tests automatisés Vitest/Playwright (à introduire quand le projet ou l'équipe grossit).
+**En place** : CI GitHub Actions (`.github/workflows/ci.yml` — lint/type-check/build/tests + Dependabot), tests Vitest (unitaires) + Playwright (e2e surfaces non authentifiées), script `verify-rls`.
+**Différé volontairement (voir Backlog dans TODO.md)** : Sentry (les logs Vercel + le logger structuré `lib/observability/logger.ts` suffisent pour un cercle d'amis) ; base Supabase de test dédiée (le job CI `rls` s'active dès que ses secrets sont fournis).
 
 ## Pourquoi ces choix
 
@@ -67,7 +68,7 @@ Le développement suit un cycle strict par ticket, piloté par `TODO.md` (source
 
 **Vercel + domaine `.vercel.app`** : HTTPS gratuit (requis pour WebAuthn), déploiement par git push, free tier suffisant. Domaine perso ajoutable plus tard sans rien casser. URL prévue : `phil.vercel.app` (ou variante si déjà prise, par exemple `phil-app.vercel.app`, `getphil.vercel.app`, `heyphil.vercel.app`).
 
-**Pas de CI ni de Sentry en v1** : Vercel builde et déploie chaque push avec preview par branche ; les erreurs de type sortent au build, le lint tourne dans l'IDE et en local. Les utilisateurs sont des amis qui signalent les bugs directement. Ces outils seront ajoutés quand un second contributeur arrive ou que la base de tests le justifie.
+**CI présente, pas de Sentry en v1** : une CI GitHub Actions (lint Biome, type-check, build, tests) tourne à chaque push, en complément du build/preview Vercel par branche. Sentry reste différé : les logs Vercel et le logger structuré suffisent pour un cercle d'amis ; il sera ajouté quand un second contributeur arrive ou que le volume le justifie.
 
 ## Identité visuelle et ton
 
@@ -211,27 +212,34 @@ UPSTASH_REDIS_REST_TOKEN=
 
 ## Commandes utiles
 
+Le projet utilise **pnpm** (voir `packageManager` dans `package.json`) et **Biome**
+(lint + format) — pas npm/ESLint/Prettier.
+
 ```bash
 # Dev local
-npm run dev
+pnpm dev
 
 # Build (obligatoire avant chaque commit de ticket)
-npm run build
+pnpm build
 
-# Lint et type-check (obligatoire avant chaque commit de ticket)
-npm run lint
-npm run type-check
+# Lint (Biome) et type-check (obligatoire avant chaque commit de ticket)
+pnpm lint
+pnpm type-check
+
+# Tests
+pnpm test          # unitaires (Vitest)
+pnpm test:e2e      # e2e (Playwright, surfaces non authentifiées)
 
 # Vérification RLS (après toute migration touchant aux politiques)
-npx tsx scripts/verify-rls.ts
+pnpm verify:rls
 
 # Migrations Supabase
-npx supabase migration new <nom>
-npx supabase db push
-npx supabase db reset   # Local seulement
+pnpm exec supabase migration new <nom>
+pnpm db:push
+pnpm exec supabase db reset   # Local seulement
 
 # Génération des types depuis le schéma (projet distant linké, pas de stack locale)
-npm run db:types
+pnpm db:types
 ```
 
 ## Ressources

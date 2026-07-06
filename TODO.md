@@ -879,13 +879,93 @@ SVG animés en CSS, composant `<PhilLoader />` réutilisable, tirage aléatoire,
 
 ---
 
+## Catégorie R — Audit & durcissement (audit du 2026-07-06 — voir `AUDIT-REPORT.md`)
+
+Audit complet noté **12,4/20** (1 🔴, 9 🟠). Findings tracés ci-dessous ; preuves détaillées dans `AUDIT-REPORT.md`.
+
+### [x] PHIL-R01 — 🟠 Bump `next` (8 CVE *high*) + `@types/node` *(fait le 2026-07-06)*
+`next` 16.2.2 → **16.2.10** (`~16.2.10`, fin du pin exact), `@types/node` → 24, `packageManager: pnpm@10.33.0`. Audit prod : **16 vulns dont 8 *high* → 2 *moderate***.
+
+### [x] PHIL-R02 — 🟠 Invitation liée à l'email invité *(fait le 2026-07-06)*
+`acceptInvitation` refuse un compte connecté dont l'email ≠ `invited_email` (le lien n'est plus une capacité anonyme). Clé i18n `invitations.msg.wrongAccount` (fr/en/es).
+
+### [x] PHIL-R03 — 🟠 Logging des échecs (documents / viewer / audit) *(fait le 2026-07-06)*
+`logger.error/warn` sur création de document (Zod + insert), viewer 502, `vault/audit.ts` (console→logger structuré). Le « bug d'hier soir » devient reconstituable (audit D17).
+
+### [x] PHIL-R04 — 🟠 Purge Storage à la suppression de voyage *(fait le 2026-07-06)*
+`deleteTrip` purge les blobs `documents`/`photos`/`covers` avant suppression (best-effort tracé) — plus d'orphelins (rétention RGPD + quota Free).
+
+### [x] PHIL-R05 — 🔴 Compte fantôme « Voyageur parti » — intégrité des soldes *(fait le 2026-07-06)*
+Supprimer un compte réattribue ses données de groupe (dépenses `paid_by`/`created_by`, bénéficiaires, photos, sondages, checklist, notes, journal, candidats hébergement) à un profil système AVANT la cascade sur `profiles`, au lieu de les effacer et fausser silencieusement les soldes du tricount de l'équipage. `lib/account/deletion.ts`. Collisions de bénéficiaires rares écartées. **⚠️ À tester sur comptes jetables avant confiance** (code monétaire, non exécuté ici). Suite : R18 (nom lisible).
+
+### [x] PHIL-R06 — 🟡 `import "server-only"` sur les modules service-role *(fait le 2026-07-06)*
+`admin.ts`, `resend.ts`, `vault-session.ts`, `vault/audit.ts`, `deletion.ts`. `secret.ts` exclu (testé sous Vitest → `server-only` y jetterait). Paquet `server-only` ajouté.
+
+### [x] PHIL-R07 — 🟡 Périmètre Biome + not-found + code mort + doc *(fait le 2026-07-06)*
+Biome couvre `scripts/` + `tests/` (7 fichiers reformatés), `app/not-found.tsx` (i18n, ton Phil), `tab-placeholder.tsx` supprimé, `CLAUDE.md` réaligné (pnpm/Biome/CI/tests réels).
+
+### [x] PHIL-R14 — 🟡 Tests unitaires du filigrane *(fait le 2026-07-06)*
+`tests/unit/watermark.test.ts` : `canWatermark` (truth table), `watermarkPdf` (%PDF + pages préservées), `watermarkImage` (PNG→PDF).
+
+### [~] PHIL-R08 — 🟠 Verrou colonnes OWNER-only de `trips` (escalade EDITOR) *(écrit le 2026-07-06)*
+Migration `20260706120000_trips_owner_only_columns.sql` — trigger `BEFORE UPDATE` bloquant la modification de `public_token`/`archived_at`/`email_alias`/`created_by` par un EDITOR (service role bypasse). **À appliquer : `pnpm db:push` puis `pnpm verify:rls`.**
+
+### [ ] PHIL-R09 — 🟠 SSRF via l'optimiseur d'images *(décision requise)*
+Restreindre `images.remotePatterns` à une allowlist ferme le SSRF aveugle mais **casse la couverture de voyage par URL collée** (D02). Trancher : URL libres (risque résiduel) OU allowlist Google/Supabase + couverture par upload uniquement.
+
+### [ ] PHIL-R10 — 🟠 Chiffrement `document_number` vs réalignement doc *(décision requise)*
+`CLAUDE.md` promet le « chiffrement » du coffre ; le n° de pièce est stocké en clair. Soit chiffrer au repos (effort L), soit réaligner la promesse sur le modèle réel (RLS + bucket privé + audit + SSE infra).
+
+### [ ] PHIL-R11 — 🟠 Séparer la base Supabase dev/prod *(infra)*
+Un seul projet Supabase sert dev/preview/prod (contient les vrais documents d'identité). Provisionner un 2e projet + clés par environnement Vercel.
+
+### [ ] PHIL-R12 — 🟠 Rate limiting sur les endpoints coûteux *(infra Upstash)*
+Brancher `rateLimitOk` sur `geo/search`, `import-reservation` (Gemini), invitations. Le code est inerte sans Upstash → provisionner Upstash puis câbler.
+
+### [ ] PHIL-R13 — 🟠 Tests des zones critiques restantes
+`vault-session` (HMAC — exporter `sign/verify` pour testabilité) et intégration `deleteAccount` sur base jetable. (Filigrane fait en R14.)
+
+### [~] PHIL-R15 — 🟡 messages FR en dur → `t()` *(en cours le 2026-07-07)*
+Fait : `events/[eventId]/actions.ts` (11 messages + 2 `console.log` d'audit → `logger.info`, ferme aussi le PII B12 de ce fichier), `vault/[documentId]/actions.ts` (12 messages → `documents.msg.*`), message partagé « capitaine ou éditeur » → clé unique `events.msg.createDenied` (events/new ×3). NB : R15 s'est révélé plus large que l'estimation d'audit (~30 chaînes, pas 20). Reste : `import/actions.ts` (2, dont le createDenied — ajouter `getT`), `journal-actions.ts` (2, ajouter `getT`), `note-actions.ts` (2), `budget/actions.ts` (« Date invalide. » — schéma au niveau module, à déplacer dans la fonction), `vault/new/actions.ts` (3, ajouter `getT`).
+
+### [x] PHIL-R16 — 🟡 États d'erreur DB sur les pages listes *(fait le 2026-07-07)*
+`vault/page.tsx` et `documents/page.tsx` : une erreur DB est loggée puis levée (boundary `error.tsx`) au lieu d'être masquée en « coffre vide » trompeur. Reste `lib/offline/sync.ts` (contexte offline, dégradation acceptable — à traiter avec la résilience offline).
+
+### [ ] PHIL-R17 — 🟡 Activer le job CI `rls`
+Fournir un projet Supabase de test + secrets GitHub pour que le job `rls` de `.github/workflows/ci.yml` s'exécute réellement.
+
+### [ ] PHIL-R18 — 🟡 Profil « Voyageur parti » lisible dans les soldes
+Suite de R05 : rendre le profil système lisible (colonne `is_system` + policy SELECT) pour afficher son nom dans les soldes plutôt qu'un libellé de repli.
+
+### [ ] PHIL-R19 — 🟡 Perf : `React.cache` + Suspense + bundle i18n
+`React.cache()` sur `getUser`/profil/trip, `<Suspense>` météo/OSRM + `loading.tsx` sous `trips/[tripId]`, purger le catalogue i18n trilingue du bundle client (~150 Ko).
+
+### [ ] PHIL-R20 — 🟡 Cohérence transversale (refactors)
+Type `ActionState` unique, standard formulaire `useActionState`, `<TimezoneSelect>` partagé, routage des dates via un module, palette JS centralisée (audit A9).
+
+---
+
+## Catégorie S — Restauration & courses (à traiter APRÈS l'audit)
+
+### [~] PHIL-S01 — Onglet « Miam » : repas & liste de courses *(migration écrite le 2026-07-07)*
+Nouvel onglet du voyage **Miam** (FR) / **Yummy** (EN) / **Ñam** (ES) regroupant deux usages partagés dans le même onglet :
+- **Repas** : planifier qui cuisine quoi et quand (petit-déj / déj / dîner par jour), idées de plats, notes.
+- **Liste de courses** : liste partagée d'articles cochables (qui achète quoi), autonome ou dérivée des repas.
+> Migration écrite : `20260707100000_trip_meals_shopping.sql` (tables `trip_meals` + `shopping_items`, RLS collaboratif calqué sur la checklist, temps réel). **À appliquer (`pnpm db:push` + `pnpm db:types`) avant l'UI** — le code type-safe a besoin des types régénérés. Reste : onglet dans `trip-tabs.tsx`, i18n, sections repas/courses, temps réel, et ajout de `created_by` à la réattribution fantôme (R18).
+
+### [~] PHIL-S02 — Supermarchés & commerces repérés sur la carte *(migration écrite le 2026-07-07)*
+Sur la carte du voyage, épingler les **supermarchés / commerces repérés** par le groupe (nom, position, note courte — « ouvert tard », « bon marché »). Un membre repère un magasin → point sur la carte, visible de tous. Couche POI légère, distincte des événements. Lien possible avec la liste de courses (S01).
+> Migration écrite : `20260707100100_trip_places.sql` (table `trip_places`, catégories SUPERMARKET/SHOP/PHARMACY/MARKET/OTHER, lat/lng, RLS participant, temps réel). **À appliquer (`pnpm db:push` + `pnpm db:types`) avant l'UI.** Reste : couche de marqueurs sur `trip-map.tsx`, formulaire d'ajout, i18n, réattribution fantôme (R18).
+
+---
+
 ## Backlog — différé volontairement (ne pas traiter sans demande explicite)
 
 **Outillage retiré du P0** (à réintroduire quand un second contributeur arrive ou que le projet grossit) :
 
 - **PHIL-A06 — Monitoring Sentry** : installer `@sentry/nextjs`, configurer le DSN, breadcrumbs sur les actions critiques. Différé : les logs Vercel + retours directs des amis suffisent en v1.
-- **PHIL-A07 — Pipeline CI GitHub Actions** : lint, type-check, tests et build sur chaque PR. Différé : Vercel builde déjà chaque push et chaque PR avec preview.
-- **PHIL-A08 — Tests automatisés (Vitest + Playwright)** : tests unitaires et end-to-end sur les parcours principaux. Différé : la vérification RLS manuelle (PHIL-B12) couvre le risque principal ; les tests auto viendront avec la maturité du projet.
+- ~~**PHIL-A07 — Pipeline CI GitHub Actions**~~ **Réalisé** (`.github/workflows/ci.yml` : lint Biome / type-check / build / tests + Dependabot). Sorti du backlog.
+- ~~**PHIL-A08 — Tests automatisés (Vitest + Playwright)**~~ **Réalisé** (Vitest unitaires + Playwright e2e ; couverture + `verify-rls`). Sorti du backlog.
 
 **Idées v2+** (dépoussiéré le 2026-07-04 — la majorité de la liste initiale est réalisée : carte N01, météo O02/O03, checklist N11+N03, dépenses N09+O09, iCal N02, OCR MRZ N04, mode Aujourd'hui N10, galerie photos O10, templates N03, import par fichier O01 ; le chat intégré est **écarté** — WhatsApp garde ce rôle, décision du 2026-07-04. Import email, devises et partage public sont devenus les tickets P01-P03) :
 

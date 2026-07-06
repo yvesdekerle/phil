@@ -103,8 +103,22 @@ async function main(): Promise<void> {
       method: "POST",
       headers: { ...as(jwtA), Prefer: "return=minimal" },
       body: JSON.stringify([
-        { id: tripX, name: "X", destination: "D", start_date: "2026-08-01", end_date: "2026-08-02", created_by: idA },
-        { id: tripY, name: "Y", destination: "D", start_date: "2026-09-01", end_date: "2026-09-02", created_by: idA },
+        {
+          id: tripX,
+          name: "X",
+          destination: "D",
+          start_date: "2026-08-01",
+          end_date: "2026-08-02",
+          created_by: idA,
+        },
+        {
+          id: tripY,
+          name: "Y",
+          destination: "D",
+          start_date: "2026-09-01",
+          end_date: "2026-09-02",
+          created_by: idA,
+        },
       ]),
     });
     check("A crée deux voyages (insert + trigger OWNER)", r.status === 201);
@@ -112,7 +126,13 @@ async function main(): Promise<void> {
     r = await fetch(`${BASE}/rest/v1/trips`, {
       method: "POST",
       headers: as(jwtA),
-      body: JSON.stringify({ name: "Z", destination: "D", start_date: "2026-08-01", end_date: "2026-08-02", created_by: idB }),
+      body: JSON.stringify({
+        name: "Z",
+        destination: "D",
+        start_date: "2026-08-01",
+        end_date: "2026-08-02",
+        created_by: idB,
+      }),
     });
     check("A ne peut pas créer un voyage au nom de B", r.status === 401 || r.status === 403);
 
@@ -157,7 +177,15 @@ async function main(): Promise<void> {
     r = await fetch(`${BASE}/rest/v1/trip_events`, {
       method: "POST",
       headers: { ...as(jwtA), Prefer: "return=minimal" },
-      body: JSON.stringify({ id: eventA, trip_id: tripX, type: "ACTIVITY", title: "Plongée", starts_at: "2026-08-01T09:00:00Z", timezone: "Indian/Mauritius", created_by: idA }),
+      body: JSON.stringify({
+        id: eventA,
+        trip_id: tripX,
+        type: "ACTIVITY",
+        title: "Plongée",
+        starts_at: "2026-08-01T09:00:00Z",
+        timezone: "Indian/Mauritius",
+        created_by: idA,
+      }),
     });
     check("A (OWNER) crée un événement", r.status === 201);
 
@@ -166,7 +194,14 @@ async function main(): Promise<void> {
     r = await fetch(`${BASE}/rest/v1/trip_events`, {
       method: "POST",
       headers: as(jwtB),
-      body: JSON.stringify({ trip_id: tripX, type: "ACTIVITY", title: "P", starts_at: "2026-08-01T10:00:00Z", timezone: "UTC", created_by: idB }),
+      body: JSON.stringify({
+        trip_id: tripX,
+        type: "ACTIVITY",
+        title: "P",
+        starts_at: "2026-08-01T10:00:00Z",
+        timezone: "UTC",
+        created_by: idB,
+      }),
     });
     check("B (VIEWER) ne peut pas créer d'événement", r.status === 401 || r.status === 403);
 
@@ -180,7 +215,15 @@ async function main(): Promise<void> {
     r = await fetch(`${BASE}/rest/v1/trip_events`, {
       method: "POST",
       headers: { ...as(jwtB), Prefer: "return=minimal" },
-      body: JSON.stringify({ id: eventB, trip_id: tripX, type: "LODGING", title: "Hôtel", starts_at: "2026-08-01T14:00:00Z", timezone: "UTC", created_by: idB }),
+      body: JSON.stringify({
+        id: eventB,
+        trip_id: tripX,
+        type: "LODGING",
+        title: "Hôtel",
+        starts_at: "2026-08-01T14:00:00Z",
+        timezone: "UTC",
+        created_by: idB,
+      }),
     });
     check("B (EDITOR) crée un événement", r.status === 201);
 
@@ -188,7 +231,10 @@ async function main(): Promise<void> {
       method: "DELETE",
       headers: { ...as(jwtB), Prefer: "return=representation" },
     });
-    check("B (EDITOR) ne peut pas supprimer l'événement de A", ((await r.json()) as unknown[]).length === 0);
+    check(
+      "B (EDITOR) ne peut pas supprimer l'événement de A",
+      ((await r.json()) as unknown[]).length === 0,
+    );
 
     r = await fetch(`${BASE}/rest/v1/trip_events?id=eq.${eventB}`, {
       method: "DELETE",
@@ -210,7 +256,16 @@ async function main(): Promise<void> {
     r = await fetch(`${BASE}/rest/v1/documents`, {
       method: "POST",
       headers: { ...as(jwtA), Prefer: "return=minimal" },
-      body: JSON.stringify({ id: vaultDoc, owner_id: idA, scope: "VAULT", file_name: "passeport.pdf", mime_type: "application/pdf", size_bytes: 1000, storage_path: `verify/${vaultDoc}.pdf`, category: "passport" }),
+      body: JSON.stringify({
+        id: vaultDoc,
+        owner_id: idA,
+        scope: "VAULT",
+        file_name: "passeport.pdf",
+        mime_type: "application/pdf",
+        size_bytes: 1000,
+        storage_path: `verify/${vaultDoc}.pdf`,
+        category: "passport",
+      }),
     });
     check("A crée un doc VAULT", r.status === 201);
 
@@ -240,7 +295,10 @@ async function main(): Promise<void> {
       headers: { ...as(jwtB), Prefer: "return=representation" },
       body: JSON.stringify({ file_name: "pirate.pdf" }),
     });
-    check("Règle 5 : B ne peut pas modifier le doc de A", ((await r.json()) as unknown[]).length === 0);
+    check(
+      "Règle 5 : B ne peut pas modifier le doc de A",
+      ((await r.json()) as unknown[]).length === 0,
+    );
 
     r = await fetch(`${BASE}/rest/v1/document_shares?document_id=eq.${vaultDoc}`, {
       method: "DELETE",
@@ -318,7 +376,17 @@ async function main(): Promise<void> {
     await fetch(`${BASE}/rest/v1/documents`, {
       method: "POST",
       headers: { ...as(jwtA), Prefer: "return=minimal" },
-      body: JSON.stringify({ id: tripDoc, owner_id: idA, scope: "TRIP", trip_id: tripX, file_name: "billets.pdf", mime_type: "application/pdf", size_bytes: 1000, storage_path: `verify/${tripDoc}.pdf`, category: "ticket" }),
+      body: JSON.stringify({
+        id: tripDoc,
+        owner_id: idA,
+        scope: "TRIP",
+        trip_id: tripX,
+        file_name: "billets.pdf",
+        mime_type: "application/pdf",
+        size_bytes: 1000,
+        storage_path: `verify/${tripDoc}.pdf`,
+        category: "ticket",
+      }),
     });
     check(
       "Règle 2 : B (participant) voit le doc TRIP",
@@ -328,13 +396,27 @@ async function main(): Promise<void> {
     r = await fetch(`${BASE}/rest/v1/documents`, {
       method: "POST",
       headers: as(jwtB),
-      body: JSON.stringify({ owner_id: idB, scope: "TRIP", trip_id: tripX, file_name: "x.pdf", mime_type: "application/pdf", size_bytes: 1, storage_path: `verify/x-${idB}.pdf` }),
+      body: JSON.stringify({
+        owner_id: idB,
+        scope: "TRIP",
+        trip_id: tripX,
+        file_name: "x.pdf",
+        mime_type: "application/pdf",
+        size_bytes: 1,
+        storage_path: `verify/x-${idB}.pdf`,
+      }),
     });
     check("B (VIEWER) ne peut pas uploader dans le voyage", r.status === 401 || r.status === 403);
 
     // ================= nettoyage =================
-    await fetch(`${BASE}/rest/v1/documents?id=eq.${vaultDoc}`, { method: "DELETE", headers: as(jwtA) });
-    await fetch(`${BASE}/rest/v1/trips?id=in.(${tripX},${tripY})`, { method: "DELETE", headers: as(jwtA) });
+    await fetch(`${BASE}/rest/v1/documents?id=eq.${vaultDoc}`, {
+      method: "DELETE",
+      headers: as(jwtA),
+    });
+    await fetch(`${BASE}/rest/v1/trips?id=in.(${tripX},${tripY})`, {
+      method: "DELETE",
+      headers: as(jwtA),
+    });
   } finally {
     await deleteUser(idA);
     await deleteUser(idB);
