@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { IdeaCard } from "@/components/ideas/idea-card";
+import type { MapMarker } from "@/components/map/trip-map";
+import { TripMapLazy } from "@/components/map/trip-map-lazy";
 import { RealtimeRefresh } from "@/components/realtime-refresh";
 import { SearchForm } from "@/components/search-form";
 import { Button } from "@/components/ui/button";
@@ -31,7 +33,7 @@ export default async function TripIdeasPage({
   }
   const t = await getT();
 
-  const [{ data: ideasData }, { data: me }] = await Promise.all([
+  const [{ data: ideasData }, { data: me }, { data: lodgings }] = await Promise.all([
     supabase
       .from("trip_ideas")
       .select(
@@ -46,9 +48,52 @@ export default async function TripIdeasPage({
       .eq("trip_id", tripId)
       .eq("user_id", user.id)
       .single(),
+    supabase
+      .from("trip_events")
+      .select("id, title, location_lat, location_lng")
+      .eq("trip_id", tripId)
+      .eq("type", "LODGING")
+      .not("location_lat", "is", null)
+      .order("starts_at", { ascending: true }),
   ]);
 
   const canPropose = me?.role === "OWNER" || me?.role === "EDITOR";
+
+  // PHIL-Q37c : carte des idées géolocalisées + logements, distances depuis le 1er logement
+  const locatedIdeas = (ideasData ?? []).filter(
+    (i) => i.location_lat != null && i.location_lng != null,
+  );
+  const refLodging = (lodgings ?? [])[0];
+  const distanceFrom = refLodging
+    ? {
+        lat: refLodging.location_lat as number,
+        lng: refLodging.location_lng as number,
+        label: refLodging.title,
+      }
+    : null;
+  const mapMarkers: MapMarker[] = [
+    ...(lodgings ?? []).map(
+      (l): MapMarker => ({
+        id: l.id,
+        lat: l.location_lat as number,
+        lng: l.location_lng as number,
+        title: l.title,
+        subtitle: t("map.lodging"),
+        color: "#3f6e5a",
+        house: true,
+      }),
+    ),
+    ...locatedIdeas.map(
+      (i): MapMarker => ({
+        id: i.id,
+        lat: i.location_lat as number,
+        lng: i.location_lng as number,
+        title: i.title,
+        subtitle: i.location_name ?? undefined,
+        color: "#6e1f2e",
+      }),
+    ),
+  ];
 
   let ideas: IdeaWithMeta[] = (ideasData ?? []).map((row) => {
     const votes = (row.idea_votes ?? []) as { user_id: string }[];
@@ -88,6 +133,11 @@ export default async function TripIdeasPage({
     <div className="flex flex-col gap-5">
       {/* PHIL-Q03 : votes en direct */}
       <RealtimeRefresh tables={["idea_votes"]} />
+
+      {mapMarkers.length > 0 ? (
+        <TripMapLazy markers={mapMarkers} distanceFrom={distanceFrom} heightClass="h-[24rem]" />
+      ) : null}
+
       <div className="flex items-center justify-between">
         <p className="text-sm text-encre-douce">{t("ideas.intro")}</p>
         {canPropose ? (
