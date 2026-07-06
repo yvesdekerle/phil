@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, MapPin, Trash2, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Trash2, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { useT } from "@/components/i18n/provider";
 import type { MapMarker } from "@/components/map/trip-map";
@@ -57,10 +57,8 @@ export function PhotosClient({
   const captionRef = useRef<HTMLInputElement>(null);
   const eventRef = useRef<HTMLSelectElement>(null);
 
-  // PHIL-Q12/Q14 : carte au-dessus de la grille, focus depuis une vignette
+  // PHIL-Q12/Q14 : carte des photos géolocalisées au-dessus de la grille
   const located = photos.filter((p) => p.lat !== null && p.lng !== null);
-  const [focusId, setFocusId] = useState<string | null>(null);
-  const mapSectionRef = useRef<HTMLDivElement>(null);
 
   // PHIL-Q02 : visionneuse
   const [lightbox, setLightbox] = useState<number | null>(null);
@@ -221,9 +219,8 @@ export function PhotosClient({
       {error ? <p className="text-sm text-bordeaux">{error}</p> : null}
 
       {located.length > 0 ? (
-        <div ref={mapSectionRef}>
+        <div>
           <TripMapLazy
-            focusId={focusId}
             markers={located.map(
               (p): MapMarker => ({
                 id: p.id,
@@ -275,23 +272,7 @@ export function PhotosClient({
                   {p.caption}
                 </p>
               ) : null}
-              <p className="flex items-center gap-1.5 text-[0.65rem] text-encre-douce/70">
-                {p.uploaderName}
-                {p.lat !== null && p.lng !== null ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setFocusId(p.id);
-                      mapSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-                    }}
-                    className="text-laiton hover:text-bordeaux"
-                    title={t("photos.viewOnMapTitle")}
-                    aria-label={t("photos.viewOnMapAria")}
-                  >
-                    <MapPin className="size-3.5" aria-hidden="true" />
-                  </button>
-                ) : null}
-              </p>
+              <p className="text-[0.65rem] text-encre-douce/70">{p.uploaderName}</p>
               {p.uploadedBy === myId || isOwner ? (
                 <button
                   type="button"
