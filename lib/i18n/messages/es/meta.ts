@@ -28,8 +28,11 @@ export const metaEs = {
     },
     suggestions: {
       title: "Tus compañeros de ruta",
-      invited: "Invitación enviada",
+      invited: "Enviada",
       inviteName: "Invitar a {name}",
+      add: "Añadir",
+      addFriend: "Añadir un amigo",
+      empty: "Todos tus amigos ya están a bordo — añade nuevos desde la página Amigos.",
     },
     actions: {
       makeCaptain: "Nombrar capitán",

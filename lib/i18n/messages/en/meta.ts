@@ -27,8 +27,11 @@ export const metaEn = {
     },
     suggestions: {
       title: "Your fellow travellers",
-      invited: "Invitation sent",
+      invited: "Sent",
       inviteName: "Invite {name}",
+      add: "Add",
+      addFriend: "Add a friend",
+      empty: "All your friends are already aboard — add new ones from the Friends page.",
     },
     actions: {
       makeCaptain: "Make captain",
