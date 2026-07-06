@@ -202,6 +202,7 @@ export default async function TripMapPage({
           filter={
             !showIdeas && days.length > 1 ? (
               <DayFilterSelect
+                key="day-filter"
                 value={activeDay ?? ""}
                 ariaLabel={t("map.dayFilter")}
                 options={[

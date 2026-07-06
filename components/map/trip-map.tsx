@@ -52,9 +52,13 @@ export function TripMap({
     }
     const map = L.map(containerRef.current, { scrollWheelZoom: true });
     mapRef.current = map;
-    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-      maxZoom: 19,
+    // Fond CARTO Voyager (PHIL-Q37c) : lisible et épuré, sans le fouillis des
+    // frontières administratives d'OSM.
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
+      attribution:
+        '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/attributions">CARTO</a>',
+      subdomains: "abcd",
+      maxZoom: 20,
     }).addTo(map);
     // La colonne carte est haute/responsive/sticky : recalcule la taille des
     // tuiles quand le conteneur change de dimensions (évite les tuiles grises),
