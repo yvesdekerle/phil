@@ -354,7 +354,15 @@ export const metaFr = {
       alreadyUsed: "Cette invitation a déjà été utilisée.",
       expired: "Cette invitation a expiré — demande un nouveau lien.",
       joinFailed: "L'embarquement a échoué. Réessaie dans un instant.",
+      wrongAccount:
+        "Cette invitation a été envoyée à une autre adresse. Connecte-toi avec le compte invité.",
     },
+  },
+
+  notFound: {
+    title: "Cette page a quitté l'itinéraire",
+    body: "Même Phileas s'est parfois trompé de gare. Reprenons la route ensemble.",
+    back: "Retour à mes voyages",
   },
 
   legal: {

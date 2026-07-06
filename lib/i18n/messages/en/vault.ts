@@ -73,6 +73,18 @@ export const vaultEn = {
     msg: {
       nameRequired: "The name can't be empty.",
       invalidInput: "Invalid input.",
+      updateFailed: "The change failed.",
+      updated: "Noted in the logbook.",
+      expiryInvalid: "Invalid expiry date.",
+      recipientInvalid: "Invalid recipient.",
+      shareExists: "This share already exists.",
+      shareFailed: "Sharing failed.",
+      sharedTargeted: "Shared — with this person only.",
+      sharedCrew: "Shared with the crew.",
+      invalidIds: "Invalid identifiers.",
+      unshareFailed: "Removing the share failed.",
+      unshared: "Share removed.",
+      deleteFailed: "Deletion failed.",
     },
     categories: {
       passport: "Passport",

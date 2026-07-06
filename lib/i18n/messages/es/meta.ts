@@ -353,7 +353,15 @@ export const metaEs = {
       alreadyUsed: "Esta invitación ya se ha utilizado.",
       expired: "Esta invitación ha caducado: pide un nuevo enlace.",
       joinFailed: "El embarque ha fallado. Inténtalo de nuevo en un momento.",
+      wrongAccount:
+        "Esta invitación se envió a otra dirección. Inicia sesión con la cuenta invitada.",
     },
+  },
+
+  notFound: {
+    title: "Esta página se salió del itinerario",
+    body: "Hasta Phileas se equivocó de andén alguna vez. Volvamos al camino juntos.",
+    back: "Volver a mis viajes",
   },
 
   legal: {

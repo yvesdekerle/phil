@@ -18,7 +18,7 @@ export const fr = {
   },
   tripTabs: {
     aria: "Sections du voyage",
-    calendar: "Calendrier",
+    calendar: "Journal",
     map: "Carte",
     lodging: "Logement",
     documents: "Documents",

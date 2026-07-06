@@ -24,7 +24,7 @@ export const en: PartialMessages = {
   },
   tripTabs: {
     aria: "Trip sections",
-    calendar: "Calendar",
+    calendar: "Roadbook",
     map: "Map",
     lodging: "Lodging",
     documents: "Documents",

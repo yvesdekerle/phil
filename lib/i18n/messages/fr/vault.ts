@@ -74,6 +74,18 @@ export const vaultFr = {
     msg: {
       nameRequired: "Le nom ne peut pas être vide.",
       invalidInput: "Saisie invalide.",
+      updateFailed: "La modification a échoué.",
+      updated: "C'est noté dans le carnet.",
+      expiryInvalid: "Échéance invalide.",
+      recipientInvalid: "Destinataire invalide.",
+      shareExists: "Ce partage existe déjà.",
+      shareFailed: "Le partage a échoué.",
+      sharedTargeted: "Partagé — avec cette personne uniquement.",
+      sharedCrew: "Partagé avec l'équipage.",
+      invalidIds: "Identifiants invalides.",
+      unshareFailed: "Le retrait du partage a échoué.",
+      unshared: "Partage retiré.",
+      deleteFailed: "La suppression a échoué.",
     },
     categories: {
       passport: "Passeport",

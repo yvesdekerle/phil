@@ -74,6 +74,18 @@ export const vaultEs = {
     msg: {
       nameRequired: "El nombre no puede estar vacío.",
       invalidInput: "Entrada no válida.",
+      updateFailed: "No se pudo modificar.",
+      updated: "Anotado en el cuaderno.",
+      expiryInvalid: "Fecha de caducidad no válida.",
+      recipientInvalid: "Destinatario no válido.",
+      shareExists: "Este uso compartido ya existe.",
+      shareFailed: "No se pudo compartir.",
+      sharedTargeted: "Compartido — solo con esta persona.",
+      sharedCrew: "Compartido con la tripulación.",
+      invalidIds: "Identificadores no válidos.",
+      unshareFailed: "No se pudo retirar el uso compartido.",
+      unshared: "Uso compartido retirado.",
+      deleteFailed: "No se pudo eliminar.",
     },
     categories: {
       passport: "Pasaporte",

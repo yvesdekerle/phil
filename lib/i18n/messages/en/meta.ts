@@ -352,7 +352,15 @@ export const metaEn = {
       alreadyUsed: "This invitation has already been used.",
       expired: "This invitation has expired — ask for a new link.",
       joinFailed: "Boarding failed. Try again in a moment.",
+      wrongAccount:
+        "This invitation was sent to a different address. Sign in with the invited account.",
     },
+  },
+
+  notFound: {
+    title: "This page left the itinerary",
+    body: "Even Phileas caught the wrong platform once or twice. Let's get back on track.",
+    back: "Back to my trips",
   },
 
   legal: {
