@@ -6,6 +6,7 @@ import { z } from "zod";
 import { geocode } from "@/lib/geo/geocode";
 import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
+import { withCoverPosition } from "@/lib/trips/cover";
 
 export type TripSettingsState = {
   status: "idle" | "success" | "error";
@@ -85,15 +86,6 @@ export async function updateTrip(
       destination: z.string().trim().min(1, t("settings.msg.destinationRequired")).max(100),
       startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t("settings.msg.startDateInvalid")),
       endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t("settings.msg.endDateInvalid")),
-      coverImageUrl: z
-        .union([
-          z.literal(""),
-          z
-            .string()
-            .url(t("settings.msg.urlInvalid"))
-            .startsWith("https://", t("settings.msg.urlHttps")),
-        ])
-        .optional(),
       whatsappGroupUrl: z
         .union([
           z.literal(""),
@@ -131,7 +123,6 @@ export async function updateTrip(
     destination: formData.get("destination"),
     startDate: formData.get("startDate"),
     endDate: formData.get("endDate"),
-    coverImageUrl: formData.get("coverImageUrl") ?? "",
     whatsappGroupUrl: formData.get("whatsappGroupUrl") ?? "",
     currencyPrimary: formData.get("currencyPrimary") ?? "EUR",
     currencySecondary: formData.get("currencySecondary") ?? "",
@@ -168,7 +159,6 @@ export async function updateTrip(
         ...coordsPatch,
         start_date: parsed.data.startDate,
         end_date: parsed.data.endDate,
-        cover_image_url: parsed.data.coverImageUrl || null,
         whatsapp_group_url: parsed.data.whatsappGroupUrl || null,
         currency_primary: parsed.data.currencyPrimary,
         currency_secondary: parsed.data.currencySecondary || null,
@@ -236,6 +226,40 @@ export async function setCoverFromUrl(tripId: string, rawUrl: string): Promise<T
 
   if (error || count === 0) {
     return { status: "error", message: t("settings.msg.coverSaveFailed") };
+  }
+
+  revalidatePath(`/trips/${tripId}`);
+  return { status: "success", message: t("settings.cover.done") };
+}
+
+/** Cadrage de la couverture (PHIL-Q37c) — encode la position X/Y dans l'URL. */
+export async function setCoverPosition(
+  tripId: string,
+  x: number,
+  y: number,
+): Promise<TripSettingsState> {
+  const t = await getT();
+  if (!z.string().uuid().safeParse(tripId).success || !Number.isFinite(x) || !Number.isFinite(y)) {
+    return { status: "error", message: t("settings.cover.errSave") };
+  }
+
+  const supabase = await createClient();
+  const { data: trip } = await supabase
+    .from("trips")
+    .select("cover_image_url")
+    .eq("id", tripId)
+    .single();
+  if (!trip?.cover_image_url) {
+    return { status: "error", message: t("settings.cover.errSave") };
+  }
+
+  const { error, count } = await supabase
+    .from("trips")
+    .update({ cover_image_url: withCoverPosition(trip.cover_image_url, x, y) }, { count: "exact" })
+    .eq("id", tripId);
+
+  if (error || count === 0) {
+    return { status: "error", message: t("settings.cover.errSave") };
   }
 
   revalidatePath(`/trips/${tripId}`);

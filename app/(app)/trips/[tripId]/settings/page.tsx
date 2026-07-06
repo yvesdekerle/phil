@@ -4,6 +4,7 @@ import { PrepareOfflineButton } from "@/components/offline/prepare-offline-butto
 import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { CalendarFeed } from "./calendar-feed";
+import { CoverPosition } from "./cover-position";
 import { CoverUpload } from "./cover-upload";
 import { EmailAliasCard } from "./email-alias";
 import { PublicShareCard } from "./public-share";
@@ -65,6 +66,9 @@ export default async function TripSettingsPage({
         <PublicShareCard tripId={trip.id} token={trip.public_token} baseUrl={baseUrl} />
       ) : null}
       {canEdit ? <CoverUpload tripId={trip.id} /> : null}
+      {canEdit && trip.cover_image_url ? (
+        <CoverPosition tripId={trip.id} src={trip.cover_image_url} />
+      ) : null}
       <TripSettingsForm
         tripId={trip.id}
         tripName={trip.name}
@@ -76,7 +80,6 @@ export default async function TripSettingsPage({
           destination: trip.destination,
           startDate: trip.start_date,
           endDate: trip.end_date,
-          coverImageUrl: trip.cover_image_url ?? "",
           whatsappGroupUrl: trip.whatsapp_group_url ?? "",
           currencyPrimary: trip.currency_primary,
           currencySecondary: trip.currency_secondary ?? "",

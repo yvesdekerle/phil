@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { parseCover } from "@/lib/trips/cover";
 
 /**
  * Couverture de voyage avec repli gracieux (PHIL-Q37c). Les URL sont libres
@@ -25,6 +26,7 @@ export function CoverImage({
   priority?: boolean;
 }) {
   const [failed, setFailed] = useState(false);
+  const { base, objectPosition } = parseCover(src);
 
   if (failed) {
     return (
@@ -36,12 +38,13 @@ export function CoverImage({
 
   return (
     <Image
-      src={src}
+      src={base}
       alt=""
       fill
       sizes={sizes}
       priority={priority}
       className={className}
+      style={objectPosition ? { objectPosition } : undefined}
       onError={() => setFailed(true)}
     />
   );

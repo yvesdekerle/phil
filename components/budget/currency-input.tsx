@@ -1,66 +1,32 @@
 "use client";
 
-import { useId } from "react";
-import { useT } from "@/components/i18n/provider";
+import { useId, useMemo } from "react";
+import { useLocale } from "@/components/i18n/provider";
 import { Input } from "@/components/ui/input";
-
-/** Codes des devises courantes proposées (PHIL-Q04) — la saisie libre reste possible. */
-const COMMON_CURRENCIES = [
-  "EUR",
-  "USD",
-  "GBP",
-  "CHF",
-  "MUR",
-  "MAD",
-  "TND",
-  "THB",
-  "IDR",
-  "VND",
-  "JPY",
-  "CNY",
-  "INR",
-  "LKR",
-  "CAD",
-  "AUD",
-  "NZD",
-  "BRL",
-  "MXN",
-  "ARS",
-  "CLP",
-  "PEN",
-  "COP",
-  "ZAR",
-  "KES",
-  "TZS",
-  "EGP",
-  "TRY",
-  "NOK",
-  "SEK",
-  "DKK",
-  "ISK",
-  "CZK",
-  "HUF",
-  "PLN",
-  "AED",
-  "SGD",
-  "HKD",
-  "KRW",
-  "PHP",
-];
 
 type Props = React.ComponentProps<typeof Input>;
 
-/** Champ devise avec suggestions (datalist) — code ISO 3 lettres. */
+/**
+ * Champ devise (PHIL-Q04, liste complète PHIL-Q37c) — code ISO 3 lettres, avec
+ * la liste ISO 4217 complète en suggestions (noms localisés via Intl). La saisie
+ * libre reste possible.
+ */
 export function CurrencyInput(props: Props) {
   const listId = useId();
-  const t = useT();
+  const locale = useLocale();
+  const options = useMemo(() => {
+    const codes = Intl.supportedValuesOf("currency");
+    const names = new Intl.DisplayNames([locale], { type: "currency" });
+    return codes.map((code) => ({ code, name: names.of(code) ?? code }));
+  }, [locale]);
+
   return (
     <>
       <Input maxLength={3} autoComplete="off" {...props} list={listId} />
       <datalist id={listId}>
-        {COMMON_CURRENCIES.map((code) => (
-          <option key={code} value={code}>
-            {t(`budget.currencies.${code}`)}
+        {options.map((o) => (
+          <option key={o.code} value={o.code}>
+            {o.name}
           </option>
         ))}
       </datalist>

@@ -35,12 +35,6 @@ const formSchema = z
     destination: z.string().trim().min(1, "Où va-t-on ?").max(100),
     startDate: z.string().min(1, "Date de départ requise."),
     endDate: z.string().min(1, "Date de retour requise."),
-    coverImageUrl: z
-      .union([
-        z.literal(""),
-        z.string().url("URL invalide.").startsWith("https://", "URL en https uniquement."),
-      ])
-      .optional(),
     whatsappGroupUrl: z
       .union([
         z.literal(""),
@@ -145,14 +139,6 @@ export function TripSettingsForm({
               <p className="text-sm text-bordeaux">{errors.endDate.message}</p>
             ) : null}
           </div>
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="coverImageUrl">{t("settings.form.coverUrl")}</Label>
-          <Input id="coverImageUrl" type="url" disabled={!canEdit} {...register("coverImageUrl")} />
-          {errors.coverImageUrl ? (
-            <p className="text-sm text-bordeaux">{errors.coverImageUrl.message}</p>
-          ) : null}
         </div>
 
         <div className="grid grid-cols-2 gap-4">
