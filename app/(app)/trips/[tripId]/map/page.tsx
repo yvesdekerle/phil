@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
-import { DayFilterSelect } from "@/components/calendar/day-filter-select";
 import type { MapMarker } from "@/components/map/trip-map";
 import { TripMapExplorer } from "@/components/map/trip-map-explorer";
+import { FilterSelect } from "@/components/ui/filter-select";
 import { eventDayKey, eventTime, groupEventsByDay } from "@/lib/events/datetime";
 import type { TripEvent } from "@/lib/events/types";
 import { haversineKm } from "@/lib/geo/distance";
@@ -201,7 +201,7 @@ export default async function TripMapPage({
           missing={missing}
           filter={
             !showIdeas && days.length > 1 ? (
-              <DayFilterSelect
+              <FilterSelect
                 key="day-filter"
                 value={activeDay ?? ""}
                 ariaLabel={t("map.dayFilter")}

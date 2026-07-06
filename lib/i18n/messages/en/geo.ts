@@ -71,6 +71,7 @@ export const geoEn = {
   },
   tripDocs: {
     subtitle: "Visible to the whole crew — tickets, vouchers, bookings.",
+    categoryFilter: "Filter by category",
     add: "Add a document",
     allCategories: "All categories",
     allTravelers: "All travellers",

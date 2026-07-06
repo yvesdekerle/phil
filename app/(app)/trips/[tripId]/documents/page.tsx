@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { OfflineDocToggle } from "@/components/offline/offline-doc-toggle";
 import { Button } from "@/components/ui/button";
+import { FilterSelect } from "@/components/ui/filter-select";
 import { CategoryIcon } from "@/components/vault/category-icon";
 import { getDateFnsLocale, getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
@@ -128,33 +129,19 @@ export default async function TripDocumentsPage({
         ) : null}
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        <Link
-          href={filterHref(null, owner ?? null)}
-          className={cn(
-            "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
-            !activeCategory
-              ? "border-bordeaux bg-bordeaux text-papier"
-              : "border-laiton-clair bg-papier text-encre-douce hover:text-encre",
-          )}
-        >
-          {t("tripDocs.allCategories")}
-        </Link>
-        {CATEGORIES.map((c) => (
-          <Link
-            key={c}
-            href={filterHref(c, owner ?? null)}
-            className={cn(
-              "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
-              activeCategory === c
-                ? "border-bordeaux bg-bordeaux text-papier"
-                : "border-laiton-clair bg-papier text-encre-douce hover:text-encre",
-            )}
-          >
-            {CATEGORY_LABELS[c]}
-          </Link>
-        ))}
-      </div>
+      <FilterSelect
+        value={activeCategory ?? ""}
+        ariaLabel={t("tripDocs.categoryFilter")}
+        className="sm:w-72"
+        options={[
+          { value: "", label: t("tripDocs.allCategories"), href: filterHref(null, owner ?? null) },
+          ...CATEGORIES.map((c) => ({
+            value: c,
+            label: CATEGORY_LABELS[c],
+            href: filterHref(c, owner ?? null),
+          })),
+        ]}
+      />
 
       {owners.length > 1 ? (
         <div className="flex flex-wrap gap-2">

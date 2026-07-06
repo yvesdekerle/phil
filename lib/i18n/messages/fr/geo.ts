@@ -70,6 +70,7 @@ export const geoFr = {
   },
   tripDocs: {
     subtitle: "Visibles de tout l'équipage — billets, vouchers, réservations.",
+    categoryFilter: "Filtrer par catégorie",
     add: "Ajouter un document",
     allCategories: "Toutes catégories",
     allTravelers: "Tous les voyageurs",

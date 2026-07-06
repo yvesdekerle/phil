@@ -70,6 +70,7 @@ export const geoEs = {
   },
   tripDocs: {
     subtitle: "Visibles para toda la tripulación — billetes, vales, reservas.",
+    categoryFilter: "Filtrar por categoría",
     add: "Añadir un documento",
     allCategories: "Todas las categorías",
     allTravelers: "Todos los viajeros",
