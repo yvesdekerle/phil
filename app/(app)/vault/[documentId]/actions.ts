@@ -69,7 +69,7 @@ export async function updateDocument(
     .is("deleted_at", null);
 
   if (error || count === 0) {
-    return { status: "error", message: "La modification a échoué." };
+    return { status: "error", message: t("documents.msg.updateFailed") };
   }
 
   await logVaultAccess({
@@ -81,7 +81,7 @@ export async function updateDocument(
 
   revalidatePath(`/vault/${parsed.data.documentId}`);
   revalidatePath("/vault");
-  return { status: "success", message: "C'est noté dans le carnet." };
+  return { status: "success", message: t("documents.msg.updated") };
 }
 
 /**
@@ -94,11 +94,12 @@ export async function shareDocument(
   sharedWith: string | null = null,
   expiresAt: string | null = null,
 ): Promise<DocumentActionState> {
+  const t = await getT();
   if (expiresAt !== null && Number.isNaN(Date.parse(expiresAt))) {
-    return { status: "error", message: "Échéance invalide." };
+    return { status: "error", message: t("documents.msg.expiryInvalid") };
   }
   if (sharedWith !== null && !areUuids(sharedWith)) {
-    return { status: "error", message: "Destinataire invalide." };
+    return { status: "error", message: t("documents.msg.recipientInvalid") };
   }
   const supabase = await createClient();
   const {
@@ -122,8 +123,8 @@ export async function shareDocument(
     return {
       status: "error",
       message: error.message.includes("duplicate")
-        ? "Ce partage existe déjà."
-        : "Le partage a échoué.",
+        ? t("documents.msg.shareExists")
+        : t("documents.msg.shareFailed"),
     };
   }
 
@@ -137,7 +138,7 @@ export async function shareDocument(
   revalidatePath(`/vault/${documentId}`);
   return {
     status: "success",
-    message: sharedWith ? "Partagé — avec cette personne uniquement." : "Partagé avec l'équipage.",
+    message: sharedWith ? t("documents.msg.sharedTargeted") : t("documents.msg.sharedCrew"),
   };
 }
 
@@ -145,8 +146,9 @@ export async function unshareDocument(
   documentId: string,
   shareId: string,
 ): Promise<DocumentActionState> {
+  const t = await getT();
   if (!areUuids(documentId, shareId)) {
-    return { status: "error", message: "Identifiants invalides." };
+    return { status: "error", message: t("documents.msg.invalidIds") };
   }
   const supabase = await createClient();
   const {
@@ -163,7 +165,7 @@ export async function unshareDocument(
     .eq("document_id", documentId);
 
   if (error || count === 0) {
-    return { status: "error", message: "Le retrait du partage a échoué." };
+    return { status: "error", message: t("documents.msg.unshareFailed") };
   }
 
   await logVaultAccess({
@@ -174,7 +176,7 @@ export async function unshareDocument(
   });
 
   revalidatePath(`/vault/${documentId}`);
-  return { status: "success", message: "Partage retiré." };
+  return { status: "success", message: t("documents.msg.unshared") };
 }
 
 /**
@@ -183,6 +185,7 @@ export async function unshareDocument(
  * ou un nettoyage périodique.
  */
 export async function deleteDocument(documentId: string): Promise<DocumentActionState> {
+  const t = await getT();
   const supabase = await createClient();
   const {
     data: { user },
@@ -198,7 +201,7 @@ export async function deleteDocument(documentId: string): Promise<DocumentAction
     .is("deleted_at", null);
 
   if (error || count === 0) {
-    return { status: "error", message: "La suppression a échoué." };
+    return { status: "error", message: t("documents.msg.deleteFailed") };
   }
 
   await logVaultAccess({

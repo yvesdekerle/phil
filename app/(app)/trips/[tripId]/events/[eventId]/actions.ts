@@ -4,6 +4,7 @@ import { fromZonedTime } from "date-fns-tz";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { getT } from "@/lib/i18n/server";
+import { logger } from "@/lib/observability/logger";
 import { createClient } from "@/lib/supabase/server";
 import { areUuids } from "@/lib/validation";
 
@@ -100,11 +101,11 @@ export async function updateEvent(
   if (error || count === 0) {
     return {
       status: "error",
-      message: "La modification a échoué — il faut être capitaine ou éditeur du voyage.",
+      message: t("events.msg.editDenied"),
     };
   }
 
-  console.log(`[audit] event ${d.eventId} modifié par ${user.id}`);
+  logger.info("event_updated", { eventId: d.eventId, userId: user.id });
   redirect(`/trips/${d.tripId}/events/${d.eventId}`);
 }
 
@@ -119,6 +120,7 @@ export async function attachDocument(
   eventId: string,
   documentId: string,
 ): Promise<EventActionState> {
+  const t = await getT();
   const supabase = await createClient();
   const {
     data: { user },
@@ -136,7 +138,7 @@ export async function attachDocument(
     .single();
 
   if (!doc) {
-    return { status: "error", message: "Document introuvable." };
+    return { status: "error", message: t("events.msg.docNotFound") };
   }
 
   if (doc.scope === "VAULT") {
@@ -154,7 +156,7 @@ export async function attachDocument(
       if (doc.owner_id !== user.id) {
         return {
           status: "error",
-          message: "Seul le propriétaire peut partager ce document avec le voyage.",
+          message: t("events.msg.shareOwnerOnly"),
         };
       }
       const { error: shareError } = await supabase.from("document_shares").insert({
@@ -163,7 +165,7 @@ export async function attachDocument(
         shared_by: user.id,
       });
       if (shareError) {
-        return { status: "error", message: "Le partage vers le voyage a échoué." };
+        return { status: "error", message: t("events.msg.shareFailed") };
       }
       const { logVaultAccess } = await import("@/lib/vault/audit");
       await logVaultAccess({
@@ -174,7 +176,7 @@ export async function attachDocument(
       });
     }
   } else if (doc.trip_id !== tripId) {
-    return { status: "error", message: "Ce document appartient à un autre voyage." };
+    return { status: "error", message: t("events.msg.docOtherTrip") };
   }
 
   const { error } = await supabase
@@ -182,7 +184,7 @@ export async function attachDocument(
     .insert({ event_id: eventId, document_id: documentId });
 
   if (error && !error.message.includes("duplicate")) {
-    return { status: "error", message: "L'attache a échoué." };
+    return { status: "error", message: t("events.msg.attachFailed") };
   }
 
   const { revalidatePath } = await import("next/cache");
@@ -201,8 +203,9 @@ export async function toggleEventParticipant(
   userId: string,
   present: boolean,
 ): Promise<EventActionState> {
+  const t = await getT();
   if (!areUuids(tripId, eventId, userId)) {
-    return { status: "error", message: "Identifiants invalides." };
+    return { status: "error", message: t("events.msg.invalidIds") };
   }
 
   const supabase = await createClient();
@@ -222,7 +225,7 @@ export async function toggleEventParticipant(
     if (error) {
       return {
         status: "error",
-        message: "Inscription refusée — seuls capitaines et éditeurs inscrivent les autres.",
+        message: t("events.msg.enrollDenied"),
       };
     }
   } else {
@@ -232,7 +235,7 @@ export async function toggleEventParticipant(
       .eq("event_id", eventId)
       .eq("user_id", userId);
     if (error || count === 0) {
-      return { status: "error", message: "Retrait refusé." };
+      return { status: "error", message: t("events.msg.removeDenied") };
     }
   }
 
@@ -245,8 +248,9 @@ export async function detachDocument(
   eventId: string,
   documentId: string,
 ): Promise<EventActionState> {
+  const t = await getT();
   if (!areUuids(tripId, eventId, documentId)) {
-    return { status: "error", message: "Identifiants invalides." };
+    return { status: "error", message: t("events.msg.invalidIds") };
   }
   const supabase = await createClient();
   const { error, count } = await supabase
@@ -256,7 +260,7 @@ export async function detachDocument(
     .eq("document_id", documentId);
 
   if (error || count === 0) {
-    return { status: "error", message: "Le détachement a échoué." };
+    return { status: "error", message: t("events.msg.detachFailed") };
   }
 
   const { revalidatePath } = await import("next/cache");
@@ -265,6 +269,7 @@ export async function detachDocument(
 }
 
 export async function deleteEvent(tripId: string, eventId: string): Promise<EventActionState> {
+  const t = await getT();
   const supabase = await createClient();
   const {
     data: { user },
@@ -282,10 +287,10 @@ export async function deleteEvent(tripId: string, eventId: string): Promise<Even
   if (error || count === 0) {
     return {
       status: "error",
-      message: "La suppression a échoué — réservée au capitaine ou au créateur de l'événement.",
+      message: t("events.msg.deleteDenied"),
     };
   }
 
-  console.log(`[audit] event ${eventId} supprimé par ${user.id}`);
+  logger.info("event_deleted", { eventId, userId: user.id });
   redirect(`/trips/${tripId}`);
 }

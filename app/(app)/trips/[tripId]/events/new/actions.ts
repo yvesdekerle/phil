@@ -127,7 +127,7 @@ export async function createActivityEvent(
   if (error) {
     return {
       status: "error",
-      message: "La création a échoué — il faut être capitaine ou éditeur du voyage.",
+      message: t("events.msg.createDenied"),
     };
   }
 
@@ -244,7 +244,7 @@ export async function createLodgingEvent(
   if (error) {
     return {
       status: "error",
-      message: "La création a échoué — il faut être capitaine ou éditeur du voyage.",
+      message: t("events.msg.createDenied"),
     };
   }
 
@@ -345,7 +345,7 @@ export async function createTransportEvent(
   if (error) {
     return {
       status: "error",
-      message: "La création a échoué — il faut être capitaine ou éditeur du voyage.",
+      message: t("events.msg.createDenied"),
     };
   }
 
