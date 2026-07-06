@@ -28,7 +28,7 @@ export function DayFilterSelect({
         if (href) startTransition(() => router.push(href));
       }}
       aria-label={ariaLabel}
-      className="h-9 max-w-full cursor-pointer rounded-full border border-laiton-clair bg-papier px-3 text-sm text-encre transition-colors hover:border-laiton focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-laiton disabled:opacity-60"
+      className="h-9 w-full cursor-pointer rounded-full border border-laiton-clair bg-papier pr-8 pl-3 text-sm text-encre transition-colors hover:border-laiton focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-laiton disabled:opacity-60 sm:w-64"
     >
       {options.map((o) => (
         <option key={o.value} value={o.value}>

@@ -1,7 +1,7 @@
 "use client";
 
 import { Home } from "lucide-react";
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 import { EventTypeIcon } from "@/components/calendar/event-type-icon";
 import { useT } from "@/components/i18n/provider";
 import type { MapMarker } from "@/components/map/trip-map";
@@ -31,6 +31,7 @@ export function TripMapExplorer({
   distanceFrom,
   distanceLabel,
   missing,
+  filter,
 }: {
   markers: MapMarker[];
   departureId: string | null;
@@ -40,6 +41,8 @@ export function TripMapExplorer({
   distanceFrom: { lat: number; lng: number; label: string } | null;
   distanceLabel: string | null;
   missing: number;
+  /** Le menu déroulant « filtrer par jour » (rendu côté serveur). */
+  filter?: ReactNode;
 }) {
   const t = useT();
   const [focusId, setFocusId] = useState<string | null>(null);
@@ -65,96 +68,111 @@ export function TripMapExplorer({
   );
 
   return (
-    <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[minmax(0,24rem)_1fr] lg:items-start">
-      <div className="order-2 flex flex-col gap-3 lg:order-1 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:pr-1">
-        {departureId ? (
-          <button
-            type="button"
-            onClick={() => {
-              setShowDeparture((v) => !v);
-              setFocusId(null);
-            }}
-            className="self-start rounded-full border border-laiton-clair bg-papier px-3 py-1 text-xs font-medium text-encre-douce transition-colors hover:border-laiton hover:text-encre"
-          >
-            {showDeparture ? t("map.hideDeparture") : t("map.showDeparture")}
-          </button>
-        ) : null}
+    <div className="flex flex-col gap-3">
+      {/* Ligne du haut : filtre par jour + toggle départ/arrivée */}
+      {filter || departureId ? (
+        <div className="flex flex-wrap items-center gap-2">
+          {filter}
+          {departureId ? (
+            <button
+              type="button"
+              onClick={() => {
+                setShowDeparture((v) => !v);
+                setFocusId(null);
+              }}
+              className={cn(
+                "h-9 rounded-full border px-3 text-xs font-medium transition-colors",
+                showDeparture
+                  ? "border-bordeaux bg-bordeaux/10 text-bordeaux"
+                  : "border-laiton-clair bg-papier text-encre-douce hover:border-laiton hover:text-encre",
+              )}
+            >
+              {showDeparture ? t("map.hideDeparture") : t("map.showDeparture")}
+            </button>
+          ) : null}
+        </div>
+      ) : null}
 
-        <section className="rounded-lg border border-laiton-clair bg-papier px-4 py-3">
-          <h2 className="mb-2 text-sm font-medium text-encre">{heading}</h2>
-          {dayRows ? (
-            <ol className="flex flex-col">
-              {dayRows.map((r, i) => (
-                <li key={r.id}>
-                  {r.legText ? (
-                    <p className="my-1 ml-3.5 border-l-2 border-dashed border-laiton-clair py-0.5 pl-4 text-xs text-encre-douce">
-                      {r.legText}
-                    </p>
-                  ) : null}
-                  <button
-                    type="button"
-                    onClick={() => focus(r.id)}
-                    className={cn(
-                      "flex w-full items-center gap-2.5 rounded-md px-1 py-1 text-left transition-colors hover:bg-laiton/10",
-                      focusId === r.id && "bg-laiton/15",
-                    )}
-                  >
-                    <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-bordeaux text-xs font-bold text-papier">
-                      {i + 1}
-                    </span>
-                    <EventTypeIcon type={r.type} className="size-6 shrink-0" />
-                    <span className="min-w-0 flex-1 truncate text-sm text-encre">{r.title}</span>
-                    <span className="shrink-0 text-xs text-encre-douce tabular-nums">{r.time}</span>
-                  </button>
-                </li>
-              ))}
-            </ol>
-          ) : count > 0 ? (
-            <ul className="flex flex-col gap-0.5">
-              {shownMarkers.map((m) => (
-                <li key={m.id}>
-                  <button
-                    type="button"
-                    onClick={() => focus(m.id)}
-                    className={cn(
-                      "flex w-full items-center gap-2.5 rounded-md px-1 py-1.5 text-left transition-colors hover:bg-laiton/10",
-                      focusId === m.id && "bg-laiton/15",
-                    )}
-                  >
-                    {pin(m)}
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm text-encre">{m.title}</span>
-                      {m.subtitle ? (
-                        <span className="block truncate text-xs text-encre-douce">
-                          {m.subtitle}
-                        </span>
-                      ) : null}
-                    </span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-sm text-encre-douce">{t("map.noPlaces")}</p>
-          )}
-        </section>
+      <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[minmax(0,24rem)_1fr] lg:items-start">
+        <div className="order-2 flex flex-col gap-3 lg:order-1 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:pr-1">
+          <section className="rounded-lg border border-laiton-clair bg-papier px-4 py-3">
+            <h2 className="mb-2 text-sm font-medium text-encre">{heading}</h2>
+            {dayRows ? (
+              <ol className="flex flex-col">
+                {dayRows.map((r, i) => (
+                  <li key={r.id}>
+                    {r.legText ? (
+                      <p className="my-1 ml-3.5 border-l-2 border-dashed border-laiton-clair py-0.5 pl-4 text-xs text-encre-douce">
+                        {r.legText}
+                      </p>
+                    ) : null}
+                    <button
+                      type="button"
+                      onClick={() => focus(r.id)}
+                      className={cn(
+                        "flex w-full items-center gap-2.5 rounded-md px-1 py-1 text-left transition-colors hover:bg-laiton/10",
+                        focusId === r.id && "bg-laiton/15",
+                      )}
+                    >
+                      <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-bordeaux text-xs font-bold text-papier">
+                        {i + 1}
+                      </span>
+                      <EventTypeIcon type={r.type} className="size-6 shrink-0" />
+                      <span className="min-w-0 flex-1 truncate text-sm text-encre">{r.title}</span>
+                      <span className="shrink-0 text-xs text-encre-douce tabular-nums">
+                        {r.time}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ol>
+            ) : count > 0 ? (
+              <ul className="flex flex-col gap-0.5">
+                {shownMarkers.map((m) => (
+                  <li key={m.id}>
+                    <button
+                      type="button"
+                      onClick={() => focus(m.id)}
+                      className={cn(
+                        "flex w-full items-center gap-2.5 rounded-md px-1 py-1.5 text-left transition-colors hover:bg-laiton/10",
+                        focusId === m.id && "bg-laiton/15",
+                      )}
+                    >
+                      {pin(m)}
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-sm text-encre">{m.title}</span>
+                        {m.subtitle ? (
+                          <span className="block truncate text-xs text-encre-douce">
+                            {m.subtitle}
+                          </span>
+                        ) : null}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-encre-douce">{t("map.noPlaces")}</p>
+            )}
+          </section>
 
-        <p className="px-1 text-xs text-encre-douce">
-          {count} {count > 1 ? t("map.places") : t("map.place")} {t("map.onMap")}
-          {missing > 0 ? ` · ${missing} ${t("map.missingNote")}` : ""}
-          {distanceLabel ? ` · ${t("map.distancesFrom")} ${distanceLabel}` : ""}
-        </p>
-      </div>
+          <p className="px-1 text-xs text-encre-douce">
+            {count} {count > 1 ? t("map.places") : t("map.place")} {t("map.onMap")}
+            {missing > 0 ? ` · ${missing} ${t("map.missingNote")}` : ""}
+            {distanceLabel ? ` · ${t("map.distancesFrom")} ${distanceLabel}` : ""}
+          </p>
+        </div>
 
-      <div className="order-1 lg:order-2 lg:sticky lg:top-4">
-        <TripMapLazy
-          markers={shownMarkers}
-          drawPath={drawPath}
-          distanceFrom={distanceFrom}
-          focusId={focusId}
-          focusNonce={focusNonce}
-          heightClass="h-[55vh] lg:h-[calc(100vh-7rem)]"
-        />
+        <div className="order-1 lg:order-2 lg:sticky lg:top-4">
+          <TripMapLazy
+            markers={shownMarkers}
+            drawPath={drawPath}
+            distanceFrom={distanceFrom}
+            focusId={focusId}
+            focusNonce={focusNonce}
+            heightClass="h-[55vh] lg:h-[calc(100vh-7rem)]"
+          />
+        </div>
       </div>
     </div>
   );

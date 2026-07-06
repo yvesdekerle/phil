@@ -219,21 +219,6 @@ export default async function TripMapPage({
           </div>
         </div>
 
-        {!showIdeas && days.length > 1 ? (
-          <DayFilterSelect
-            value={activeDay ?? ""}
-            ariaLabel={t("map.dayFilter")}
-            options={[
-              { value: "", label: t("map.wholeTrip"), href: `/trips/${tripId}/map` },
-              ...days.map((d) => ({
-                value: d.dayKey,
-                label: d.label.replace(/ \d{4}$/, ""),
-                href: `/trips/${tripId}/map?day=${d.dayKey}`,
-              })),
-            ]}
-          />
-        ) : null}
-
         {/* TREK-style : liste cliquable à gauche, grande carte à droite */}
         <TripMapExplorer
           markers={markers}
@@ -244,6 +229,22 @@ export default async function TripMapPage({
           distanceFrom={distanceFrom}
           distanceLabel={distanceFrom?.label ?? null}
           missing={missing}
+          filter={
+            !showIdeas && days.length > 1 ? (
+              <DayFilterSelect
+                value={activeDay ?? ""}
+                ariaLabel={t("map.dayFilter")}
+                options={[
+                  { value: "", label: t("map.wholeTrip"), href: `/trips/${tripId}/map` },
+                  ...days.map((d) => ({
+                    value: d.dayKey,
+                    label: d.label.replace(/ \d{4}$/, ""),
+                    href: `/trips/${tripId}/map?day=${d.dayKey}`,
+                  })),
+                ]}
+              />
+            ) : null
+          }
         />
       </div>
     </div>
