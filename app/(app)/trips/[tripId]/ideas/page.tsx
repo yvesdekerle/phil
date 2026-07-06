@@ -97,14 +97,6 @@ export default async function TripIdeasPage({
         ) : null}
       </div>
 
-      <Link
-        href={`/trips/${tripId}/lodging`}
-        className="rounded-lg border border-laiton-clair bg-papier px-4 py-3 text-sm text-encre transition-shadow hover:shadow-[0_2px_12px_rgba(31,42,68,0.1)]"
-      >
-        🏠 <span className="font-medium">{t("ideas.lodgingLinkTitle")}</span>
-        <span className="text-encre-douce">{t("ideas.lodgingLinkDesc")}</span>
-      </Link>
-
       <SearchForm
         action={`/trips/${tripId}/ideas`}
         q={q}

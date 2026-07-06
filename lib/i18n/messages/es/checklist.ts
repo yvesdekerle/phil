@@ -150,6 +150,10 @@ export const checklistEs = {
     pollsEmpty: "Ninguna encuesta todavía — lanza la primera para decidir en grupo.",
   },
   lodging: {
+    pageTitle: "Alojamiento",
+    pageIntro: "Tus alojamientos reservados, y las opciones a comparar antes de decidir.",
+    bookedTitle: "Alojamientos reservados",
+    bookedEmpty: "Ningún alojamiento en el calendario por ahora.",
     title: "Alojamientos candidatos",
     subtitle:
       "Varias opciones para un mismo hueco — se comparan, se vota, y luego el capitán decide y el elegido se une al calendario.",

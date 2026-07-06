@@ -1,15 +1,13 @@
+import { formatInTimeZone } from "date-fns-tz";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getT } from "@/lib/i18n/server";
+import { EventTypeIcon } from "@/components/calendar/event-type-icon";
+import { getDateFnsLocale, getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { type Candidate, LodgingClient } from "./lodging-client";
 
-/** Hébergements candidats (PHIL-L01) : comparer, puis trancher. */
-export default async function LodgingCandidatesPage({
-  params,
-}: {
-  params: Promise<{ tripId: string }>;
-}) {
+/** Logement (PHIL-Q37c) : hébergements réservés (calendrier) + candidats à trancher. */
+export default async function LodgingPage({ params }: { params: Promise<{ tripId: string }> }) {
   const { tripId } = await params;
   const supabase = await createClient();
   const {
@@ -19,8 +17,15 @@ export default async function LodgingCandidatesPage({
     redirect("/login");
   }
   const t = await getT();
+  const dfLocale = await getDateFnsLocale();
 
-  const [{ data: candidates }, { data: me }] = await Promise.all([
+  const [{ data: booked }, { data: candidates }, { data: me }] = await Promise.all([
+    supabase
+      .from("trip_events")
+      .select("id, title, starts_at, ends_at, timezone, location_name")
+      .eq("trip_id", tripId)
+      .eq("type", "LODGING")
+      .order("starts_at", { ascending: true }),
     supabase
       .from("lodging_candidates")
       .select(
@@ -51,41 +56,76 @@ export default async function LodgingCandidatesPage({
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <Link
-          href={`/trips/${tripId}/ideas`}
-          className="text-sm text-encre-douce underline underline-offset-4 hover:text-encre"
-        >
-          {t("ideas.backToIdeas")}
-        </Link>
-        <h1 className="mt-2 font-display text-2xl text-encre">{t("lodging.title")}</h1>
-        <p className="mt-1 text-sm text-encre-douce">{t("lodging.subtitle")}</p>
+        <h1 className="font-display text-2xl text-encre">{t("lodging.pageTitle")}</h1>
+        <p className="mt-1 text-sm text-encre-douce">{t("lodging.pageIntro")}</p>
       </div>
-      <LodgingClient
-        tripId={tripId}
-        candidates={(candidates ?? []).map(
-          (c): Candidate => ({
-            id: c.id,
-            title: c.title,
-            url: c.url,
-            price: c.price,
-            notes: c.notes,
-            checkIn: c.check_in,
-            checkOut: c.check_out,
-            status: c.status as Candidate["status"],
-            createdBy: c.created_by,
-            authorName: c.profiles?.display_name ?? t("lodging.travelerFallback"),
-          }),
+
+      {/* Hébergements réservés (les nuits du calendrier) */}
+      <section className="flex flex-col gap-2">
+        <h2 className="text-sm font-medium text-encre">{t("lodging.bookedTitle")}</h2>
+        {(booked ?? []).length === 0 ? (
+          <p className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-4 py-6 text-center text-sm text-encre-douce">
+            {t("lodging.bookedEmpty")}
+          </p>
+        ) : (
+          <ul className="flex flex-col gap-2">
+            {(booked ?? []).map((e) => (
+              <li key={e.id}>
+                <Link
+                  href={`/trips/${tripId}/events/${e.id}`}
+                  className="flex items-center gap-3 rounded-lg border border-laiton-clair bg-papier px-4 py-3 transition-shadow hover:shadow-[0_2px_12px_rgba(31,42,68,0.08)]"
+                >
+                  <EventTypeIcon type="LODGING" className="size-7 shrink-0" />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-medium text-encre">{e.title}</span>
+                    <span className="block truncate text-xs text-encre-douce">
+                      {formatInTimeZone(e.starts_at, e.timezone, "d MMM", { locale: dfLocale })}
+                      {e.ends_at
+                        ? ` → ${formatInTimeZone(e.ends_at, e.timezone, "d MMM", { locale: dfLocale })}`
+                        : ""}
+                      {e.location_name ? ` · ${e.location_name}` : ""}
+                    </span>
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
         )}
-        votes={(votes ?? []).map((v) => ({
-          candidateId: v.candidate_id,
-          userId: v.user_id,
-          rating: v.rating,
-          comment: v.comment,
-          name: v.profiles?.display_name ?? t("lodging.travelerFallback"),
-        }))}
-        myId={user.id}
-        role={me?.role ?? "VIEWER"}
-      />
+      </section>
+
+      {/* Hébergements candidats (avant le départ : comparer et trancher) */}
+      <section className="flex flex-col gap-2">
+        <div>
+          <h2 className="text-sm font-medium text-encre">{t("lodging.title")}</h2>
+          <p className="mt-0.5 text-xs text-encre-douce">{t("lodging.subtitle")}</p>
+        </div>
+        <LodgingClient
+          tripId={tripId}
+          candidates={(candidates ?? []).map(
+            (c): Candidate => ({
+              id: c.id,
+              title: c.title,
+              url: c.url,
+              price: c.price,
+              notes: c.notes,
+              checkIn: c.check_in,
+              checkOut: c.check_out,
+              status: c.status as Candidate["status"],
+              createdBy: c.created_by,
+              authorName: c.profiles?.display_name ?? t("lodging.travelerFallback"),
+            }),
+          )}
+          votes={(votes ?? []).map((v) => ({
+            candidateId: v.candidate_id,
+            userId: v.user_id,
+            rating: v.rating,
+            comment: v.comment,
+            name: v.profiles?.display_name ?? t("lodging.travelerFallback"),
+          }))}
+          myId={user.id}
+          role={me?.role ?? "VIEWER"}
+        />
+      </section>
     </div>
   );
 }

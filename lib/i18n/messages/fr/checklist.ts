@@ -154,6 +154,10 @@ export const checklistFr = {
     pollsEmpty: "Aucun sondage pour l'instant — lance le premier pour trancher en groupe.",
   },
   lodging: {
+    pageTitle: "Logement",
+    pageIntro: "Vos hébergements réservés, et les options à comparer avant de trancher.",
+    bookedTitle: "Hébergements réservés",
+    bookedEmpty: "Aucun hébergement au calendrier pour l'instant.",
     title: "Hébergements candidats",
     subtitle:
       "Plusieurs options pour un même créneau — on compare, on vote, puis le capitaine tranche et l'élu rejoint le calendrier.",

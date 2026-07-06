@@ -144,6 +144,10 @@ export const checklistEn = {
     pollsEmpty: "No poll yet — launch the first to decide as a group.",
   },
   lodging: {
+    pageTitle: "Lodging",
+    pageIntro: "Your booked stays, and the options to compare before deciding.",
+    bookedTitle: "Booked stays",
+    bookedEmpty: "No stay on the calendar yet.",
     title: "Lodging shortlist",
     subtitle:
       "Several options for the same slot — we compare, we vote, then the captain decides and the winner joins the calendar.",
