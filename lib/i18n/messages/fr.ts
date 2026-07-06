@@ -26,7 +26,7 @@ export const fr = {
     polls: "Sondages",
     checklist: "Valise",
     photos: "Photos",
-    budget: "Bourse",
+    budget: "Budget",
     participants: "Participants",
     settings: "Paramètres",
   },

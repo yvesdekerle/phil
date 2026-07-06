@@ -32,7 +32,7 @@ export const es: PartialMessages = {
     polls: "Encuestas",
     checklist: "Maleta",
     photos: "Fotos",
-    budget: "Bolsa",
+    budget: "Presupuesto",
     participants: "Participantes",
     settings: "Ajustes",
   },
