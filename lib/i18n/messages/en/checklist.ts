@@ -140,6 +140,8 @@ export const checklistEn = {
     close: "Close",
     pollNeeds: "You need a question and 2 to 5 options.",
     pollCreateFailed: "Couldn't create it.",
+    pollDelete: "Delete poll",
+    pollsEmpty: "No poll yet — launch the first to decide as a group.",
   },
   lodging: {
     title: "Lodging shortlist",

@@ -146,6 +146,8 @@ export const checklistEs = {
     // Mensajes de acción del servidor
     pollNeeds: "Hace falta una pregunta y de 2 a 5 opciones.",
     pollCreateFailed: "No se pudo crear.",
+    pollDelete: "Eliminar la encuesta",
+    pollsEmpty: "Ninguna encuesta todavía — lanza la primera para decidir en grupo.",
   },
   lodging: {
     title: "Alojamientos candidatos",

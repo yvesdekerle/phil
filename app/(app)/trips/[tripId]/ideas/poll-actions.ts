@@ -56,11 +56,11 @@ export async function createPoll(_prev: PollState, formData: FormData): Promise<
     await sendPushToUser(m.user_id, {
       title: t("ideas.pollQuick"),
       body: parsed.data.question,
-      url: `/trips/${parsed.data.tripId}/ideas`,
+      url: `/trips/${parsed.data.tripId}/polls`,
     });
   }
 
-  revalidatePath(`/trips/${parsed.data.tripId}/ideas`);
+  revalidatePath(`/trips/${parsed.data.tripId}/polls`);
   return { status: "idle" };
 }
 
@@ -82,7 +82,7 @@ export async function votePoll(tripId: string, pollId: string, optionIndex: numb
       { poll_id: pollId, user_id: user.id, option_index: optionIndex },
       { onConflict: "poll_id,user_id" },
     );
-  revalidatePath(`/trips/${tripId}/ideas`);
+  revalidatePath(`/trips/${tripId}/polls`);
 }
 
 export async function closePoll(tripId: string, pollId: string): Promise<void> {
@@ -91,5 +91,15 @@ export async function closePoll(tripId: string, pollId: string): Promise<void> {
   }
   const { supabase } = await requireUser();
   await supabase.from("polls").update({ closed_at: new Date().toISOString() }).eq("id", pollId);
-  revalidatePath(`/trips/${tripId}/ideas`);
+  revalidatePath(`/trips/${tripId}/polls`);
+}
+
+/** Supprime un sondage (créateur ou OWNER — RLS `polls_delete_creator_or_owner`). */
+export async function deletePoll(tripId: string, pollId: string): Promise<void> {
+  if (!areUuids(tripId, pollId)) {
+    return;
+  }
+  const { supabase } = await requireUser();
+  await supabase.from("polls").delete().eq("id", pollId);
+  revalidatePath(`/trips/${tripId}/polls`);
 }

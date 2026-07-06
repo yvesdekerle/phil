@@ -150,6 +150,8 @@ export const checklistFr = {
     // Messages d'action serveur
     pollNeeds: "Il faut une question et 2 à 5 options.",
     pollCreateFailed: "Création impossible.",
+    pollDelete: "Supprimer le sondage",
+    pollsEmpty: "Aucun sondage pour l'instant — lance le premier pour trancher en groupe.",
   },
   lodging: {
     title: "Hébergements candidats",

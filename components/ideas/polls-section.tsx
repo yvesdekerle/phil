@@ -1,9 +1,11 @@
 "use client";
 
+import { Trash2 } from "lucide-react";
 import { useActionState, useState, useTransition } from "react";
 import {
   closePoll,
   createPoll,
+  deletePoll,
   type PollState,
   votePoll,
 } from "@/app/(app)/trips/[tripId]/ideas/poll-actions";
@@ -40,18 +42,8 @@ export function PollsSection({
   });
   const [pending, startTransition] = useTransition();
 
-  if (polls.length === 0 && !showForm) {
-    return (
-      <div className="flex justify-end">
-        <Button type="button" variant="outline" size="sm" onClick={() => setShowForm(true)}>
-          {t("ideas.pollQuick")}
-        </Button>
-      </div>
-    );
-  }
-
   return (
-    <section className="flex flex-col gap-3 rounded-lg border border-laiton-clair bg-papier px-4 py-3">
+    <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-medium text-encre">{t("ideas.pollSectionTitle")}</h2>
         <Button type="button" variant="outline" size="sm" onClick={() => setShowForm(!showForm)}>
@@ -60,7 +52,10 @@ export function PollsSection({
       </div>
 
       {showForm ? (
-        <form action={formAction} className="flex flex-col gap-2 rounded-md bg-parchemin/50 p-3">
+        <form
+          action={formAction}
+          className="flex flex-col gap-2 rounded-lg border border-laiton-clair bg-parchemin/50 p-3"
+        >
           <input type="hidden" name="tripId" value={tripId} />
           <Input
             name="question"
@@ -85,18 +80,28 @@ export function PollsSection({
         </form>
       ) : null}
 
+      {polls.length === 0 && !showForm ? (
+        <p className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-4 py-8 text-center text-sm text-encre-douce">
+          {t("ideas.pollsEmpty")}
+        </p>
+      ) : null}
+
       {polls.map((poll) => {
         const total = poll.votes.length;
         const myVote = poll.votes.find((v) => v.user_id === myId)?.option_index ?? null;
         const closed = poll.closed_at !== null;
+        const canManage = poll.created_by === myId || isOwner;
         return (
-          <article key={poll.id} className="flex flex-col gap-1.5">
+          <article
+            key={poll.id}
+            className="flex flex-col gap-1.5 rounded-lg border border-laiton-clair bg-papier px-4 py-3"
+          >
             <div className="flex items-center justify-between gap-2">
               <p className="text-sm font-medium text-encre">{poll.question}</p>
               <span className="flex items-center gap-2 text-xs text-encre-douce">
                 {total} {total > 1 ? t("ideas.voteMany") : t("ideas.voteOne")}
                 {closed ? ` · ${t("ideas.closed")}` : null}
-                {!closed && (poll.created_by === myId || isOwner) ? (
+                {!closed && canManage ? (
                   <button
                     type="button"
                     disabled={pending}
@@ -104,6 +109,18 @@ export function PollsSection({
                     className="underline underline-offset-4 hover:text-encre"
                   >
                     {t("ideas.close")}
+                  </button>
+                ) : null}
+                {canManage ? (
+                  <button
+                    type="button"
+                    disabled={pending}
+                    onClick={() => startTransition(() => deletePoll(tripId, poll.id))}
+                    className="text-encre-douce transition-colors hover:text-bordeaux"
+                    aria-label={t("ideas.pollDelete")}
+                    title={t("ideas.pollDelete")}
+                  >
+                    <Trash2 className="size-3.5" aria-hidden="true" />
                   </button>
                 ) : null}
               </span>
@@ -147,6 +164,6 @@ export function PollsSection({
           </article>
         );
       })}
-    </section>
+    </div>
   );
 }
