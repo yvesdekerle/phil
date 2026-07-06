@@ -1,5 +1,5 @@
-import Image from "next/image";
 import Link from "next/link";
+import { CoverImage } from "@/components/trips/cover-image";
 import { getDateFnsLocale, getT } from "@/lib/i18n/server";
 import { formatDateRange } from "@/lib/trips/format";
 import { type Trip, tripStatus } from "@/lib/trips/status";
@@ -34,12 +34,11 @@ export async function TripCard({
     >
       <div className="relative h-36 overflow-hidden bg-encre">
         {trip.cover_image_url ? (
-          <Image
+          <CoverImage
             src={trip.cover_image_url}
-            alt=""
-            fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             className="object-cover transition-transform duration-500 group-hover:scale-105"
+            fallbackChar={trip.destination.charAt(0).toUpperCase()}
           />
         ) : (
           <div className="flex h-full items-center justify-center">

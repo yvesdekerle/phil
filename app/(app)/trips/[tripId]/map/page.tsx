@@ -1,6 +1,7 @@
 import { Home } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { DayFilterSelect } from "@/components/calendar/day-filter-select";
 import { EventTypeIcon } from "@/components/calendar/event-type-icon";
 import type { MapMarker } from "@/components/map/trip-map";
 import { TripMapLazy } from "@/components/map/trip-map-lazy";
@@ -215,16 +216,18 @@ export default async function TripMapPage({
         </div>
 
         {!showIdeas && days.length > 1 ? (
-          <div className="flex flex-wrap gap-1.5">
-            {chip(`/trips/${tripId}/map`, t("map.wholeTrip"), !activeDay)}
-            {days.map((d) =>
-              chip(
-                `/trips/${tripId}/map?day=${d.dayKey}`,
-                d.label.replace(/ \d{4}$/, ""),
-                activeDay === d.dayKey,
-              ),
-            )}
-          </div>
+          <DayFilterSelect
+            value={activeDay ?? ""}
+            ariaLabel={t("map.dayFilter")}
+            options={[
+              { value: "", label: t("map.wholeTrip"), href: `/trips/${tripId}/map` },
+              ...days.map((d) => ({
+                value: d.dayKey,
+                label: d.label.replace(/ \d{4}$/, ""),
+                href: `/trips/${tripId}/map?day=${d.dayKey}`,
+              })),
+            ]}
+          />
         ) : null}
 
         {/* TREK-style : liste à gauche, grande carte à droite */}

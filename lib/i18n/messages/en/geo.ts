@@ -15,6 +15,7 @@ export const geoEn = {
     dayProgram: "The day's itinerary",
     allPlaces: "All places",
     noPlaces: "No geolocated place to show here yet.",
+    dayFilter: "Filter by day",
     byRoad: "on the road",
     place: "place",
     places: "places",

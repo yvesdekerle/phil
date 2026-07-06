@@ -14,6 +14,7 @@ export const geoFr = {
     dayProgram: "Programme de la journée",
     allPlaces: "Tous les lieux",
     noPlaces: "Aucun lieu géolocalisé à afficher ici pour l'instant.",
+    dayFilter: "Filtrer par jour",
     byRoad: "de route",
     place: "lieu",
     places: "lieux",

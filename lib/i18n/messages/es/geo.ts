@@ -14,6 +14,7 @@ export const geoEs = {
     dayProgram: "Programa del día",
     allPlaces: "Todos los lugares",
     noPlaces: "Ningún lugar geolocalizado que mostrar aquí por ahora.",
+    dayFilter: "Filtrar por día",
     byRoad: "por carretera",
     place: "lugar",
     places: "lugares",

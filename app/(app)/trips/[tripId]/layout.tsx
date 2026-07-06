@@ -1,6 +1,6 @@
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { TripOfflineSync } from "@/components/offline/trip-sync";
+import { CoverImage } from "@/components/trips/cover-image";
 import { TripTabs } from "@/components/trips/trip-tabs";
 import { getDateFnsLocale, getIntlLocale, getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
@@ -86,13 +86,13 @@ export default async function TripLayout({
       <header className="overflow-hidden rounded-lg border border-laiton-clair bg-papier">
         <div className="relative h-40 bg-encre sm:h-52">
           {trip.cover_image_url ? (
-            <Image
+            <CoverImage
               src={trip.cover_image_url}
-              alt=""
-              fill
               sizes="(max-width: 1024px) 100vw, 1024px"
               className="object-cover"
               priority
+              fallbackChar={trip.destination.charAt(0).toUpperCase()}
+              fallbackClassName="font-display text-6xl text-laiton italic"
             />
           ) : (
             <div className="flex h-full items-center justify-center">
