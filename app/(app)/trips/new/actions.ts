@@ -8,27 +8,6 @@ import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { getTemplate } from "@/lib/trips/templates";
 
-const tripSchema = z
-  .object({
-    name: z.string().trim().min(1, "Donne un nom à ce voyage.").max(100),
-    destination: z.string().trim().min(1, "Où va-t-on ?").max(100),
-    startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date de départ invalide."),
-    endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date de retour invalide."),
-    coverImageUrl: z
-      .union([
-        z.literal(""),
-        z.string().url("URL invalide.").startsWith("https://", "URL en https uniquement."),
-      ])
-      .optional(),
-    timezone: z.string().refine((tz) => Intl.supportedValuesOf("timeZone").includes(tz), {
-      message: "Fuseau horaire inconnu.",
-    }),
-  })
-  .refine((v) => v.endDate >= v.startDate, {
-    message: "Le retour ne peut pas précéder le départ — même Phileas n'y est pas arrivé.",
-    path: ["endDate"],
-  });
-
 export type CreateTripState = {
   status: "idle" | "error";
   message?: string;
@@ -38,6 +17,31 @@ export async function createTrip(
   _prev: CreateTripState,
   formData: FormData,
 ): Promise<CreateTripState> {
+  const t = await getT();
+  const tripSchema = z
+    .object({
+      name: z.string().trim().min(1, t("newTrip.msg.nameRequired")).max(100),
+      destination: z.string().trim().min(1, t("newTrip.msg.destinationRequired")).max(100),
+      startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t("newTrip.msg.startDateInvalid")),
+      endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t("newTrip.msg.endDateInvalid")),
+      coverImageUrl: z
+        .union([
+          z.literal(""),
+          z
+            .string()
+            .url(t("newTrip.msg.urlInvalid"))
+            .startsWith("https://", t("newTrip.msg.urlHttps")),
+        ])
+        .optional(),
+      timezone: z.string().refine((tz) => Intl.supportedValuesOf("timeZone").includes(tz), {
+        message: t("newTrip.msg.timezoneUnknown"),
+      }),
+    })
+    .refine((v) => v.endDate >= v.startDate, {
+      message: t("newTrip.msg.endBeforeStart"),
+      path: ["endDate"],
+    });
+
   const parsed = tripSchema.safeParse({
     name: formData.get("name"),
     destination: formData.get("destination"),
@@ -47,7 +51,6 @@ export async function createTrip(
     timezone: formData.get("timezone"),
   });
 
-  const t = await getT();
   if (!parsed.success) {
     return {
       status: "error",

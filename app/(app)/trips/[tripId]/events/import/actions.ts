@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { TRANSPORT_MODES } from "@/lib/events/transport";
 import { geolocateEvent } from "@/lib/geo/locate";
+import { getT } from "@/lib/i18n/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { areUuids } from "@/lib/validation";
@@ -12,14 +13,16 @@ import { isAllowedMimeType, MAX_FILE_SIZE_BYTES } from "@/lib/vault/upload";
 
 const DATETIME_LOCAL = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
 
-const eventFieldsSchema = {
+type Translate = Awaited<ReturnType<typeof getT>>;
+
+const eventFieldsSchema = (t: Translate) => ({
   tripId: z.string().uuid(),
   kind: z.enum(["TRANSPORT", "LODGING", "ACTIVITY"]),
-  title: z.string().trim().min(1, "Donne un titre à cet événement.").max(150),
-  startsAtLocal: z.string().regex(DATETIME_LOCAL, "Date et heure de début requises."),
+  title: z.string().trim().min(1, t("events.msg.eventTitleRequired")).max(150),
+  startsAtLocal: z.string().regex(DATETIME_LOCAL, t("events.msg.startRequired")),
   endsAtLocal: z.union([z.literal(""), z.string().regex(DATETIME_LOCAL)]).optional(),
   timezone: z.string().refine((tz) => Intl.supportedValuesOf("timeZone").includes(tz), {
-    message: "Fuseau horaire inconnu.",
+    message: t("events.msg.timezoneUnknown"),
   }),
   locationName: z.string().trim().max(150).optional(),
   locationAddress: z.string().trim().max(300).optional(),
@@ -29,9 +32,9 @@ const eventFieldsSchema = {
   carrier: z.string().trim().max(120).optional(),
   bookingReference: z.string().trim().max(100).optional(),
   notes: z.string().trim().max(2000).optional(),
-};
+});
 
-type EventFields = z.infer<z.ZodObject<typeof eventFieldsSchema>>;
+type EventFields = z.infer<z.ZodObject<ReturnType<typeof eventFieldsSchema>>>;
 
 function eventFieldsFrom(formData: FormData): Record<string, FormDataEntryValue | string> {
   return {
@@ -77,20 +80,21 @@ function eventInsertOf(d: EventFields, eventId: string, userId: string) {
   };
 }
 
-const importedEventSchema = z
-  .object({
-    ...eventFieldsSchema,
-    // Document attaché (la confirmation elle-même), déjà uploadé côté client
-    documentId: z.string().uuid(),
-    fileName: z.string().trim().min(1).max(255),
-    mimeType: z.string().refine(isAllowedMimeType, "Format non accepté."),
-    sizeBytes: z.coerce.number().int().positive().max(MAX_FILE_SIZE_BYTES),
-    storagePath: z.string().min(1),
-  })
-  .refine((v) => !v.endsAtLocal || v.endsAtLocal >= v.startsAtLocal, {
-    message: "La fin ne peut pas précéder le début.",
-    path: ["endsAtLocal"],
-  });
+const importedEventSchema = (t: Translate) =>
+  z
+    .object({
+      ...eventFieldsSchema(t),
+      // Document attaché (la confirmation elle-même), déjà uploadé côté client
+      documentId: z.string().uuid(),
+      fileName: z.string().trim().min(1).max(255),
+      mimeType: z.string().refine(isAllowedMimeType, t("events.msg.badFormat")),
+      sizeBytes: z.coerce.number().int().positive().max(MAX_FILE_SIZE_BYTES),
+      storagePath: z.string().min(1),
+    })
+    .refine((v) => !v.endsAtLocal || v.endsAtLocal >= v.startsAtLocal, {
+      message: t("events.msg.endBeforeStart"),
+      path: ["endsAtLocal"],
+    });
 
 export type ImportedEventState = { status: "idle" | "error"; message?: string };
 
@@ -102,7 +106,8 @@ export async function createImportedEvent(
   _prev: ImportedEventState,
   formData: FormData,
 ): Promise<ImportedEventState> {
-  const parsed = importedEventSchema.safeParse({
+  const t = await getT();
+  const parsed = importedEventSchema(t).safeParse({
     ...eventFieldsFrom(formData),
     documentId: formData.get("documentId"),
     fileName: formData.get("fileName"),
@@ -111,7 +116,10 @@ export async function createImportedEvent(
     storagePath: formData.get("storagePath"),
   });
   if (!parsed.success) {
-    return { status: "error", message: parsed.error.issues[0]?.message ?? "Saisie invalide." };
+    return {
+      status: "error",
+      message: parsed.error.issues[0]?.message ?? t("events.msg.invalidInput"),
+    };
   }
   const d = parsed.data;
 
@@ -166,12 +174,13 @@ export async function createImportedEvent(
   redirect(`/trips/${d.tripId}/events/${eventId}`);
 }
 
-const finalizeDraftSchema = z
-  .object({ ...eventFieldsSchema, draftId: z.string().uuid() })
-  .refine((v) => !v.endsAtLocal || v.endsAtLocal >= v.startsAtLocal, {
-    message: "La fin ne peut pas précéder le début.",
-    path: ["endsAtLocal"],
-  });
+const finalizeDraftSchema = (t: Translate) =>
+  z
+    .object({ ...eventFieldsSchema(t), draftId: z.string().uuid() })
+    .refine((v) => !v.endsAtLocal || v.endsAtLocal >= v.startsAtLocal, {
+      message: t("events.msg.endBeforeStart"),
+      path: ["endsAtLocal"],
+    });
 
 /**
  * Valide un brouillon reçu par email (PHIL-P02) : crée l'événement, déplace
@@ -181,12 +190,16 @@ export async function finalizeDraft(
   _prev: ImportedEventState,
   formData: FormData,
 ): Promise<ImportedEventState> {
-  const parsed = finalizeDraftSchema.safeParse({
+  const t = await getT();
+  const parsed = finalizeDraftSchema(t).safeParse({
     ...eventFieldsFrom(formData),
     draftId: formData.get("draftId"),
   });
   if (!parsed.success) {
-    return { status: "error", message: parsed.error.issues[0]?.message ?? "Saisie invalide." };
+    return {
+      status: "error",
+      message: parsed.error.issues[0]?.message ?? t("events.msg.invalidInput"),
+    };
   }
   const d = parsed.data;
 

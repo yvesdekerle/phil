@@ -7,50 +7,6 @@ import { geocode } from "@/lib/geo/geocode";
 import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 
-const tripUpdateSchema = z
-  .object({
-    tripId: z.string().uuid(),
-    name: z.string().trim().min(1, "Donne un nom à ce voyage.").max(100),
-    destination: z.string().trim().min(1, "Où va-t-on ?").max(100),
-    startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date de départ invalide."),
-    endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date de retour invalide."),
-    coverImageUrl: z
-      .union([
-        z.literal(""),
-        z.string().url("URL invalide.").startsWith("https://", "URL en https uniquement."),
-      ])
-      .optional(),
-    whatsappGroupUrl: z
-      .union([
-        z.literal(""),
-        z
-          .string()
-          .url("URL invalide.")
-          .regex(
-            /^https:\/\/(chat\.whatsapp\.com|m\.me|(www\.)?messenger\.com)\//,
-            "Un lien WhatsApp (chat.whatsapp.com) ou Messenger (m.me).",
-          ),
-      ])
-      .optional(),
-    currencyPrimary: z
-      .string()
-      .trim()
-      .toUpperCase()
-      .regex(/^[A-Z]{3}$/, "Code devise à 3 lettres (EUR, MUR…)."),
-    currencySecondary: z
-      .string()
-      .trim()
-      .toUpperCase()
-      .regex(/^$|^[A-Z]{3}$/, "Code devise à 3 lettres, ou vide."),
-    timezone: z.string().refine((tz) => Intl.supportedValuesOf("timeZone").includes(tz), {
-      message: "Fuseau horaire inconnu.",
-    }),
-  })
-  .refine((v) => v.endDate >= v.startDate, {
-    message: "Le retour ne peut pas précéder le départ.",
-    path: ["endDate"],
-  });
-
 export type TripSettingsState = {
   status: "idle" | "success" | "error";
   message?: string;
@@ -121,6 +77,54 @@ export async function updateTrip(
   _prev: TripSettingsState,
   formData: FormData,
 ): Promise<TripSettingsState> {
+  const t = await getT();
+  const tripUpdateSchema = z
+    .object({
+      tripId: z.string().uuid(),
+      name: z.string().trim().min(1, t("settings.msg.nameRequired")).max(100),
+      destination: z.string().trim().min(1, t("settings.msg.destinationRequired")).max(100),
+      startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t("settings.msg.startDateInvalid")),
+      endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t("settings.msg.endDateInvalid")),
+      coverImageUrl: z
+        .union([
+          z.literal(""),
+          z
+            .string()
+            .url(t("settings.msg.urlInvalid"))
+            .startsWith("https://", t("settings.msg.urlHttps")),
+        ])
+        .optional(),
+      whatsappGroupUrl: z
+        .union([
+          z.literal(""),
+          z
+            .string()
+            .url(t("settings.msg.urlInvalid"))
+            .regex(
+              /^https:\/\/(chat\.whatsapp\.com|m\.me|(www\.)?messenger\.com)\//,
+              t("settings.msg.whatsappInvalid"),
+            ),
+        ])
+        .optional(),
+      currencyPrimary: z
+        .string()
+        .trim()
+        .toUpperCase()
+        .regex(/^[A-Z]{3}$/, t("settings.msg.currencyPrimaryInvalid")),
+      currencySecondary: z
+        .string()
+        .trim()
+        .toUpperCase()
+        .regex(/^$|^[A-Z]{3}$/, t("settings.msg.currencySecondaryInvalid")),
+      timezone: z.string().refine((tz) => Intl.supportedValuesOf("timeZone").includes(tz), {
+        message: t("settings.msg.timezoneUnknown"),
+      }),
+    })
+    .refine((v) => v.endDate >= v.startDate, {
+      message: t("settings.msg.endBeforeStart"),
+      path: ["endDate"],
+    });
+
   const parsed = tripUpdateSchema.safeParse({
     tripId: formData.get("tripId"),
     name: formData.get("name"),
@@ -134,7 +138,6 @@ export async function updateTrip(
     timezone: formData.get("timezone"),
   });
 
-  const t = await getT();
   if (!parsed.success) {
     return {
       status: "error",

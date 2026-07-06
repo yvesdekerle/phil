@@ -2,6 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { isLocale, type Locale } from "@/lib/i18n/config";
+import { messages, translator } from "@/lib/i18n/messages";
 import { getT } from "@/lib/i18n/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -85,17 +87,28 @@ export async function inviteFriend(
       const { formatDateRange } = await import("@/lib/trips/format");
       const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
       const resend = createResendClient();
-      const inviterName = me?.display_name ?? "Un compagnon de route";
+      // Langue du destinataire (l'ami ré-invité), pas de l'expéditeur.
+      const { data: friendProfile } = await admin
+        .from("profiles")
+        .select("locale")
+        .eq("id", friendUserId)
+        .single();
+      const recipientLocale: Locale = isLocale(friendProfile?.locale) ? friendProfile.locale : "fr";
+      const te = translator(messages[recipientLocale]);
+      const inviterName = me?.display_name ?? te("email.invitation.inviterFallback");
       const { error: sendError } = await resend.emails.send({
         from: `Phil <${fromEmail()}>`,
         to: email,
-        subject: `${inviterName} t'invite à rejoindre « ${trip.name} »`,
+        subject: te("email.invitation.subject")
+          .replace("{name}", inviterName)
+          .replace("{trip}", trip.name),
         react: TripInvitationEmail({
           inviterName,
           tripName: trip.name,
           destination: trip.destination,
           dates: formatDateRange(trip.start_date, trip.end_date),
           inviteUrl: `${baseUrl}/invitations/${invitation.token}`,
+          locale: recipientLocale,
         }),
       });
       emailSent = !sendError;

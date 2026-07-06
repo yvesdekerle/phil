@@ -4,14 +4,8 @@ import { fromZonedTime } from "date-fns-tz";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
-
-const quickAddSchema = z.object({
-  tripId: z.string().uuid(),
-  title: z.string().trim().min(1, "Un titre suffit !").max(150),
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Choisis un jour."),
-  time: z.union([z.literal(""), z.string().regex(/^\d{2}:\d{2}$/)]).optional(),
-});
 
 export type QuickAddState = { status: "idle" | "error"; message?: string };
 
@@ -24,6 +18,13 @@ export async function quickAddEvent(
   _prev: QuickAddState,
   formData: FormData,
 ): Promise<QuickAddState> {
+  const t = await getT();
+  const quickAddSchema = z.object({
+    tripId: z.string().uuid(),
+    title: z.string().trim().min(1, t("calendar.quickAdd.errTitle")).max(150),
+    date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t("calendar.quickAdd.errDate")),
+    time: z.union([z.literal(""), z.string().regex(/^\d{2}:\d{2}$/)]).optional(),
+  });
   const parsed = quickAddSchema.safeParse({
     tripId: formData.get("tripId"),
     title: formData.get("title"),
@@ -31,7 +32,10 @@ export async function quickAddEvent(
     time: formData.get("time") ?? "",
   });
   if (!parsed.success) {
-    return { status: "error", message: parsed.error.issues[0]?.message ?? "Saisie invalide." };
+    return {
+      status: "error",
+      message: parsed.error.issues[0]?.message ?? t("calendar.quickAdd.errInvalid"),
+    };
   }
   const d = parsed.data;
 

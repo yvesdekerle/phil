@@ -10,7 +10,7 @@ import { dateFnsLocale } from "@/lib/i18n/dates";
 import {
   type CatalogSection,
   catalogItemTitle,
-  matchesCatalogItem,
+  matchesCatalogKey,
   PACKING_CATALOG,
 } from "@/lib/trips/packing-catalog";
 import { cn } from "@/lib/utils";
@@ -71,10 +71,11 @@ export function ChecklistClient({
   const doneCount = items.filter((i) => i.done).length;
   const sectionItems = items.filter((i) => i.section === tab);
 
-  // Catalogue de l'onglet : ce qu'on peut encore sélectionner
-  const isInList = (title: string) => items.some((i) => matchesCatalogItem(i.title, title));
+  // Catalogue de l'onglet : ce qu'on peut encore sélectionner (dédoublonnage par
+  // clé, indépendant de la langue où l'item a été ajouté)
+  const isInList = (key: string) => items.some((i) => matchesCatalogKey(i.title, key));
   const pendingGroups = PACKING_CATALOG.filter((c) => c.section === tab)
-    .map((g) => ({ ...g, items: g.items.filter((i) => !isInList(i.title)) }))
+    .map((g) => ({ ...g, items: g.items.filter((i) => !isInList(i.key)) }))
     .filter((g) => g.items.length > 0);
 
   // La liste (sélectionnés), groupée par catégorie
@@ -83,17 +84,19 @@ export function ChecklistClient({
   );
   const categorySuggestions = [
     ...new Set([
-      ...PACKING_CATALOG.filter((c) => c.section === tab).map((c) => c.category),
+      ...PACKING_CATALOG.filter((c) => c.section === tab).map((c) =>
+        t(`checklist.catalogCat.${c.categoryKey}`),
+      ),
       ...sectionItems.map((i) => i.category?.trim()).filter((c): c is string => Boolean(c)),
     ]),
   ];
 
-  const addFromCatalog = (title: string, qty: number, category: string) => {
+  const addFromCatalog = (itemKey: string, qty: number, categoryKey: string) => {
     const formData = new FormData();
     formData.set("tripId", tripId);
     formData.set("section", tab);
-    formData.set("title", catalogItemTitle(title, qty));
-    formData.set("category", category);
+    formData.set("title", catalogItemTitle(t(`checklist.catalog.${itemKey}`), qty));
+    formData.set("category", t(`checklist.catalogCat.${categoryKey}`));
     startTransition(async () => {
       await addChecklistItem({ status: "idle" }, formData);
     });
@@ -283,19 +286,20 @@ export function ChecklistClient({
             {t("checklist.stillToSelectPrefix")} {nights} {t("checklist.stillToSelectSuffix")}
           </p>
           {pendingGroups.map((group) => (
-            <div key={group.category}>
+            <div key={group.categoryKey}>
               <h3 className="mb-1 text-xs font-medium text-laiton uppercase tracking-wide">
-                {group.category}
+                {t(`checklist.catalogCat.${group.categoryKey}`)}
               </h3>
               <ul className="flex flex-col gap-1">
                 {group.items.map((item) => {
-                  const qty = qtyOverrides[item.title] ?? item.qty(nights);
+                  const qty = qtyOverrides[item.key] ?? item.qty(nights);
+                  const name = t(`checklist.catalog.${item.key}`);
                   return (
                     <li
-                      key={item.title}
+                      key={item.key}
                       className="flex items-center gap-2 rounded-md px-1 py-1 text-sm text-encre-douce"
                     >
-                      <span className="min-w-0 flex-1">{item.title}</span>
+                      <span className="min-w-0 flex-1">{name}</span>
                       {item.qty(nights) > 1 || qty > 1 ? (
                         <input
                           type="number"
@@ -305,19 +309,19 @@ export function ChecklistClient({
                           onChange={(e) =>
                             setQtyOverrides((prev) => ({
                               ...prev,
-                              [item.title]: Math.max(1, Number(e.target.value) || 1),
+                              [item.key]: Math.max(1, Number(e.target.value) || 1),
                             }))
                           }
                           className="w-14 rounded border border-laiton-clair bg-papier px-1.5 py-0.5 text-right text-xs"
-                          aria-label={`${t("checklist.qtyPrefix")} ${item.title}`}
+                          aria-label={`${t("checklist.qtyPrefix")} ${name}`}
                         />
                       ) : null}
                       <button
                         type="button"
                         disabled={pending}
-                        onClick={() => addFromCatalog(item.title, qty, group.category)}
+                        onClick={() => addFromCatalog(item.key, qty, group.categoryKey)}
                         className="flex items-center gap-1 rounded-full border border-laiton-clair px-2.5 py-0.5 text-xs transition-colors hover:border-bordeaux hover:text-bordeaux"
-                        aria-label={`${t("checklist.addItemPrefix")} ${item.title} ${t("checklist.addItemSuffix")}`}
+                        aria-label={`${t("checklist.addItemPrefix")} ${name} ${t("checklist.addItemSuffix")}`}
                       >
                         <Plus className="size-3.5" aria-hidden="true" /> {t("checklist.add")}
                       </button>

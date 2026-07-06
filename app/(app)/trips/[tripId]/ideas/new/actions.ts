@@ -3,30 +3,8 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { geolocateIdea } from "@/lib/geo/locate";
+import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
-
-const ideaSchema = z.object({
-  tripId: z.string().uuid(),
-  title: z.string().trim().min(1, "Donne un titre à cette idée.").max(150),
-  description: z.string().trim().max(2000).optional(),
-  externalUrl: z.union([z.literal(""), z.string().url("Lien invalide.")]).optional(),
-  locationName: z.string().trim().max(150).optional(),
-  locationLat: z.union([z.literal(""), z.coerce.number().min(-90).max(90)]).optional(),
-  locationLng: z.union([z.literal(""), z.coerce.number().min(-180).max(180)]).optional(),
-  durationMinutes: z
-    .union([
-      z.literal(""),
-      z.coerce
-        .number()
-        .int()
-        .min(5)
-        .max(60 * 24 * 7),
-    ])
-    .optional(),
-  cost: z.union([z.literal(""), z.coerce.number().min(0).max(1000000)]).optional(),
-  costCurrency: z.string().trim().max(3).optional(),
-  tags: z.string().trim().max(300).optional(),
-});
 
 export type CreateIdeaState = {
   status: "idle" | "error";
@@ -37,6 +15,29 @@ export async function createIdea(
   _prev: CreateIdeaState,
   formData: FormData,
 ): Promise<CreateIdeaState> {
+  const t = await getT();
+  const ideaSchema = z.object({
+    tripId: z.string().uuid(),
+    title: z.string().trim().min(1, t("ideas.msg.titleRequired")).max(150),
+    description: z.string().trim().max(2000).optional(),
+    externalUrl: z.union([z.literal(""), z.string().url(t("ideas.msg.linkInvalid"))]).optional(),
+    locationName: z.string().trim().max(150).optional(),
+    locationLat: z.union([z.literal(""), z.coerce.number().min(-90).max(90)]).optional(),
+    locationLng: z.union([z.literal(""), z.coerce.number().min(-180).max(180)]).optional(),
+    durationMinutes: z
+      .union([
+        z.literal(""),
+        z.coerce
+          .number()
+          .int()
+          .min(5)
+          .max(60 * 24 * 7),
+      ])
+      .optional(),
+    cost: z.union([z.literal(""), z.coerce.number().min(0).max(1000000)]).optional(),
+    costCurrency: z.string().trim().max(3).optional(),
+    tags: z.string().trim().max(300).optional(),
+  });
   const parsed = ideaSchema.safeParse({
     tripId: formData.get("tripId"),
     title: formData.get("title"),
@@ -52,7 +53,10 @@ export async function createIdea(
   });
 
   if (!parsed.success) {
-    return { status: "error", message: parsed.error.issues[0]?.message ?? "Saisie invalide." };
+    return {
+      status: "error",
+      message: parsed.error.issues[0]?.message ?? t("ideas.msg.invalidInput"),
+    };
   }
 
   const supabase = await createClient();
@@ -66,8 +70,8 @@ export async function createIdea(
   const d = parsed.data;
   const tags = (d.tags ?? "")
     .split(",")
-    .map((t) => t.trim().toLowerCase().replace(/^#/, ""))
-    .filter((t) => t.length > 0)
+    .map((tag) => tag.trim().toLowerCase().replace(/^#/, ""))
+    .filter((tag) => tag.length > 0)
     .slice(0, 10);
 
   // PHIL-P07 : coordonnées choisies via l'autocomplétion (sinon géocodage plus bas)

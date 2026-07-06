@@ -1,4 +1,6 @@
 import { Button, Section, Text } from "@react-email/components";
+import type { Locale } from "@/lib/i18n/config";
+import { messages, translator } from "@/lib/i18n/messages";
 import { EmailShell, emailStyles } from "./base";
 
 type Props = {
@@ -6,22 +8,37 @@ type Props = {
   categoryLabel: string;
   daysLeft: number;
   vaultUrl: string;
+  locale: Locale;
 };
 
-export function DocumentExpiryEmail({ documentName, categoryLabel, daysLeft, vaultUrl }: Props) {
+export function DocumentExpiryEmail({
+  documentName,
+  categoryLabel,
+  daysLeft,
+  vaultUrl,
+  locale,
+}: Props) {
+  const t = translator(messages[locale]);
+  const days = String(daysLeft);
   return (
-    <EmailShell preview={`${categoryLabel} : expiration dans ${daysLeft} jours`}>
-      <Text style={emailStyles.heading}>Un document arrive à échéance</Text>
+    <EmailShell
+      locale={locale}
+      preview={t("email.expiry.preview")
+        .replace("{category}", categoryLabel)
+        .replace("{days}", days)}
+    >
+      <Text style={emailStyles.heading}>{t("email.expiry.heading")}</Text>
       <Text style={emailStyles.text}>
-        Ton document <strong>{documentName}</strong> ({categoryLabel.toLowerCase()}) expire dans{" "}
-        <strong>{daysLeft} jours</strong>.
+        {t("email.expiry.bodyBefore")}
+        <strong>{documentName}</strong>
+        {t("email.expiry.bodyMiddle").replace("{category}", categoryLabel.toLowerCase())}
+        <strong>{t("email.expiry.days").replace("{days}", days)}</strong>
+        {t("email.expiry.bodyAfter")}
       </Text>
-      <Text style={emailStyles.muted}>
-        Un renouvellement peut prendre plusieurs semaines — mieux vaut s'y prendre avant le départ.
-      </Text>
+      <Text style={emailStyles.muted}>{t("email.expiry.renewalNote")}</Text>
       <Section style={emailStyles.buttonWrap}>
         <Button href={vaultUrl} style={emailStyles.button}>
-          Ouvrir mon coffre
+          {t("email.expiry.button")}
         </Button>
       </Section>
     </EmailShell>

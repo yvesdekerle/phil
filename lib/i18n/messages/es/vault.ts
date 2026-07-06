@@ -71,6 +71,10 @@ export const vaultEs = {
     },
   },
   documents: {
+    msg: {
+      nameRequired: "El nombre no puede estar vacío.",
+      invalidInput: "Entrada no válida.",
+    },
     categories: {
       passport: "Pasaporte",
       id_card: "Documento de identidad",

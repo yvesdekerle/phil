@@ -1,9 +1,11 @@
 import { createResendClient, fromEmail } from "@/lib/email/resend";
 import { DocumentExpiryEmail } from "@/lib/email/templates/document-expiry";
+import { isLocale, type Locale } from "@/lib/i18n/config";
+import { messages, translator } from "@/lib/i18n/messages";
 import { parsePreferences } from "@/lib/notifications/preferences";
 import { checkBearer } from "@/lib/security/secret";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { CATEGORY_LABELS } from "@/lib/vault/categories";
+import { categoryLabel } from "@/lib/vault/categories";
 
 export const dynamic = "force-dynamic";
 // PHIL-Q50 : marge au-delà des 10 s par défaut (envois séquentiels + purge)
@@ -68,7 +70,7 @@ export async function GET(request: Request) {
 
     const { data: docs } = await admin
       .from("documents")
-      .select("id, file_name, category, owner_id, profiles(notification_preferences)")
+      .select("id, file_name, category, owner_id, profiles(notification_preferences, locale)")
       .eq("expires_at", targetDate)
       .is("deleted_at", null);
 
@@ -87,17 +89,22 @@ export async function GET(request: Request) {
       }
 
       const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+      // Langue du destinataire (propriétaire du document), pas de l'expéditeur.
+      const recipientLocale: Locale = isLocale(doc.profiles?.locale) ? doc.profiles.locale : "fr";
+      const t = translator(messages[recipientLocale]);
+      const label = categoryLabel(t, doc.category);
       try {
         const resend = createResendClient();
         const { error } = await resend.emails.send({
           from: `Phil <${fromEmail()}>`,
           to: email,
-          subject: `Ton document expire dans ${days} jours`,
+          subject: t("email.expiry.subject").replace("{days}", String(days)),
           react: DocumentExpiryEmail({
             documentName: doc.file_name,
-            categoryLabel: CATEGORY_LABELS[doc.category] ?? doc.category,
+            categoryLabel: label,
             daysLeft: days,
             vaultUrl: `${baseUrl}/vault`,
+            locale: recipientLocale,
           }),
         });
         results.push({

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { haversineKm } from "@/lib/geo/distance";
-import { catalogItemTitle, matchesCatalogItem } from "@/lib/trips/packing-catalog";
+import { catalogItemTitle, matchesCatalogKey } from "@/lib/trips/packing-catalog";
 
 /** Distance à vol d'oiseau (PHIL-P09) — sert la carte et l'Explorateur. */
 describe("haversineKm", () => {
@@ -29,14 +29,18 @@ describe("catalogItemTitle", () => {
   });
 });
 
-describe("matchesCatalogItem", () => {
+describe("matchesCatalogKey", () => {
   it("reconnaît un item avec quantité", () => {
-    expect(matchesCatalogItem("T-shirts ×8", "T-shirts")).toBe(true);
+    expect(matchesCatalogKey("T-shirts ×8", "tshirts")).toBe(true);
   });
   it("insensible aux accents", () => {
-    expect(matchesCatalogItem("Crème solaire", "Creme solaire")).toBe(true);
+    expect(matchesCatalogKey("Creme solaire", "sunscreen")).toBe(true);
+  });
+  it("reconnaît un item ajouté dans une autre langue (dédoublonnage cross-langue)", () => {
+    // "Camisetas" (ES) doit correspondre à la clé tshirts vue en FR
+    expect(matchesCatalogKey("Camisetas ×8", "tshirts")).toBe(true);
   });
   it("ne confond pas deux items distincts", () => {
-    expect(matchesCatalogItem("Chaussettes", "T-shirts")).toBe(false);
+    expect(matchesCatalogKey("Chaussettes", "tshirts")).toBe(false);
   });
 });

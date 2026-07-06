@@ -1,4 +1,6 @@
 import { Button, Section, Text } from "@react-email/components";
+import type { Locale } from "@/lib/i18n/config";
+import { messages, translator } from "@/lib/i18n/messages";
 import { EmailShell, emailStyles } from "./base";
 
 type Props = {
@@ -7,6 +9,7 @@ type Props = {
   destination: string;
   dates: string;
   inviteUrl: string;
+  locale: Locale;
 };
 
 export function TripInvitationEmail({
@@ -15,24 +18,32 @@ export function TripInvitationEmail({
   destination,
   dates,
   inviteUrl,
+  locale,
 }: Props) {
+  const t = translator(messages[locale]);
   return (
-    <EmailShell preview={`${inviterName} t'invite à rejoindre « ${tripName} »`}>
-      <Text style={emailStyles.heading}>Embarquement proposé</Text>
+    <EmailShell
+      locale={locale}
+      preview={t("email.invitation.preview")
+        .replace("{name}", inviterName)
+        .replace("{trip}", tripName)}
+    >
+      <Text style={emailStyles.heading}>{t("email.invitation.heading")}</Text>
       <Text style={emailStyles.text}>
-        {inviterName} t'invite à rejoindre le voyage <strong>{tripName}</strong> — {destination},{" "}
-        {dates}.
+        {t("email.invitation.bodyBefore").replace("{name}", inviterName)}
+        <strong>{tripName}</strong>
+        {t("email.invitation.bodyAfter")
+          .replace("{destination}", destination)
+          .replace("{dates}", dates)}
       </Text>
-      <Text style={emailStyles.muted}>
-        Calendrier partagé, documents du groupe, idées à voter : tout le voyage au même endroit.
-      </Text>
+      <Text style={emailStyles.muted}>{t("email.invitation.perks")}</Text>
       <Section style={emailStyles.buttonWrap}>
         <Button href={inviteUrl} style={emailStyles.button}>
-          Rejoindre le voyage
+          {t("email.invitation.button")}
         </Button>
       </Section>
       <Text style={emailStyles.muted}>
-        Si le bouton ne fonctionne pas, copie ce lien :{" "}
+        {t("email.invitation.fallbackPrefix")}
         <span style={emailStyles.fallbackLink}>{inviteUrl}</span>
       </Text>
     </EmailShell>

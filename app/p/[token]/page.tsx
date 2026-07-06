@@ -5,7 +5,8 @@ import { EventTypeIcon } from "@/components/calendar/event-type-icon";
 import type { MapMarker } from "@/components/map/trip-map";
 import { TripMapLazy } from "@/components/map/trip-map-lazy";
 import { eventTime, groupEventsByDay } from "@/lib/events/datetime";
-import { EVENT_TYPE_LABELS, type TripEvent } from "@/lib/events/types";
+import type { TripEvent } from "@/lib/events/types";
+import { getT } from "@/lib/i18n/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { areUuids } from "@/lib/validation";
 
@@ -26,6 +27,7 @@ export default async function PublicTripPage({ params }: { params: Promise<{ tok
     notFound();
   }
 
+  const t = await getT();
   const admin = createAdminClient();
   const { data: trip } = await admin
     .from("trips")
@@ -53,7 +55,7 @@ export default async function PublicTripPage({ params }: { params: Promise<{ tok
       lat: e.location_lat as number,
       lng: e.location_lng as number,
       title: e.title,
-      subtitle: EVENT_TYPE_LABELS[e.type],
+      subtitle: t(`events.type.${e.type}`),
       color: MARKER_COLORS[e.type] ?? "#6e1f2e",
       order: i,
     }));
@@ -66,7 +68,7 @@ export default async function PublicTripPage({ params }: { params: Promise<{ tok
 
   return (
     <main className="mx-auto w-full max-w-2xl px-4 py-10">
-      <p className="text-xs text-laiton uppercase tracking-widest">Carnet de voyage</p>
+      <p className="text-xs text-laiton uppercase tracking-widest">{t("public.eyebrow")}</p>
       <h1 className="mt-1 font-display text-3xl text-encre">{trip.name}</h1>
       <p className="mt-1 text-sm text-encre-douce">
         {trip.destination} · {dateRange}
@@ -81,7 +83,7 @@ export default async function PublicTripPage({ params }: { params: Promise<{ tok
       <section className="mt-8 flex flex-col gap-6">
         {days.length === 0 ? (
           <p className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-6 py-10 text-center text-sm text-encre-douce">
-            L'itinéraire s'écrit encore — repassez bientôt.
+            {t("public.emptyItinerary")}
           </p>
         ) : (
           days.map((day) => (
@@ -116,7 +118,7 @@ export default async function PublicTripPage({ params }: { params: Promise<{ tok
       </section>
 
       <footer className="mt-10 border-t border-laiton-clair/50 pt-4 text-center text-xs text-encre-douce">
-        Partagé avec Phil — le carnet de voyage des équipages bien organisés.
+        {t("public.footer")}
       </footer>
     </main>
   );

@@ -3,18 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { areUuids } from "@/lib/validation";
 import { logVaultAccess } from "@/lib/vault/audit";
 import { CATEGORIES } from "@/lib/vault/categories";
-
-const updateDocumentSchema = z.object({
-  documentId: z.string().uuid(),
-  fileName: z.string().trim().min(1, "Le nom ne peut pas être vide.").max(255),
-  category: z.enum(CATEGORIES as [string, ...string[]]),
-  expiresAt: z.union([z.literal(""), z.string().regex(/^\d{4}-\d{2}-\d{2}$/)]).optional(),
-  documentNumber: z.string().trim().max(100).optional(),
-});
 
 export type DocumentActionState = {
   status: "idle" | "success" | "error";
@@ -25,6 +18,14 @@ export async function updateDocument(
   _prev: DocumentActionState,
   formData: FormData,
 ): Promise<DocumentActionState> {
+  const t = await getT();
+  const updateDocumentSchema = z.object({
+    documentId: z.string().uuid(),
+    fileName: z.string().trim().min(1, t("documents.msg.nameRequired")).max(255),
+    category: z.enum(CATEGORIES as [string, ...string[]]),
+    expiresAt: z.union([z.literal(""), z.string().regex(/^\d{4}-\d{2}-\d{2}$/)]).optional(),
+    documentNumber: z.string().trim().max(100).optional(),
+  });
   const parsed = updateDocumentSchema.safeParse({
     documentId: formData.get("documentId"),
     fileName: formData.get("fileName"),
@@ -34,7 +35,10 @@ export async function updateDocument(
   });
 
   if (!parsed.success) {
-    return { status: "error", message: parsed.error.issues[0]?.message ?? "Saisie invalide." };
+    return {
+      status: "error",
+      message: parsed.error.issues[0]?.message ?? t("documents.msg.invalidInput"),
+    };
   }
 
   const supabase = await createClient();

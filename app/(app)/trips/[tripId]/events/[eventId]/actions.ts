@@ -3,30 +3,11 @@
 import { fromZonedTime } from "date-fns-tz";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { areUuids } from "@/lib/validation";
 
 const DATETIME_LOCAL = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
-
-const updateEventSchema = z
-  .object({
-    tripId: z.string().uuid(),
-    eventId: z.string().uuid(),
-    title: z.string().trim().min(1, "Le titre ne peut pas être vide.").max(150),
-    startsAtLocal: z.string().regex(DATETIME_LOCAL, "Date et heure de début requises."),
-    endsAtLocal: z.union([z.literal(""), z.string().regex(DATETIME_LOCAL)]).optional(),
-    timezone: z.string().refine((tz) => Intl.supportedValuesOf("timeZone").includes(tz), {
-      message: "Fuseau horaire inconnu.",
-    }),
-    locationName: z.string().trim().max(150).optional(),
-    locationAddress: z.string().trim().max(300).optional(),
-    externalUrl: z.union([z.literal(""), z.string().url("Lien invalide.")]).optional(),
-    notes: z.string().trim().max(2000).optional(),
-  })
-  .refine((v) => !v.endsAtLocal || v.endsAtLocal >= v.startsAtLocal, {
-    message: "La fin ne peut pas précéder le début.",
-    path: ["endsAtLocal"],
-  });
 
 export type EventActionState = {
   status: "idle" | "error";
@@ -37,6 +18,26 @@ export async function updateEvent(
   _prev: EventActionState,
   formData: FormData,
 ): Promise<EventActionState> {
+  const t = await getT();
+  const updateEventSchema = z
+    .object({
+      tripId: z.string().uuid(),
+      eventId: z.string().uuid(),
+      title: z.string().trim().min(1, t("events.msg.editTitleRequired")).max(150),
+      startsAtLocal: z.string().regex(DATETIME_LOCAL, t("events.msg.startRequired")),
+      endsAtLocal: z.union([z.literal(""), z.string().regex(DATETIME_LOCAL)]).optional(),
+      timezone: z.string().refine((tz) => Intl.supportedValuesOf("timeZone").includes(tz), {
+        message: t("events.msg.timezoneUnknown"),
+      }),
+      locationName: z.string().trim().max(150).optional(),
+      locationAddress: z.string().trim().max(300).optional(),
+      externalUrl: z.union([z.literal(""), z.string().url(t("events.msg.linkInvalid"))]).optional(),
+      notes: z.string().trim().max(2000).optional(),
+    })
+    .refine((v) => !v.endsAtLocal || v.endsAtLocal >= v.startsAtLocal, {
+      message: t("events.msg.endBeforeStart"),
+      path: ["endsAtLocal"],
+    });
   const parsed = updateEventSchema.safeParse({
     tripId: formData.get("tripId"),
     eventId: formData.get("eventId"),
@@ -51,7 +52,10 @@ export async function updateEvent(
   });
 
   if (!parsed.success) {
-    return { status: "error", message: parsed.error.issues[0]?.message ?? "Saisie invalide." };
+    return {
+      status: "error",
+      message: parsed.error.issues[0]?.message ?? t("events.msg.invalidInput"),
+    };
   }
 
   const supabase = await createClient();

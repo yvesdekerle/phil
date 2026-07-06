@@ -1,12 +1,16 @@
+import { locales } from "@/lib/i18n/config";
+import { messages, translator } from "@/lib/i18n/messages";
+
 /**
- * Catalogue de la Valise (PHIL-Q10, réorganisé par PHIL-Q20) — les affaires
- * et préparatifs qu'on retrouve dans tous les voyages, intégrés directement
- * dans chaque section (avant le départ / à emporter / sur place), avec des
- * quantités calées sur la durée du séjour (ajustables).
+ * Catalogue de la Valise (PHIL-Q10/Q20, i18n PHIL-Q37) — les affaires et
+ * préparatifs récurrents, avec une **clé stable** par item et par catégorie.
+ * Les noms affichés vivent dans les messages (`checklist.catalog.<key>` et
+ * `checklist.catalogCat.<categoryKey>`), donc traduisibles ; la clé sert au
+ * dédoublonnage entre membres, indépendamment de la langue.
  */
 
 export type CatalogItem = {
-  title: string;
+  key: string;
   /** Quantité proposée selon le nombre de nuits. */
   qty: (nights: number) => number;
 };
@@ -20,106 +24,113 @@ const perNights =
     Math.max(1, Math.min(max, Math.ceil(nights / div)));
 
 export const PACKING_CATALOG: {
-  category: string;
+  categoryKey: string;
   section: CatalogSection;
   items: CatalogItem[];
 }[] = [
   {
-    category: "Préparatifs",
+    categoryKey: "prep",
     section: "avant_depart",
     items: [
-      { title: "Vaccins à jour", qty: one },
-      { title: "Passeports vérifiés (validité 6 mois après retour)", qty: one },
-      { title: "Assurance voyage vérifiée", qty: one },
-      { title: "Google Maps hors-ligne téléchargé", qty: one },
-      { title: "Copies des papiers dans le coffre Phil", qty: one },
-      { title: "Banque prévenue du voyage", qty: one },
+      { key: "vaccines", qty: one },
+      { key: "passports", qty: one },
+      { key: "insurance", qty: one },
+      { key: "offlineMaps", qty: one },
+      { key: "docCopies", qty: one },
+      { key: "bankNotified", qty: one },
     ],
   },
   {
-    category: "Vêtements — Haut",
+    categoryKey: "clothingTop",
     section: "a_emporter",
     items: [
-      { title: "T-shirts", qty: perNights(10) },
-      { title: "Chemises ou tops", qty: perNights(4, 4) },
-      { title: "Pull ou petite laine", qty: one },
-      { title: "Coupe-vent", qty: one },
-      { title: "Manteau", qty: one },
-      { title: "Tenue habillée (soirée)", qty: one },
-      { title: "Casquette ou chapeau", qty: one },
+      { key: "tshirts", qty: perNights(10) },
+      { key: "shirts", qty: perNights(4, 4) },
+      { key: "sweater", qty: one },
+      { key: "windbreaker", qty: one },
+      { key: "coat", qty: one },
+      { key: "dressyOutfit", qty: one },
+      { key: "hat", qty: one },
     ],
   },
   {
-    category: "Vêtements — Bas",
+    categoryKey: "clothingBottom",
     section: "a_emporter",
     items: [
-      { title: "Shorts", qty: perNights(5, 3) },
-      { title: "Pantalons", qty: perNights(3, 7) },
+      { key: "shorts", qty: perNights(5, 3) },
+      { key: "pants", qty: perNights(3, 7) },
     ],
   },
   {
-    category: "Sous-vêtements & nuit",
+    categoryKey: "underwear",
     section: "a_emporter",
     items: [
-      { title: "Sous-vêtements", qty: (n) => Math.max(2, Math.min(12, n + 1)) },
-      { title: "Paires de chaussettes", qty: perNights(8) },
-      { title: "Maillots de bain", qty: (n) => (n >= 5 ? 2 : 1) },
-      { title: "Pyjama", qty: one },
+      { key: "underwear", qty: (n) => Math.max(2, Math.min(12, n + 1)) },
+      { key: "socks", qty: perNights(8) },
+      { key: "swimwear", qty: (n) => (n >= 5 ? 2 : 1) },
+      { key: "pyjamas", qty: one },
     ],
   },
   {
-    category: "Chaussures",
+    categoryKey: "shoes",
     section: "a_emporter",
     items: [
-      { title: "Baskets", qty: one },
-      { title: "Tongs ou sandales", qty: one },
+      { key: "sneakers", qty: one },
+      { key: "sandals", qty: one },
     ],
   },
   {
-    category: "Trousse de toilette",
+    categoryKey: "toiletry",
     section: "a_emporter",
     items: [
-      { title: "Brosse à dents", qty: one },
-      { title: "Dentifrice", qty: one },
-      { title: "Déodorant", qty: one },
-      { title: "Shampoing / gel douche", qty: one },
-      { title: "Rasoir", qty: one },
-      { title: "Brosse ou peigne", qty: one },
+      { key: "toothbrush", qty: one },
+      { key: "toothpaste", qty: one },
+      { key: "deodorant", qty: one },
+      { key: "shampoo", qty: one },
+      { key: "razor", qty: one },
+      { key: "comb", qty: one },
     ],
   },
   {
-    category: "Indispensables",
+    categoryKey: "essentials",
     section: "a_emporter",
     items: [
-      { title: "Lunettes de soleil", qty: one },
-      { title: "Crème solaire", qty: one },
-      { title: "Masque et tuba", qty: one },
-      { title: "Chargeurs (téléphone, montre…)", qty: one },
-      { title: "Batterie externe", qty: one },
-      { title: "Adaptateur de prise", qty: one },
-      { title: "Médicaments personnels", qty: one },
-      { title: "Gourde", qty: one },
-      { title: "Sac pour le linge sale", qty: one },
+      { key: "sunglasses", qty: one },
+      { key: "sunscreen", qty: one },
+      { key: "snorkel", qty: one },
+      { key: "chargers", qty: one },
+      { key: "powerbank", qty: one },
+      { key: "adapter", qty: one },
+      { key: "meds", qty: one },
+      { key: "waterBottle", qty: one },
+      { key: "laundryBag", qty: one },
     ],
   },
   {
-    category: "À l'arrivée",
+    categoryKey: "arrival",
     section: "sur_place",
     items: [
-      { title: "Carte SIM locale ou e-SIM activée", qty: one },
-      { title: "Espèces retirées en monnaie locale", qty: one },
+      { key: "simCard", qty: one },
+      { key: "cash", qty: one },
     ],
   },
 ];
 
-/** Titre d'item de valise pour un élément du catalogue ("T-shirts ×8"). */
-export function catalogItemTitle(title: string, qty: number): string {
-  return qty > 1 ? `${title} ×${qty}` : title;
+/** Titre d'item de valise à partir d'un nom localisé ("T-shirts ×8"). */
+export function catalogItemTitle(name: string, qty: number): string {
+  return qty > 1 ? `${name} ×${qty}` : name;
 }
 
-/** L'item de valise correspond-il à cet élément du catalogue ? */
-export function matchesCatalogItem(checklistTitle: string, catalogTitle: string): boolean {
-  const normalize = (s: string) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").trim();
+const normalize = (s: string) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").trim();
+
+/**
+ * L'item de valise (peu importe la langue où il a été ajouté) correspond-il à
+ * cette clé de catalogue ? On compare le titre stocké au nom du catalogue dans
+ * **toutes les langues** — ainsi un item ajouté en FR reste reconnu vu en ES.
+ */
+export function matchesCatalogKey(checklistTitle: string, key: string): boolean {
   const base = normalize(checklistTitle).replace(/\s*×\d+$/, "");
-  return base === normalize(catalogTitle);
+  return locales.some(
+    (loc) => normalize(translator(messages[loc])(`checklist.catalog.${key}`)) === base,
+  );
 }

@@ -71,6 +71,10 @@ export const vaultFr = {
     },
   },
   documents: {
+    msg: {
+      nameRequired: "Le nom ne peut pas être vide.",
+      invalidInput: "Saisie invalide.",
+    },
     categories: {
       passport: "Passeport",
       id_card: "Carte d'identité",

@@ -6,6 +6,7 @@ import { z } from "zod";
 import { LODGING_PLATFORMS } from "@/lib/events/lodging";
 import { TRANSPORT_MODES } from "@/lib/events/transport";
 import { geolocateEvent } from "@/lib/geo/locate";
+import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 
 const DATETIME_LOCAL = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
@@ -16,85 +17,41 @@ const coordsSchema = {
   locationLng: z.union([z.literal(""), z.coerce.number().min(-180).max(180)]).optional(),
 };
 
-const transportSchema = z
-  .object({
-    tripId: z.string().uuid(),
-    title: z.string().trim().min(1, "Donne un titre à ce transport.").max(150),
-    mode: z.enum(TRANSPORT_MODES),
-    from: z.string().trim().min(1, "D'où part-on ?").max(120),
-    to: z.string().trim().min(1, "Où arrive-t-on ?").max(120),
-    startsAtLocal: z.string().regex(DATETIME_LOCAL, "Date et heure de départ requises."),
-    endsAtLocal: z.union([z.literal(""), z.string().regex(DATETIME_LOCAL)]).optional(),
-    timezone: z.string().refine((tz) => Intl.supportedValuesOf("timeZone").includes(tz), {
-      message: "Fuseau horaire inconnu.",
-    }),
-    bookingReference: z.string().trim().max(100).optional(),
-    carrier: z.string().trim().max(120).optional(),
-    externalUrl: z.union([z.literal(""), z.string().url("Lien invalide.")]).optional(),
-    notes: z.string().trim().max(2000).optional(),
-  })
-  .refine((v) => !v.endsAtLocal || v.endsAtLocal >= v.startsAtLocal, {
-    message: "L'arrivée ne peut pas précéder le départ.",
-    path: ["endsAtLocal"],
-  });
-
 export type CreateEventState = {
   status: "idle" | "error";
   message?: string;
 };
 
-const lodgingSchema = z
-  .object({
-    tripId: z.string().uuid(),
-    name: z.string().trim().min(1, "Quel est le nom de l'hébergement ?").max(150),
-    address: z.string().trim().max(300).optional(),
-    ...coordsSchema,
-    checkInLocal: z.string().regex(DATETIME_LOCAL, "Date et heure de check-in requises."),
-    checkOutLocal: z.string().regex(DATETIME_LOCAL, "Date et heure de check-out requises."),
-    timezone: z.string().refine((tz) => Intl.supportedValuesOf("timeZone").includes(tz), {
-      message: "Fuseau horaire inconnu.",
-    }),
-    platform: z.enum(LODGING_PLATFORMS),
-    bookingReference: z.string().trim().max(100).optional(),
-    guests: z.union([z.literal(""), z.coerce.number().int().min(1).max(50)]).optional(),
-    externalUrl: z.union([z.literal(""), z.string().url("Lien invalide.")]).optional(),
-    notes: z.string().trim().max(2000).optional(),
-  })
-  .refine((v) => v.checkOutLocal >= v.checkInLocal, {
-    message: "Le check-out ne peut pas précéder le check-in.",
-    path: ["checkOutLocal"],
-  });
-
-const activitySchema = z.object({
-  tripId: z.string().uuid(),
-  title: z.string().trim().min(1, "Donne un titre à cette activité.").max(150),
-  description: z.string().trim().max(2000).optional(),
-  locationName: z.string().trim().max(150).optional(),
-  ...coordsSchema,
-  startsAtLocal: z.string().regex(DATETIME_LOCAL, "Date et heure de début requises."),
-  timezone: z.string().refine((tz) => Intl.supportedValuesOf("timeZone").includes(tz), {
-    message: "Fuseau horaire inconnu.",
-  }),
-  durationMinutes: z
-    .union([
-      z.literal(""),
-      z.coerce
-        .number()
-        .int()
-        .min(5)
-        .max(60 * 24 * 7),
-    ])
-    .optional(),
-  cost: z.union([z.literal(""), z.coerce.number().min(0).max(1000000)]).optional(),
-  costCurrency: z.string().trim().max(3).optional(),
-  externalUrl: z.union([z.literal(""), z.string().url("Lien invalide.")]).optional(),
-  ideaId: z.union([z.literal(""), z.string().uuid()]).optional(),
-});
-
 export async function createActivityEvent(
   _prev: CreateEventState,
   formData: FormData,
 ): Promise<CreateEventState> {
+  const t = await getT();
+  const activitySchema = z.object({
+    tripId: z.string().uuid(),
+    title: z.string().trim().min(1, t("events.msg.activityTitleRequired")).max(150),
+    description: z.string().trim().max(2000).optional(),
+    locationName: z.string().trim().max(150).optional(),
+    ...coordsSchema,
+    startsAtLocal: z.string().regex(DATETIME_LOCAL, t("events.msg.startRequired")),
+    timezone: z.string().refine((tz) => Intl.supportedValuesOf("timeZone").includes(tz), {
+      message: t("events.msg.timezoneUnknown"),
+    }),
+    durationMinutes: z
+      .union([
+        z.literal(""),
+        z.coerce
+          .number()
+          .int()
+          .min(5)
+          .max(60 * 24 * 7),
+      ])
+      .optional(),
+    cost: z.union([z.literal(""), z.coerce.number().min(0).max(1000000)]).optional(),
+    costCurrency: z.string().trim().max(3).optional(),
+    externalUrl: z.union([z.literal(""), z.string().url(t("events.msg.linkInvalid"))]).optional(),
+    ideaId: z.union([z.literal(""), z.string().uuid()]).optional(),
+  });
   const parsed = activitySchema.safeParse({
     tripId: formData.get("tripId"),
     title: formData.get("title"),
@@ -112,7 +69,10 @@ export async function createActivityEvent(
   });
 
   if (!parsed.success) {
-    return { status: "error", message: parsed.error.issues[0]?.message ?? "Saisie invalide." };
+    return {
+      status: "error",
+      message: parsed.error.issues[0]?.message ?? t("events.msg.invalidInput"),
+    };
   }
 
   const supabase = await createClient();
@@ -192,6 +152,28 @@ export async function createLodgingEvent(
   _prev: CreateEventState,
   formData: FormData,
 ): Promise<CreateEventState> {
+  const t = await getT();
+  const lodgingSchema = z
+    .object({
+      tripId: z.string().uuid(),
+      name: z.string().trim().min(1, t("events.msg.lodgingNameRequired")).max(150),
+      address: z.string().trim().max(300).optional(),
+      ...coordsSchema,
+      checkInLocal: z.string().regex(DATETIME_LOCAL, t("events.msg.checkInRequired")),
+      checkOutLocal: z.string().regex(DATETIME_LOCAL, t("events.msg.checkOutRequired")),
+      timezone: z.string().refine((tz) => Intl.supportedValuesOf("timeZone").includes(tz), {
+        message: t("events.msg.timezoneUnknown"),
+      }),
+      platform: z.enum(LODGING_PLATFORMS),
+      bookingReference: z.string().trim().max(100).optional(),
+      guests: z.union([z.literal(""), z.coerce.number().int().min(1).max(50)]).optional(),
+      externalUrl: z.union([z.literal(""), z.string().url(t("events.msg.linkInvalid"))]).optional(),
+      notes: z.string().trim().max(2000).optional(),
+    })
+    .refine((v) => v.checkOutLocal >= v.checkInLocal, {
+      message: t("events.msg.checkOutBeforeCheckIn"),
+      path: ["checkOutLocal"],
+    });
   const parsed = lodgingSchema.safeParse({
     tripId: formData.get("tripId"),
     name: formData.get("name"),
@@ -209,7 +191,10 @@ export async function createLodgingEvent(
   });
 
   if (!parsed.success) {
-    return { status: "error", message: parsed.error.issues[0]?.message ?? "Saisie invalide." };
+    return {
+      status: "error",
+      message: parsed.error.issues[0]?.message ?? t("events.msg.invalidInput"),
+    };
   }
 
   const supabase = await createClient();
@@ -274,6 +259,28 @@ export async function createTransportEvent(
   _prev: CreateEventState,
   formData: FormData,
 ): Promise<CreateEventState> {
+  const t = await getT();
+  const transportSchema = z
+    .object({
+      tripId: z.string().uuid(),
+      title: z.string().trim().min(1, t("events.msg.transportTitleRequired")).max(150),
+      mode: z.enum(TRANSPORT_MODES),
+      from: z.string().trim().min(1, t("events.msg.fromRequired")).max(120),
+      to: z.string().trim().min(1, t("events.msg.toRequired")).max(120),
+      startsAtLocal: z.string().regex(DATETIME_LOCAL, t("events.msg.departureRequired")),
+      endsAtLocal: z.union([z.literal(""), z.string().regex(DATETIME_LOCAL)]).optional(),
+      timezone: z.string().refine((tz) => Intl.supportedValuesOf("timeZone").includes(tz), {
+        message: t("events.msg.timezoneUnknown"),
+      }),
+      bookingReference: z.string().trim().max(100).optional(),
+      carrier: z.string().trim().max(120).optional(),
+      externalUrl: z.union([z.literal(""), z.string().url(t("events.msg.linkInvalid"))]).optional(),
+      notes: z.string().trim().max(2000).optional(),
+    })
+    .refine((v) => !v.endsAtLocal || v.endsAtLocal >= v.startsAtLocal, {
+      message: t("events.msg.arrivalBeforeDeparture"),
+      path: ["endsAtLocal"],
+    });
   const parsed = transportSchema.safeParse({
     tripId: formData.get("tripId"),
     title: formData.get("title"),
@@ -290,7 +297,10 @@ export async function createTransportEvent(
   });
 
   if (!parsed.success) {
-    return { status: "error", message: parsed.error.issues[0]?.message ?? "Saisie invalide." };
+    return {
+      status: "error",
+      message: parsed.error.issues[0]?.message ?? t("events.msg.invalidInput"),
+    };
   }
 
   const supabase = await createClient();

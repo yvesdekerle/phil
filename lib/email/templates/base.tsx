@@ -1,4 +1,6 @@
 import { Body, Container, Head, Hr, Html, Preview, Section, Text } from "@react-email/components";
+import type { Locale } from "@/lib/i18n/config";
+import { messages, translator } from "@/lib/i18n/messages";
 
 const styles = {
   body: { backgroundColor: "#f4eee1", fontFamily: "Georgia, 'Times New Roman', serif" },
@@ -29,18 +31,27 @@ const styles = {
   signature: { color: "#5a6379", fontSize: "13px", margin: 0, textAlign: "center" as const },
 };
 
-export function EmailShell({ preview, children }: { preview: string; children: React.ReactNode }) {
+export function EmailShell({
+  locale,
+  preview,
+  children,
+}: {
+  locale: Locale;
+  preview: string;
+  children: React.ReactNode;
+}) {
+  const t = translator(messages[locale]);
   return (
-    <Html lang="fr">
+    <Html lang={locale}>
       <Head />
       <Preview>{preview}</Preview>
       <Body style={styles.body}>
         <Container style={styles.container}>
           <Text style={styles.wordmark}>Phil</Text>
-          <Text style={styles.tagline}>Carnet de voyage</Text>
+          <Text style={styles.tagline}>{t("email.tagline")}</Text>
           <Section>{children}</Section>
           <Hr style={styles.hr} />
-          <Text style={styles.signature}>À bientôt sur la route, Phil</Text>
+          <Text style={styles.signature}>{t("email.signature")}</Text>
         </Container>
       </Body>
     </Html>

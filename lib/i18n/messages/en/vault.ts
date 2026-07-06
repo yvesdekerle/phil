@@ -70,6 +70,10 @@ export const vaultEn = {
     },
   },
   documents: {
+    msg: {
+      nameRequired: "The name can't be empty.",
+      invalidInput: "Invalid input.",
+    },
     categories: {
       passport: "Passport",
       id_card: "ID card",

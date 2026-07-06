@@ -4,7 +4,10 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth/require-user";
+import { isLocale, type Locale } from "@/lib/i18n/config";
+import { messages, translator } from "@/lib/i18n/messages";
 import { getT } from "@/lib/i18n/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { areUuids } from "@/lib/validation";
 
 export type ParticipantActionState = {
@@ -26,6 +29,31 @@ async function myRole(
     .eq("user_id", userId)
     .single();
   return data?.role ?? null;
+}
+
+/**
+ * Langue de l'invité (par email) pour l'email d'invitation. On résout l'email
+ * vers un compte existant via le client admin, puis on lit `profiles.locale`.
+ * L'invité peut ne pas encore avoir de compte → repli sur le français.
+ */
+async function recipientLocaleForEmail(email: string): Promise<Locale> {
+  try {
+    const admin = createAdminClient();
+    const { data } = await admin.auth.admin.listUsers({ perPage: 1000 });
+    const target = email.toLowerCase();
+    const found = data.users.find((u) => u.email?.toLowerCase() === target);
+    if (!found) {
+      return "fr";
+    }
+    const { data: profile } = await admin
+      .from("profiles")
+      .select("locale")
+      .eq("id", found.id)
+      .single();
+    return isLocale(profile?.locale) ? profile.locale : "fr";
+  } catch {
+    return "fr";
+  }
 }
 
 export async function changeParticipantRole(
@@ -218,17 +246,23 @@ export async function createInvitation(
       const { formatDateRange } = await import("@/lib/trips/format");
 
       const resend = createResendClient();
-      const inviterName = inviter?.display_name ?? "Un compagnon de route";
+      // Langue du destinataire (l'invité), pas de l'expéditeur.
+      const recipientLocale = await recipientLocaleForEmail(d.email);
+      const te = translator(messages[recipientLocale]);
+      const inviterName = inviter?.display_name ?? te("email.invitation.inviterFallback");
       const { error: sendError } = await resend.emails.send({
         from: `Phil <${fromEmail()}>`,
         to: d.email,
-        subject: `${inviterName} t'invite à rejoindre « ${trip.name} »`,
+        subject: te("email.invitation.subject")
+          .replace("{name}", inviterName)
+          .replace("{trip}", trip.name),
         react: TripInvitationEmail({
           inviterName,
           tripName: trip.name,
           destination: trip.destination,
           dates: formatDateRange(trip.start_date, trip.end_date),
           inviteUrl,
+          locale: recipientLocale,
         }),
       });
       emailSent = !sendError;
