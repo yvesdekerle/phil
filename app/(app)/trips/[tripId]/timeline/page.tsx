@@ -87,11 +87,14 @@ export default async function TimelinePage({ params }: { params: Promise<{ tripI
             <p className="mt-2 text-sm text-encre-douce">{t("calendar.timeline.emptyBody")}</p>
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-lg border border-laiton-clair bg-papier pb-3">
+          <div className="max-h-[calc(100vh-7rem)] overflow-auto rounded-lg border border-laiton-clair bg-papier">
             <div style={{ width: dayCount * DAY_WIDTH + LABEL_W }}>
-              {/* En-tête des jours — colonne des noms figée à gauche */}
-              <div className="flex border-b border-laiton-clair/60" style={dayGridBackground}>
-                <div className="sticky left-0 z-20 shrink-0 bg-papier" style={{ width: LABEL_W }} />
+              {/* En-tête des jours — figé en haut, colonne des noms figée à gauche */}
+              <div
+                className="sticky top-0 z-30 flex border-b border-laiton-clair/60 bg-papier"
+                style={dayGridBackground}
+              >
+                <div className="sticky left-0 z-40 shrink-0 bg-papier" style={{ width: LABEL_W }} />
                 {days.map((d) => (
                   <div
                     key={d.toISOString()}
@@ -126,11 +129,11 @@ export default async function TimelinePage({ params }: { params: Promise<{ tripI
                         style={dayGridBackground}
                       >
                         <div
-                          className="sticky left-0 z-20 shrink-0 truncate border-r border-laiton-clair/40 bg-papier px-3 text-xs text-encre-douce"
+                          className="sticky left-0 z-20 flex shrink-0 items-center self-stretch border-r border-laiton-clair/40 bg-papier px-3"
                           style={{ width: LABEL_W }}
                           title={event.title}
                         >
-                          {event.title}
+                          <span className="truncate text-xs text-encre-douce">{event.title}</span>
                         </div>
                         <div className="relative h-8" style={{ width: dayCount * DAY_WIDTH }}>
                           <Link
