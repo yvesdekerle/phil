@@ -12,6 +12,8 @@ export const geoFr = {
     ideas: "Idées",
     wholeTrip: "Tout le voyage",
     dayProgram: "Programme de la journée",
+    allPlaces: "Tous les lieux",
+    noPlaces: "Aucun lieu géolocalisé à afficher ici pour l'instant.",
     byRoad: "de route",
     place: "lieu",
     places: "lieux",

@@ -13,6 +13,8 @@ export const geoEn = {
     ideas: "Ideas",
     wholeTrip: "The whole trip",
     dayProgram: "The day's itinerary",
+    allPlaces: "All places",
+    noPlaces: "No geolocated place to show here yet.",
     byRoad: "on the road",
     place: "place",
     places: "places",

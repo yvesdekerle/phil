@@ -12,6 +12,8 @@ export const geoEs = {
     ideas: "Ideas",
     wholeTrip: "Todo el viaje",
     dayProgram: "Programa del día",
+    allPlaces: "Todos los lugares",
+    noPlaces: "Ningún lugar geolocalizado que mostrar aquí por ahora.",
     byRoad: "por carretera",
     place: "lugar",
     places: "lugares",

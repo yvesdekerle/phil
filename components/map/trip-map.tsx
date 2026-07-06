@@ -4,6 +4,7 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useEffect, useRef } from "react";
 import { useT } from "@/components/i18n/provider";
+import { cn } from "@/lib/utils";
 
 export type MapMarker = {
   id: string;
@@ -28,12 +29,15 @@ export function TripMap({
   drawPath,
   distanceFrom,
   focusId,
+  heightClass = "h-[28rem]",
 }: {
   markers: MapMarker[];
   drawPath?: boolean;
   distanceFrom?: { lat: number; lng: number; label: string } | null;
   /** Centre la carte et ouvre le popup de ce marqueur (PHIL-Q14). */
   focusId?: string | null;
+  /** Hauteur de la carte (PHIL-Q37b) — la page carte l'agrandit en colonne. */
+  heightClass?: string;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
@@ -49,7 +53,14 @@ export function TripMap({
       attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       maxZoom: 19,
     }).addTo(map);
+    // La colonne carte est haute/responsive/sticky : recalcule la taille des
+    // tuiles quand le conteneur change de dimensions (évite les tuiles grises),
+    // et une fois après le premier paint (init en grille/flex à largeur tardive).
+    requestAnimationFrame(() => map.invalidateSize());
+    const observer = new ResizeObserver(() => map.invalidateSize());
+    observer.observe(containerRef.current);
     return () => {
+      observer.disconnect();
       map.remove();
       mapRef.current = null;
     };
@@ -144,7 +155,7 @@ export function TripMap({
   return (
     <div
       ref={containerRef}
-      className="h-[28rem] w-full overflow-hidden rounded-lg border border-laiton-clair"
+      className={cn(heightClass, "w-full overflow-hidden rounded-lg border border-laiton-clair")}
     />
   );
 }
