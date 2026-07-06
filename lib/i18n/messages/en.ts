@@ -13,6 +13,7 @@ export const en: PartialMessages = {
     clocks: "Clocks",
     tips: "Tips",
     profileAria: "Your profile",
+    language: "Change language",
   },
   passport: {
     expiresBeforePrefix: "Your passport expires on ",

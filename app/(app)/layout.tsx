@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { ProfileMenu } from "@/components/layout/profile-menu";
 import { getT } from "@/lib/i18n/server";
 import { getOwnProfile } from "@/lib/supabase/profiles";
@@ -41,7 +42,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               ))}
             </nav>
           </div>
-          <ProfileMenu avatarUrl={profile?.avatar_url ?? null} initial={initial} />
+          <div className="flex items-center gap-3">
+            <LanguageSwitcher />
+            <ProfileMenu avatarUrl={profile?.avatar_url ?? null} initial={initial} />
+          </div>
         </div>
       </header>
       {children}

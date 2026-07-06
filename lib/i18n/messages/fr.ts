@@ -7,6 +7,7 @@ export const fr = {
     clocks: "Horloges",
     tips: "Conseils",
     profileAria: "Ton profil",
+    language: "Changer de langue",
   },
   passport: {
     expiresBeforePrefix: "Ton passeport expire le ",
