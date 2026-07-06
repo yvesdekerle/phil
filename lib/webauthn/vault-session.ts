@@ -1,3 +1,4 @@
+import "server-only";
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 import { VAULT_SESSION_COOKIE, VAULT_SESSION_MINUTES } from "./config";

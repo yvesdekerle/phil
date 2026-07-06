@@ -33,7 +33,7 @@ export async function acceptInvitation(token: string): Promise<AcceptState> {
   const admin = createAdminClient();
   const { data: invitation } = await admin
     .from("trip_invitations")
-    .select("id, trip_id, role, accepted_at, expires_at")
+    .select("id, trip_id, role, accepted_at, expires_at, invited_email")
     .eq("token", token)
     .single();
 
@@ -45,6 +45,15 @@ export async function acceptInvitation(token: string): Promise<AcceptState> {
   }
   if (new Date(invitation.expires_at) < new Date()) {
     return { status: "error", message: t("invitations.msg.expired") };
+  }
+  // Le lien magique doit être consommé par son destinataire : l'invitation est
+  // liée à une adresse précise, on refuse un compte connecté qui ne correspond pas.
+  if (
+    invitation.invited_email &&
+    user.email &&
+    invitation.invited_email.trim().toLowerCase() !== user.email.trim().toLowerCase()
+  ) {
+    return { status: "error", message: t("invitations.msg.wrongAccount") };
   }
 
   const { data: existing } = await admin
