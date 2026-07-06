@@ -1,5 +1,5 @@
 import type { Locale as DateFnsLocale } from "date-fns";
-import { enGB, fr } from "date-fns/locale";
+import { enGB, es, fr } from "date-fns/locale";
 import type { Locale } from "./config";
 
 /**
@@ -8,9 +8,9 @@ import type { Locale } from "./config";
  * BCP-47 pour `Intl`. Ajouter une langue = ajouter une branche ici.
  */
 export function dateFnsLocale(locale: Locale): DateFnsLocale {
-  return locale === "en" ? enGB : fr;
+  return locale === "en" ? enGB : locale === "es" ? es : fr;
 }
 
 export function intlLocale(locale: Locale): string {
-  return locale === "en" ? "en-GB" : "fr-FR";
+  return locale === "en" ? "en-GB" : locale === "es" ? "es-ES" : "fr-FR";
 }

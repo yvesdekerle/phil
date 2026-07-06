@@ -22,7 +22,7 @@ export async function updateProfile(
       .trim()
       .min(1, t("profile.form.nameRequired"))
       .max(80, t("profile.form.nameMax")),
-    locale: z.enum(["fr", "en"]),
+    locale: z.enum(["fr", "en", "es"]),
     timezone: z.string().refine((tz) => Intl.supportedValuesOf("timeZone").includes(tz), {
       message: t("profile.form.unknownTimezone"),
     }),
@@ -123,7 +123,8 @@ export async function deleteMyAccount(
   formData: FormData,
 ): Promise<ProfileFormState> {
   const t = await getT();
-  if (formData.get("confirmation") !== "SUPPRIMER") {
+  // PHIL-Q37 : le mot de confirmation est localisé (SUPPRIMER / DELETE / ELIMINAR)
+  if (formData.get("confirmation") !== t("profile.delete.confirmWord")) {
     return { status: "error", message: t("profile.delete.confirmError") };
   }
 

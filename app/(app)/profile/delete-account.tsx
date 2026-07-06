@@ -40,7 +40,8 @@ export function DeleteAccountSection() {
               <AlertDialogHeader>
                 <AlertDialogTitle>{t("profile.delete.dialogTitle")}</AlertDialogTitle>
                 <AlertDialogDescription>
-                  {t("profile.delete.dialogBodyPrefix")} <strong>SUPPRIMER</strong>{" "}
+                  {t("profile.delete.dialogBodyPrefix")}{" "}
+                  <strong>{t("profile.delete.confirmWord")}</strong>{" "}
                   {t("profile.delete.dialogBodySuffix")}
                 </AlertDialogDescription>
               </AlertDialogHeader>

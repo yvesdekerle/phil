@@ -6,6 +6,14 @@ import { geoEn } from "./en/geo";
 import { metaEn } from "./en/meta";
 import { profileEn } from "./en/profile";
 import { vaultEn } from "./en/vault";
+import { es as esShell } from "./es";
+import { budgetEs } from "./es/budget";
+import { calendarEs } from "./es/calendar";
+import { checklistEs } from "./es/checklist";
+import { geoEs } from "./es/geo";
+import { metaEs } from "./es/meta";
+import { profileEs } from "./es/profile";
+import { vaultEs } from "./es/vault";
 import { fr as frShell } from "./fr";
 import { budgetFr } from "./fr/budget";
 import { calendarFr } from "./fr/calendar";
@@ -47,7 +55,18 @@ export const en: PartialMessages = {
   ...vaultEn,
 };
 
-export const messages: { fr: Messages; en: PartialMessages } = { fr, en };
+export const es: PartialMessages = {
+  ...esShell,
+  ...budgetEs,
+  ...calendarEs,
+  ...checklistEs,
+  ...geoEs,
+  ...metaEs,
+  ...profileEs,
+  ...vaultEs,
+};
+
+export const messages: { fr: Messages; en: PartialMessages; es: PartialMessages } = { fr, en, es };
 
 function lookup(dict: unknown, key: string): string | undefined {
   const value = key

@@ -19,7 +19,7 @@ import { type ProfileFormState, updateProfile } from "./actions";
 
 type FormValues = {
   displayName: string;
-  locale: "fr" | "en";
+  locale: "fr" | "en" | "es";
   timezone: string;
   whatsapp: string;
 };
@@ -27,6 +27,7 @@ type FormValues = {
 const LOCALES = [
   { value: "fr", label: "Français" },
   { value: "en", label: "English" },
+  { value: "es", label: "Español" },
 ] as const;
 
 export function ProfileForm({ defaultValues }: { defaultValues: FormValues }) {
@@ -42,7 +43,7 @@ export function ProfileForm({ defaultValues }: { defaultValues: FormValues }) {
           .trim()
           .min(1, t("profile.form.nameRequired"))
           .max(80, t("profile.form.nameMax")),
-        locale: z.enum(["fr", "en"]),
+        locale: z.enum(["fr", "en", "es"]),
         timezone: z.string().min(1),
         whatsapp: z
           .string()

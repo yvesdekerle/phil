@@ -57,6 +57,7 @@ export const profileFr = {
         "Compte, coffre, documents et participations seront supprimés immédiatement. Écris",
       dialogBodySuffix: "pour confirmer.",
       confirmLabel: "Confirmation",
+      confirmWord: "SUPPRIMER",
       cancel: "Rester à bord",
       confirm: "Supprimer définitivement",
       deleting: "Suppression…",
