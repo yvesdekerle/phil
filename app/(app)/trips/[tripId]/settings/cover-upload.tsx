@@ -5,8 +5,9 @@ import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
 import { useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { createClient } from "@/lib/supabase/client";
-import { setCoverFromUpload } from "./actions";
+import { setCoverFromUpload, setCoverFromUrl } from "./actions";
 
 const MAX_BYTES = 3 * 1024 * 1024;
 const ALLOWED = ["image/jpeg", "image/png", "image/webp"];
@@ -18,7 +19,26 @@ export function CoverUpload({ tripId }: { tripId: string }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [url, setUrl] = useState("");
   const [pending, startTransition] = useTransition();
+
+  function onUrl() {
+    setMessage(null);
+    setError(null);
+    if (!url.trim()) {
+      return;
+    }
+    startTransition(async () => {
+      const result = await setCoverFromUrl(tripId, url.trim());
+      if (result.status === "error") {
+        setError(result.message ?? t("settings.cover.errSave"));
+        return;
+      }
+      setMessage(t("settings.cover.done"));
+      setUrl("");
+      router.refresh();
+    });
+  }
 
   function onFile(file: File | undefined) {
     setMessage(null);
@@ -75,9 +95,30 @@ export function CoverUpload({ tripId }: { tripId: string }) {
           <ImageUp aria-hidden="true" />
           {pending ? t("settings.cover.uploading") : t("settings.cover.choose")}
         </Button>
-        {message ? <p className="text-xs text-encre-douce">{message}</p> : null}
-        {error ? <p className="text-xs text-bordeaux">{error}</p> : null}
       </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <Input
+          type="url"
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              onUrl();
+            }
+          }}
+          placeholder={t("settings.cover.urlPlaceholder")}
+          disabled={pending}
+          className="h-9 min-w-0 flex-1"
+        />
+        <Button type="button" variant="outline" disabled={pending || !url.trim()} onClick={onUrl}>
+          {t("settings.cover.urlSubmit")}
+        </Button>
+      </div>
+
+      {message ? <p className="text-xs text-encre-douce">{message}</p> : null}
+      {error ? <p className="text-xs text-bordeaux">{error}</p> : null}
     </div>
   );
 }

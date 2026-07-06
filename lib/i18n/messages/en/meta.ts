@@ -123,13 +123,16 @@ export const metaEn = {
     },
     cover: {
       title: "Cover image",
-      desc: "Upload a photo (JPG/PNG/WebP, 3 MB max) — or paste a URL in the form below.",
+      desc: "Upload a photo (JPG/PNG/WebP, 3 MB max) or paste an image link below.",
       uploading: "Uploading…",
       choose: "Choose an image",
+      urlPlaceholder: "Paste an https:// link…",
+      urlSubmit: "Use link",
       errType: "JPG, PNG or WebP only.",
       errSize: "3 MB maximum — crop or compress the image.",
       errUpload: "The upload failed — you must be captain or editor.",
       errSave: "Couldn't save the cover.",
+      errUrl: "Invalid link — an https:// URL is expected.",
       done: "New cover in place.",
     },
     email: {

@@ -124,13 +124,16 @@ export const metaFr = {
     },
     cover: {
       title: "Image de couverture",
-      desc: "Téléverse une photo (JPG/PNG/WebP, 3 Mo max) — ou colle une URL dans le formulaire ci-dessous.",
+      desc: "Téléverse une photo (JPG/PNG/WebP, 3 Mo max) ou colle un lien d'image ci-dessous.",
       uploading: "Envoi…",
       choose: "Choisir une image",
+      urlPlaceholder: "Colle un lien https://…",
+      urlSubmit: "Valider le lien",
       errType: "JPG, PNG ou WebP uniquement.",
       errSize: "3 Mo maximum — recadre ou compresse l'image.",
       errUpload: "L'envoi a échoué — il faut être capitaine ou éditeur.",
       errSave: "Impossible d'enregistrer la couverture.",
+      errUrl: "Lien invalide — une URL https:// est attendue.",
       done: "Nouvelle couverture en place.",
     },
     email: {

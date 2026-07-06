@@ -113,10 +113,12 @@ export default async function TripLayout({
             {t(`trips.status.${status}`)}
           </span>
         </div>
-        <div className="border-t border-laiton-clair/60 px-5">
-          <TripTabs tripId={trip.id} />
-        </div>
       </header>
+
+      {/* PHIL-Q37c : le menu du voyage reste collé en haut au défilement */}
+      <nav className="sticky top-2 z-[1001] mt-2 rounded-lg border border-laiton-clair bg-papier px-5 shadow-[0_2px_10px_rgba(31,42,68,0.05)]">
+        <TripTabs tripId={trip.id} />
+      </nav>
 
       <div className="py-6">{children}</div>
     </main>

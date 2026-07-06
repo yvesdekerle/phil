@@ -220,6 +220,28 @@ export async function setCoverFromUpload(
   return { status: "success", message: t("settings.msg.coverUpdated") };
 }
 
+/** Couverture depuis une URL collée directement (PHIL-Q37c). */
+export async function setCoverFromUrl(tripId: string, rawUrl: string): Promise<TripSettingsState> {
+  const t = await getT();
+  const parsed = z.string().trim().min(1).max(2000).url().safeParse(rawUrl);
+  if (!parsed.success || !parsed.data.startsWith("https://")) {
+    return { status: "error", message: t("settings.cover.errUrl") };
+  }
+
+  const supabase = await createClient();
+  const { error, count } = await supabase
+    .from("trips")
+    .update({ cover_image_url: parsed.data }, { count: "exact" })
+    .eq("id", tripId);
+
+  if (error || count === 0) {
+    return { status: "error", message: t("settings.msg.coverSaveFailed") };
+  }
+
+  revalidatePath(`/trips/${tripId}`);
+  return { status: "success", message: t("settings.cover.done") };
+}
+
 export async function setTripArchived(
   tripId: string,
   archived: boolean,

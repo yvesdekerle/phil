@@ -124,13 +124,16 @@ export const metaEs = {
     },
     cover: {
       title: "Imagen de portada",
-      desc: "Sube una foto (JPG/PNG/WebP, 3 MB máx.), o pega una URL en el formulario de abajo.",
+      desc: "Sube una foto (JPG/PNG/WebP, 3 MB máx.) o pega un enlace de imagen abajo.",
       uploading: "Enviando…",
       choose: "Elegir una imagen",
+      urlPlaceholder: "Pega un enlace https://…",
+      urlSubmit: "Usar el enlace",
       errType: "Solo JPG, PNG o WebP.",
       errSize: "3 MB máximo: recorta o comprime la imagen.",
       errUpload: "El envío ha fallado: hay que ser capitán o editor.",
       errSave: "No se ha podido guardar la portada.",
+      errUrl: "Enlace no válido — se espera una URL https://.",
       done: "Nueva portada colocada.",
     },
     email: {
