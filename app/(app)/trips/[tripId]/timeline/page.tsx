@@ -9,8 +9,8 @@ import { getDateFnsLocale, getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 
-const DAY_WIDTH = 130; // px par jour (PHIL-Q36 : plus large pour lire les libellés)
-const LABEL_W = 150; // px de la colonne fixe des noms
+const DAY_WIDTH = 155; // px par jour (PHIL-Q37c : plus large pour lire les libellés)
+const LABEL_W = 220; // px de la colonne fixe des noms
 const LANES = ["TRANSPORT", "LODGING", "ACTIVITY"] as const;
 
 /** Vue timeline (PHIL-F03) : Gantt horizontal du voyage entier. */
@@ -71,90 +71,93 @@ export default async function TimelinePage({ params }: { params: Promise<{ tripI
   } as const;
 
   return (
-    <div>
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <TripViewToggle tripId={tripId} active="timeline" />
-        <h1 className="font-display text-2xl text-encre">{t("calendar.timeline.title")}</h1>
-      </div>
-
-      {bars.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-6 py-14 text-center">
-          <p className="font-display text-xl text-encre italic">
-            {t("calendar.timeline.emptyTitle")}
-          </p>
-          <p className="mt-2 text-sm text-encre-douce">{t("calendar.timeline.emptyBody")}</p>
+    // Pleine largeur (PHIL-Q37c) : le Gantt déborde du gabarit pour lire les titres
+    <div className="relative left-1/2 right-1/2 -mx-[50vw] w-screen px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-[104rem]">
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <TripViewToggle tripId={tripId} active="timeline" />
+          <h1 className="font-display text-2xl text-encre">{t("calendar.timeline.title")}</h1>
         </div>
-      ) : (
-        <div className="overflow-x-auto rounded-lg border border-laiton-clair bg-papier pb-3">
-          <div style={{ width: dayCount * DAY_WIDTH + LABEL_W }}>
-            {/* En-tête des jours — colonne des noms figée à gauche */}
-            <div className="flex border-b border-laiton-clair/60" style={dayGridBackground}>
-              <div className="sticky left-0 z-20 shrink-0 bg-papier" style={{ width: LABEL_W }} />
-              {days.map((d) => (
-                <div
-                  key={d.toISOString()}
-                  className="shrink-0 border-l border-laiton-clair/40 px-2 py-2 text-center"
-                  style={{ width: DAY_WIDTH }}
-                >
-                  <p className="text-[0.65rem] text-encre-douce uppercase">
-                    {format(d, "EEE", { locale: dfLocale })}
-                  </p>
-                  <p className="text-sm font-medium text-encre">
-                    {format(d, "d MMM", { locale: dfLocale })}
-                  </p>
-                </div>
-              ))}
-            </div>
 
-            {/* Une section par type, une ligne par événement */}
-            {LANES.map((lane) => {
-              const laneBars = bars.filter((b) => b.event.type === lane);
-              if (laneBars.length === 0) {
-                return null;
-              }
-              return (
-                <div key={lane} className="border-b border-laiton-clair/40 last:border-b-0">
-                  <p className="sticky left-0 z-20 bg-papier px-3 pt-2.5 pb-1 text-[0.65rem] font-medium tracking-wide text-laiton uppercase">
-                    {t(`events.type.${lane}`)}
-                  </p>
-                  {laneBars.map(({ event, startIdx, span }) => (
-                    <div
-                      key={event.id}
-                      className="flex items-center py-0.5"
-                      style={dayGridBackground}
-                    >
-                      <div
-                        className="sticky left-0 z-20 shrink-0 truncate border-r border-laiton-clair/40 bg-papier px-3 text-xs text-encre-douce"
-                        style={{ width: LABEL_W }}
-                        title={event.title}
-                      >
-                        {event.title}
-                      </div>
-                      <div className="relative h-8" style={{ width: dayCount * DAY_WIDTH }}>
-                        <Link
-                          href={`/trips/${tripId}/events/${event.id}`}
-                          className={cn(
-                            "absolute top-0.5 bottom-0.5 flex items-center gap-1.5 overflow-hidden rounded-full border px-2.5 transition-shadow hover:shadow-[0_2px_10px_rgba(31,42,68,0.2)]",
-                            event.type === "TRANSPORT" && "border-encre/40 bg-encre/10",
-                            event.type === "LODGING" && "border-laiton bg-laiton/20",
-                            event.type === "ACTIVITY" && "border-bordeaux/40 bg-bordeaux/10",
-                          )}
-                          style={{ left: startIdx * DAY_WIDTH + 2, width: span * DAY_WIDTH - 4 }}
-                        >
-                          <EventTypeIcon type={event.type} className="size-5 shrink-0" />
-                          <span className="truncate text-xs font-medium text-encre">
-                            {event.title}
-                          </span>
-                        </Link>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              );
-            })}
+        {bars.length === 0 ? (
+          <div className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-6 py-14 text-center">
+            <p className="font-display text-xl text-encre italic">
+              {t("calendar.timeline.emptyTitle")}
+            </p>
+            <p className="mt-2 text-sm text-encre-douce">{t("calendar.timeline.emptyBody")}</p>
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="overflow-x-auto rounded-lg border border-laiton-clair bg-papier pb-3">
+            <div style={{ width: dayCount * DAY_WIDTH + LABEL_W }}>
+              {/* En-tête des jours — colonne des noms figée à gauche */}
+              <div className="flex border-b border-laiton-clair/60" style={dayGridBackground}>
+                <div className="sticky left-0 z-20 shrink-0 bg-papier" style={{ width: LABEL_W }} />
+                {days.map((d) => (
+                  <div
+                    key={d.toISOString()}
+                    className="shrink-0 border-l border-laiton-clair/40 px-2 py-2 text-center"
+                    style={{ width: DAY_WIDTH }}
+                  >
+                    <p className="text-[0.65rem] text-encre-douce uppercase">
+                      {format(d, "EEE", { locale: dfLocale })}
+                    </p>
+                    <p className="text-sm font-medium text-encre">
+                      {format(d, "d MMM", { locale: dfLocale })}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Une section par type, une ligne par événement */}
+              {LANES.map((lane) => {
+                const laneBars = bars.filter((b) => b.event.type === lane);
+                if (laneBars.length === 0) {
+                  return null;
+                }
+                return (
+                  <div key={lane} className="border-b border-laiton-clair/40 last:border-b-0">
+                    <p className="sticky left-0 z-20 bg-papier px-3 pt-2.5 pb-1 text-[0.65rem] font-medium tracking-wide text-laiton uppercase">
+                      {t(`events.type.${lane}`)}
+                    </p>
+                    {laneBars.map(({ event, startIdx, span }) => (
+                      <div
+                        key={event.id}
+                        className="flex items-center py-0.5"
+                        style={dayGridBackground}
+                      >
+                        <div
+                          className="sticky left-0 z-20 shrink-0 truncate border-r border-laiton-clair/40 bg-papier px-3 text-xs text-encre-douce"
+                          style={{ width: LABEL_W }}
+                          title={event.title}
+                        >
+                          {event.title}
+                        </div>
+                        <div className="relative h-8" style={{ width: dayCount * DAY_WIDTH }}>
+                          <Link
+                            href={`/trips/${tripId}/events/${event.id}`}
+                            className={cn(
+                              "absolute top-0.5 bottom-0.5 flex items-center gap-1.5 overflow-hidden rounded-full border px-2.5 transition-shadow hover:shadow-[0_2px_10px_rgba(31,42,68,0.2)]",
+                              event.type === "TRANSPORT" && "border-encre/40 bg-encre/10",
+                              event.type === "LODGING" && "border-laiton bg-laiton/20",
+                              event.type === "ACTIVITY" && "border-bordeaux/40 bg-bordeaux/10",
+                            )}
+                            style={{ left: startIdx * DAY_WIDTH + 2, width: span * DAY_WIDTH - 4 }}
+                          >
+                            <EventTypeIcon type={event.type} className="size-5 shrink-0" />
+                            <span className="truncate text-xs font-medium text-encre">
+                              {event.title}
+                            </span>
+                          </Link>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
