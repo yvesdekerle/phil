@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { logger } from "@/lib/observability/logger";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { logVaultAccess } from "@/lib/vault/audit";
@@ -48,6 +49,7 @@ export async function createDocument(
   });
 
   if (!parsed.success) {
+    logger.warn("document_create_invalid_input", { code: parsed.error.issues[0]?.code });
     return { status: "error", message: parsed.error.issues[0]?.message ?? "Saisie invalide." };
   }
 
@@ -86,6 +88,11 @@ export async function createDocument(
   });
 
   if (error) {
+    logger.error("document_insert_failed", {
+      documentId: parsed.data.documentId,
+      userId: user.id,
+      code: error.code,
+    });
     // La ligne n'a pas pu être créée : on retire le blob orphelin.
     const admin = createAdminClient();
     await admin.storage.from("documents").remove([parsed.data.storagePath]);

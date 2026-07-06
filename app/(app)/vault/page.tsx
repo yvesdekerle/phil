@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { CategoryIcon } from "@/components/vault/category-icon";
 import { getDateFnsLocale, getT } from "@/lib/i18n/server";
+import { logger } from "@/lib/observability/logger";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 import {
@@ -40,7 +41,12 @@ export default async function VaultPage({
   if (activeCategory) {
     query = query.eq("category", activeCategory);
   }
-  const { data } = await query;
+  const { data, error } = await query;
+  if (error) {
+    // Ne pas masquer une panne DB en « coffre vide » (audit D16/R16).
+    logger.error("vault_documents_query_failed", { userId: user.id, code: error.code });
+    throw new Error("vault_documents_query_failed");
+  }
   const documents = (data ?? []) as VaultDocument[];
 
   return (

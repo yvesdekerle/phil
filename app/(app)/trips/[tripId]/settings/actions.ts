@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { geocode } from "@/lib/geo/geocode";
 import { getT } from "@/lib/i18n/server";
+import { logger } from "@/lib/observability/logger";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { withCoverPosition } from "@/lib/trips/cover";
 
@@ -295,6 +297,19 @@ export async function setTripArchived(
   };
 }
 
+/** Chemin storage d'une couverture hébergée dans le bucket `covers` (null si URL externe). */
+function coverStoragePath(url: string | null | undefined): string | null {
+  if (!url) {
+    return null;
+  }
+  const marker = "/storage/v1/object/public/covers/";
+  const i = url.indexOf(marker);
+  if (i < 0) {
+    return null; // couverture collée depuis une URL externe : rien à purger côté Storage
+  }
+  return url.slice(i + marker.length).split(/[?#]/)[0] || null;
+}
+
 export async function deleteTrip(tripId: string): Promise<TripSettingsState> {
   const t = await getT();
   const { role } = await getMyRole(tripId);
@@ -303,12 +318,40 @@ export async function deleteTrip(tripId: string): Promise<TripSettingsState> {
   }
 
   const supabase = await createClient();
-  // La suppression cascade sur trip_participants ; les futurs contenus liés
-  // (events, idées, documents, invitations) seront purgés par leurs FK on delete cascade.
-  const { error } = await supabase.from("trips").delete().eq("id", tripId);
 
+  // Les lignes cascadent (documents TRIP, photos, idées, événements…), mais les
+  // fichiers Storage n'ont pas de FK : on relève leurs chemins AVANT de supprimer
+  // pour les purger ensuite, sinon ils restent orphelins (rétention RGPD + quota).
+  const [{ data: tripRow }, { data: tripDocs }, { data: photos }] = await Promise.all([
+    supabase.from("trips").select("cover_image_url").eq("id", tripId).single(),
+    supabase.from("documents").select("storage_path").eq("trip_id", tripId).eq("scope", "TRIP"),
+    supabase.from("trip_photos").select("storage_path, thumb_path").eq("trip_id", tripId),
+  ]);
+
+  const { error } = await supabase.from("trips").delete().eq("id", tripId);
   if (error) {
     return { status: "error", message: t("settings.msg.deleteFailed") };
+  }
+
+  // Purge best-effort des blobs (échec non bloquant mais tracé).
+  try {
+    const admin = createAdminClient();
+    const docPaths = (tripDocs ?? []).map((d) => d.storage_path).filter(Boolean);
+    if (docPaths.length > 0) {
+      await admin.storage.from("documents").remove(docPaths);
+    }
+    const photoPaths = (photos ?? [])
+      .flatMap((p) => [p.storage_path, p.thumb_path])
+      .filter((p): p is string => Boolean(p));
+    if (photoPaths.length > 0) {
+      await admin.storage.from("photos").remove(photoPaths);
+    }
+    const coverPath = coverStoragePath(tripRow?.cover_image_url);
+    if (coverPath) {
+      await admin.storage.from("covers").remove([coverPath]);
+    }
+  } catch {
+    logger.error("trip_delete_storage_cleanup_failed", { tripId });
   }
 
   redirect("/trips");

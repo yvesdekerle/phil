@@ -1,3 +1,4 @@
+import { logger } from "@/lib/observability/logger";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { areUuids } from "@/lib/validation";
@@ -60,6 +61,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   const admin = createAdminClient();
   const { data: blob, error } = await admin.storage.from("documents").download(doc.storage_path);
   if (error || !blob) {
+    logger.error("document_blob_download_failed", { documentId: id, code: error?.name });
     return Response.json({ error: "Fichier indisponible" }, { status: 502 });
   }
 

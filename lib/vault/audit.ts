@@ -1,4 +1,6 @@
+import "server-only";
 import { headers } from "next/headers";
+import { logger } from "@/lib/observability/logger";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Database } from "@/types/database";
 
@@ -31,9 +33,16 @@ export async function logVaultAccess(params: {
       user_agent: userAgent,
     });
     if (error) {
-      console.error("vault_access_log insert failed:", error.message);
+      logger.error("vault_audit_insert_failed", {
+        action: params.action,
+        documentId: params.documentId,
+        code: error.code,
+      });
     }
-  } catch (e) {
-    console.error("vault_access_log unexpected failure:", e);
+  } catch {
+    logger.error("vault_audit_unexpected", {
+      action: params.action,
+      documentId: params.documentId,
+    });
   }
 }

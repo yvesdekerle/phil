@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { FilterSelect } from "@/components/ui/filter-select";
 import { CategoryIcon } from "@/components/vault/category-icon";
 import { getDateFnsLocale, getT } from "@/lib/i18n/server";
+import { logger } from "@/lib/observability/logger";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 import { CATEGORIES, CATEGORY_LABELS, isDocumentCategory } from "@/lib/vault/categories";
@@ -44,7 +45,11 @@ export default async function TripDocumentsPage({
   const t = await getT();
   const dfLocale = await getDateFnsLocale();
 
-  const [{ data: tripDocs }, { data: sharedRows }, { data: me }] = await Promise.all([
+  const [
+    { data: tripDocs, error: docsError },
+    { data: sharedRows, error: sharesError },
+    { data: me },
+  ] = await Promise.all([
     supabase
       .from("documents")
       .select(
@@ -66,6 +71,14 @@ export default async function TripDocumentsPage({
       .eq("user_id", user.id)
       .single(),
   ]);
+  if (docsError || sharesError) {
+    // Ne pas masquer une panne DB en « aucun document » (audit D16/R16).
+    logger.error("trip_documents_query_failed", {
+      tripId,
+      code: (docsError ?? sharesError)?.code,
+    });
+    throw new Error("trip_documents_query_failed");
+  }
 
   const canUpload = me?.role === "OWNER" || me?.role === "EDITOR";
 
