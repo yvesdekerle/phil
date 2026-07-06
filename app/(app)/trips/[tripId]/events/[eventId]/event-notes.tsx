@@ -1,12 +1,12 @@
 "use client";
 
 import { format } from "date-fns";
-import { fr } from "date-fns/locale";
 import { Trash2 } from "lucide-react";
 import { useActionState, useRef, useTransition } from "react";
-import { useT } from "@/components/i18n/provider";
+import { useLocale, useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import { Linkify } from "@/components/ui/linkify";
+import { dateFnsLocale } from "@/lib/i18n/dates";
 import { addEventNote, deleteEventNote, type NoteState } from "./note-actions";
 
 export type EventNote = {
@@ -32,6 +32,7 @@ export function EventNotes({
   isOwner: boolean;
 }) {
   const t = useT();
+  const dfLocale = dateFnsLocale(useLocale());
   const formRef = useRef<HTMLFormElement>(null);
   const [state, formAction] = useActionState<NoteState, FormData>(
     async (prev, formData) => {
@@ -64,7 +65,7 @@ export function EventNotes({
                   {note.author_id === myId ? t("events.you") : note.authorName}
                 </span>
                 <span className="flex items-center gap-2 text-xs text-encre-douce">
-                  {format(new Date(note.created_at), "d MMM, HH'h'mm", { locale: fr })}
+                  {format(new Date(note.created_at), "d MMM, HH'h'mm", { locale: dfLocale })}
                   {note.author_id === myId || isOwner ? (
                     <button
                       type="button"

@@ -5,7 +5,7 @@ import { WorldMapLazy } from "@/components/map/world-map-lazy";
 import { computeBadges } from "@/lib/gamification/badges";
 import { countryAt } from "@/lib/geo/country-lookup";
 import { haversineKm } from "@/lib/geo/distance";
-import { getT } from "@/lib/i18n/server";
+import { getIntlLocale, getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { CountrySuggestions } from "./country-suggestions";
 
@@ -24,6 +24,7 @@ function Stat({ value, label, hint }: { value: string; label: string; hint?: str
 /** Carnet de l'explorateur (PHIL-P09) : les chiffres de tes voyages. */
 export default async function ExplorerPage() {
   const t = await getT();
+  const il = await getIntlLocale();
   const supabase = await createClient();
   const {
     data: { user },
@@ -184,9 +185,7 @@ export default async function ExplorerPage() {
         <Stat value={String(destinations.size)} label={t("explorer.stats.destinations")} />
         <Stat value={String(activityCount)} label={t("explorer.stats.activities")} />
         <Stat
-          value={
-            km >= 100 ? `${Math.round(km).toLocaleString("fr-FR")} km` : `${Math.round(km)} km`
-          }
+          value={km >= 100 ? `${Math.round(km).toLocaleString(il)} km` : `${Math.round(km)} km`}
           label={t("explorer.stats.km")}
           hint={t("explorer.stats.kmHint")}
         />

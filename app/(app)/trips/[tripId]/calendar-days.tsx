@@ -4,10 +4,11 @@ import { Search } from "lucide-react";
 import Link from "next/link";
 import { useDeferredValue, useMemo, useState } from "react";
 import { EventTypeIcon } from "@/components/calendar/event-type-icon";
-import { useT } from "@/components/i18n/provider";
+import { useLocale, useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import { eventTime, groupEventsByDay } from "@/lib/events/datetime";
 import type { TripEvent } from "@/lib/events/types";
+import { dateFnsLocale } from "@/lib/i18n/dates";
 import { fuzzyMatch } from "@/lib/search/fuzzy";
 import { cn } from "@/lib/utils";
 
@@ -28,6 +29,7 @@ export function CalendarDays({
   canEdit: boolean;
 }) {
   const t = useT();
+  const dfLocale = dateFnsLocale(useLocale());
   const [query, setQuery] = useState("");
   const deferredQuery = useDeferredValue(query);
 
@@ -37,8 +39,8 @@ export function CalendarDays({
           fuzzyMatch(`${e.title} ${e.location_name ?? ""} ${e.notes ?? ""}`, deferredQuery),
         )
       : events;
-    return groupEventsByDay(visible);
-  }, [events, deferredQuery]);
+    return groupEventsByDay(visible, dfLocale);
+  }, [events, deferredQuery, dfLocale]);
 
   return (
     <div className="flex flex-col gap-6">

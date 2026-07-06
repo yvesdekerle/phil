@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { useT } from "@/components/i18n/provider";
+import { useLocale, useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
+import { intlLocale } from "@/lib/i18n/dates";
 import { offlineDb } from "@/lib/offline/db";
 import { isDocumentOffline, saveDocumentOffline } from "@/lib/offline/documents";
 import { type SyncResult, syncTrip } from "@/lib/offline/sync";
@@ -10,6 +11,7 @@ import { type SyncResult, syncTrip } from "@/lib/offline/sync";
 /** Bouton « Préparer pour offline » avec horodatage de dernière synchro (PHIL-I03). */
 export function PrepareOfflineButton({ tripId }: { tripId: string }) {
   const t = useT();
+  const il = intlLocale(useLocale());
   const [last, setLast] = useState<SyncResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [fullStatus, setFullStatus] = useState<string | null>(null);
@@ -102,7 +104,7 @@ export function PrepareOfflineButton({ tripId }: { tripId: string }) {
         {last ? (
           <p className="text-xs text-encre-douce">
             {t("offline.syncedAt")}{" "}
-            {new Intl.DateTimeFormat("fr-FR", { dateStyle: "short", timeStyle: "short" }).format(
+            {new Intl.DateTimeFormat(il, { dateStyle: "short", timeStyle: "short" }).format(
               new Date(last.syncedAt),
             )}{" "}
             ·{" "}

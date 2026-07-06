@@ -1,12 +1,12 @@
 "use client";
 
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import { type Locale as DateFnsLocale, format } from "date-fns";
 import { CheckCircle2, ExternalLink, Trash2 } from "lucide-react";
 import { useActionState, useRef, useState, useTransition } from "react";
-import { useT } from "@/components/i18n/provider";
+import { useLocale, useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { dateFnsLocale } from "@/lib/i18n/dates";
 import { cn } from "@/lib/utils";
 import {
   addCandidate,
@@ -139,9 +139,9 @@ function CandidateVotes({
   );
 }
 
-function slotLabel(checkIn: string, checkOut: string, t: T): string {
-  const inLabel = format(new Date(`${checkIn}T12:00:00`), "d MMM", { locale: fr });
-  const outLabel = format(new Date(`${checkOut}T12:00:00`), "d MMM yyyy", { locale: fr });
+function slotLabel(checkIn: string, checkOut: string, t: T, dfLocale: DateFnsLocale): string {
+  const inLabel = format(new Date(`${checkIn}T12:00:00`), "d MMM", { locale: dfLocale });
+  const outLabel = format(new Date(`${checkOut}T12:00:00`), "d MMM yyyy", { locale: dfLocale });
   return `${t("lodging.slotFrom")} ${inLabel} ${t("lodging.slotTo")} ${outLabel}`;
 }
 
@@ -160,6 +160,7 @@ export function LodgingClient({
   role: string;
 }) {
   const t = useT();
+  const dfLocale = dateFnsLocale(useLocale());
   const [showForm, setShowForm] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const [state, formAction] = useActionState<CandidateState, FormData>(
@@ -236,7 +237,7 @@ export function LodgingClient({
           return (
             <section key={slot}>
               <h2 className="mb-2 text-sm font-medium text-laiton uppercase tracking-wide">
-                {slotLabel(checkIn, checkOut, t)}
+                {slotLabel(checkIn, checkOut, t, dfLocale)}
               </h2>
               <ul className="flex flex-col gap-2">
                 {slotCandidates.map((c) => (

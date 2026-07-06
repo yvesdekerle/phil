@@ -1,7 +1,11 @@
+"use client";
+
+import { useLocale } from "@/components/i18n/provider";
+import { intlLocale } from "@/lib/i18n/dates";
 import { cn } from "@/lib/utils";
 
-export function fmtMoney(n: number, currency: string): string {
-  return `${n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`;
+export function fmtMoney(n: number, currency: string, il: string): string {
+  return `${n.toLocaleString(il, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`;
 }
 
 /**
@@ -25,6 +29,7 @@ export function Money({
   className?: string;
   title?: string;
 }) {
+  const il = intlLocale(useLocale());
   return (
     <span
       className={cn(
@@ -34,10 +39,10 @@ export function Money({
       )}
       title={title}
     >
-      <span>{fmtMoney(amount, currency)}</span>
+      <span>{fmtMoney(amount, currency, il)}</span>
       {secondaryAmount !== null && secondaryAmount !== undefined && secondaryCurrency ? (
         <span className="text-[0.7em] font-normal text-encre-douce">
-          ≈ {fmtMoney(secondaryAmount, secondaryCurrency)}
+          ≈ {fmtMoney(secondaryAmount, secondaryCurrency, il)}
         </span>
       ) : null}
     </span>

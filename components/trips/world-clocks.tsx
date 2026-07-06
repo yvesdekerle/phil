@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useT } from "@/components/i18n/provider";
+import { useLocale, useT } from "@/components/i18n/provider";
+import { intlLocale } from "@/lib/i18n/dates";
 import { cn } from "@/lib/utils";
 
 export type ClockEntry = { timezone: string; label: string; isHome?: boolean };
@@ -12,6 +13,7 @@ export type ClockEntry = { timezone: string; label: string; isHome?: boolean };
  */
 export function WorldClocks({ clocks }: { clocks: ClockEntry[] }) {
   const t = useT();
+  const il = intlLocale(useLocale());
   const [now, setNow] = useState<Date | null>(null);
 
   useEffect(() => {
@@ -31,11 +33,9 @@ export function WorldClocks({ clocks }: { clocks: ClockEntry[] }) {
     return Math.round(((local.getTime() - utc.getTime()) / 3_600_000) * 4) / 4;
   };
   const timeIn = (tz: string) =>
-    new Intl.DateTimeFormat("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: tz }).format(
-      now,
-    );
+    new Intl.DateTimeFormat(il, { hour: "2-digit", minute: "2-digit", timeZone: tz }).format(now);
   const dayIn = (tz: string) => {
-    const day = new Intl.DateTimeFormat("fr-FR", { weekday: "long", timeZone: tz }).format(now);
+    const day = new Intl.DateTimeFormat(il, { weekday: "long", timeZone: tz }).format(now);
     // Seul le jour prend une majuscule (pas "Par Rapport À Chez Toi")
     return day.charAt(0).toUpperCase() + day.slice(1);
   };

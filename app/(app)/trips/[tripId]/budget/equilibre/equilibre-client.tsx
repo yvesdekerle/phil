@@ -4,9 +4,10 @@ import { Lock, LockOpen } from "lucide-react";
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { Money } from "@/components/budget/money";
-import { useT } from "@/components/i18n/provider";
+import { useLocale, useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import type { Balance, Settlement } from "@/lib/budget/balances";
+import { intlLocale } from "@/lib/i18n/dates";
 import { cn } from "@/lib/utils";
 import { markSettled, setPurseClosed } from "../actions";
 
@@ -40,12 +41,13 @@ export function EquilibreClient({
 }) {
   const [pending, startTransition] = useTransition();
   const t = useT();
+  const il = intlLocale(useLocale());
   const nameOf = (id: string) =>
     id === myId
       ? t("budget.common.you")
       : (members.find((m) => m.userId === id)?.name ?? t("budget.common.traveler"));
   const fmt = (n: number) =>
-    `${n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`;
+    `${n.toLocaleString(il, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`;
   const sub = (n: number) => (secondaryCurrency && secondaryRate ? n * secondaryRate : null);
 
   const mine = balances.find((b) => b.userId === myId);
@@ -160,7 +162,7 @@ export function EquilibreClient({
             <>
               <p className="min-w-0 flex-1 text-xs text-encre-douce">
                 {t("budget.close.closedOnPrefix")}{" "}
-                {new Intl.DateTimeFormat("fr-FR", { dateStyle: "long" }).format(new Date(closedAt))}
+                {new Intl.DateTimeFormat(il, { dateStyle: "long" }).format(new Date(closedAt))}
                 {t("budget.close.closedOnSuffix")}
               </p>
               <Button

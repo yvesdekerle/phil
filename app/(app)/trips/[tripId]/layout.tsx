@@ -2,7 +2,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { TripOfflineSync } from "@/components/offline/trip-sync";
 import { TripTabs } from "@/components/trips/trip-tabs";
-import { getT } from "@/lib/i18n/server";
+import { getDateFnsLocale, getIntlLocale, getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { formatDateRange } from "@/lib/trips/format";
 import { tripStatus } from "@/lib/trips/status";
@@ -36,6 +36,8 @@ export default async function TripLayout({
 
   const status = tripStatus(trip);
   const t = await getT();
+  const dfLocale = await getDateFnsLocale();
+  const il = await getIntlLocale();
 
   // PHIL-N04 : validité du passeport vs dates du voyage (règle des 6 mois)
   const { data: passports } = await supabase
@@ -57,12 +59,12 @@ export default async function TripLayout({
     if (expiry < tripEnd) {
       passportWarning = {
         level: "danger",
-        text: `Ton passeport expire le ${expiry.toLocaleDateString("fr-FR")} — avant la fin du voyage. Renouvelle-le sans attendre.`,
+        text: `${t("passport.expiresBeforePrefix")}${expiry.toLocaleDateString(il)}${t("passport.expiresBeforeSuffix")}`,
       };
     } else if (expiry < sixMonthsAfter) {
       passportWarning = {
         level: "warn",
-        text: `Ton passeport expire le ${expiry.toLocaleDateString("fr-FR")} — moins de 6 mois après le retour. Certains pays exigent 6 mois de validité après le séjour : vérifie les règles de la destination.`,
+        text: `${t("passport.expires6Prefix")}${expiry.toLocaleDateString(il)}${t("passport.expires6Suffix")}`,
       };
     }
   }
@@ -104,7 +106,7 @@ export default async function TripLayout({
           <div>
             <h1 className="font-display text-3xl text-encre">{trip.name}</h1>
             <p className="mt-1 text-sm text-encre-douce">
-              {trip.destination} · {formatDateRange(trip.start_date, trip.end_date)}
+              {trip.destination} · {formatDateRange(trip.start_date, trip.end_date, dfLocale)}
             </p>
           </div>
           <span className={cn("rounded-full px-3 py-1 text-xs font-medium", STATUS_STYLES[status])}>

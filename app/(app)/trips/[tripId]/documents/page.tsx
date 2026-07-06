@@ -1,11 +1,10 @@
 import { format, parseISO } from "date-fns";
-import { fr } from "date-fns/locale";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { OfflineDocToggle } from "@/components/offline/offline-doc-toggle";
 import { Button } from "@/components/ui/button";
 import { CategoryIcon } from "@/components/vault/category-icon";
-import { getT } from "@/lib/i18n/server";
+import { getDateFnsLocale, getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 import { CATEGORIES, CATEGORY_LABELS, isDocumentCategory } from "@/lib/vault/categories";
@@ -42,6 +41,7 @@ export default async function TripDocumentsPage({
     redirect("/login");
   }
   const t = await getT();
+  const dfLocale = await getDateFnsLocale();
 
   const [{ data: tripDocs }, { data: sharedRows }, { data: me }] = await Promise.all([
     supabase
@@ -211,7 +211,7 @@ export default async function TripDocumentsPage({
                   </span>
                   <span className="block text-xs text-encre-douce">
                     {doc.label ?? CATEGORY_LABELS[doc.category]} ·{" "}
-                    {format(parseISO(doc.uploaded_at), "d MMM yyyy", { locale: fr })}
+                    {format(parseISO(doc.uploaded_at), "d MMM yyyy", { locale: dfLocale })}
                   </span>
                 </span>
               </a>

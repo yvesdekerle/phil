@@ -8,6 +8,13 @@ export const fr = {
     tips: "Conseils",
     profileAria: "Ton profil",
   },
+  passport: {
+    expiresBeforePrefix: "Ton passeport expire le ",
+    expiresBeforeSuffix: " — avant la fin du voyage. Renouvelle-le sans attendre.",
+    expires6Prefix: "Ton passeport expire le ",
+    expires6Suffix:
+      " — moins de 6 mois après le retour. Certains pays exigent 6 mois de validité après le séjour : vérifie les règles de la destination.",
+  },
   tripTabs: {
     aria: "Sections du voyage",
     calendar: "Calendrier",

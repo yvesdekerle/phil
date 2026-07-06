@@ -1,5 +1,4 @@
 import { format } from "date-fns";
-import { fr } from "date-fns/locale";
 import {
   Cloud,
   CloudDrizzle,
@@ -10,6 +9,7 @@ import {
   CloudSun,
   Sun,
 } from "lucide-react";
+import { getDateFnsLocale } from "@/lib/i18n/server";
 import { type DailyForecast, weatherLabel } from "@/lib/weather/open-meteo";
 
 function WeatherIcon({ code, className }: { code: number; className?: string }) {
@@ -27,7 +27,7 @@ function WeatherIcon({ code, className }: { code: number; className?: string }) 
 }
 
 /** Encart météo de la semaine à destination (PHIL-O02). */
-export function WeatherStrip({
+export async function WeatherStrip({
   days,
   destination,
 }: {
@@ -37,6 +37,7 @@ export function WeatherStrip({
   if (days.length === 0) {
     return null;
   }
+  const dfLocale = await getDateFnsLocale();
   return (
     <section
       aria-label={`Météo à ${destination}`}
@@ -53,7 +54,7 @@ export function WeatherStrip({
             title={weatherLabel(d.code)}
           >
             <span className="text-xs text-encre-douce capitalize">
-              {format(new Date(`${d.date}T12:00:00`), "EEE d", { locale: fr })}
+              {format(new Date(`${d.date}T12:00:00`), "EEE d", { locale: dfLocale })}
             </span>
             <WeatherIcon code={d.code} className="size-5 text-encre" />
             <span className="text-xs text-encre tabular-nums">

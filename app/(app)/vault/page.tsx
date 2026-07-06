@@ -1,10 +1,9 @@
 import { addDays, format, parseISO } from "date-fns";
-import { fr } from "date-fns/locale";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { CategoryIcon } from "@/components/vault/category-icon";
-import { getT } from "@/lib/i18n/server";
+import { getDateFnsLocale, getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 import {
@@ -22,6 +21,7 @@ export default async function VaultPage({
   const { category } = await searchParams;
   const activeCategory = category && isDocumentCategory(category) ? category : null;
   const t = await getT();
+  const dfLocale = await getDateFnsLocale();
 
   const supabase = await createClient();
   const {
@@ -110,7 +110,7 @@ export default async function VaultPage({
                   </span>
                   <span className="block text-xs text-encre-douce">
                     {doc.label ?? categoryLabel(t, doc.category)} · {t("vault.addedOn")}{" "}
-                    {format(parseISO(doc.uploaded_at), "d MMM yyyy", { locale: fr })}
+                    {format(parseISO(doc.uploaded_at), "d MMM yyyy", { locale: dfLocale })}
                   </span>
                 </span>
                 {doc.expires_at ? (
@@ -121,12 +121,12 @@ export default async function VaultPage({
                   ) : parseISO(doc.expires_at) < addDays(new Date(), 90) ? (
                     <span className="shrink-0 rounded-full bg-laiton/20 px-2.5 py-0.5 text-xs font-medium text-laiton">
                       {t("vault.expiresSoon")}{" "}
-                      {format(parseISO(doc.expires_at), "d MMM yyyy", { locale: fr })}
+                      {format(parseISO(doc.expires_at), "d MMM yyyy", { locale: dfLocale })}
                     </span>
                   ) : (
                     <span className="shrink-0 text-xs text-encre-douce">
                       {t("vault.expiresOnPrefix")}{" "}
-                      {format(parseISO(doc.expires_at), "d MMM yyyy", { locale: fr })}
+                      {format(parseISO(doc.expires_at), "d MMM yyyy", { locale: dfLocale })}
                     </span>
                   )
                 ) : null}

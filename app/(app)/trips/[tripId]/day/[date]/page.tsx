@@ -1,4 +1,3 @@
-import { fr } from "date-fns/locale";
 import { formatInTimeZone } from "date-fns-tz";
 import { Navigation } from "lucide-react";
 import Link from "next/link";
@@ -11,7 +10,7 @@ import { directionsUrl } from "@/lib/geo/directions";
 import { ensureTripCoords } from "@/lib/geo/locate";
 import { formatMinutes, getTravelMinutes } from "@/lib/geo/travel-time";
 import { suggestVisitOrder } from "@/lib/geo/visit-order";
-import { getT } from "@/lib/i18n/server";
+import { getDateFnsLocale, getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 import { type DailyForecast, getDailyForecast } from "@/lib/weather/open-meteo";
@@ -52,6 +51,7 @@ export default async function DayViewPage({
 }) {
   const { tripId, date } = await params;
   const t = await getT();
+  const dfLocale = await getDateFnsLocale();
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
     notFound();
   }
@@ -148,7 +148,9 @@ export default async function DayViewPage({
       : null,
   );
 
-  const label = formatInTimeZone(`${date}T12:00:00Z`, "UTC", "EEEE d MMMM yyyy", { locale: fr });
+  const label = formatInTimeZone(`${date}T12:00:00Z`, "UTC", "EEEE d MMMM yyyy", {
+    locale: dfLocale,
+  });
   const hours = Array.from({ length: HOUR_END - HOUR_START }, (_, i) => HOUR_START + i);
 
   return (

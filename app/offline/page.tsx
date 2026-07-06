@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { EventTypeIcon } from "@/components/calendar/event-type-icon";
+import { useLocale } from "@/components/i18n/provider";
 import { eventTime, groupEventsByDay } from "@/lib/events/datetime";
 import type { TripEvent } from "@/lib/events/types";
+import { dateFnsLocale, intlLocale } from "@/lib/i18n/dates";
 import type { TripIdea } from "@/lib/ideas/types";
 import { type OfflineDocumentMeta, offlineDb, type SyncMeta } from "@/lib/offline/db";
 import { openOfflineDocument } from "@/lib/offline/documents";
@@ -23,6 +25,9 @@ type OfflineTrip = {
  * précachée par le service worker, servie en fallback hors ligne.
  */
 export default function OfflinePage() {
+  const locale = useLocale();
+  const dfLocale = dateFnsLocale(locale);
+  const il = intlLocale(locale);
   const [trips, setTrips] = useState<OfflineTrip[] | null>(null);
   const [offlineDocIds, setOfflineDocIds] = useState<Set<string>>(new Set());
 
@@ -70,12 +75,12 @@ export default function OfflinePage() {
             >
               <h2 className="font-display text-2xl text-encre">{trip.name}</h2>
               <p className="text-sm text-encre-douce">
-                {trip.destination} · {formatDateRange(trip.start_date, trip.end_date)}
+                {trip.destination} · {formatDateRange(trip.start_date, trip.end_date, dfLocale)}
               </p>
               {meta ? (
                 <p className="mt-0.5 text-xs text-encre-douce">
                   Synchronisé le{" "}
-                  {new Intl.DateTimeFormat("fr-FR", {
+                  {new Intl.DateTimeFormat(il, {
                     dateStyle: "short",
                     timeStyle: "short",
                   }).format(new Date(meta.syncedAt))}

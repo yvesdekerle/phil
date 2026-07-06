@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState, useTransition } from "react";
-import { useT } from "@/components/i18n/provider";
+import { useLocale, useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,6 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { intlLocale } from "@/lib/i18n/dates";
 import { createClient } from "@/lib/supabase/client";
 import { type DocumentActionState, shareDocument, unshareDocument } from "./actions";
 
@@ -32,6 +33,7 @@ type Member = { userId: string; name: string };
  */
 export function ShareManager({ documentId, shares }: { documentId: string; shares: Share[] }) {
   const t = useT();
+  const il = intlLocale(useLocale());
   const [open, setOpen] = useState(false);
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -250,7 +252,7 @@ export function ShareManager({ documentId, shares }: { documentId: string; share
                     ? `${t("documents.share.onlyRecipientPrefix")}${s.recipientName}`
                     : t("documents.share.wholeCrewList")}
                   {s.expiresAt
-                    ? ` · ${t("documents.share.expiresListPrefix")} ${new Date(s.expiresAt).toLocaleDateString("fr-FR")}`
+                    ? ` · ${t("documents.share.expiresListPrefix")} ${new Date(s.expiresAt).toLocaleDateString(il)}`
                     : ""}
                 </span>
               </span>

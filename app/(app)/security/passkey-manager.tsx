@@ -4,8 +4,9 @@ import { startRegistration } from "@simplewebauthn/browser";
 import { Fingerprint } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { useT } from "@/components/i18n/provider";
+import { useLocale, useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
+import { intlLocale } from "@/lib/i18n/dates";
 import {
   deletePasskey,
   getRegistrationOptions,
@@ -22,6 +23,7 @@ type Passkey = {
 
 export function PasskeyManager({ passkeys }: { passkeys: Passkey[] }) {
   const t = useT();
+  const il = intlLocale(useLocale());
   const router = useRouter();
   const [state, setState] = useState<SecurityActionState>({ status: "idle" });
   const [pending, startTransition] = useTransition();
@@ -32,7 +34,7 @@ export function PasskeyManager({ passkeys }: { passkeys: Passkey[] }) {
       try {
         const options = await getRegistrationOptions();
         const response = await startRegistration({ optionsJSON: options });
-        const deviceName = `${navigator.platform || t("security.device")} — ${new Date().toLocaleDateString("fr-FR")}`;
+        const deviceName = `${navigator.platform || t("security.device")} — ${new Date().toLocaleDateString(il)}`;
         const result = await verifyRegistration(response, deviceName);
         setState(result);
         if (result.status === "success") {
@@ -86,9 +88,9 @@ export function PasskeyManager({ passkeys }: { passkeys: Passkey[] }) {
                 {p.device_name ?? t("security.device")}
                 <span className="text-xs text-encre-douce">
                   {" "}
-                  · {t("security.addedOn")} {new Date(p.created_at).toLocaleDateString("fr-FR")}
+                  · {t("security.addedOn")} {new Date(p.created_at).toLocaleDateString(il)}
                   {p.last_used_at
-                    ? ` · ${t("security.usedOn")} ${new Date(p.last_used_at).toLocaleDateString("fr-FR")}`
+                    ? ` · ${t("security.usedOn")} ${new Date(p.last_used_at).toLocaleDateString(il)}`
                     : ""}
                 </span>
               </span>

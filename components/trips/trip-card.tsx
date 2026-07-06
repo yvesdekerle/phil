@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { getT } from "@/lib/i18n/server";
+import { getDateFnsLocale, getT } from "@/lib/i18n/server";
 import { formatDateRange } from "@/lib/trips/format";
 import { type Trip, tripStatus } from "@/lib/trips/status";
 import { cn } from "@/lib/utils";
@@ -22,6 +22,7 @@ export async function TripCard({
   const status = tripStatus(trip);
   const isPast = status === "passe" || status === "archive";
   const t = await getT();
+  const dfLocale = await getDateFnsLocale();
 
   return (
     <Link
@@ -61,7 +62,7 @@ export async function TripCard({
         <h2 className="font-display text-xl text-encre">{trip.name}</h2>
         <p className="mt-0.5 text-sm text-encre-douce">{trip.destination}</p>
         <div className="mt-2.5 flex items-center justify-between text-xs text-encre-douce">
-          <span>{formatDateRange(trip.start_date, trip.end_date)}</span>
+          <span>{formatDateRange(trip.start_date, trip.end_date, dfLocale)}</span>
           <span>
             {participantCount} {participantCount > 1 ? t("trips.travelers") : t("trips.traveler")}
           </span>

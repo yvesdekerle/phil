@@ -1,3 +1,4 @@
+import type { Locale as DateFnsLocale } from "date-fns";
 import { fr } from "date-fns/locale";
 import { formatInTimeZone } from "date-fns-tz";
 import type { TripEvent } from "./types";
@@ -26,7 +27,7 @@ export type EventsByDay = { dayKey: string; label: string; events: TripEvent[] }
  * Groupe les événements par jour local (fuseau de chaque événement),
  * dans l'ordre chronologique.
  */
-export function groupEventsByDay(events: TripEvent[]): EventsByDay {
+export function groupEventsByDay(events: TripEvent[], locale: DateFnsLocale = fr): EventsByDay {
   const groups = new Map<string, TripEvent[]>();
   for (const event of events) {
     const key = eventDayKey(event.starts_at, event.timezone);
@@ -38,7 +39,7 @@ export function groupEventsByDay(events: TripEvent[]): EventsByDay {
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([dayKey, dayEvents]) => ({
       dayKey,
-      label: formatInTimeZone(`${dayKey}T12:00:00Z`, "UTC", "EEEE d MMMM yyyy", { locale: fr }),
+      label: formatInTimeZone(`${dayKey}T12:00:00Z`, "UTC", "EEEE d MMMM yyyy", { locale }),
       events: dayEvents,
     }));
 }

@@ -1,8 +1,7 @@
 import { format, parseISO, subDays } from "date-fns";
-import { fr } from "date-fns/locale";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getT } from "@/lib/i18n/server";
+import { getDateFnsLocale, getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 
@@ -14,6 +13,7 @@ export default async function VaultActivityPage({
 }) {
   const { action, document: documentId, period = "30" } = await searchParams;
   const t = await getT();
+  const dfLocale = await getDateFnsLocale();
 
   const ACTION_LABELS: Record<string, string> = {
     UPLOAD: t("vault.activity.actions.UPLOAD"),
@@ -148,7 +148,7 @@ export default async function VaultActivityPage({
               className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-md border border-laiton-clair/60 bg-papier px-4 py-2.5 text-sm"
             >
               <span className="w-40 shrink-0 text-xs text-encre-douce tabular-nums">
-                {format(parseISO(entry.accessed_at), "d MMM yyyy · HH:mm", { locale: fr })}
+                {format(parseISO(entry.accessed_at), "d MMM yyyy · HH:mm", { locale: dfLocale })}
               </span>
               <span className="shrink-0 rounded-full bg-encre/10 px-2 py-0.5 text-xs font-medium text-encre">
                 {ACTION_LABELS[entry.action] ?? entry.action}

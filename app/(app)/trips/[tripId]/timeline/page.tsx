@@ -1,12 +1,11 @@
 import { addDays, differenceInCalendarDays, format, parseISO } from "date-fns";
-import { fr } from "date-fns/locale";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { EventTypeIcon } from "@/components/calendar/event-type-icon";
 import { TripViewToggle } from "@/components/calendar/trip-view-toggle";
 import { eventDayKey } from "@/lib/events/datetime";
 import type { TripEvent } from "@/lib/events/types";
-import { getT } from "@/lib/i18n/server";
+import { getDateFnsLocale, getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 
@@ -18,6 +17,7 @@ const LANES = ["TRANSPORT", "LODGING", "ACTIVITY"] as const;
 export default async function TimelinePage({ params }: { params: Promise<{ tripId: string }> }) {
   const { tripId } = await params;
   const t = await getT();
+  const dfLocale = await getDateFnsLocale();
   const supabase = await createClient();
   const {
     data: { user },
@@ -97,10 +97,10 @@ export default async function TimelinePage({ params }: { params: Promise<{ tripI
                   style={{ width: DAY_WIDTH }}
                 >
                   <p className="text-[0.65rem] text-encre-douce uppercase">
-                    {format(d, "EEE", { locale: fr })}
+                    {format(d, "EEE", { locale: dfLocale })}
                   </p>
                   <p className="text-sm font-medium text-encre">
-                    {format(d, "d MMM", { locale: fr })}
+                    {format(d, "d MMM", { locale: dfLocale })}
                   </p>
                 </div>
               ))}

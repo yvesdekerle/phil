@@ -1,12 +1,12 @@
 "use client";
 
 import { format } from "date-fns";
-import { fr } from "date-fns/locale";
 import { Plus, Trash2 } from "lucide-react";
 import { useActionState, useState, useTransition } from "react";
-import { useT } from "@/components/i18n/provider";
+import { useLocale, useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { dateFnsLocale } from "@/lib/i18n/dates";
 import {
   type CatalogSection,
   catalogItemTitle,
@@ -59,6 +59,7 @@ export function ChecklistClient({
   nights?: number;
 }) {
   const t = useT();
+  const dfLocale = dateFnsLocale(useLocale());
   const MISC = t("checklist.misc");
   const [tab, setTab] = useState<CatalogSection>("a_emporter");
   const [qtyOverrides, setQtyOverrides] = useState<Record<string, number>>({});
@@ -179,7 +180,9 @@ export function ChecklistClient({
                       {item.due_date ? (
                         <span className="ml-1.5 text-xs text-encre-douce">
                           {t("checklist.dueBefore")}{" "}
-                          {format(new Date(`${item.due_date}T12:00:00`), "d MMM", { locale: fr })}
+                          {format(new Date(`${item.due_date}T12:00:00`), "d MMM", {
+                            locale: dfLocale,
+                          })}
                         </span>
                       ) : null}
                       {item.eventTitle ? (

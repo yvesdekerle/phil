@@ -14,6 +14,13 @@ export const en: PartialMessages = {
     tips: "Tips",
     profileAria: "Your profile",
   },
+  passport: {
+    expiresBeforePrefix: "Your passport expires on ",
+    expiresBeforeSuffix: " — before the end of the trip. Renew it right away.",
+    expires6Prefix: "Your passport expires on ",
+    expires6Suffix:
+      " — less than 6 months after your return. Some countries require 6 months' validity after the stay: check the destination's rules.",
+  },
   tripTabs: {
     aria: "Trip sections",
     calendar: "Calendar",

@@ -1,9 +1,8 @@
 import { format, parseISO } from "date-fns";
-import { fr } from "date-fns/locale";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { CategoryIcon } from "@/components/vault/category-icon";
-import { getT } from "@/lib/i18n/server";
+import { getDateFnsLocale, getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { categoryLabel } from "@/lib/vault/categories";
 import { DocumentActions } from "./document-actions";
@@ -16,6 +15,7 @@ export default async function VaultDocumentPage({
 }) {
   const { documentId } = await params;
   const t = await getT();
+  const dfLocale = await getDateFnsLocale();
   const supabase = await createClient();
   const {
     data: { user },
@@ -69,12 +69,12 @@ export default async function VaultDocumentPage({
           <h1 className="truncate font-display text-2xl text-encre">{doc.file_name}</h1>
           <p className="mt-1 text-sm text-encre-douce">
             {doc.label ?? categoryLabel(t, doc.category)} · {t("vault.addedOn")}{" "}
-            {format(parseISO(doc.uploaded_at), "d MMMM yyyy", { locale: fr })} ·{" "}
+            {format(parseISO(doc.uploaded_at), "d MMMM yyyy", { locale: dfLocale })} ·{" "}
             {(doc.size_bytes / 1024 / 1024).toFixed(1)} {t("vault.detail.sizeUnit")}
           </p>
           <p className="mt-0.5 text-xs text-encre-douce">
             {doc.expires_at
-              ? `${t("vault.detail.expiresOnPrefix")} ${format(parseISO(doc.expires_at), "d MMMM yyyy", { locale: fr })}`
+              ? `${t("vault.detail.expiresOnPrefix")} ${format(parseISO(doc.expires_at), "d MMMM yyyy", { locale: dfLocale })}`
               : t("vault.detail.noExpiry")}
             {metadata.document_number
               ? ` · ${t("vault.detail.numberPrefix")} ${metadata.document_number}`

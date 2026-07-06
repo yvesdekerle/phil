@@ -1,13 +1,12 @@
 "use client";
 
 import { format } from "date-fns";
-import { fr } from "date-fns/locale";
 import { Search, Trash2 } from "lucide-react";
 import { useActionState, useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { CurrencyInput } from "@/components/budget/currency-input";
 import { Money } from "@/components/budget/money";
-import { useT } from "@/components/i18n/provider";
+import { useLocale, useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -15,6 +14,7 @@ import {
   EXPENSE_CATEGORIES,
   type ExpenseCategory,
 } from "@/lib/budget/categories";
+import { dateFnsLocale, intlLocale } from "@/lib/i18n/dates";
 import { fuzzyMatch } from "@/lib/search/fuzzy";
 import { addExpense, deleteExpense, type ExpenseState } from "./actions";
 
@@ -74,6 +74,9 @@ export function ExpensesClient({
   });
   const [pending, startTransition] = useTransition();
   const t = useT();
+  const locale = useLocale();
+  const dfLocale = dateFnsLocale(locale);
+  const il = intlLocale(locale);
 
   const splitLabels: Record<SplitMode, string> = {
     equal: t("budget.split.equal"),
@@ -88,7 +91,7 @@ export function ExpensesClient({
   const realNameOf = (id: string) =>
     members.find((m) => m.userId === id)?.name ?? t("budget.common.traveler");
   const fmt = (n: number, c: string) =>
-    `${n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${c}`;
+    `${n.toLocaleString(il, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${c}`;
   const sub = (amountInPrimary: number) =>
     secondaryCurrency && secondaryRate ? amountInPrimary * secondaryRate : null;
 
@@ -405,7 +408,7 @@ export function ExpensesClient({
         byDate.map(([date, rows]) => (
           <section key={date}>
             <h2 className="mb-1.5 text-sm font-medium text-encre-douce capitalize">
-              {format(new Date(`${date}T12:00:00`), "d MMMM yyyy", { locale: fr })}
+              {format(new Date(`${date}T12:00:00`), "d MMMM yyyy", { locale: dfLocale })}
             </h2>
             <div className="flex flex-col gap-1.5">
               {rows.map((e) => (

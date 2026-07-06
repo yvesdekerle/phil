@@ -2,14 +2,14 @@ import { redirect } from "next/navigation";
 import { beneficiaryShares } from "@/lib/budget/balances";
 import { asCategory, EXPENSE_CATEGORIES, type ExpenseCategory } from "@/lib/budget/categories";
 import { getRates, toBase } from "@/lib/budget/rates";
-import { getT } from "@/lib/i18n/server";
+import { getIntlLocale, getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { PurseNav } from "../purse-nav";
 
 type Slice = { label: string; amount: number };
 
-function fmt(n: number, c: string): string {
-  return `${n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${c}`;
+function fmt(n: number, c: string, il: string): string {
+  return `${n.toLocaleString(il, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${c}`;
 }
 
 async function Bars({
@@ -22,6 +22,7 @@ async function Bars({
   currency: string;
 }) {
   const t = await getT();
+  const il = await getIntlLocale();
   const visible = slices.filter((s) => s.amount > 0);
   if (visible.length === 0) {
     return <p className="text-sm text-encre-douce">{t("budget.tracking.nothingYet")}</p>;
@@ -38,7 +39,7 @@ async function Bars({
             />
           </div>
           <span className="w-28 shrink-0 text-right text-encre-douce tabular-nums">
-            {fmt(s.amount, currency)}
+            {fmt(s.amount, currency, il)}
           </span>
         </div>
       ))}
@@ -54,6 +55,7 @@ export default async function ExpenseTrackingPage({
 }) {
   const { tripId } = await params;
   const t = await getT();
+  const il = await getIntlLocale();
   const supabase = await createClient();
   const {
     data: { user },
@@ -165,7 +167,7 @@ export default async function ExpenseTrackingPage({
                     {t("budget.tracking.tripTitle")} ({currency})
                   </span>
                   <span className="text-encre-douce">
-                    {t("budget.tracking.total")} {fmt(total, currency)}
+                    {t("budget.tracking.total")} {fmt(total, currency, il)}
                   </span>
                 </h2>
                 <Bars slices={byCategory((e) => e.amount)} total={total} currency={currency} />
@@ -181,8 +183,8 @@ export default async function ExpenseTrackingPage({
                     {t("budget.tracking.myExpenses")} ({currency})
                   </span>
                   <span className="text-encre-douce">
-                    {t("budget.tracking.myShare")} {fmt(myTotal, currency)}{" "}
-                    {t("budget.tracking.advanced")} {fmt(myPaid, currency)}
+                    {t("budget.tracking.myShare")} {fmt(myTotal, currency, il)}{" "}
+                    {t("budget.tracking.advanced")} {fmt(myPaid, currency, il)}
                   </span>
                 </h2>
                 <Bars slices={byCategory((e) => e.myShare)} total={myTotal} currency={currency} />
