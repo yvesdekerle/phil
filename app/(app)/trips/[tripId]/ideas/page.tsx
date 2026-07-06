@@ -6,6 +6,9 @@ import { TripMapLazy } from "@/components/map/trip-map-lazy";
 import { RealtimeRefresh } from "@/components/realtime-refresh";
 import { SearchForm } from "@/components/search-form";
 import { Button } from "@/components/ui/button";
+import { FilterSelect } from "@/components/ui/filter-select";
+import { haversineKm } from "@/lib/geo/distance";
+import { formatMinutes, getTravelMinutes } from "@/lib/geo/travel-time";
 import { getT } from "@/lib/i18n/server";
 import type { IdeaWithMeta } from "@/lib/ideas/types";
 import { fuzzyMatch } from "@/lib/search/fuzzy";
@@ -17,10 +20,16 @@ export default async function TripIdeasPage({
   searchParams,
 }: {
   params: Promise<{ tripId: string }>;
-  searchParams: Promise<{ sort?: string; tag?: string; dismissed?: string; q?: string }>;
+  searchParams: Promise<{
+    sort?: string;
+    tag?: string;
+    dismissed?: string;
+    q?: string;
+    lodging?: string;
+  }>;
 }) {
   const { tripId } = await params;
-  const { sort, tag, dismissed, q } = await searchParams;
+  const { sort, tag, dismissed, q, lodging } = await searchParams;
   const sortBy = sort === "recent" ? "recent" : "votes";
   const showDismissed = dismissed === "1";
 
@@ -59,18 +68,45 @@ export default async function TripIdeasPage({
 
   const canPropose = me?.role === "OWNER" || me?.role === "EDITOR";
 
-  // PHIL-Q37c : carte des idées géolocalisées + logements, distances depuis le 1er logement
+  // PHIL-Q37c : carte des idées géolocalisées + logements, distances depuis le logement choisi
   const locatedIdeas = (ideasData ?? []).filter(
     (i) => i.location_lat != null && i.location_lng != null,
   );
-  const refLodging = (lodgings ?? [])[0];
-  const distanceFrom = refLodging
+  const selectedLodging =
+    (lodgings ?? []).find((l) => l.id === lodging) ?? (lodgings ?? [])[0] ?? null;
+  const distanceFrom = selectedLodging
     ? {
-        lat: refLodging.location_lat as number,
-        lng: refLodging.location_lng as number,
-        label: refLodging.title,
+        lat: selectedLodging.location_lat as number,
+        lng: selectedLodging.location_lng as number,
+        label: selectedLodging.title,
       }
     : null;
+
+  // Distance à vol d'oiseau + temps de trajet (OSRM) depuis le logement choisi
+  const distances = new Map<string, { text: string; title: string }>();
+  if (selectedLodging) {
+    const a = {
+      lat: selectedLodging.location_lat as number,
+      lng: selectedLodging.location_lng as number,
+    };
+    const legs = await Promise.all(
+      locatedIdeas.map(async (i) => {
+        const b = { lat: i.location_lat as number, lng: i.location_lng as number };
+        const km = haversineKm(a, b);
+        if (km < 0.3) return null;
+        const minutes = await getTravelMinutes(a, b);
+        const text = `≈ ${km.toFixed(km < 10 ? 1 : 0)} km${
+          minutes !== null && minutes >= 3 ? ` · ${formatMinutes(minutes)}` : ""
+        }`;
+        return { id: i.id, text };
+      }),
+    );
+    const title = t("ideas.distanceFrom").replace("{name}", selectedLodging.title);
+    for (const leg of legs) {
+      if (leg) distances.set(leg.id, { text: leg.text, title });
+    }
+  }
+
   const mapMarkers: MapMarker[] = [
     ...(lodgings ?? []).map(
       (l): MapMarker => ({
@@ -125,14 +161,39 @@ export default async function TripIdeasPage({
     if (s && s !== "votes") p.set("sort", s);
     if (t) p.set("tag", t);
     if (d) p.set("dismissed", "1");
+    if (lodging) p.set("lodging", lodging);
     const qs = p.toString();
     return `/trips/${tripId}/ideas${qs ? `?${qs}` : ""}`;
+  };
+  const lodgingHref = (id: string) => {
+    const p = new URLSearchParams();
+    if (sortBy === "recent") p.set("sort", "recent");
+    if (tag) p.set("tag", tag);
+    if (showDismissed) p.set("dismissed", "1");
+    if (q) p.set("q", q);
+    p.set("lodging", id);
+    return `/trips/${tripId}/ideas?${p.toString()}`;
   };
 
   return (
     <div className="flex flex-col gap-5">
       {/* PHIL-Q03 : votes en direct */}
       <RealtimeRefresh tables={["idea_votes"]} />
+
+      {(lodgings ?? []).length > 1 && selectedLodging ? (
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs text-encre-douce">{t("ideas.distancesLabel")}</span>
+          <FilterSelect
+            value={selectedLodging.id}
+            ariaLabel={t("ideas.lodgingFilter")}
+            options={(lodgings ?? []).map((l) => ({
+              value: l.id,
+              label: l.title,
+              href: lodgingHref(l.id),
+            }))}
+          />
+        </div>
+      ) : null}
 
       {mapMarkers.length > 0 ? (
         <TripMapLazy markers={mapMarkers} distanceFrom={distanceFrom} heightClass="h-[24rem]" />
@@ -151,7 +212,7 @@ export default async function TripIdeasPage({
         action={`/trips/${tripId}/ideas`}
         q={q}
         placeholder={t("ideas.searchPlaceholder")}
-        hidden={{ sort, tag, dismissed }}
+        hidden={{ sort, tag, dismissed, lodging }}
       />
 
       <div className="flex flex-wrap items-center gap-2">
@@ -219,7 +280,13 @@ export default async function TripIdeasPage({
       ) : (
         <div className="flex flex-col gap-3">
           {ideas.map((idea) => (
-            <IdeaCard key={idea.id} idea={idea} tripId={tripId} canPlan={canPropose} />
+            <IdeaCard
+              key={idea.id}
+              idea={idea}
+              tripId={tripId}
+              canPlan={canPropose}
+              distance={distances.get(idea.id) ?? null}
+            />
           ))}
         </div>
       )}

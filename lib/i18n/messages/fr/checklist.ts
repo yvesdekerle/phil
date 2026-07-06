@@ -95,6 +95,9 @@ export const checklistFr = {
     intro: "Le carnet d'envies du groupe — on propose, on vote, on planifie.",
     pollsIntro:
       "Tranchez en groupe — lancez un sondage éclair, chacun vote, la majorité l'emporte.",
+    distancesLabel: "Distances depuis",
+    lodgingFilter: "Distances depuis le logement",
+    distanceFrom: "depuis {name}",
     propose: "Proposer une idée",
     lodgingLinkTitle: "Hébergements candidats",
     lodgingLinkDesc: " — comparer les options avant de trancher →",

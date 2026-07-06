@@ -1,4 +1,4 @@
-import { CalendarPlus, Clock, Coins, ExternalLink, MapPin } from "lucide-react";
+import { CalendarPlus, Car, Clock, Coins, ExternalLink, MapPin } from "lucide-react";
 import Link from "next/link";
 import { Linkify } from "@/components/ui/linkify";
 import { formatInTimezone } from "@/lib/events/datetime";
@@ -12,10 +12,13 @@ export async function IdeaCard({
   idea,
   tripId,
   canPlan,
+  distance,
 }: {
   idea: IdeaWithMeta;
   tripId: string;
   canPlan: boolean;
+  /** Distance/temps depuis le logement de référence (PHIL-Q37c). */
+  distance?: { text: string; title: string } | null;
 }) {
   const t = await getT();
   return (
@@ -85,6 +88,11 @@ export async function IdeaCard({
         {idea.location_name ? (
           <span className="inline-flex items-center gap-1">
             <MapPin className="size-3.5" aria-hidden="true" /> {idea.location_name}
+          </span>
+        ) : null}
+        {distance ? (
+          <span className="inline-flex items-center gap-1" title={distance.title}>
+            <Car className="size-3.5" aria-hidden="true" /> {distance.text}
           </span>
         ) : null}
         {idea.estimated_duration_minutes ? (
