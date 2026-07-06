@@ -1,5 +1,7 @@
+import { FileUp } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import type { EventType } from "@/lib/events/types";
 import { getT } from "@/lib/i18n/server";
@@ -77,16 +79,16 @@ export default async function NewEventPage({
       <h1 className="mt-3 mb-2 text-center font-display text-3xl text-encre">
         {t("events.new.title")}
       </h1>
-      <p className="mb-6 text-center text-sm text-encre-douce">
-        {t("events.new.importPrompt")}{" "}
+      <div className="mb-6 flex flex-col items-center gap-2">
+        <p className="text-center text-sm text-encre-douce">{t("events.new.importPrompt")}</p>
         <Link
           href={`/trips/${tripId}/events/import`}
-          className="text-bordeaux underline underline-offset-4"
+          className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
         >
-          {t("events.new.importLink")}
-        </Link>{" "}
-        {t("events.new.importSuffix")}
-      </p>
+          <FileUp aria-hidden="true" />
+          {t("events.new.importButton")}
+        </Link>
+      </div>
 
       <div className="mb-6 flex justify-center gap-2">
         {TYPE_TABS.map((tabType) => (

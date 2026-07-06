@@ -115,9 +115,8 @@ export const calendarEn = {
     },
     new: {
       title: "New event",
-      importPrompt: "Got the confirmation to hand?",
-      importLink: "Import it",
-      importSuffix: "and I'll pre-fill everything.",
+      importPrompt: "Got the confirmation to hand? I'll pre-fill everything.",
+      importButton: "Import a confirmation",
     },
     transport: {
       mode: "Type of transport",

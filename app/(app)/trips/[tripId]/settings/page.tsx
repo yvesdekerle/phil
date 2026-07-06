@@ -1,7 +1,5 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PrepareOfflineButton } from "@/components/offline/prepare-offline-button";
-import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { CalendarFeed } from "./calendar-feed";
 import { CoverPosition } from "./cover-position";
@@ -16,7 +14,6 @@ export default async function TripSettingsPage({
   params: Promise<{ tripId: string }>;
 }) {
   const { tripId } = await params;
-  const t = await getT();
   const supabase = await createClient();
 
   const {
@@ -46,14 +43,6 @@ export default async function TripSettingsPage({
   return (
     <div className="mx-auto flex max-w-lg flex-col gap-6">
       <PrepareOfflineButton tripId={trip.id} />
-      <p className="text-sm">
-        <Link
-          href="/conseils"
-          className="text-encre-douce underline underline-offset-4 hover:text-encre"
-        >
-          {t("settings.tipsLink")}
-        </Link>
-      </p>
       {calendarUrl ? <CalendarFeed url={calendarUrl} /> : null}
       {canEdit ? (
         <EmailAliasCard

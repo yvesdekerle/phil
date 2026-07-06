@@ -116,9 +116,8 @@ export const calendarEs = {
     },
     new: {
       title: "Nuevo evento",
-      importPrompt: "¿Tienes la confirmación a mano?",
-      importLink: "Impórtala",
-      importSuffix: "y te lo relleno todo.",
+      importPrompt: "¿Tienes la confirmación a mano? Te lo relleno todo.",
+      importButton: "Importar una confirmación",
     },
     transport: {
       mode: "Tipo de transporte",
