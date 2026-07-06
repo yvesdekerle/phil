@@ -127,7 +127,7 @@ export const metaFr = {
       desc: "Téléverse une photo (JPG/PNG/WebP, 3 Mo max) ou colle un lien d'image ci-dessous.",
       uploading: "Envoi…",
       choose: "Choisir une image",
-      urlPlaceholder: "Colle un lien https://…",
+      urlPlaceholder: "Lien direct vers une image (.jpg, .png…)",
       urlSubmit: "Valider le lien",
       errType: "JPG, PNG ou WebP uniquement.",
       errSize: "3 Mo maximum — recadre ou compresse l'image.",

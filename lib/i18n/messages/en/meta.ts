@@ -126,7 +126,7 @@ export const metaEn = {
       desc: "Upload a photo (JPG/PNG/WebP, 3 MB max) or paste an image link below.",
       uploading: "Uploading…",
       choose: "Choose an image",
-      urlPlaceholder: "Paste an https:// link…",
+      urlPlaceholder: "Direct link to an image (.jpg, .png…)",
       urlSubmit: "Use link",
       errType: "JPG, PNG or WebP only.",
       errSize: "3 MB maximum — crop or compress the image.",

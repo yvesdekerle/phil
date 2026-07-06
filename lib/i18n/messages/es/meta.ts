@@ -127,7 +127,7 @@ export const metaEs = {
       desc: "Sube una foto (JPG/PNG/WebP, 3 MB máx.) o pega un enlace de imagen abajo.",
       uploading: "Enviando…",
       choose: "Elegir una imagen",
-      urlPlaceholder: "Pega un enlace https://…",
+      urlPlaceholder: "Enlace directo a una imagen (.jpg, .png…)",
       urlSubmit: "Usar el enlace",
       errType: "Solo JPG, PNG o WebP.",
       errSize: "3 MB máximo: recorta o comprime la imagen.",
