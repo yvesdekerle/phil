@@ -10,6 +10,7 @@ const TABS = [
   { segment: "map", key: "map" },
   { segment: "documents", key: "documents" },
   { segment: "ideas", key: "ideas" },
+  { segment: "polls", key: "polls" },
   { segment: "checklist", key: "checklist" },
   { segment: "photos", key: "photos" },
   { segment: "budget", key: "budget" },

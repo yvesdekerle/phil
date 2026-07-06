@@ -89,6 +89,7 @@ export const checklistEn = {
       invalidInput: "Invalid input.",
     },
     intro: "The group's wishlist — we suggest, we vote, we plan.",
+    pollsIntro: "Decide as a group — launch a quick poll, everyone votes, the majority wins.",
     propose: "Suggest an idea",
     lodgingLinkTitle: "Lodging shortlist",
     lodgingLinkDesc: " — compare the options before deciding →",

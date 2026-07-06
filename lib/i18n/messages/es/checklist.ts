@@ -90,6 +90,7 @@ export const checklistEs = {
       invalidInput: "Entrada no válida.",
     },
     intro: "El cuaderno de deseos del grupo — se propone, se vota, se planifica.",
+    pollsIntro: "Decidid en grupo — lanza una encuesta exprés, cada uno vota, gana la mayoría.",
     propose: "Proponer una idea",
     lodgingLinkTitle: "Alojamientos candidatos",
     lodgingLinkDesc: " — comparar las opciones antes de decidir →",

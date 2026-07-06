@@ -28,6 +28,7 @@ export const en: PartialMessages = {
     map: "Map",
     documents: "Documents",
     ideas: "Ideas",
+    polls: "Polls",
     checklist: "Packing",
     photos: "Photos",
     budget: "Purse",

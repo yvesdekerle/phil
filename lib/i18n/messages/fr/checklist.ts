@@ -93,6 +93,8 @@ export const checklistFr = {
       invalidInput: "Saisie invalide.",
     },
     intro: "Le carnet d'envies du groupe — on propose, on vote, on planifie.",
+    pollsIntro:
+      "Tranchez en groupe — lancez un sondage éclair, chacun vote, la majorité l'emporte.",
     propose: "Proposer une idée",
     lodgingLinkTitle: "Hébergements candidats",
     lodgingLinkDesc: " — comparer les options avant de trancher →",

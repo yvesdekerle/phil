@@ -22,6 +22,7 @@ export const fr = {
     map: "Carte",
     documents: "Documents",
     ideas: "Idées",
+    polls: "Sondages",
     checklist: "Valise",
     photos: "Photos",
     budget: "Bourse",

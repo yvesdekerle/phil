@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { IdeaCard } from "@/components/ideas/idea-card";
-import { type Poll, PollsSection } from "@/components/ideas/polls-section";
 import { RealtimeRefresh } from "@/components/realtime-refresh";
 import { SearchForm } from "@/components/search-form";
 import { Button } from "@/components/ui/button";
@@ -32,7 +31,7 @@ export default async function TripIdeasPage({
   }
   const t = await getT();
 
-  const [{ data: ideasData }, { data: me }, { data: pollsData }] = await Promise.all([
+  const [{ data: ideasData }, { data: me }] = await Promise.all([
     supabase
       .from("trip_ideas")
       .select(
@@ -47,22 +46,7 @@ export default async function TripIdeasPage({
       .eq("trip_id", tripId)
       .eq("user_id", user.id)
       .single(),
-    supabase
-      .from("polls")
-      .select("id, question, options, closed_at, created_by, poll_votes(user_id, option_index)")
-      .eq("trip_id", tripId)
-      .order("created_at", { ascending: false })
-      .limit(5),
   ]);
-
-  const polls: Poll[] = (pollsData ?? []).map((p) => ({
-    id: p.id,
-    question: p.question,
-    options: p.options,
-    closed_at: p.closed_at,
-    created_by: p.created_by,
-    votes: p.poll_votes ?? [],
-  }));
 
   const canPropose = me?.role === "OWNER" || me?.role === "EDITOR";
 
@@ -102,9 +86,8 @@ export default async function TripIdeasPage({
 
   return (
     <div className="flex flex-col gap-5">
-      {/* PHIL-Q03 : votes et sondages en direct */}
-      <RealtimeRefresh tables={["polls", "poll_votes", "idea_votes"]} />
-      <PollsSection tripId={tripId} polls={polls} myId={user.id} isOwner={me?.role === "OWNER"} />
+      {/* PHIL-Q03 : votes en direct */}
+      <RealtimeRefresh tables={["idea_votes"]} />
       <div className="flex items-center justify-between">
         <p className="text-sm text-encre-douce">{t("ideas.intro")}</p>
         {canPropose ? (
