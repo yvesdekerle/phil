@@ -1,10 +1,8 @@
-import { Home } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { DayFilterSelect } from "@/components/calendar/day-filter-select";
-import { EventTypeIcon } from "@/components/calendar/event-type-icon";
 import type { MapMarker } from "@/components/map/trip-map";
-import { TripMapLazy } from "@/components/map/trip-map-lazy";
+import { TripMapExplorer } from "@/components/map/trip-map-explorer";
 import { eventDayKey, eventTime, groupEventsByDay } from "@/lib/events/datetime";
 import type { TripEvent } from "@/lib/events/types";
 import { haversineKm } from "@/lib/geo/distance";
@@ -180,16 +178,6 @@ export default async function TripMapPage({
     </Link>
   );
 
-  // Pastille de liste (numéro ou maison), calée sur le style des pions de la carte
-  const listPin = (m: MapMarker) => (
-    <span
-      className="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-papier"
-      style={{ backgroundColor: m.color }}
-    >
-      {m.house ? <Home className="size-3.5" aria-hidden="true" /> : (m.label ?? "")}
-    </span>
-  );
-
   // Liste de gauche : programme riche du jour (avec distances), sinon tous les lieux
   const showDayProgram = !showIdeas && !!activeDay && dayProgram.length > 0;
   const listHeading = showIdeas
@@ -197,6 +185,22 @@ export default async function TripMapPage({
     : activeDay
       ? t("map.dayProgram")
       : t("map.allPlaces");
+  const departureId = markers.some((m) => m.id === "depart-maison") ? "depart-maison" : null;
+  const dayRows = showDayProgram
+    ? dayProgram.map(({ event, leg }) => ({
+        id: event.id,
+        title: event.title,
+        time: eventTime(event.starts_at, event.timezone),
+        type: event.type,
+        legText: leg
+          ? `↓ ${leg.km.toFixed(leg.km < 10 ? 1 : 0)} km${
+              leg.minutes !== null && leg.minutes >= 3
+                ? ` · ${formatMinutes(leg.minutes)} ${t("map.byRoad")}`
+                : ""
+            }`
+          : null,
+      }))
+    : null;
 
   return (
     // Pleine largeur (PHIL-Q37b) : la carte déborde du gabarit habituel
@@ -230,95 +234,17 @@ export default async function TripMapPage({
           />
         ) : null}
 
-        {/* TREK-style : liste à gauche, grande carte à droite */}
-        <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[minmax(0,24rem)_1fr] lg:items-start">
-          <div className="order-2 flex flex-col gap-3 lg:order-1 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:pr-1">
-            <section className="rounded-lg border border-laiton-clair bg-papier px-4 py-3">
-              <h2 className="mb-2 text-sm font-medium text-encre">{listHeading}</h2>
-              {showDayProgram ? (
-                <ol className="flex flex-col">
-                  {dayProgram.map(({ event, leg }, i) => (
-                    <li key={event.id}>
-                      {leg ? (
-                        <p className="my-1 ml-3.5 border-l-2 border-dashed border-laiton-clair py-0.5 pl-4 text-xs text-encre-douce">
-                          ↓ {leg.km.toFixed(leg.km < 10 ? 1 : 0)} km
-                          {leg.minutes !== null && leg.minutes >= 3
-                            ? ` · ${formatMinutes(leg.minutes)} ${t("map.byRoad")}`
-                            : ""}
-                        </p>
-                      ) : null}
-                      <Link
-                        href={`/trips/${tripId}/events/${event.id}`}
-                        className="flex items-center gap-2.5 rounded-md px-1 py-1 hover:bg-laiton/10"
-                      >
-                        <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-bordeaux text-xs font-bold text-papier">
-                          {i + 1}
-                        </span>
-                        <EventTypeIcon type={event.type} className="size-6 shrink-0" />
-                        <span className="min-w-0 flex-1 truncate text-sm text-encre">
-                          {event.title}
-                        </span>
-                        <span className="shrink-0 text-xs text-encre-douce tabular-nums">
-                          {eventTime(event.starts_at, event.timezone)}
-                        </span>
-                      </Link>
-                    </li>
-                  ))}
-                </ol>
-              ) : markers.length > 0 ? (
-                <ul className="flex flex-col gap-0.5">
-                  {markers.map((m) => {
-                    const row = (
-                      <>
-                        {listPin(m)}
-                        <span className="min-w-0 flex-1">
-                          <span className="block truncate text-sm text-encre">{m.title}</span>
-                          {m.subtitle ? (
-                            <span className="block truncate text-xs text-encre-douce">
-                              {m.subtitle}
-                            </span>
-                          ) : null}
-                        </span>
-                      </>
-                    );
-                    return (
-                      <li key={m.id}>
-                        {m.href ? (
-                          <Link
-                            href={m.href}
-                            className="flex items-center gap-2.5 rounded-md px-1 py-1.5 hover:bg-laiton/10"
-                          >
-                            {row}
-                          </Link>
-                        ) : (
-                          <div className="flex items-center gap-2.5 px-1 py-1.5">{row}</div>
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
-              ) : (
-                <p className="text-sm text-encre-douce">{t("map.noPlaces")}</p>
-              )}
-            </section>
-
-            <p className="px-1 text-xs text-encre-douce">
-              {markers.length} {markers.length > 1 ? t("map.places") : t("map.place")}{" "}
-              {t("map.onMap")}
-              {missing > 0 ? ` · ${missing} ${t("map.missingNote")}` : ""}
-              {distanceFrom ? ` · ${t("map.distancesFrom")} ${distanceFrom.label}` : ""}
-            </p>
-          </div>
-
-          <div className="order-1 lg:order-2 lg:sticky lg:top-4">
-            <TripMapLazy
-              markers={markers}
-              drawPath={!showIdeas}
-              distanceFrom={distanceFrom}
-              heightClass="h-[55vh] lg:h-[calc(100vh-7rem)]"
-            />
-          </div>
-        </div>
+        {/* TREK-style : liste cliquable à gauche, grande carte à droite */}
+        <TripMapExplorer
+          markers={markers}
+          departureId={departureId}
+          dayRows={dayRows}
+          heading={listHeading}
+          drawPath={!showIdeas}
+          distanceFrom={distanceFrom}
+          distanceLabel={distanceFrom?.label ?? null}
+          missing={missing}
+        />
       </div>
     </div>
   );

@@ -15,6 +15,8 @@ export const geoFr = {
     allPlaces: "Tous les lieux",
     noPlaces: "Aucun lieu géolocalisé à afficher ici pour l'instant.",
     dayFilter: "Filtrer par jour",
+    showDeparture: "Afficher le départ / arrivée",
+    hideDeparture: "Masquer le départ / arrivée",
     byRoad: "de route",
     place: "lieu",
     places: "lieux",

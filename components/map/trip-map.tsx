@@ -29,6 +29,7 @@ export function TripMap({
   drawPath,
   distanceFrom,
   focusId,
+  focusNonce,
   heightClass = "h-[28rem]",
 }: {
   markers: MapMarker[];
@@ -36,6 +37,8 @@ export function TripMap({
   distanceFrom?: { lat: number; lng: number; label: string } | null;
   /** Centre la carte et ouvre le popup de ce marqueur (PHIL-Q14). */
   focusId?: string | null;
+  /** Change à chaque clic pour re-zoomer même sur le même lieu (PHIL-Q37c). */
+  focusNonce?: number;
   /** Hauteur de la carte (PHIL-Q37b) — la page carte l'agrandit en colonne. */
   heightClass?: string;
 }) {
@@ -137,12 +140,13 @@ export function TripMap({
       map.setView([0, 0], 2);
     }
 
-    // PHIL-Q14 : focus demandé depuis la grille de photos
+    // PHIL-Q14/Q37c : focus depuis la grille photos ou un clic dans la liste
+    void focusNonce; // dépendance : force le re-zoom même sur le même lieu
     if (focusId) {
       const target = byId.get(focusId);
       const m = markers.find((x) => x.id === focusId);
       if (target && m) {
-        map.setView([m.lat, m.lng], Math.max(map.getZoom(), 13));
+        map.setView([m.lat, m.lng], Math.max(map.getZoom(), 12));
         target.openPopup();
       }
     }
@@ -150,7 +154,7 @@ export function TripMap({
     return () => {
       layer.remove();
     };
-  }, [markers, drawPath, distanceFrom, focusId, t]);
+  }, [markers, drawPath, distanceFrom, focusId, focusNonce, t]);
 
   return (
     <div

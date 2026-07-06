@@ -16,6 +16,8 @@ export const geoEn = {
     allPlaces: "All places",
     noPlaces: "No geolocated place to show here yet.",
     dayFilter: "Filter by day",
+    showDeparture: "Show departure / arrival",
+    hideDeparture: "Hide departure / arrival",
     byRoad: "on the road",
     place: "place",
     places: "places",
