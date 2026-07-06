@@ -945,7 +945,7 @@ Type `ActionState` unique, standard formulaire `useActionState`, `<TimezoneSelec
 
 ---
 
-## Catégorie S — Restauration & courses (à traiter APRÈS l'audit)
+## Catégorie S — Évolutions produit (demandées pendant l'audit, à traiter après)
 
 ### [~] PHIL-S01 — Onglet « Miam » : repas & liste de courses *(migration écrite le 2026-07-07)*
 Nouvel onglet du voyage **Miam** (FR) / **Yummy** (EN) / **Ñam** (ES) regroupant deux usages partagés dans le même onglet :
@@ -956,6 +956,23 @@ Nouvel onglet du voyage **Miam** (FR) / **Yummy** (EN) / **Ñam** (ES) regroupan
 ### [~] PHIL-S02 — Supermarchés & commerces repérés sur la carte *(migration écrite le 2026-07-07)*
 Sur la carte du voyage, épingler les **supermarchés / commerces repérés** par le groupe (nom, position, note courte — « ouvert tard », « bon marché »). Un membre repère un magasin → point sur la carte, visible de tous. Couche POI légère, distincte des événements. Lien possible avec la liste de courses (S01).
 > Migration écrite : `20260707100100_trip_places.sql` (table `trip_places`, catégories SUPERMARKET/SHOP/PHARMACY/MARKET/OTHER, lat/lng, RLS participant, temps réel). **À appliquer (`pnpm db:push` + `pnpm db:types`) avant l'UI.** Reste : couche de marqueurs sur `trip-map.tsx`, formulaire d'ajout, i18n, réattribution fantôme (R18).
+
+### [~] PHIL-S03 — Sondages : qui a voté quoi, choix simple/multiple, date de fin *(migration écrite le 2026-07-07)*
+Trois demandes (2026-07-07) :
+- **Voir qui a voté et quel vote** : la donnée existe déjà (`poll_votes.user_id` + `option_index`, RLS membres) → UI seule (votants par option).
+- **Choix simple (1 parmi X) vs choix multiple** : `allow_multiple` sur `polls`. En multiple, un utilisateur peut cocher plusieurs options (PK `poll_votes` étendue à `(poll_id, user_id, option_index)`) ; en simple, l'action de vote remplace le vote précédent.
+- **Date de fin programmée (+ rappel si possible)** : `closes_at` sur `polls` (distinct de `closed_at`). Auto-clôture + rappel avant échéance à câbler dans le cron.
+> Migration écrite : `20260707110000_polls_multi_schedule.sql`. **À appliquer avant l'UI/cron.** Reste : UI (type à la création, votants par option, badge date de fin), logique vote simple/multiple, sweep cron clôture/rappel.
+
+### [~] PHIL-S04 — Valise : quantité optionnelle, retrait de la date, réordonnancement *(migration écrite le 2026-07-07)*
+Demandes (2026-07-07) sur le formulaire d'ajout d'élément :
+- **Quantité optionnelle** : champ `quantity` (texte libre — « 2 », « 3 paires »…).
+- **Retirer le champ date** : `due_date` sans usage clair → masquer du formulaire (colonne conservée, non rendue). UI seule.
+- **Réordonner éléments ET catégories** : `position` sur `checklist_items` (drag-drop des éléments). Réordonner les **catégories** (texte libre) demande un mécanisme d'ordre dédié — à cadrer (table de catégories ou map d'ordre par voyage).
+> Migration écrite : `20260707110100_checklist_quantity_position.sql`. **À appliquer avant l'UI.** Reste : champ quantité + retrait date dans `checklist-client.tsx`, drag-drop des éléments, décision ordre des catégories.
+
+### [ ] PHIL-S05 — Données démo photos : exemples Maurice (plage, marché…)
+Le seed démo (`scripts/seed-demo-maurice.ts`) doit porter des **photos d'exemple mauriciennes** (plage, marché, etc.) plutôt que des placeholders — cf. backlog « Photos basse qualité pour le voyage démo ». Nécessite des visuels basse qualité libres de droits. Pas de migration.
 
 ---
 
