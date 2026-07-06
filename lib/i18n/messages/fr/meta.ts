@@ -33,6 +33,10 @@ export const metaFr = {
       add: "Ajouter",
       addFriend: "Ajouter un ami",
       empty: "Tous tes amis sont déjà à bord — ajoutes-en de nouveaux depuis la page Amis.",
+      search: "Rechercher un ami…",
+      noMatch: "Aucun ami ne correspond.",
+      prev: "Précédent",
+      next: "Suivant",
     },
     actions: {
       makeCaptain: "Passer capitaine",

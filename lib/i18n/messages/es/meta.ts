@@ -33,6 +33,10 @@ export const metaEs = {
       add: "Añadir",
       addFriend: "Añadir un amigo",
       empty: "Todos tus amigos ya están a bordo — añade nuevos desde la página Amigos.",
+      search: "Buscar un amigo…",
+      noMatch: "Ningún amigo coincide.",
+      prev: "Anterior",
+      next: "Siguiente",
     },
     actions: {
       makeCaptain: "Nombrar capitán",

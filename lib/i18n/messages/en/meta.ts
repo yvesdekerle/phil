@@ -32,6 +32,10 @@ export const metaEn = {
       add: "Add",
       addFriend: "Add a friend",
       empty: "All your friends are already aboard — add new ones from the Friends page.",
+      search: "Search a friend…",
+      noMatch: "No friend matches.",
+      prev: "Previous",
+      next: "Next",
     },
     actions: {
       makeCaptain: "Make captain",
