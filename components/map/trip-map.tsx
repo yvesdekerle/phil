@@ -63,10 +63,20 @@ export function TripMap({
     // La colonne carte est haute/responsive/sticky : recalcule la taille des
     // tuiles quand le conteneur change de dimensions (évite les tuiles grises),
     // et une fois après le premier paint (init en grille/flex à largeur tardive).
-    requestAnimationFrame(() => map.invalidateSize());
-    const observer = new ResizeObserver(() => map.invalidateSize());
+    // `removed` : la carte peut être démontée (navigation) avant que le rAF ou
+    // le ResizeObserver ne s'exécute — invalidateSize planterait alors.
+    let removed = false;
+    const resize = () => {
+      if (!removed) {
+        map.invalidateSize();
+      }
+    };
+    const raf = requestAnimationFrame(resize);
+    const observer = new ResizeObserver(resize);
     observer.observe(containerRef.current);
     return () => {
+      removed = true;
+      cancelAnimationFrame(raf);
       observer.disconnect();
       map.remove();
       mapRef.current = null;
