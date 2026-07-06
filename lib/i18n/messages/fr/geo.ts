@@ -17,6 +17,7 @@ export const geoFr = {
     dayFilter: "Filtrer par jour",
     showDeparture: "Afficher le départ / arrivée",
     hideDeparture: "Masquer le départ / arrivée",
+    departureLabel: "Départ / arrivée",
     byRoad: "de route",
     place: "lieu",
     places: "lieux",

@@ -6,6 +6,7 @@ import { EventTypeIcon } from "@/components/calendar/event-type-icon";
 import { useT } from "@/components/i18n/provider";
 import type { MapMarker } from "@/components/map/trip-map";
 import { TripMapLazy } from "@/components/map/trip-map-lazy";
+import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 
 export type DayRow = {
@@ -69,26 +70,25 @@ export function TripMapExplorer({
 
   return (
     <div className="flex flex-col gap-3">
-      {/* Ligne du haut : filtre par jour + toggle départ/arrivée */}
+      {/* Ligne du haut : filtre par jour à gauche, toggle départ/arrivée à droite */}
       {filter || departureId ? (
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-3">
           {filter}
           {departureId ? (
-            <button
-              type="button"
-              onClick={() => {
-                setShowDeparture((v) => !v);
-                setFocusId(null);
-              }}
-              className={cn(
-                "h-9 rounded-full border px-3 text-xs font-medium transition-colors",
-                showDeparture
-                  ? "border-bordeaux bg-bordeaux/10 text-bordeaux"
-                  : "border-laiton-clair bg-papier text-encre-douce hover:border-laiton hover:text-encre",
-              )}
+            <label
+              htmlFor="map-show-departure"
+              className="ml-auto flex cursor-pointer items-center gap-2.5"
             >
-              {showDeparture ? t("map.hideDeparture") : t("map.showDeparture")}
-            </button>
+              <span className="text-sm text-encre-douce">{t("map.departureLabel")}</span>
+              <Switch
+                id="map-show-departure"
+                checked={showDeparture}
+                onCheckedChange={(v) => {
+                  setShowDeparture(v);
+                  setFocusId(null);
+                }}
+              />
+            </label>
           ) : null}
         </div>
       ) : null}

@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { DayFilterSelect } from "@/components/calendar/day-filter-select";
 import type { MapMarker } from "@/components/map/trip-map";
@@ -10,7 +9,6 @@ import { geocode } from "@/lib/geo/geocode";
 import { formatMinutes, getTravelMinutes } from "@/lib/geo/travel-time";
 import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
-import { cn } from "@/lib/utils";
 
 const TYPE_COLORS: Record<string, string> = {
   TRANSPORT: "#1f2a44",
@@ -163,21 +161,6 @@ export default async function TripMapPage({
     );
   }
 
-  const chip = (href: string, label: string, active: boolean) => (
-    <Link
-      key={href}
-      href={href}
-      className={cn(
-        "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
-        active
-          ? "border-bordeaux bg-bordeaux text-papier"
-          : "border-laiton-clair bg-papier text-encre-douce hover:text-encre",
-      )}
-    >
-      {label}
-    </Link>
-  );
-
   // Liste de gauche : programme riche du jour (avec distances), sinon tous les lieux
   const showDayProgram = !showIdeas && !!activeDay && dayProgram.length > 0;
   const listHeading = showIdeas
@@ -206,19 +189,6 @@ export default async function TripMapPage({
     // Pleine largeur (PHIL-Q37b) : la carte déborde du gabarit habituel
     <div className="relative left-1/2 right-1/2 -mx-[50vw] w-screen px-4 sm:px-6 lg:px-8">
       <div className="mx-auto flex max-w-[104rem] flex-col gap-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <Link
-            href={`/trips/${tripId}`}
-            className="text-sm text-encre-douce underline underline-offset-4 hover:text-encre"
-          >
-            {t("map.backToCalendar")}
-          </Link>
-          <div className="flex gap-1.5">
-            {chip(`/trips/${tripId}/map`, t("map.programme"), !showIdeas)}
-            {chip(`/trips/${tripId}/map?view=ideas`, t("map.ideas"), showIdeas)}
-          </div>
-        </div>
-
         {/* TREK-style : liste cliquable à gauche, grande carte à droite */}
         <TripMapExplorer
           markers={markers}

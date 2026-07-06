@@ -18,6 +18,7 @@ export const geoEn = {
     dayFilter: "Filter by day",
     showDeparture: "Show departure / arrival",
     hideDeparture: "Hide departure / arrival",
+    departureLabel: "Departure / arrival",
     byRoad: "on the road",
     place: "place",
     places: "places",
