@@ -8,6 +8,7 @@ export const calendarEn = {
     viewToggle: {
       calendar: "Calendar",
       timeline: "Timeline",
+      map: "Map",
     },
     searchPlaceholder: "Search the programme…",
     localTimeNote: "Times shown in each event's local time.",

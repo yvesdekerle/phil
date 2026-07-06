@@ -4,32 +4,36 @@ import { useRouter } from "next/navigation";
 import { useT } from "@/components/i18n/provider";
 import { cn } from "@/lib/utils";
 
+type TripView = "calendar" | "timeline" | "carte";
+
 /**
- * Bascule Calendrier ⇄ Timeline (PHIL-Q36) — mémorise le choix dans un cookie
- * lu côté serveur, pour retrouver sa vue préférée en rouvrant un voyage.
+ * Bascule Calendrier / Timeline / Carte (PHIL-Q36 + carte intégrée au Journal).
+ * Calendrier et Timeline mémorisent la vue d'atterrissage du voyage dans un
+ * cookie lu côté serveur ; la Carte est une vue « coup d'œil », non mémorisée.
  */
-export function TripViewToggle({
-  tripId,
-  active,
-}: {
-  tripId: string;
-  active: "calendar" | "timeline";
-}) {
+export function TripViewToggle({ tripId, active }: { tripId: string; active: TripView }) {
   const router = useRouter();
   const t = useT();
 
-  const go = (view: "calendar" | "timeline") => {
+  const go = (view: TripView) => {
     if (view === active) {
       return;
     }
-    // 1 an, lisible par le serveur pour atterrir sur la bonne vue. document.cookie
-    // (et non la CookieStore API, async et peu supportée) : simple pref non sensible.
-    // biome-ignore lint/suspicious/noDocumentCookie: préférence d'affichage, pas de donnée sensible
-    document.cookie = `phil_trip_view=${view}; path=/; max-age=31536000; samesite=lax`;
-    router.push(view === "timeline" ? `/trips/${tripId}/timeline` : `/trips/${tripId}`);
+    if (view !== "carte") {
+      // 1 an, lisible par le serveur pour atterrir sur la bonne vue.
+      // biome-ignore lint/suspicious/noDocumentCookie: préférence d'affichage, pas de donnée sensible
+      document.cookie = `phil_trip_view=${view}; path=/; max-age=31536000; samesite=lax`;
+    }
+    const path =
+      view === "timeline"
+        ? `/trips/${tripId}/timeline`
+        : view === "carte"
+          ? `/trips/${tripId}/map`
+          : `/trips/${tripId}`;
+    router.push(path);
   };
 
-  const seg = (view: "calendar" | "timeline", label: string) => (
+  const seg = (view: TripView, label: string) => (
     <button
       type="button"
       onClick={() => go(view)}
@@ -49,6 +53,7 @@ export function TripViewToggle({
     <div className="inline-flex items-center gap-0.5 rounded-full border border-laiton-clair bg-papier p-0.5">
       {seg("calendar", t("calendar.viewToggle.calendar"))}
       {seg("timeline", t("calendar.viewToggle.timeline"))}
+      {seg("carte", t("calendar.viewToggle.map"))}
     </div>
   );
 }
