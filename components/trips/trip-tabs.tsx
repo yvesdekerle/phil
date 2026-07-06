@@ -31,7 +31,11 @@ export function TripTabs({ tripId }: { tripId: string }) {
     >
       {TABS.map((tab) => {
         const href = tab.segment ? `${base}/${tab.segment}` : base;
-        const active = pathname === href;
+        // Le Calendrier couvre aussi sa sous-vue Timeline (/trips/[id]/timeline).
+        const active =
+          tab.segment === ""
+            ? pathname === base || pathname === `${base}/timeline`
+            : pathname === href;
         return (
           <Link
             key={tab.key}

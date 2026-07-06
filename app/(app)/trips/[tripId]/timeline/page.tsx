@@ -73,7 +73,7 @@ export default async function TimelinePage({ params }: { params: Promise<{ tripI
   return (
     // Pleine largeur (PHIL-Q37c) : le Gantt déborde du gabarit pour lire les titres
     <div className="relative left-1/2 right-1/2 -mx-[50vw] w-screen px-4 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-[104rem]">
+      <div className="mx-auto max-w-[104rem] pb-16">
         <div className="mb-4 flex items-center justify-between gap-3">
           <TripViewToggle tripId={tripId} active="timeline" />
           <h1 className="font-display text-2xl text-encre">{t("calendar.timeline.title")}</h1>
@@ -87,7 +87,7 @@ export default async function TimelinePage({ params }: { params: Promise<{ tripI
             <p className="mt-2 text-sm text-encre-douce">{t("calendar.timeline.emptyBody")}</p>
           </div>
         ) : (
-          <div className="max-h-[calc(100vh-7rem)] overflow-auto rounded-lg border border-laiton-clair bg-papier">
+          <div className="sticky top-16 z-0 max-h-[calc(100dvh-3.5rem)] overflow-auto rounded-lg border border-laiton-clair bg-papier">
             <div style={{ width: dayCount * DAY_WIDTH + LABEL_W }}>
               {/* En-tête des jours — figé en haut, colonne des noms figée à gauche */}
               <div
