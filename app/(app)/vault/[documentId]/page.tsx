@@ -1,5 +1,4 @@
 import { format, parseISO } from "date-fns";
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { CategoryIcon } from "@/components/vault/category-icon";
 import { getDateFnsLocale, getT } from "@/lib/i18n/server";
@@ -85,14 +84,7 @@ export default async function VaultDocumentPage({
 
   return (
     <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8">
-      <Link
-        href="/vault"
-        className="text-sm text-encre-douce underline underline-offset-4 hover:text-encre"
-      >
-        {t("vault.backLink")}
-      </Link>
-
-      <div className="mt-4 mb-6 flex items-start gap-4">
+      <div className="mb-6 flex items-start gap-4">
         <CategoryIcon category={doc.category} />
         <div className="min-w-0 flex-1">
           <h1 className="truncate font-display text-2xl text-encre">{doc.file_name}</h1>
