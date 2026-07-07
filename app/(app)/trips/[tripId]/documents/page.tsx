@@ -19,6 +19,7 @@ type TripDocument = {
   label: string | null;
   uploaded_at: string;
   scope: "VAULT" | "TRIP";
+  encrypted: boolean;
   ownerName: string;
   canDelete: boolean;
   forMeOnly?: boolean;
@@ -61,7 +62,7 @@ export default async function TripDocumentsPage({
     supabase
       .from("document_shares")
       .select(
-        "shared_with, documents(id, file_name, category, label, uploaded_at, scope, deleted_at, profiles(display_name))",
+        "shared_with, documents(id, file_name, category, label, uploaded_at, scope, encrypted, deleted_at, profiles(display_name))",
       )
       .eq("trip_id", tripId),
     supabase
@@ -90,6 +91,7 @@ export default async function TripDocumentsPage({
     label: d.label,
     uploaded_at: d.uploaded_at,
     scope: "TRIP" as const,
+    encrypted: false,
     ownerName: d.profiles?.display_name ?? t("tripDocs.travelerFallback"),
     canDelete: isTripOwner || d.owner_id === user.id,
   }));
@@ -106,6 +108,7 @@ export default async function TripDocumentsPage({
       label: r.documents.label,
       uploaded_at: r.documents.uploaded_at,
       scope: "VAULT" as const,
+      encrypted: r.documents.encrypted,
       ownerName: r.documents.profiles?.display_name ?? t("tripDocs.travelerFallback"),
       canDelete: false, // un doc du coffre partagé se gère depuis le coffre
       forMeOnly: r.shared_with === user.id, // E09 : partage ciblé
@@ -199,7 +202,11 @@ export default async function TripDocumentsPage({
               className="flex items-center gap-3 rounded-lg border border-laiton-clair bg-papier px-4 py-3"
             >
               <a
-                href={`/api/documents/${doc.id}/view`}
+                href={
+                  doc.scope === "VAULT" && doc.encrypted
+                    ? `/vault/${doc.id}`
+                    : `/api/documents/${doc.id}/view`
+                }
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex min-w-0 flex-1 items-center gap-4"

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState, useTransition } from "react";
+import { getUserPublicKey } from "@/app/(app)/profile/coffre-actions";
 import { useLocale, useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,8 +12,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { intlLocale } from "@/lib/i18n/dates";
-import { getUserPublicKey } from "@/app/(app)/profile/coffre-actions";
 import { getCoffreMaster, getCoffrePrivateKey } from "@/lib/crypto/coffre-session";
 import {
   deriveSharedWrapKey,
@@ -22,6 +21,7 @@ import {
   unwrapKey,
   wrapKey,
 } from "@/lib/crypto/vault-crypto";
+import { intlLocale } from "@/lib/i18n/dates";
 import { createClient } from "@/lib/supabase/client";
 import { type DocumentActionState, shareDocument, unshareDocument } from "./actions";
 
@@ -120,7 +120,10 @@ export function ShareManager({
       // destinataire (ECDH : sa clé publique + ma clé privée). Individuel requis.
       if (encrypted) {
         if (!sharedWith) {
-          setState({ status: "error", message: "Document chiffré : partage individuel uniquement." });
+          setState({
+            status: "error",
+            message: "Document chiffré : partage individuel uniquement.",
+          });
           return;
         }
         try {
@@ -130,7 +133,10 @@ export function ShareManager({
             getUserPublicKey(sharedWith),
           ]);
           if (!pubJwk) {
-            setState({ status: "error", message: "Le destinataire doit d'abord activer son coffre." });
+            setState({
+              status: "error",
+              message: "Le destinataire doit d'abord activer son coffre.",
+            });
             return;
           }
           const recipientPub = await importEcdhPublic(pubJwk as JsonWebKey);
@@ -291,6 +297,21 @@ export function ShareManager({
                 </button>
               </div>
             )}
+            {pending ? (
+              <p className="mt-2 text-center text-sm text-encre-douce">
+                {t("documents.share.loading")}
+              </p>
+            ) : state.status !== "idle" ? (
+              <p
+                className={
+                  state.status === "error"
+                    ? "mt-2 text-center text-sm text-bordeaux"
+                    : "mt-2 text-center text-sm text-encre"
+                }
+              >
+                {state.message}
+              </p>
+            ) : null}
           </DialogContent>
         </Dialog>
       </div>
