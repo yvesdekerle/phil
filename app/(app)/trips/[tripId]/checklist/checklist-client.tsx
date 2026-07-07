@@ -1,12 +1,10 @@
 "use client";
 
-import { format } from "date-fns";
-import { Plus, Trash2 } from "lucide-react";
-import { useActionState, useState, useTransition } from "react";
-import { useLocale, useT } from "@/components/i18n/provider";
+import { GripVertical, Plus, Trash2 } from "lucide-react";
+import { useActionState, useEffect, useState, useTransition } from "react";
+import { useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { dateFnsLocale } from "@/lib/i18n/dates";
 import {
   type CatalogSection,
   catalogItemTitle,
@@ -19,6 +17,7 @@ import {
   assignChecklistItem,
   type ChecklistState,
   deleteChecklistItem,
+  reorderChecklistItems,
   toggleChecklistItem,
 } from "./actions";
 
@@ -32,8 +31,10 @@ export type ChecklistItem = {
   /** PHIL-O05 : item rattaché à un événement ("à emporter" d'une activité). */
   event_id: string | null;
   eventTitle: string | null;
-  /** PHIL-Q20 : échéance optionnelle ("vaccins avant le…"). */
-  due_date: string | null;
+  /** PHIL-S04 : quantité optionnelle (texte libre — "2", "3 paires"…). */
+  quantity: string | null;
+  /** PHIL-S04 : rang d'affichage au sein de la catégorie (drag-drop). */
+  position: number;
   /** PHIL-Q27 : catégorie de rangement libre. */
   category: string | null;
 };
@@ -41,7 +42,7 @@ type Member = { userId: string; name: string };
 
 const SECTION_KEYS: CatalogSection[] = ["a_emporter", "avant_depart", "sur_place"];
 
-/** Valise partagée (PHIL-N11, refonte onglets/catégories PHIL-Q27). */
+/** Valise partagée (PHIL-N11, quantité + réordonnancement PHIL-S04). */
 export function ChecklistClient({
   tripId,
   items,
@@ -59,7 +60,6 @@ export function ChecklistClient({
   nights?: number;
 }) {
   const t = useT();
-  const dfLocale = dateFnsLocale(useLocale());
   const MISC = t("checklist.misc");
   const [tab, setTab] = useState<CatalogSection>("a_emporter");
   const [qtyOverrides, setQtyOverrides] = useState<Record<string, number>>({});
@@ -68,19 +68,26 @@ export function ChecklistClient({
   });
   const [pending, startTransition] = useTransition();
 
-  const doneCount = items.filter((i) => i.done).length;
-  const sectionItems = items.filter((i) => i.section === tab);
+  // PHIL-S04 : ordre local optimiste pour le drag-drop, resynchronisé au serveur.
+  const [localItems, setLocalItems] = useState(items);
+  useEffect(() => setLocalItems(items), [items]);
+  const [dragId, setDragId] = useState<string | null>(null);
 
-  // Catalogue de l'onglet : ce qu'on peut encore sélectionner (dédoublonnage par
-  // clé, indépendant de la langue où l'item a été ajouté)
-  const isInList = (key: string) => items.some((i) => matchesCatalogKey(i.title, key));
+  const doneCount = localItems.filter((i) => i.done).length;
+  const sectionItems = localItems.filter((i) => i.section === tab);
+  const catKey = (i: ChecklistItem) => i.category?.trim() || MISC;
+  const itemsOfCategory = (category: string) =>
+    sectionItems.filter((i) => catKey(i) === category).sort((a, b) => a.position - b.position);
+
+  // Catalogue de l'onglet : ce qu'on peut encore sélectionner (dédoublonnage par clé)
+  const isInList = (key: string) => localItems.some((i) => matchesCatalogKey(i.title, key));
   const pendingGroups = PACKING_CATALOG.filter((c) => c.section === tab)
     .map((g) => ({ ...g, items: g.items.filter((i) => !isInList(i.key)) }))
     .filter((g) => g.items.length > 0);
 
   // La liste (sélectionnés), groupée par catégorie
-  const categories = [...new Set(sectionItems.map((i) => i.category?.trim() || MISC))].sort(
-    (a, b) => (a === MISC ? 1 : b === MISC ? -1 : a.localeCompare(b, "fr")),
+  const categories = [...new Set(sectionItems.map(catKey))].sort((a, b) =>
+    a === MISC ? 1 : b === MISC ? -1 : a.localeCompare(b, "fr"),
   );
   const categorySuggestions = [
     ...new Set([
@@ -100,6 +107,30 @@ export function ChecklistClient({
     startTransition(async () => {
       await addChecklistItem({ status: "idle" }, formData);
     });
+  };
+
+  // PHIL-S04 : drop d'un élément sur un autre de la MÊME catégorie → réordonne.
+  const handleDrop = (target: ChecklistItem) => {
+    const draggedId = dragId;
+    setDragId(null);
+    if (!draggedId || draggedId === target.id) {
+      return;
+    }
+    const dragged = sectionItems.find((i) => i.id === draggedId);
+    if (!dragged || catKey(dragged) !== catKey(target)) {
+      return;
+    }
+    const ordered = itemsOfCategory(catKey(target)).filter((i) => i.id !== draggedId);
+    const targetIdx = ordered.findIndex((i) => i.id === target.id);
+    ordered.splice(targetIdx, 0, dragged);
+    const orderedIds = ordered.map((i) => i.id);
+    setLocalItems((prev) =>
+      prev.map((i) => {
+        const idx = orderedIds.indexOf(i.id);
+        return idx >= 0 ? { ...i, position: idx } : i;
+      }),
+    );
+    startTransition(() => reorderChecklistItems(tripId, orderedIds));
   };
 
   return (
@@ -123,16 +154,16 @@ export function ChecklistClient({
         ))}
       </nav>
 
-      {items.length > 0 ? (
+      {localItems.length > 0 ? (
         <div className="flex items-center gap-3">
           <div className="h-2 flex-1 overflow-hidden rounded-full bg-laiton-clair/40">
             <div
               className="h-full rounded-full bg-bordeaux transition-all"
-              style={{ width: `${items.length ? (doneCount / items.length) * 100 : 0}%` }}
+              style={{ width: `${localItems.length ? (doneCount / localItems.length) * 100 : 0}%` }}
             />
           </div>
           <span className="shrink-0 text-xs text-encre-douce">
-            {doneCount}/{items.length}
+            {doneCount}/{localItems.length}
           </span>
         </div>
       ) : null}
@@ -149,92 +180,102 @@ export function ChecklistClient({
               {category}
             </h2>
             <ul className="flex flex-col gap-1.5">
-              {sectionItems
-                .filter((i) => (i.category?.trim() || MISC) === category)
-                .map((item) => (
-                  <li
-                    key={item.id}
-                    className="flex flex-wrap items-center gap-2 rounded-md border border-laiton-clair/60 bg-papier px-3 py-2"
+              {itemsOfCategory(category).map((item) => (
+                <li
+                  key={item.id}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={() => handleDrop(item)}
+                  className={cn(
+                    "flex flex-wrap items-center gap-2 rounded-md border border-laiton-clair/60 bg-papier px-2 py-2",
+                    dragId === item.id && "opacity-40",
+                  )}
+                >
+                  <button
+                    type="button"
+                    draggable
+                    onDragStart={() => setDragId(item.id)}
+                    onDragEnd={() => setDragId(null)}
+                    className="shrink-0 cursor-grab text-laiton-clair hover:text-laiton"
+                    aria-label={t("checklist.reorderAria")}
                   >
-                    <input
-                      type="checkbox"
-                      checked={item.done}
-                      disabled={pending}
-                      onChange={(e) =>
-                        startTransition(() =>
-                          toggleChecklistItem(
-                            tripId,
-                            item.id,
-                            e.target.checked,
-                            item.event_id ?? undefined,
-                          ),
-                        )
-                      }
-                      className="size-4 accent-[#6e1f2e]"
-                      aria-label={`${t("checklist.doneAria")} ${item.title}`}
-                    />
-                    <span
-                      className={cn(
-                        "min-w-0 flex-1 text-sm",
-                        item.done ? "text-encre-douce line-through" : "text-encre",
-                      )}
-                    >
-                      {item.title}
-                      {item.due_date ? (
-                        <span className="ml-1.5 text-xs text-encre-douce">
-                          {t("checklist.dueBefore")}{" "}
-                          {format(new Date(`${item.due_date}T12:00:00`), "d MMM", {
-                            locale: dfLocale,
-                          })}
-                        </span>
-                      ) : null}
-                      {item.eventTitle ? (
-                        <span className="ml-1.5 rounded-full bg-laiton/15 px-2 py-0.5 text-[0.65rem] text-laiton">
-                          {item.eventTitle}
-                        </span>
-                      ) : null}
-                    </span>
-                    <select
-                      value={item.assigned_to ?? ""}
-                      disabled={pending}
-                      onChange={(e) =>
-                        startTransition(() =>
-                          assignChecklistItem(tripId, item.id, e.target.value || null),
-                        )
-                      }
-                      className="rounded border border-laiton-clair bg-papier px-1.5 py-1 text-xs text-encre-douce"
-                      aria-label={t("checklist.assignAria")}
-                    >
-                      <option value="">{t("checklist.assignNobody")}</option>
-                      {members.map((m) => (
-                        <option key={m.userId} value={m.userId}>
-                          {m.userId === myId ? t("checklist.you") : m.name}
-                        </option>
-                      ))}
-                    </select>
-                    {item.created_by === myId || isOwner ? (
-                      <button
-                        type="button"
-                        disabled={pending}
-                        onClick={() =>
-                          startTransition(() =>
-                            deleteChecklistItem(tripId, item.id, item.event_id ?? undefined),
-                          )
-                        }
-                        className="text-encre-douce hover:text-bordeaux"
-                        aria-label={`${t("checklist.removePrefix")} ${item.title} ${t("checklist.removeSuffix")}`}
-                      >
-                        <Trash2 className="size-4" aria-hidden="true" />
-                      </button>
+                    <GripVertical className="size-4" aria-hidden="true" />
+                  </button>
+                  <input
+                    type="checkbox"
+                    checked={item.done}
+                    disabled={pending}
+                    onChange={(e) =>
+                      startTransition(() =>
+                        toggleChecklistItem(
+                          tripId,
+                          item.id,
+                          e.target.checked,
+                          item.event_id ?? undefined,
+                        ),
+                      )
+                    }
+                    className="size-4 accent-[#6e1f2e]"
+                    aria-label={`${t("checklist.doneAria")} ${item.title}`}
+                  />
+                  <span
+                    className={cn(
+                      "min-w-0 flex-1 text-sm",
+                      item.done ? "text-encre-douce line-through" : "text-encre",
+                    )}
+                  >
+                    {item.title}
+                    {item.quantity ? (
+                      <span className="ml-1.5 rounded-full bg-laiton/15 px-1.5 py-0.5 text-[0.65rem] font-medium text-laiton">
+                        × {item.quantity}
+                      </span>
                     ) : null}
-                  </li>
-                ))}
+                    {item.eventTitle ? (
+                      <span className="ml-1.5 rounded-full bg-laiton/15 px-2 py-0.5 text-[0.65rem] text-laiton">
+                        {item.eventTitle}
+                      </span>
+                    ) : null}
+                  </span>
+                  <select
+                    value={item.assigned_to ?? ""}
+                    disabled={pending}
+                    onChange={(e) =>
+                      startTransition(() =>
+                        assignChecklistItem(tripId, item.id, e.target.value || null),
+                      )
+                    }
+                    className="rounded border border-laiton-clair bg-papier px-1.5 py-1 text-xs text-encre-douce"
+                    aria-label={t("checklist.assignAria")}
+                  >
+                    <option value="">{t("checklist.assignNobody")}</option>
+                    {members.map((m) => (
+                      <option key={m.userId} value={m.userId}>
+                        {m.userId === myId ? t("checklist.you") : m.name}
+                      </option>
+                    ))}
+                  </select>
+                  {item.created_by === myId || isOwner ? (
+                    <button
+                      type="button"
+                      disabled={pending}
+                      onClick={() =>
+                        startTransition(() =>
+                          deleteChecklistItem(tripId, item.id, item.event_id ?? undefined),
+                        )
+                      }
+                      className="text-encre-douce hover:text-bordeaux"
+                      aria-label={`${t("checklist.removePrefix")} ${item.title} ${t("checklist.removeSuffix")}`}
+                    >
+                      <Trash2 className="size-4" aria-hidden="true" />
+                    </button>
+                  ) : null}
+                </li>
+              ))}
             </ul>
           </section>
         ))
       )}
 
-      {/* Ajouter ses propres éléments, avec catégorie libre */}
+      {/* Ajouter ses propres éléments : titre, quantité (optionnel), catégorie */}
       <form
         action={formAction}
         className="flex flex-col gap-2 rounded-lg border border-laiton-clair bg-papier px-4 py-3"
@@ -254,6 +295,13 @@ export function ChecklistClient({
             maxLength={200}
           />
           <Input
+            name="quantity"
+            placeholder={t("checklist.quantityPlaceholder")}
+            className="h-8 w-20 text-sm"
+            maxLength={40}
+            aria-label={t("checklist.quantityAria")}
+          />
+          <Input
             name="category"
             placeholder={t("checklist.categoryPlaceholder")}
             className="h-8 w-44 text-sm"
@@ -266,13 +314,6 @@ export function ChecklistClient({
               <option key={c} value={c} />
             ))}
           </datalist>
-          <Input
-            name="dueDate"
-            type="date"
-            className="h-8 w-36 text-sm"
-            aria-label={t("checklist.dueDateAria")}
-            title={t("checklist.dueDateTitle")}
-          />
           <Button type="submit" size="sm" variant="outline">
             {t("checklist.add")}
           </Button>

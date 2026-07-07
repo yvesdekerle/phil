@@ -15,8 +15,8 @@ const addSchema = z.object({
   title: z.string().trim().min(1).max(200),
   // PHIL-O05 : item rattaché à un événement ("à emporter pour cette activité")
   eventId: z.union([z.literal(""), z.string().uuid()]).optional(),
-  // PHIL-Q20 : échéance optionnelle
-  dueDate: z.union([z.literal(""), z.string().regex(/^\d{4}-\d{2}-\d{2}$/)]).optional(),
+  // PHIL-S04 : quantité optionnelle (texte libre — "2", "3 paires"…)
+  quantity: z.string().trim().max(40).optional(),
   // PHIL-Q27 : catégorie de rangement libre
   category: z.string().trim().max(40).optional(),
 });
@@ -32,7 +32,7 @@ export async function addChecklistItem(
     section: formData.get("section"),
     title: formData.get("title"),
     eventId: formData.get("eventId") ?? "",
-    dueDate: formData.get("dueDate") ?? "",
+    quantity: formData.get("quantity") ?? "",
     category: formData.get("category") ?? "",
   });
   const t = await getT();
@@ -45,7 +45,7 @@ export async function addChecklistItem(
     section: parsed.data.section,
     title: parsed.data.title,
     event_id: parsed.data.eventId || null,
-    due_date: parsed.data.dueDate || null,
+    quantity: parsed.data.quantity || null,
     category: parsed.data.category || null,
     created_by: user.id,
   });
@@ -90,6 +90,25 @@ export async function assignChecklistItem(
     .update({ assigned_to: userId })
     .eq("id", itemId)
     .eq("trip_id", tripId);
+  revalidatePath(`/trips/${tripId}/checklist`);
+}
+
+/** PHIL-S04 : réordonne les éléments d'une catégorie (position = rang). */
+export async function reorderChecklistItems(tripId: string, orderedIds: string[]): Promise<void> {
+  if (!areUuids(tripId) || orderedIds.length === 0 || !orderedIds.every((id) => areUuids(id))) {
+    return;
+  }
+  const { supabase } = await requireUser();
+  // RLS : mise à jour réservée aux participants du voyage (comme toggle/assign).
+  await Promise.all(
+    orderedIds.map((id, index) =>
+      supabase
+        .from("checklist_items")
+        .update({ position: index })
+        .eq("id", id)
+        .eq("trip_id", tripId),
+    ),
+  );
   revalidatePath(`/trips/${tripId}/checklist`);
 }
 
