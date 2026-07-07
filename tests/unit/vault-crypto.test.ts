@@ -66,6 +66,40 @@ describe("vault-crypto — partage E2EE (ECDH P-256)", () => {
   });
 });
 
+describe("vault-crypto — sceller / ouvrir un document (Phase 1)", () => {
+  it("scelle puis ouvre un document avec la maîtresse (round-trip)", async () => {
+    const master = await vc.generateMasterKey();
+    const sealed = await vc.sealDocument(master, enc.encode("PDF passeport"));
+    expect([...sealed.ciphertext]).not.toEqual([...enc.encode("PDF passeport")]);
+    expect(dec.decode(await vc.openDocument(master, sealed))).toBe("PDF passeport");
+  });
+
+  it("une autre maîtresse ne peut pas ouvrir le document", async () => {
+    const master = await vc.generateMasterKey();
+    const other = await vc.generateMasterKey();
+    const sealed = await vc.sealDocument(master, enc.encode("secret"));
+    await expect(vc.openDocument(other, sealed)).rejects.toThrow();
+  });
+
+  it("partage : le propriétaire ré-emballe la DEK, le destinataire ouvre", async () => {
+    const master = await vc.generateMasterKey();
+    const owner = await vc.generateKeyPair();
+    const recipient = await vc.generateKeyPair();
+    const sealed = await vc.sealDocument(master, enc.encode("CNI partagée"));
+
+    // Propriétaire : ré-emballe la DEK pour le destinataire
+    const ownerShare = await vc.deriveSharedWrapKey(owner.privateKey, recipient.publicKey);
+    const forRecipient = await vc.rewrapDekForRecipient(master, sealed, ownerShare);
+
+    // Destinataire : déballe la DEK avec la clé partagée, déchiffre le fichier
+    const recipShare = await vc.deriveSharedWrapKey(recipient.privateKey, owner.publicKey);
+    const dek = await vc.unwrapKey(recipShare, forRecipient.data, forRecipient.iv);
+    expect(dec.decode(await vc.decryptBytes(dek, sealed.ciphertext, sealed.iv))).toBe(
+      "CNI partagée",
+    );
+  });
+});
+
 describe("vault-crypto — sérialisation (stockage)", () => {
   it("base64 round-trip", () => {
     const bytes = new Uint8Array([0, 1, 2, 250, 255]);

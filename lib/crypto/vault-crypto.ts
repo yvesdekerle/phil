@@ -150,6 +150,45 @@ export async function unwrapPrivateKey(
 }
 
 // ---------------------------------------------------------------------------
+// Documents : fichier chiffré par une DEK, DEK emballée par la maîtresse
+// ---------------------------------------------------------------------------
+
+/** Enveloppe d'un document chiffré (tout est stockable côté serveur). */
+export type SealedDocument = {
+  ciphertext: Uint8Array;
+  iv: Uint8Array;
+  wrappedDek: Uint8Array;
+  dekIv: Uint8Array;
+};
+
+/** Scelle un document : DEK aléatoire chiffre le fichier, la maîtresse scelle la DEK. */
+export async function sealDocument(master: CryptoKey, data: Uint8Array): Promise<SealedDocument> {
+  const dek = await generateDek();
+  const file = await encryptBytes(dek, data);
+  const wrapped = await wrapKey(master, dek);
+  return { ciphertext: file.data, iv: file.iv, wrappedDek: wrapped.data, dekIv: wrapped.iv };
+}
+
+/** Ouvre un document scellé : déballe la DEK (maîtresse) puis déchiffre le fichier. */
+export async function openDocument(master: CryptoKey, sealed: SealedDocument): Promise<Uint8Array> {
+  const dek = await unwrapKey(master, sealed.wrappedDek, sealed.dekIv);
+  return decryptBytes(dek, sealed.ciphertext, sealed.iv);
+}
+
+/**
+ * Ré-emballe la DEK d'un document scellé pour un destinataire (partage E2EE) :
+ * déballe la DEK avec la maîtresse, la ré-emballe avec la clé partagée ECDH.
+ */
+export async function rewrapDekForRecipient(
+  master: CryptoKey,
+  sealed: Pick<SealedDocument, "wrappedDek" | "dekIv">,
+  sharedWrapKey: CryptoKey,
+): Promise<Wrapped> {
+  const dek = await unwrapKey(master, sealed.wrappedDek, sealed.dekIv);
+  return wrapKey(sharedWrapKey, dek);
+}
+
+// ---------------------------------------------------------------------------
 // Base64 (stockage/transport des octets)
 // ---------------------------------------------------------------------------
 
