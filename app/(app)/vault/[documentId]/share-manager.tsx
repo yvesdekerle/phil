@@ -163,15 +163,23 @@ export function ShareManager({
           const origDek = await unwrapKey(master, fromBase64(encWrappedDek), fromBase64(encDekIv));
           const plain = await decryptBytes(origDek, origCipher, fromBase64(encFileIv));
 
-          // 2. Incruster le filigrane à l'identité du destinataire.
+          // 2. Incruster le filigrane à l'identité du destinataire. Si pdf-lib
+          //    n'y arrive pas (PDF récalcitrant), on partage le doc brut re-chiffré
+          //    — le partage réussit, sans filigrane incrusté pour ce PDF précis.
           const { canWatermark, watermarkImage, watermarkPdf } = await import(
             "@/lib/vault/watermark"
           );
-          const stamped = canWatermark(mimeType)
-            ? mimeType === "application/pdf"
-              ? await watermarkPdf(plain, recipientName)
-              : await watermarkImage(plain, mimeType, recipientName)
-            : plain;
+          let stamped = plain;
+          try {
+            if (canWatermark(mimeType)) {
+              stamped =
+                mimeType === "application/pdf"
+                  ? await watermarkPdf(plain, recipientName)
+                  : await watermarkImage(plain, mimeType, recipientName);
+            }
+          } catch {
+            stamped = plain;
+          }
 
           // 3. Re-chiffrer cette copie avec une NOUVELLE clé.
           const newDek = await generateDek();
