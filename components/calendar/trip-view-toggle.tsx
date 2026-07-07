@@ -50,7 +50,7 @@ export function TripViewToggle({ tripId, active }: { tripId: string; active: Tri
   );
 
   return (
-    <div className="inline-flex items-center gap-0.5 rounded-full border border-laiton-clair bg-papier p-0.5">
+    <div className="inline-flex w-fit items-center gap-0.5 rounded-full border border-laiton-clair bg-papier p-0.5">
       {seg("calendar", t("calendar.viewToggle.calendar"))}
       {seg("timeline", t("calendar.viewToggle.timeline"))}
       {seg("carte", t("calendar.viewToggle.map"))}
