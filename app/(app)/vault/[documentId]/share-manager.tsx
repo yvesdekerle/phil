@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState, useTransition } from "react";
-import { getUserPublicKey } from "@/app/(app)/profile/coffre-actions";
+import { getUserEmail, getUserPublicKey } from "@/app/(app)/profile/coffre-actions";
 import { useLocale, useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import {
@@ -141,10 +141,11 @@ export function ShareManager({
         try {
           const recipientName =
             members?.find((m) => m.userId === sharedWith)?.name ?? "Destinataire";
-          const [master, myPriv, pubJwk] = await Promise.all([
+          const [master, myPriv, pubJwk, recipientEmail] = await Promise.all([
             getCoffreMaster(),
             getCoffrePrivateKey(),
             getUserPublicKey(sharedWith),
+            getUserEmail(sharedWith),
           ]);
           if (!pubJwk) {
             setState({
@@ -153,6 +154,9 @@ export function ShareManager({
             });
             return;
           }
+          const recipientLabel = recipientEmail
+            ? `${recipientName} · ${recipientEmail}`
+            : recipientName;
 
           // 1. Récupérer + déchiffrer l'original.
           const res = await fetch(`/api/documents/${documentId}/view`);
@@ -175,9 +179,9 @@ export function ShareManager({
             );
             if (mimeType === "application/pdf") {
               const { renderPdfToPngs } = await import("@/lib/vault/pdf-render");
-              stamped = await watermarkImagePages(await renderPdfToPngs(plain), recipientName);
+              stamped = await watermarkImagePages(await renderPdfToPngs(plain), recipientLabel);
             } else if (canWatermark(mimeType)) {
-              stamped = await watermarkImage(plain, mimeType, recipientName);
+              stamped = await watermarkImage(plain, mimeType, recipientLabel);
             }
           } catch {
             stamped = plain;

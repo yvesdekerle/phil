@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { areUuids } from "@/lib/validation";
 import type { Json } from "@/types/database";
@@ -148,6 +149,35 @@ export async function getUserPublicKey(userId: string): Promise<Json | null> {
     .eq("user_id", userId)
     .maybeSingle();
   return data?.public_key ?? null;
+}
+
+/**
+ * Email d'un utilisateur — pour le filigrane d'un partage. Gardé par la RLS :
+ * on ne l'obtient que si on peut voir sa clé publique (soi ou co-voyageur).
+ */
+export async function getUserEmail(userId: string): Promise<string | null> {
+  if (!areUuids(userId)) {
+    return null;
+  }
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return null;
+  }
+  // Gate anti-énumération : la clé publique n'est visible qu'à soi / aux co-voyageurs.
+  const { data: allowed } = await supabase
+    .from("user_crypto_keys")
+    .select("user_id")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (!allowed) {
+    return null;
+  }
+  const admin = createAdminClient();
+  const { data } = await admin.auth.admin.getUserById(userId);
+  return data.user?.email ?? null;
 }
 
 /** Stocke l'enveloppe de récupération (code de secours) — remplace l'ancienne. */
