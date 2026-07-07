@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { TripViewToggle } from "@/components/calendar/trip-view-toggle";
 import type { MapMarker } from "@/components/map/trip-map";
 import { TripMapExplorer } from "@/components/map/trip-map-explorer";
+import { TripPlaces } from "@/components/map/trip-places";
 import { FilterSelect } from "@/components/ui/filter-select";
 import { eventDayKey, eventTime, groupEventsByDay } from "@/lib/events/datetime";
 import type { TripEvent } from "@/lib/events/types";
@@ -38,9 +39,19 @@ export default async function TripMapPage({
     redirect("/login");
   }
 
-  const [{ data: events }, { data: ideas }] = await Promise.all([
+  const [{ data: events }, { data: ideas }, { data: places }, { data: me }] = await Promise.all([
     supabase.from("trip_events").select("*").eq("trip_id", tripId).order("starts_at"),
     supabase.from("trip_ideas").select("*").eq("trip_id", tripId).neq("status", "DISMISSED"),
+    supabase
+      .from("trip_places")
+      .select("id, name, category, lat, lng, note, created_by")
+      .eq("trip_id", tripId),
+    supabase
+      .from("trip_participants")
+      .select("role")
+      .eq("trip_id", tripId)
+      .eq("user_id", user.id)
+      .single(),
   ]);
 
   const allEvents = (events ?? []) as TripEvent[];
@@ -134,6 +145,19 @@ export default async function TripMapPage({
     }
   }
 
+  // PHIL-S02 : commerces repérés — marqueurs distincts, hors tracé d'itinéraire.
+  for (const p of places ?? []) {
+    markers.push({
+      id: `place-${p.id}`,
+      lat: p.lat,
+      lng: p.lng,
+      title: p.name,
+      subtitle: p.note ?? t(`places.cat.${p.category}`),
+      color: "#c2410c",
+      noPath: true,
+    });
+  }
+
   // PHIL-Q25 : programme de la journée filtrée, avec distance et temps depuis le point d'avant
   type DayLeg = { km: number; minutes: number | null };
   let dayProgram: { event: TripEvent; leg: DayLeg | null }[] = [];
@@ -218,6 +242,12 @@ export default async function TripMapPage({
               />
             ) : null
           }
+        />
+        <TripPlaces
+          tripId={tripId}
+          places={places ?? []}
+          myId={user.id}
+          isOwner={me?.role === "OWNER"}
         />
       </div>
     </div>

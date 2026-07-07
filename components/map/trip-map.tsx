@@ -21,6 +21,8 @@ export type MapMarker = {
   house?: boolean;
   /** Pastille photo ronde (vignette). */
   thumbUrl?: string;
+  /** PHIL-S02 : exclu du tracé d'itinéraire (commerces repérés). */
+  noPath?: boolean;
 };
 
 /** Carte Leaflet + OSM (PHIL-N01, style Polarsteps PHIL-Q15). */
@@ -95,7 +97,7 @@ export function TripMap({
 
     // Tracé façon Polarsteps : liseré clair sous un trait plein arrondi
     if (drawPath && sorted.length > 1) {
-      const pathMarkers = sorted.filter((m) => !m.thumbUrl);
+      const pathMarkers = sorted.filter((m) => !m.thumbUrl && !m.noPath);
       const points = pathMarkers.map((m) => [m.lat, m.lng] as [number, number]);
       if (points.length > 1) {
         L.polyline(points, {
