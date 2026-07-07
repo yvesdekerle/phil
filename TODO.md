@@ -947,24 +947,28 @@ Type `ActionState` unique, standard formulaire `useActionState`, `<TimezoneSelec
 
 ## Catégorie S — Évolutions produit (demandées pendant l'audit, à traiter après)
 
-### [~] PHIL-S01 — Onglet « Miam » : repas & liste de courses *(migration écrite le 2026-07-07)*
+### [x] PHIL-S01 — Onglet « Miam » : repas & liste de courses *(fait le 2026-07-07)*
+> UI livrée : onglet Miam (Miam/Yummy/Ñam) avec sous-vues **Courses** (liste cochable + quantité) et **Repas** (par jour, créneau, cuisinier, notes), temps réel. Reste : ajouter `trip_meals`/`shopping_items` à la réattribution fantôme (R18).
 Nouvel onglet du voyage **Miam** (FR) / **Yummy** (EN) / **Ñam** (ES) regroupant deux usages partagés dans le même onglet :
 - **Repas** : planifier qui cuisine quoi et quand (petit-déj / déj / dîner par jour), idées de plats, notes.
 - **Liste de courses** : liste partagée d'articles cochables (qui achète quoi), autonome ou dérivée des repas.
 > Migration écrite : `20260707100000_trip_meals_shopping.sql` (tables `trip_meals` + `shopping_items`, RLS collaboratif calqué sur la checklist, temps réel). **À appliquer (`pnpm db:push` + `pnpm db:types`) avant l'UI** — le code type-safe a besoin des types régénérés. Reste : onglet dans `trip-tabs.tsx`, i18n, sections repas/courses, temps réel, et ajout de `created_by` à la réattribution fantôme (R18).
 
-### [~] PHIL-S02 — Supermarchés & commerces repérés sur la carte *(migration écrite le 2026-07-07)*
+### [x] PHIL-S02 — Supermarchés & commerces repérés sur la carte *(fait le 2026-07-07)*
+> UI livrée : marqueurs distincts (hors tracé) sur la carte + formulaire d'ajout par **adresse géocodée** (nom, catégorie, note), suppression créateur/OWNER. Amélioration possible : ajout par clic sur la carte. Reste R18 (fantôme).
 Sur la carte du voyage, épingler les **supermarchés / commerces repérés** par le groupe (nom, position, note courte — « ouvert tard », « bon marché »). Un membre repère un magasin → point sur la carte, visible de tous. Couche POI légère, distincte des événements. Lien possible avec la liste de courses (S01).
 > Migration écrite : `20260707100100_trip_places.sql` (table `trip_places`, catégories SUPERMARKET/SHOP/PHARMACY/MARKET/OTHER, lat/lng, RLS participant, temps réel). **À appliquer (`pnpm db:push` + `pnpm db:types`) avant l'UI.** Reste : couche de marqueurs sur `trip-map.tsx`, formulaire d'ajout, i18n, réattribution fantôme (R18).
 
-### [~] PHIL-S03 — Sondages : qui a voté quoi, choix simple/multiple, date de fin *(migration écrite le 2026-07-07)*
+### [~] PHIL-S03 — Sondages : qui a voté quoi, choix simple/multiple, date de fin *(UI faite le 2026-07-07)*
+> UI livrée : votants affichés sous chaque option, badge choix multiple, choix simple (remplace) vs multiple (bascule), date de fin + auto-clôture à l'échéance. **Reste : le sweep cron** (rappel avant échéance + clôture auto) — à câbler dans `cron/event-reminders`.
 Trois demandes (2026-07-07) :
 - **Voir qui a voté et quel vote** : la donnée existe déjà (`poll_votes.user_id` + `option_index`, RLS membres) → UI seule (votants par option).
 - **Choix simple (1 parmi X) vs choix multiple** : `allow_multiple` sur `polls`. En multiple, un utilisateur peut cocher plusieurs options (PK `poll_votes` étendue à `(poll_id, user_id, option_index)`) ; en simple, l'action de vote remplace le vote précédent.
 - **Date de fin programmée (+ rappel si possible)** : `closes_at` sur `polls` (distinct de `closed_at`). Auto-clôture + rappel avant échéance à câbler dans le cron.
 > Migration écrite : `20260707110000_polls_multi_schedule.sql`. **À appliquer avant l'UI/cron.** Reste : UI (type à la création, votants par option, badge date de fin), logique vote simple/multiple, sweep cron clôture/rappel.
 
-### [~] PHIL-S04 — Valise : quantité optionnelle, retrait de la date, réordonnancement *(migration écrite le 2026-07-07)*
+### [~] PHIL-S04 — Valise : quantité optionnelle, retrait de la date, réordonnancement *(UI faite le 2026-07-07)*
+> UI livrée : champ quantité optionnel (+ badge), champ date retiré du formulaire, **drag-drop des éléments** (poignée, par catégorie, colonne `position`). **Reste : réordonner les CATÉGORIES** (mécanisme d'ordre à cadrer — texte libre aujourd'hui).
 Demandes (2026-07-07) sur le formulaire d'ajout d'élément :
 - **Quantité optionnelle** : champ `quantity` (texte libre — « 2 », « 3 paires »…).
 - **Retirer le champ date** : `due_date` sans usage clair → masquer du formulaire (colonne conservée, non rendue). UI seule.
