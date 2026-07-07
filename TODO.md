@@ -994,6 +994,28 @@ Chiffrement de bout en bout du coffre : le serveur ne voit jamais le contenu ni 
 
 ---
 
+## Catégorie U — Évolutions produit (demandées le 2026-07-07, à traiter APRÈS la sécurité E2EE PHIL-T01)
+
+### [ ] PHIL-U01 — Pastilles « à préparer avant le voyage »
+À la création d'un voyage (et sur la vue voyage), afficher des **pastilles/indicateurs** de ce qu'il reste à préparer avant le départ : logement réservé ? repas prévus ? etc. Une sorte de checklist de préparation visible d'un coup d'œil.
+
+### [ ] PHIL-U02 — Notifications/rappels pour voter (sondages, idées)
+Rappeler aux participants de **voter sur les sondages / réagir aux idées** en attente. Idéalement une **pastille de notification** (sur l'avatar profil ? à côté du sélecteur de langue ?) indiquant les actions en attente.
+
+### [ ] PHIL-U03 — Retirer le libellé « Timeline » redondant à droite
+Sur la vue voyage, la barre de bascule (Calendrier / Timeline / Carte) est à gauche et un **titre « Timeline » redondant** s'affiche à droite → le retirer. *(Petit ; cf. capture du 2026-07-07.)*
+
+### [ ] PHIL-U04 — Idées « façon Yallah » : swipe d'activités par voyage — **GROS CHANTIER**
+Reprendre le concept de **Yallah** dans l'onglet Idées : pour chaque voyage, une **liste d'activités** proposées avec **swipe** (like/pass), etc. Réf. code : `/Users/yvesdekerle/Sources/perso/yallah`. **Analyse complète obligatoire avant tout dev** (modèle de données, source des activités, UX swipe, intégration au voyage).
+
+### [ ] PHIL-U05 — Clarifier la division BDD locale vs prod
+Documenter (et éventuellement mettre en place) la **séparation base locale / production**. Aujourd'hui le dev tape la base distante linkée (pas de stack Supabase locale). À creuser : base de dev/test dédiée, seed, isolement des données.
+
+### [ ] PHIL-U06 — Générateur de guide de voyage (avant / pendant / après)
+Permettre de créer un **guide de voyage** : avant (préparation), pendant, et **après** (rétro : infos passées, **dépenses ajustées**, photos…). En faire un **template** que chaque voyage remplit avec ses données. Réf. exemple : `tmp/guide/guide_islande.pdf`.
+
+---
+
 ## Backlog — différé volontairement (ne pas traiter sans demande explicite)
 
 **Outillage retiré du P0** (à réintroduire quand un second contributeur arrive ou que le projet grossit) :
