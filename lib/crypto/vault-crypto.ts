@@ -130,6 +130,25 @@ export function importEcdhPrivate(jwk: JsonWebKey): Promise<CryptoKey> {
   return subtle.importKey("jwk", jwk, { name: "ECDH", namedCurve: "P-256" }, true, ["deriveKey"]);
 }
 
+/**
+ * Emballe la clé privée ECDH par la maîtresse. Une clé ECDH ne s'exporte pas en
+ * "raw" (donc pas via wrapKey) : on chiffre son JWK avec la maîtresse (AES-GCM).
+ */
+export async function wrapPrivateKey(master: CryptoKey, privateKey: CryptoKey): Promise<Wrapped> {
+  const jwk = await exportKeyJwk(privateKey);
+  return encryptBytes(master, new TextEncoder().encode(JSON.stringify(jwk)));
+}
+
+/** Déballe la clé privée ECDH (déchiffre son JWK avec la maîtresse). */
+export async function unwrapPrivateKey(
+  master: CryptoKey,
+  wrapped: Uint8Array,
+  iv: Uint8Array,
+): Promise<CryptoKey> {
+  const bytes = await decryptBytes(master, wrapped, iv);
+  return importEcdhPrivate(JSON.parse(new TextDecoder().decode(bytes)) as JsonWebKey);
+}
+
 // ---------------------------------------------------------------------------
 // Base64 (stockage/transport des octets)
 // ---------------------------------------------------------------------------

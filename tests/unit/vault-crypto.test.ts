@@ -83,6 +83,20 @@ describe("vault-crypto — sérialisation (stockage)", () => {
     await expect(vc.unwrapKey(k2, w, iv)).resolves.toBeDefined();
   });
 
+  it("emballe/déballe la clé privée ECDH via la maîtresse (reste utilisable)", async () => {
+    const master = await vc.generateMasterKey();
+    const me = await vc.generateKeyPair();
+    const peer = await vc.generateKeyPair();
+    const { data, iv } = await vc.wrapPrivateKey(master, me.privateKey);
+    const priv2 = await vc.unwrapPrivateKey(master, data, iv);
+    // la privée réimportée dérive la même clé partagée que l'originale
+    const dek = await vc.generateDek();
+    const w = await vc.wrapKey(await vc.deriveSharedWrapKey(me.privateKey, peer.publicKey), dek);
+    await expect(
+      vc.unwrapKey(await vc.deriveSharedWrapKey(priv2, peer.publicKey), w.data, w.iv),
+    ).resolves.toBeDefined();
+  });
+
   it("secret brut (façon PRF) importable comme clé d'emballage de la maîtresse", async () => {
     const prfSecret = globalThis.crypto.getRandomValues(new Uint8Array(32));
     const master = await vc.generateMasterKey();
