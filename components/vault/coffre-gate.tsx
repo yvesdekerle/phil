@@ -1,19 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import { VaultDoor, type VaultDoorState } from "@/components/vault/vault-door";
 import { getCoffreMaster, isCoffreUnlocked } from "@/lib/crypto/coffre-session";
 
 /**
- * Porte du coffre E2EE (PHIL-T01) — verrou biométrique UNIQUE. Une seule
- * biométrie (Face ID / empreinte) déverrouille la clé maîtresse ; elle reste en
- * mémoire pour la session, donc tous les documents chiffrés s'ouvrent ensuite
- * directement, sans redemander. Un rechargement complet re-verrouille.
+ * Porte du coffre E2EE (PHIL-T01) — verrou biométrique UNIQUE. En arrivant sur le
+ * coffre, la biométrie (Face ID / empreinte) se déclenche AUTOMATIQUEMENT. La clé
+ * maîtresse reste ensuite en mémoire pour la session (onglet) : tant qu'on ne
+ * recharge pas la page, revenir au coffre ne redemande pas la biométrie.
+ * Si le navigateur bloque le prompt auto, un bouton de secours reste affiché.
  *
- * La vraie protection des données reste la RLS (côté serveur) + le E2EE ; cette
- * porte est la barrière biométrique sur l'appareil.
+ * La vraie protection des données reste la RLS (serveur) + le E2EE ; cette porte
+ * est la barrière biométrique sur l'appareil.
  */
 export function CoffreGate({ children }: { children: React.ReactNode }) {
   const t = useT();
@@ -23,26 +24,34 @@ export function CoffreGate({ children }: { children: React.ReactNode }) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Déjà déverrouillé dans cet onglet → on entre directement.
-  useEffect(() => {
-    if (isCoffreUnlocked()) {
-      setUnlocked(true);
-    }
-    setChecked(true);
-  }, []);
-
-  const unlock = async () => {
+  const unlock = useCallback(async () => {
     setError(null);
     setPending(true);
     try {
       await getCoffreMaster();
       setDoorState("opening");
-      setTimeout(() => setUnlocked(true), 1400);
+      setTimeout(() => setUnlocked(true), 900);
     } catch (e) {
       setPending(false);
       setError(e instanceof Error ? e.message : t("vault.unlock.cancelled"));
     }
-  };
+  }, [t]);
+
+  // Déjà déverrouillé (même onglet) → on entre. Sinon → déverrouillage AUTO.
+  const started = useRef(false);
+  useEffect(() => {
+    if (started.current) {
+      return;
+    }
+    started.current = true;
+    if (isCoffreUnlocked()) {
+      setUnlocked(true);
+      setChecked(true);
+      return;
+    }
+    setChecked(true);
+    void unlock();
+  }, [unlock]);
 
   if (unlocked) {
     return <>{children}</>;
@@ -62,10 +71,12 @@ export function CoffreGate({ children }: { children: React.ReactNode }) {
         <p className="mt-2 mb-6 text-sm text-encre-douce">
           {opening ? t("vault.unlock.openingBody") : t("vault.unlock.lockedBody")}
         </p>
-        {!opening ? (
+        {opening ? null : pending ? (
+          <p className="text-sm text-encre-douce">{t("vault.unlock.verifying")}</p>
+        ) : (
           <>
-            <Button type="button" className="w-full" disabled={pending} onClick={unlock}>
-              {pending ? t("vault.unlock.verifying") : t("vault.unlock.button")}
+            <Button type="button" className="w-full" onClick={unlock}>
+              {t("vault.unlock.button")}
             </Button>
             {error ? (
               <p role="alert" className="mt-3 text-sm text-bordeaux">
@@ -73,7 +84,7 @@ export function CoffreGate({ children }: { children: React.ReactNode }) {
               </p>
             ) : null}
           </>
-        ) : null}
+        )}
       </div>
     </main>
   );
