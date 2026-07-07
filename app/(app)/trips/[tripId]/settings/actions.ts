@@ -9,6 +9,23 @@ import { logger } from "@/lib/observability/logger";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { withCoverPosition } from "@/lib/trips/cover";
+import { type CoverFetchError, ingestCoverUrl } from "@/lib/trips/cover-fetch";
+
+type Translate = Awaited<ReturnType<typeof getT>>;
+
+/** Message utilisateur pour un échec d'ingestion de couverture par URL (R09). */
+function coverFetchMessage(t: Translate, error: CoverFetchError): string {
+  if (error === "not_image") {
+    return t("settings.cover.errType");
+  }
+  if (error === "too_large") {
+    return t("settings.cover.errSize");
+  }
+  if (error === "invalid_url") {
+    return t("settings.cover.errUrl");
+  }
+  return t("settings.cover.errFetch");
+}
 
 export type TripSettingsState = {
   status: "idle" | "success" | "error";
@@ -212,7 +229,12 @@ export async function setCoverFromUpload(
   return { status: "success", message: t("settings.msg.coverUpdated") };
 }
 
-/** Couverture depuis une URL collée directement (PHIL-Q37c). */
+/**
+ * Couverture depuis une URL collée (PHIL-Q37c, durcie R09). L'image est
+ * téléchargée chez nous (garde anti-SSRF) puis servie depuis le bucket `covers`
+ * — on ne stocke plus jamais une URL distante brute (plus de fetch serveur
+ * vers un hôte arbitraire par l'optimiseur d'images).
+ */
 export async function setCoverFromUrl(tripId: string, rawUrl: string): Promise<TripSettingsState> {
   const t = await getT();
   const parsed = z.string().trim().min(1).max(2000).url().safeParse(rawUrl);
@@ -220,10 +242,21 @@ export async function setCoverFromUrl(tripId: string, rawUrl: string): Promise<T
     return { status: "error", message: t("settings.cover.errUrl") };
   }
 
+  // Gate rôle avant l'upload : éviter qu'un non-membre laisse un blob orphelin.
+  const { role } = await getMyRole(tripId);
+  if (role !== "OWNER" && role !== "EDITOR") {
+    return { status: "error", message: t("settings.cover.errUpload") };
+  }
+
   const supabase = await createClient();
+  const ingested = await ingestCoverUrl(supabase, tripId, parsed.data);
+  if (!ingested.ok) {
+    return { status: "error", message: coverFetchMessage(t, ingested.error) };
+  }
+
   const { error, count } = await supabase
     .from("trips")
-    .update({ cover_image_url: parsed.data }, { count: "exact" })
+    .update({ cover_image_url: ingested.url }, { count: "exact" })
     .eq("id", tripId);
 
   if (error || count === 0) {

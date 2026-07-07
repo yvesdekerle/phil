@@ -133,6 +133,7 @@ export const metaEn = {
       errUpload: "The upload failed — you must be captain or editor.",
       errSave: "Couldn't save the cover.",
       errUrl: "Invalid link — an https:// URL is expected.",
+      errFetch: "Couldn't fetch this image — check the link (public image, https).",
       done: "New cover in place.",
       frameTitle: "Framing",
       frameHint: "Drag the light frame to choose the visible part.",

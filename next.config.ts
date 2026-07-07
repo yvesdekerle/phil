@@ -1,12 +1,13 @@
 import type { NextConfig } from "next";
 
-const SUPABASE_ORIGIN = (() => {
+const SUPABASE_URL = (() => {
   try {
-    return new URL(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").origin;
+    return new URL(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "");
   } catch {
-    return "";
+    return null;
   }
 })();
+const SUPABASE_ORIGIN = SUPABASE_URL?.origin ?? "";
 
 /**
  * PHIL-J01 — Headers de sécurité.
@@ -21,7 +22,8 @@ const securityHeaders = [
       // 'unsafe-eval' en dev uniquement : requis par React pour le debug (jamais en prod)
       `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : ""}`,
       "style-src 'self' 'unsafe-inline'",
-      // Avatars Google + couvertures de voyage (URL libre) + blobs offline
+      // 'self' + Supabase (couvertures/photos), avatars Google, data/blob offline,
+      // et tuiles de carte en https. Le SSRF est fermé côté optimiseur (remotePatterns).
       "img-src 'self' data: blob: https:",
       "font-src 'self'",
       `connect-src 'self' ${SUPABASE_ORIGIN}`.trim(),
@@ -46,11 +48,15 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   images: {
+    // Allowlist stricte (PHIL-R09) : plus de `hostname: "**"`. Les couvertures
+    // collées par URL sont désormais téléchargées dans notre bucket `covers`
+    // (cf. lib/trips/cover-fetch.ts), donc servies depuis Supabase — l'optimiseur
+    // d'images ne va plus jamais chercher un hôte arbitraire (fin du SSRF aveugle).
     remotePatterns: [
       // Avatars Google (SSO)
       { protocol: "https", hostname: "lh3.googleusercontent.com" },
-      // Images de couverture des voyages : URL libre (D02), HTTPS uniquement
-      { protocol: "https", hostname: "**" },
+      // Nos buckets publics (couvertures, photos) sur Supabase Storage
+      ...(SUPABASE_URL ? [{ protocol: "https" as const, hostname: SUPABASE_URL.hostname }] : []),
     ],
   },
   async headers() {

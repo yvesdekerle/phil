@@ -134,6 +134,8 @@ export const metaEs = {
       errUpload: "El envío ha fallado: hay que ser capitán o editor.",
       errSave: "No se ha podido guardar la portada.",
       errUrl: "Enlace no válido — se espera una URL https://.",
+      errFetch:
+        "No se ha podido obtener esta imagen — comprueba el enlace (imagen pública, https).",
       done: "Nueva portada colocada.",
       frameTitle: "Encuadre",
       frameHint: "Arrastra el marco claro para elegir la parte visible.",

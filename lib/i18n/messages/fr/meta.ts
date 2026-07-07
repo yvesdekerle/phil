@@ -134,6 +134,7 @@ export const metaFr = {
       errUpload: "L'envoi a échoué — il faut être capitaine ou éditeur.",
       errSave: "Impossible d'enregistrer la couverture.",
       errUrl: "Lien invalide — une URL https:// est attendue.",
+      errFetch: "Impossible de récupérer cette image — vérifie le lien (image publique, https).",
       done: "Nouvelle couverture en place.",
       frameTitle: "Cadrage",
       frameHint: "Fais glisser le cadre clair pour choisir la partie visible.",

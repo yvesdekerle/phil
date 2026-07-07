@@ -910,8 +910,12 @@ Biome couvre `scripts/` + `tests/` (7 fichiers reformatés), `app/not-found.tsx`
 ### [~] PHIL-R08 — 🟠 Verrou colonnes OWNER-only de `trips` (escalade EDITOR) *(écrit le 2026-07-06)*
 Migration `20260706120000_trips_owner_only_columns.sql` — trigger `BEFORE UPDATE` bloquant la modification de `public_token`/`archived_at`/`email_alias`/`created_by` par un EDITOR (service role bypasse). **À appliquer : `pnpm db:push` puis `pnpm verify:rls`.**
 
-### [ ] PHIL-R09 — 🟠 SSRF via l'optimiseur d'images *(décision requise)*
-Restreindre `images.remotePatterns` à une allowlist ferme le SSRF aveugle mais **casse la couverture de voyage par URL collée** (D02). Trancher : URL libres (risque résiduel) OU allowlist Google/Supabase + couverture par upload uniquement.
+### [x] PHIL-R09 — 🟠 SSRF via l'optimiseur d'images *(fait le 2026-07-08)*
+Décision (Yves) : **on garde le coller-URL** mais l'image est **téléchargée chez nous** puis servie depuis le bucket `covers` — plus jamais d'URL distante brute en base. `images.remotePatterns` verrouillé à **Supabase + Google** (fin du `hostname:"**"`), donc l'optimiseur ne fetch plus d'hôte arbitraire (SSRF aveugle fermé).
+- `lib/trips/image-guard.ts` (pur, testé) : `isBlockedIp` (garde SSRF : privé/loopback/link-local/metadata `169.254.169.254`, IPv4 + IPv6 + IPv4-mapped) + `sniffImageType` (magic bytes JPEG/PNG/WebP, refuse HTML/SVG servi en `image/*`).
+- `lib/trips/cover-fetch.ts` (server-only) : `fetchRemoteImage` (https only, DNS→garde IP avant fetch, `redirect: "manual"`, timeout 5 s, taille ≤ 5 Mo, validation magic bytes) + `ingestCoverUrl` (upload `covers/{tripId}/{uuid}.{ext}` via session utilisateur, pas d'escalade).
+- Câblé dans `setCoverFromUrl` (réglages, + gate rôle OWNER/EDITOR avant upload) et `createTrip` (couverture posée après création, échec non bloquant). Clé i18n `settings.cover.errFetch` (fr/en/es). Tests `tests/unit/image-guard.test.ts` (+12).
+> Couvertures **externes déjà en base** (anciens voyages) : `CoverImage` (next/image + `onError`) dégrade sur l'initiale — rien ne casse ; re-poser la couverture depuis les réglages la rapatrie. Backfill optionnel possible (script, accès DB).
 
 ### [ ] PHIL-R10 — 🟠 Chiffrement `document_number` vs réalignement doc *(décision requise)*
 `CLAUDE.md` promet le « chiffrement » du coffre ; le n° de pièce est stocké en clair. Soit chiffrer au repos (effort L), soit réaligner la promesse sur le modèle réel (RLS + bucket privé + audit + SSE infra).

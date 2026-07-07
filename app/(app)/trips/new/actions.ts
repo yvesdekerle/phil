@@ -5,7 +5,9 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { geocode } from "@/lib/geo/geocode";
 import { getT } from "@/lib/i18n/server";
+import { logger } from "@/lib/observability/logger";
 import { createClient } from "@/lib/supabase/server";
+import { ingestCoverUrl } from "@/lib/trips/cover-fetch";
 import { getTemplate } from "@/lib/trips/templates";
 
 export type CreateTripState = {
@@ -79,13 +81,27 @@ export async function createTrip(
     destination_lng: coords?.lng ?? null,
     start_date: parsed.data.startDate,
     end_date: parsed.data.endDate,
-    cover_image_url: parsed.data.coverImageUrl || null,
+    // Couverture posée après coup : l'ingestion R09 a besoin du voyage créé
+    // (le trigger AFTER INSERT rend l'utilisateur membre → upload `covers` permis).
+    cover_image_url: null,
     default_timezone: parsed.data.timezone,
     created_by: user.id,
   });
 
   if (error) {
     return { status: "error", message: t("newTrip.msg.createFailed") };
+  }
+
+  // Couverture par URL : téléchargée chez nous (garde anti-SSRF R09) puis servie
+  // depuis notre bucket. Échec non bloquant — le voyage existe, la couverture se
+  // repose depuis les réglages avec un message d'erreur explicite.
+  if (parsed.data.coverImageUrl) {
+    const ingested = await ingestCoverUrl(supabase, tripId, parsed.data.coverImageUrl);
+    if (ingested.ok) {
+      await supabase.from("trips").update({ cover_image_url: ingested.url }).eq("id", tripId);
+    } else {
+      logger.warn("new_trip_cover_ingest_failed", { tripId, reason: ingested.error });
+    }
   }
 
   // PHIL-N03 : un template pré-remplit le pool d'idées
