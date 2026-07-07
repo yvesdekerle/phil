@@ -1,10 +1,12 @@
 import { addDays, format, parseISO } from "date-fns";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { CoffreActivation } from "@/app/(app)/profile/coffre-activation";
 import { Button } from "@/components/ui/button";
 import { CategoryIcon } from "@/components/vault/category-icon";
 import { getDateFnsLocale, getT } from "@/lib/i18n/server";
 import { logger } from "@/lib/observability/logger";
+import { getOwnProfile } from "@/lib/supabase/profiles";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 import {
@@ -31,6 +33,15 @@ export default async function VaultPage({
   if (!user) {
     redirect("/login");
   }
+
+  // PHIL-T01 : proposer l'activation du coffre chiffré s'il ne l'est pas encore.
+  const { data: coffreKey } = await supabase
+    .from("user_crypto_keys")
+    .select("user_id")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  const profile = await getOwnProfile(supabase);
+  const displayName = profile?.display_name ?? "";
 
   let query = supabase
     .from("documents")
@@ -62,6 +73,21 @@ export default async function VaultPage({
           </Button>
         </div>
       </div>
+
+      {!coffreKey ? (
+        <div className="mb-6 rounded-lg border border-laiton-clair bg-papier px-5 py-4">
+          <p className="text-sm font-medium text-encre">Sécurise ton coffre</p>
+          <p className="mt-1 mb-3 text-sm text-encre-douce">
+            Active le chiffrement de bout en bout : tes documents ne seront lisibles que par toi (et
+            ceux à qui tu les partages), déverrouillés par Face ID / empreinte.
+          </p>
+          <CoffreActivation
+            userId={user.id}
+            userName={displayName || user.email || "Voyageur"}
+            activated={false}
+          />
+        </div>
+      ) : null}
 
       <div className="mb-6 flex flex-wrap gap-2">
         <Link
