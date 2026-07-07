@@ -93,6 +93,9 @@ export async function shareDocument(
   tripId: string,
   sharedWith: string | null = null,
   expiresAt: string | null = null,
+  // PHIL-T01 Phase 3 : DEK ré-emballée pour le destinataire (docs chiffrés).
+  wrappedDek: string | null = null,
+  dekIv: string | null = null,
 ): Promise<DocumentActionState> {
   const t = await getT();
   if (expiresAt !== null && Number.isNaN(Date.parse(expiresAt))) {
@@ -117,6 +120,8 @@ export async function shareDocument(
     shared_by: user.id,
     shared_with: sharedWith,
     expires_at: expiresAt,
+    wrapped_dek: wrappedDek,
+    dek_iv: dekIv,
   });
 
   if (error) {

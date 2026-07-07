@@ -9,10 +9,12 @@
  * la vide (il faudra re-déverrouiller). `lockCoffre()` la vide à la demande.
  */
 
-import { getMyMasterWrap } from "@/app/(app)/profile/coffre-actions";
+import { getMyMasterWrap, getMyPrivateKeyWrap } from "@/app/(app)/profile/coffre-actions";
+import { fromBase64, unwrapPrivateKey } from "./vault-crypto";
 import { unlockMaster } from "./vault-keys";
 
 let cachedMaster: CryptoKey | null = null;
+let cachedPrivate: CryptoKey | null = null;
 
 /** true si la maîtresse est déjà déverrouillée dans cet onglet. */
 export function isCoffreUnlocked(): boolean {
@@ -36,7 +38,30 @@ export async function getCoffreMaster(): Promise<CryptoKey> {
   return cachedMaster;
 }
 
-/** Oublie la maîtresse (verrouillage manuel / déconnexion). */
+/**
+ * Renvoie la clé privée ECDH de l'utilisateur (déballée via la maîtresse, mise
+ * en cache) — nécessaire pour partager (dériver la clé partagée avec un
+ * destinataire) et pour lire un document qu'on nous a partagé.
+ */
+export async function getCoffrePrivateKey(): Promise<CryptoKey> {
+  if (cachedPrivate) {
+    return cachedPrivate;
+  }
+  const master = await getCoffreMaster();
+  const wrap = await getMyPrivateKeyWrap();
+  if (!wrap) {
+    throw new Error("Coffre non activé — active-le d'abord dans ton profil.");
+  }
+  cachedPrivate = await unwrapPrivateKey(
+    master,
+    fromBase64(wrap.wrappedPrivateKey),
+    fromBase64(wrap.wrappedPrivateIv),
+  );
+  return cachedPrivate;
+}
+
+/** Oublie la maîtresse et la privée (verrouillage manuel / déconnexion). */
 export function lockCoffre(): void {
   cachedMaster = null;
+  cachedPrivate = null;
 }

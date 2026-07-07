@@ -30,7 +30,7 @@ export default async function VaultDocumentPage({
     supabase
       .from("document_shares")
       .select(
-        "id, trip_id, shared_with, expires_at, trips(name, end_date), profiles!document_shares_shared_with_fkey(display_name)",
+        "id, trip_id, shared_with, expires_at, wrapped_dek, dek_iv, trips(name, end_date), profiles!document_shares_shared_with_fkey(display_name)",
       )
       .eq("document_id", documentId),
   ]);
@@ -62,6 +62,26 @@ export default async function VaultDocumentPage({
     .eq("id", user.id)
     .single();
   const viewerLabel = `${viewerProfile?.display_name ?? user.email ?? "Voyageur"} · ${user.id.slice(0, 8)}`;
+
+  // PHIL-T01 Phase 3 : le lecteur est le propriétaire, ou un destinataire d'un
+  // partage E2EE (DEK ré-emballée pour lui + clé publique du propriétaire).
+  const isOwner = doc.owner_id === user.id;
+  let recipientDek: { wrappedDek: string; dekIv: string } | null = null;
+  let ownerPublicKeyJwk: JsonWebKey | null = null;
+  if (doc.encrypted && !isOwner) {
+    const myShare = (shareRows ?? []).find((s) => s.shared_with === user.id && s.wrapped_dek);
+    if (myShare?.wrapped_dek && myShare.dek_iv) {
+      const { data: ownerKey } = await supabase
+        .from("user_crypto_keys")
+        .select("public_key")
+        .eq("user_id", doc.owner_id)
+        .maybeSingle();
+      if (ownerKey) {
+        recipientDek = { wrappedDek: myShare.wrapped_dek, dekIv: myShare.dek_iv };
+        ownerPublicKeyJwk = ownerKey.public_key as JsonWebKey;
+      }
+    }
+  }
 
   return (
     <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8">
@@ -96,7 +116,13 @@ export default async function VaultDocumentPage({
         {/* PHIL-Q41 : pas de mise en cache offline des documents du coffre —
             les stocker en clair sur l'appareil contournerait passkey, filigrane
             et audit. La lecture offline reste possible pour les documents de voyage. */}
-        <ShareManager documentId={doc.id} shares={shares} />
+        <ShareManager
+          documentId={doc.id}
+          shares={shares}
+          encrypted={doc.encrypted}
+          encWrappedDek={doc.enc_wrapped_dek ?? ""}
+          encDekIv={doc.enc_dek_iv ?? ""}
+        />
         <DocumentActions
           documentId={doc.id}
           fileName={doc.file_name}
@@ -113,9 +139,11 @@ export default async function VaultDocumentPage({
             mimeType={doc.mime_type}
             fileName={doc.file_name}
             fileIv={doc.enc_file_iv ?? ""}
-            wrappedDek={doc.enc_wrapped_dek ?? ""}
-            dekIv={doc.enc_dek_iv ?? ""}
+            wrappedDek={recipientDek ? recipientDek.wrappedDek : (doc.enc_wrapped_dek ?? "")}
+            dekIv={recipientDek ? recipientDek.dekIv : (doc.enc_dek_iv ?? "")}
             viewerLabel={viewerLabel}
+            mode={recipientDek ? "recipient" : "owner"}
+            ownerPublicKeyJwk={ownerPublicKeyJwk}
           />
         ) : isPdf ? (
           <iframe src={viewUrl} title={doc.file_name} className="h-[70vh] w-full" />

@@ -987,7 +987,7 @@ Chiffrement de bout en bout du coffre : le serveur ne voit jamais le contenu ni 
 - [~] **Phase 0** — fondations clés livrées (`lib/crypto/` + 9 tests, PRF, migration `vault_crypto_keys` appliquée, écran d'activation dans le profil). **À valider sur appareil réel** : activation Face ID + support PRF. Onboarding auto à câbler ensuite.
 - [~] **Phase 1** — chiffrement client des documents du coffre livré (upload scelle le fichier ; viewer client déchiffre après Face ID ; route sert le chiffré ; migration `documents_encryption`). **À valider sur appareil** avec un doc jetable. Reste : chiffrer aussi `document_number` (encore en clair dans `metadata`, cf. B12).
 - [ ] **Phase 2** — filigrane côté client + verrou biométrique sur tous les documents.
-- [ ] **Phase 3** — partage E2EE (ré-emballage de clé) + expiration 1h.
+- [~] **Phase 3** — partage E2EE **individuel** livré : la DEK est ré-emballée pour le destinataire (ECDH), qui la déchiffre via sa clé privée + la publique du propriétaire (migration `document_shares_e2ee`). **À valider** entre deux comptes. Reste : partage **équipage** chiffré (ré-emballer pour chaque membre) et **expiration 1h** (l'UI reste en granularité jour).
 - [ ] **Phase 4** — offline chiffré + ajout d'appareil par QR + code de secours.
 - [ ] **Phase 5** — reprise des docs existants + repli sans PRF + audit différé.
 > ⚠️ Code le plus sensible du projet : bug = perte de données ou fausse sécurité. Tests crypto obligatoires (Phase 0) avant toute donnée réelle. Ferme aussi une partie de l'audit B12 (chiffrement au repos promis).

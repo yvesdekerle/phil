@@ -12,6 +12,16 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { intlLocale } from "@/lib/i18n/dates";
+import { getUserPublicKey } from "@/app/(app)/profile/coffre-actions";
+import { getCoffreMaster, getCoffrePrivateKey } from "@/lib/crypto/coffre-session";
+import {
+  deriveSharedWrapKey,
+  fromBase64,
+  importEcdhPublic,
+  toBase64,
+  unwrapKey,
+  wrapKey,
+} from "@/lib/crypto/vault-crypto";
 import { createClient } from "@/lib/supabase/client";
 import { type DocumentActionState, shareDocument, unshareDocument } from "./actions";
 
@@ -31,7 +41,20 @@ type Member = { userId: string; name: string };
  * étape 1 choisir le voyage, étape 2 choisir l'audience
  * (tout l'équipage, ou une personne précise).
  */
-export function ShareManager({ documentId, shares }: { documentId: string; shares: Share[] }) {
+export function ShareManager({
+  documentId,
+  shares,
+  encrypted,
+  encWrappedDek,
+  encDekIv,
+}: {
+  documentId: string;
+  shares: Share[];
+  /** Document chiffré E2EE : le partage ré-emballe la DEK pour le destinataire. */
+  encrypted: boolean;
+  encWrappedDek: string;
+  encDekIv: string;
+}) {
   const t = useT();
   const il = intlLocale(useLocale());
   const [open, setOpen] = useState(false);
@@ -90,11 +113,48 @@ export function ShareManager({ documentId, shares }: { documentId: string; share
 
   function share(tripId: string, sharedWith: string | null) {
     startTransition(async () => {
+      let wrappedDek: string | null = null;
+      let dekIv: string | null = null;
+
+      // PHIL-T01 Phase 3 : document chiffré → ré-emballer la DEK pour le
+      // destinataire (ECDH : sa clé publique + ma clé privée). Individuel requis.
+      if (encrypted) {
+        if (!sharedWith) {
+          setState({ status: "error", message: "Document chiffré : partage individuel uniquement." });
+          return;
+        }
+        try {
+          const [master, myPriv, pubJwk] = await Promise.all([
+            getCoffreMaster(),
+            getCoffrePrivateKey(),
+            getUserPublicKey(sharedWith),
+          ]);
+          if (!pubJwk) {
+            setState({ status: "error", message: "Le destinataire doit d'abord activer son coffre." });
+            return;
+          }
+          const recipientPub = await importEcdhPublic(pubJwk as JsonWebKey);
+          const sharedKey = await deriveSharedWrapKey(myPriv, recipientPub);
+          const dek = await unwrapKey(master, fromBase64(encWrappedDek), fromBase64(encDekIv));
+          const reWrapped = await wrapKey(sharedKey, dek);
+          wrappedDek = toBase64(reWrapped.data);
+          dekIv = toBase64(reWrapped.iv);
+        } catch (e) {
+          setState({
+            status: "error",
+            message: e instanceof Error ? e.message : "Échec du chiffrement du partage.",
+          });
+          return;
+        }
+      }
+
       const result = await shareDocument(
         documentId,
         tripId,
         sharedWith,
         shareUntil ? `${shareUntil}T23:59:59Z` : null,
+        wrappedDek,
+        dekIv,
       );
       setState(result);
       if (result.status === "success") {
@@ -177,7 +237,7 @@ export function ShareManager({ documentId, shares }: { documentId: string; share
                 </label>
                 <button
                   type="button"
-                  disabled={pending || crewShareTripIds.includes(selectedTrip.id)}
+                  disabled={pending || crewShareTripIds.includes(selectedTrip.id) || encrypted}
                   onClick={() => share(selectedTrip.id, null)}
                   className="flex items-center justify-between gap-3 rounded-md border border-bordeaux/40 bg-bordeaux/5 px-3 py-2.5 text-left text-sm transition-colors hover:bg-bordeaux/10 disabled:opacity-50"
                 >

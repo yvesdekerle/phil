@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { areUuids } from "@/lib/validation";
 import type { Json } from "@/types/database";
 
 // PHIL-T01 Phase 0 — enregistrement des clés du coffre E2EE. Le matériel reçu
@@ -111,4 +112,40 @@ export async function getMyMasterWrap(): Promise<MasterWrapDto | null> {
     credentialId: data.credential_id,
     prfSalt: data.prf_salt,
   };
+}
+
+/** Enveloppe de la clé privée ECDH (déballée côté client via la maîtresse) — pour le partage. */
+export async function getMyPrivateKeyWrap(): Promise<{
+  wrappedPrivateKey: string;
+  wrappedPrivateIv: string;
+} | null> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return null;
+  }
+  const { data } = await supabase
+    .from("user_crypto_keys")
+    .select("wrapped_private_key, wrapped_private_iv")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  return data
+    ? { wrappedPrivateKey: data.wrapped_private_key, wrappedPrivateIv: data.wrapped_private_iv }
+    : null;
+}
+
+/** Clé publique ECDH d'un utilisateur (RLS : soi + co-voyageurs) — pour lui partager. */
+export async function getUserPublicKey(userId: string): Promise<Json | null> {
+  if (!areUuids(userId)) {
+    return null;
+  }
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("user_crypto_keys")
+    .select("public_key")
+    .eq("user_id", userId)
+    .maybeSingle();
+  return data?.public_key ?? null;
 }

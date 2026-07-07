@@ -2,17 +2,29 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { getCoffreMaster, isCoffreUnlocked } from "@/lib/crypto/coffre-session";
-import { fromBase64, openDocument } from "@/lib/crypto/vault-crypto";
+import {
+  getCoffreMaster,
+  getCoffrePrivateKey,
+  isCoffreUnlocked,
+} from "@/lib/crypto/coffre-session";
+import {
+  decryptBytes,
+  deriveSharedWrapKey,
+  fromBase64,
+  importEcdhPublic,
+  unwrapKey,
+} from "@/lib/crypto/vault-crypto";
 import { canWatermark, watermarkImage, watermarkPdf } from "@/lib/vault/watermark";
 
 /**
  * Viewer d'un document chiffré E2EE (PHIL-T01). Le serveur n'a servi que le
  * CHIFFRÉ : on déchiffre EN MÉMOIRE, on appose le filigrane côté client
- * (Phase 2, « Phil · vu par… », baked-in), puis on affiche via object URL. Le
- * clair ne quitte jamais l'onglet.
+ * (« Phil · vu par… », baked-in), puis on affiche via object URL.
  *
- * Session déjà déverrouillée → affichage direct ; sinon biométrie.
+ * Deux modes :
+ *  - propriétaire : la DEK est déballée avec sa clé maîtresse ;
+ *  - destinataire (Phase 3) : la DEK (ré-emballée pour lui) est déballée via ECDH
+ *    (sa clé privée + la clé publique du propriétaire).
  */
 export function EncryptedDocumentViewer({
   docId,
@@ -22,6 +34,8 @@ export function EncryptedDocumentViewer({
   wrappedDek,
   dekIv,
   viewerLabel,
+  mode,
+  ownerPublicKeyJwk,
 }: {
   docId: string;
   mimeType: string;
@@ -31,6 +45,9 @@ export function EncryptedDocumentViewer({
   dekIv: string;
   /** Identité du lecteur pour le filigrane : « Prénom Nom · id ». */
   viewerLabel: string;
+  mode: "owner" | "recipient";
+  /** Clé publique du propriétaire (mode destinataire), pour dériver la clé partagée. */
+  ownerPublicKeyJwk: JsonWebKey | null;
 }) {
   const [url, setUrl] = useState<string | null>(null);
   const [resultMime, setResultMime] = useState(mimeType);
@@ -43,21 +60,27 @@ export function EncryptedDocumentViewer({
     setNeedsUnlock(false);
     setLoading(true);
     try {
-      const master = await getCoffreMaster();
       const res = await fetch(`/api/documents/${docId}/view`);
       if (!res.ok) {
         throw new Error("Fichier indisponible");
       }
       const ciphertext = new Uint8Array(await res.arrayBuffer());
-      const plain = await openDocument(master, {
-        ciphertext,
-        iv: fromBase64(fileIv),
-        wrappedDek: fromBase64(wrappedDek),
-        dekIv: fromBase64(dekIv),
-      });
 
-      // Filigrane côté client (Phase 2) : traçabilité des captures. Comme côté
-      // serveur, images et PDF ressortent en PDF filigrané ; HEIC non filigranable.
+      // Déballage de la DEK selon le mode.
+      let dek: CryptoKey;
+      if (mode === "recipient" && ownerPublicKeyJwk) {
+        const myPriv = await getCoffrePrivateKey();
+        const ownerPub = await importEcdhPublic(ownerPublicKeyJwk);
+        const sharedKey = await deriveSharedWrapKey(myPriv, ownerPub);
+        dek = await unwrapKey(sharedKey, fromBase64(wrappedDek), fromBase64(dekIv));
+      } else {
+        const master = await getCoffreMaster();
+        dek = await unwrapKey(master, fromBase64(wrappedDek), fromBase64(dekIv));
+      }
+      const plain = await decryptBytes(dek, ciphertext, fromBase64(fileIv));
+
+      // Filigrane côté client : traçabilité des captures. Comme côté serveur,
+      // images et PDF ressortent en PDF filigrané ; HEIC non filigranable.
       let bytes = plain;
       let outMime = mimeType;
       if (canWatermark(mimeType)) {
@@ -75,7 +98,7 @@ export function EncryptedDocumentViewer({
     } finally {
       setLoading(false);
     }
-  }, [docId, mimeType, fileIv, wrappedDek, dekIv, viewerLabel]);
+  }, [docId, mimeType, fileIv, wrappedDek, dekIv, viewerLabel, mode, ownerPublicKeyJwk]);
 
   // Session déjà déverrouillée → affichage direct (pas de biométrie redondante).
   useEffect(() => {
