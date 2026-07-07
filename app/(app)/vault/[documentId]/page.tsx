@@ -107,25 +107,26 @@ export default async function VaultDocumentPage({
         </div>
       </div>
 
-      <div className="mb-6 flex flex-col gap-4">
-        {/* PHIL-Q41 : pas de mise en cache offline des documents du coffre —
-            les stocker en clair sur l'appareil contournerait passkey, filigrane
-            et audit. La lecture offline reste possible pour les documents de voyage. */}
-        <ShareManager
-          documentId={doc.id}
-          shares={shares}
-          encrypted={doc.encrypted}
-          encWrappedDek={doc.enc_wrapped_dek ?? ""}
-          encDekIv={doc.enc_dek_iv ?? ""}
-        />
-        <DocumentActions
-          documentId={doc.id}
-          fileName={doc.file_name}
-          category={doc.category}
-          expiresAt={doc.expires_at ?? ""}
-          documentNumber={metadata.document_number ?? ""}
-        />
-      </div>
+      {/* Partage et actions : réservés au propriétaire. Un destinataire ne voit
+          que le document (le partage/suppression sont de toute façon bloqués par RLS). */}
+      {isOwner ? (
+        <div className="mb-6 flex flex-col gap-4">
+          <ShareManager
+            documentId={doc.id}
+            shares={shares}
+            encrypted={doc.encrypted}
+            encWrappedDek={doc.enc_wrapped_dek ?? ""}
+            encDekIv={doc.enc_dek_iv ?? ""}
+          />
+          <DocumentActions
+            documentId={doc.id}
+            fileName={doc.file_name}
+            category={doc.category}
+            expiresAt={doc.expires_at ?? ""}
+            documentNumber={metadata.document_number ?? ""}
+          />
+        </div>
+      ) : null}
 
       <div className="overflow-hidden rounded-lg border border-laiton-clair bg-papier">
         {doc.encrypted ? (
