@@ -6,6 +6,28 @@
 
 ---
 
+## 0. Suivi de remédiation — mise à jour du 2026-07-08
+
+> Re-scoring des catégories touchées par la campagne de remédiation (catégorie R du `TODO.md`) et par la livraison du coffre E2EE (PHIL-T01). Vérifications outillées rejouées le 2026-07-08 : `pnpm build`/`biome check`/`tsc` **verts** ; `pnpm test` **104 tests** (vs 81) ; `pnpm audit --prod` = **2 *moderate*** (postcss, transitif) vs *8 high* à l'audit initial ; inventaire code : **0** `any`, **0** `@ts-ignore`, **0** `TODO/FIXME` sauvage, **0** `dangerouslySetInnerHTML`.
+
+**Note globale pondérée : 12,4 → ~14,2 / 20.** Le 🔴 (perte de données à la suppression de compte) est **levé** (R05), les deux 🟠 d'intégrité/observabilité aussi (R04, R03), et la promesse de chiffrement du coffre est désormais **tenue** (E2EE client PHIL-T01). Restent 3 🟠 gated sur une **décision** (R09 SSRF, R10 chiffrement `document_number`) ou une **action infra** (R11 base dev/prod séparée, R12 Upstash) — non corrigeables en pur code.
+
+| # | Catégorie | Avant | Après | Ce qui a changé |
+|---|---|---|---|---|
+| A5 | Couverture des tests | 12 | **16** | 🟠 levé : zones critiques testées (filigrane R14, session coffre + reprise OWNER R13). 81→104 tests. |
+| A7 | Dépendances & supply chain | 12 | **16** | 🟠 levé : `next` 16.2.2→16.2.10 (R01). Prod : 8 *high* → 2 *moderate* (postcss transitif). |
+| B10 | Auth & contrôle d'accès (×3) | 12 | **14** | 🟠 email invité vérifié (R02). 🟠 escalade EDITOR→OWNER : trigger écrit (R08) **mais pas encore appliqué** → 15 une fois `db:push` fait. |
+| B12 | Secrets & protection données (×3) | 12 | **15** | Coffre **chiffré de bout en bout** livré (PHIL-T01 : docs scellés côté client, partage re-chiffré, filigrane client). Résiduel : `document_number` en clair (R10). |
+| D16 | Intégrité des données (×2) | 6 | **15** | 🔴 **levé** (R05 : réattribution au « Voyageur parti », soldes préservés) + 🟠 levé (R04 : purge Storage). Résiduel 🟡 R18. Le plafond 🔴 disparaît. |
+| D17 | Observabilité & exploitation | 9 | **13** | 🟠 levé : logs serveur sur l'ajout de document / viewer / audit (R03). Le « bug d'hier soir » redevient reconstituable. |
+| E18 | DX & outillage | 10 | **11** | 🟡 Biome/not-found/doc (R07). 🟠 base unique dev/prod (R11) **toujours ouvert** (infra). |
+
+Catégories inchangées (aucune remédiation depuis le 2026-07-06) : A1 15, A2 14, A3 14, A4 15, A6 16, A8 15, A9 12, **B11 12** (🟠 SSRF R09 en attente de décision), C13 14, C14 14, D15 14.
+
+**Ce qui débloquerait les points restants** : appliquer R08 (`db:push`, B10 +3 pondéré) ; trancher R09 (B11 +9 pondéré) ; provisionner R11/R12 (E18 + confiance B10/B12). Cible atteignable après ces trois gestes : **~15,5–16 / 20**.
+
+---
+
 ## 1. Synthèse exécutive
 
 **Note globale pondérée : 12,4 / 20.** Verdict : *un projet personnel exceptionnellement discipliné sur la forme (build/lint/types verts, dette 100 % tracée, RLS solide), dont les faiblesses réelles se concentrent sur la défense en profondeur, l'exploitabilité opérationnelle et l'intégrité des données à la suppression — jamais sur une faille d'accès directe exploitable par un attaquant.*
