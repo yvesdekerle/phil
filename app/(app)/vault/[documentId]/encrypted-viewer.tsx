@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   getCoffreMaster,
@@ -105,7 +105,14 @@ export function EncryptedDocumentViewer({
   }, [docId, mimeType, fileIv, wrappedDek, dekIv, viewerLabel, mode, ownerPublicKeyJwk]);
 
   // Session déjà déverrouillée → affichage direct (pas de biométrie redondante).
+  // Garde-fou : une seule tentative auto (évite le double-rendu React en dev qui
+  // lançait deux déchiffrements concurrents → « Failed to load PDF »).
+  const autoStarted = useRef(false);
   useEffect(() => {
+    if (autoStarted.current) {
+      return;
+    }
+    autoStarted.current = true;
     if (isCoffreUnlocked()) {
       void decrypt();
     } else {
