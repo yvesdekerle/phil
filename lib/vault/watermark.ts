@@ -7,7 +7,7 @@ import { degrees, PDFDocument, rgb, StandardFonts } from "pdf-lib";
  */
 
 const WATERMARK_COLOR = rgb(0.43, 0.12, 0.18); // bordeaux Phil
-const WATERMARK_OPACITY = 0.18;
+const WATERMARK_OPACITY = 0.2;
 
 function watermarkLines(viewer: string): string {
   const timestamp = new Intl.DateTimeFormat("fr-FR", {
@@ -20,26 +20,29 @@ function watermarkLines(viewer: string): string {
 
 async function applyWatermark(pdf: PDFDocument, text: string): Promise<void> {
   const font = await pdf.embedFont(StandardFonts.Helvetica);
-  const fontSize = 14;
+  const fontSize = 12;
   const textWidth = font.widthOfTextAtSize(text, fontSize);
+  const stepX = textWidth + 70;
+  const stepY = 85;
 
   for (const page of pdf.getPages()) {
     const { width, height } = page.getSize();
-    const diagonal = Math.hypot(width, height);
-    // Répétition le long de la diagonale pour couvrir toute la page.
-    const step = textWidth + 120;
-    const count = Math.max(2, Math.ceil(diagonal / step) + 1);
-    for (let i = 0; i < count; i++) {
-      const offset = i * step - diagonal / 3;
-      page.drawText(text, {
-        x: offset * Math.SQRT1_2,
-        y: offset * Math.SQRT1_2,
-        size: fontSize,
-        font,
-        color: WATERMARK_COLOR,
-        opacity: WATERMARK_OPACITY,
-        rotate: degrees(45),
-      });
+    // Tuile TOUTE la page (quinconce), texte en diagonale → filigrane bien visible.
+    let row = 0;
+    for (let y = -stepY; y < height + stepY; y += stepY) {
+      const shift = (row % 2) * (stepX / 2);
+      for (let x = -stepX; x < width + stepX; x += stepX) {
+        page.drawText(text, {
+          x: x + shift,
+          y,
+          size: fontSize,
+          font,
+          color: WATERMARK_COLOR,
+          opacity: WATERMARK_OPACITY,
+          rotate: degrees(30),
+        });
+      }
+      row++;
     }
   }
 }
