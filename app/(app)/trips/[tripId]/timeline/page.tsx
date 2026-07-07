@@ -74,9 +74,9 @@ export default async function TimelinePage({ params }: { params: Promise<{ tripI
     // Pleine largeur (PHIL-Q37c) : le Gantt déborde du gabarit pour lire les titres
     <div className="relative left-1/2 right-1/2 -mx-[50vw] w-screen px-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[104rem] pb-16">
-        <div className="mb-4 flex items-center justify-between gap-3">
+        {/* Le toggle indique déjà la vue active — pas de titre « Timeline » redondant (U03). */}
+        <div className="mb-4">
           <TripViewToggle tripId={tripId} active="timeline" />
-          <h1 className="font-display text-2xl text-encre">{t("calendar.timeline.title")}</h1>
         </div>
 
         {bars.length === 0 ? (

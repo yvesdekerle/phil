@@ -1012,8 +1012,8 @@ Chiffrement de bout en bout du coffre : le serveur ne voit jamais le contenu ni 
 ### [ ] PHIL-U02 — Notifications/rappels pour voter (sondages, idées)
 Rappeler aux participants de **voter sur les sondages / réagir aux idées** en attente. Idéalement une **pastille de notification** (sur l'avatar profil ? à côté du sélecteur de langue ?) indiquant les actions en attente.
 
-### [ ] PHIL-U03 — Retirer le libellé « Timeline » redondant à droite
-Sur la vue voyage, la barre de bascule (Calendrier / Timeline / Carte) est à gauche et un **titre « Timeline » redondant** s'affiche à droite → le retirer. *(Petit ; cf. capture du 2026-07-07.)*
+### [x] PHIL-U03 — Retirer le libellé « Timeline » redondant à droite *(fait le 2026-07-08)*
+`timeline/page.tsx` : retiré le `<h1>` « Timeline » qui doublonnait avec `TripViewToggle` (déjà porteur de la vue active). Vue alignée sur la carte (toggle seul, sans titre). Clé i18n `calendar.timeline.title` conservée (parité).
 
 ### [ ] PHIL-U04 — Idées « façon Yallah » : swipe d'activités par voyage — **GROS CHANTIER**
 Reprendre le concept de **Yallah** dans l'onglet Idées : pour chaque voyage, une **liste d'activités** proposées avec **swipe** (like/pass), etc. Réf. code : `/Users/yvesdekerle/Sources/perso/yallah`. **Analyse complète obligatoire avant tout dev** (modèle de données, source des activités, UX swipe, intégration au voyage).
