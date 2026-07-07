@@ -73,3 +73,42 @@ export async function storeCoffreKeys(input: unknown): Promise<StoreResult> {
   revalidatePath("/profile");
   return { ok: true };
 }
+
+export type MasterWrapDto = {
+  wrappedMasterKey: string;
+  wrappedMasterIv: string;
+  credentialId: string;
+  prfSalt: string;
+};
+
+/**
+ * Renvoie l'enveloppe PRF de la clé maîtresse de l'utilisateur (pour la
+ * déverrouiller côté client via Face ID). null si coffre non activé.
+ * NB : multi-appareils (Phase 4) → il faudra choisir l'enveloppe du bon appareil.
+ */
+export async function getMyMasterWrap(): Promise<MasterWrapDto | null> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return null;
+  }
+  const { data } = await supabase
+    .from("user_master_key_wraps")
+    .select("wrapped_key, wrap_iv, credential_id, prf_salt")
+    .eq("user_id", user.id)
+    .eq("method", "PRF")
+    .order("created_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  if (!data?.credential_id || !data.prf_salt) {
+    return null;
+  }
+  return {
+    wrappedMasterKey: data.wrapped_key,
+    wrappedMasterIv: data.wrap_iv,
+    credentialId: data.credential_id,
+    prfSalt: data.prf_salt,
+  };
+}

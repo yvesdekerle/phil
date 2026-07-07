@@ -20,6 +20,11 @@ const createDocumentSchema = z.object({
   documentNumber: z.string().trim().max(100).optional(),
   // PHIL-Q34 : "Autre" → libellé libre saisi à la main
   label: z.string().trim().max(60).optional(),
+  // PHIL-T01 : métadonnées de chiffrement E2EE (base64), présentes si chiffré.
+  encrypted: z.union([z.literal(""), z.literal("1")]).optional(),
+  encFileIv: z.string().max(64).optional(),
+  encWrappedDek: z.string().max(255).optional(),
+  encDekIv: z.string().max(64).optional(),
 });
 
 export type CreateDocumentState = {
@@ -46,6 +51,10 @@ export async function createDocument(
     expiresAt: formData.get("expiresAt") ?? "",
     documentNumber: formData.get("documentNumber") ?? "",
     label: formData.get("label") ?? "",
+    encrypted: formData.get("encrypted") ?? "",
+    encFileIv: formData.get("encFileIv") ?? "",
+    encWrappedDek: formData.get("encWrappedDek") ?? "",
+    encDekIv: formData.get("encDekIv") ?? "",
   });
 
   if (!parsed.success) {
@@ -72,6 +81,15 @@ export async function createDocument(
     metadata.document_number = parsed.data.documentNumber;
   }
 
+  // PHIL-T01 : document chiffré E2EE → les trois métadonnées sont obligatoires.
+  const isEncrypted = parsed.data.encrypted === "1";
+  if (
+    isEncrypted &&
+    (!parsed.data.encFileIv || !parsed.data.encWrappedDek || !parsed.data.encDekIv)
+  ) {
+    return { status: "error", message: "Métadonnées de chiffrement manquantes." };
+  }
+
   const { error } = await supabase.from("documents").insert({
     id: parsed.data.documentId,
     owner_id: user.id,
@@ -85,6 +103,10 @@ export async function createDocument(
     label: parsed.data.category === "other" ? parsed.data.label || null : null,
     expires_at: parsed.data.expiresAt || null,
     metadata,
+    encrypted: isEncrypted,
+    enc_file_iv: isEncrypted ? parsed.data.encFileIv : null,
+    enc_wrapped_dek: isEncrypted ? parsed.data.encWrappedDek : null,
+    enc_dek_iv: isEncrypted ? parsed.data.encDekIv : null,
   });
 
   if (error) {

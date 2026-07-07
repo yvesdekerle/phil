@@ -43,6 +43,34 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     return Response.json({ error: "Document introuvable" }, { status: 404 });
   }
 
+  const admin = createAdminClient();
+
+  // PHIL-T01 : document chiffré E2EE → servi tel quel (chiffré). Le déchiffrement
+  // et le verrou biométrique se font côté client ; le serveur ne peut pas le lire.
+  if (doc.encrypted) {
+    const { data: encBlob, error: encError } = await admin.storage
+      .from("documents")
+      .download(doc.storage_path);
+    if (encError || !encBlob) {
+      logger.error("document_blob_download_failed", { documentId: id, code: encError?.name });
+      return Response.json({ error: "Fichier indisponible" }, { status: 502 });
+    }
+    if (doc.scope === "VAULT") {
+      await logVaultAccess({
+        action: "VIEW",
+        documentId: doc.id,
+        accessedBy: user.id,
+        documentOwnerId: doc.owner_id,
+      });
+    }
+    return new Response(encBlob, {
+      headers: {
+        "Content-Type": "application/octet-stream",
+        "Cache-Control": "private, no-store",
+      },
+    });
+  }
+
   // E03b : verrou passkey sur les documents du coffre.
   if (doc.scope === "VAULT") {
     const { data: passkeys } = await supabase
@@ -58,7 +86,6 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     }
   }
 
-  const admin = createAdminClient();
   const { data: blob, error } = await admin.storage.from("documents").download(doc.storage_path);
   if (error || !blob) {
     logger.error("document_blob_download_failed", { documentId: id, code: error?.name });

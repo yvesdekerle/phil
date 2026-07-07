@@ -16,6 +16,13 @@ export default async function NewDocumentPage() {
     redirect("/login");
   }
 
+  // PHIL-T01 : chiffrer les nouveaux documents du coffre si l'E2EE est activé.
+  const { data: coffreKey } = await supabase
+    .from("user_crypto_keys")
+    .select("user_id")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
   return (
     <main className="mx-auto w-full max-w-lg flex-1 px-4 py-8">
       <h1 className="mb-2 text-center font-display text-3xl text-encre">{t("vault.new.title")}</h1>
@@ -32,6 +39,7 @@ export default async function NewDocumentPage() {
             categories={VAULT_CATEGORIES}
             submitLabel={t("vault.new.submit")}
             pendingLabel={t("vault.new.pending")}
+            encrypt={Boolean(coffreKey)}
           />
         </CardContent>
       </Card>

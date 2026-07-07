@@ -12,6 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { getCoffreMaster } from "@/lib/crypto/coffre-session";
+import { sealDocument, toBase64 } from "@/lib/crypto/vault-crypto";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { CATEGORIES, categoryLabel, type DocumentCategory } from "@/lib/vault/categories";
@@ -34,6 +36,8 @@ type Props = {
   freeLabel?: boolean;
   /** PHIL-Q26 : rattacher directement à un événement. */
   events?: { id: string; title: string }[];
+  /** PHIL-T01 : chiffrer le fichier côté client avant l'upload (coffre E2EE). */
+  encrypt?: boolean;
 };
 
 export function UploadForm({
@@ -46,6 +50,7 @@ export function UploadForm({
   pendingLabel,
   freeLabel = false,
   events = [],
+  encrypt = false,
 }: Props) {
   const t = useT();
   const LABEL_SUGGESTIONS = [
@@ -116,10 +121,36 @@ export function UploadForm({
     const documentId = crypto.randomUUID();
     const storagePath = `${userId}/${documentId}.${extensionFor(file.type)}`;
 
+    // Coffre E2EE (PHIL-T01) : on chiffre le fichier CÔTÉ CLIENT avant l'upload.
+    // Le Storage ne reçoit alors que du chiffré ; les métadonnées (IV, DEK
+    // emballée par la maîtresse) partent en base via le FormData.
+    let uploadBody: Blob | File = file;
+    let encMeta: { fileIv: string; wrappedDek: string; dekIv: string } | null = null;
+    if (encrypt) {
+      try {
+        const master = await getCoffreMaster();
+        const sealed = await sealDocument(master, new Uint8Array(await file.arrayBuffer()));
+        uploadBody = new Blob([sealed.ciphertext as BlobPart], {
+          type: "application/octet-stream",
+        });
+        encMeta = {
+          fileIv: toBase64(sealed.iv),
+          wrappedDek: toBase64(sealed.wrappedDek),
+          dekIv: toBase64(sealed.dekIv),
+        };
+      } catch (err) {
+        setPhase("idle");
+        setError(err instanceof Error ? err.message : t("documents.upload.genericError"));
+        return;
+      }
+    }
+
     const supabase = createClient();
     const { error: uploadError } = await supabase.storage
       .from("documents")
-      .upload(storagePath, file, { contentType: file.type });
+      .upload(storagePath, uploadBody, {
+        contentType: encrypt ? "application/octet-stream" : file.type,
+      });
 
     if (uploadError) {
       setPhase("idle");
@@ -138,6 +169,12 @@ export function UploadForm({
     formData.set("documentNumber", documentNumber);
     formData.set("label", label);
     formData.set("eventId", eventId);
+    if (encMeta) {
+      formData.set("encrypted", "1");
+      formData.set("encFileIv", encMeta.fileIv);
+      formData.set("encWrappedDek", encMeta.wrappedDek);
+      formData.set("encDekIv", encMeta.dekIv);
+    }
     if (tripId) {
       formData.set("tripId", tripId);
     }

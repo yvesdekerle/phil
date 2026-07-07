@@ -6,6 +6,7 @@ import { getDateFnsLocale, getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { categoryLabel } from "@/lib/vault/categories";
 import { DocumentActions } from "./document-actions";
+import { EncryptedDocumentViewer } from "./encrypted-viewer";
 import { ShareManager } from "./share-manager";
 
 export default async function VaultDocumentPage({
@@ -98,7 +99,16 @@ export default async function VaultDocumentPage({
       </div>
 
       <div className="overflow-hidden rounded-lg border border-laiton-clair bg-papier">
-        {isPdf ? (
+        {doc.encrypted ? (
+          <EncryptedDocumentViewer
+            docId={doc.id}
+            mimeType={doc.mime_type}
+            fileName={doc.file_name}
+            fileIv={doc.enc_file_iv ?? ""}
+            wrappedDek={doc.enc_wrapped_dek ?? ""}
+            dekIv={doc.enc_dek_iv ?? ""}
+          />
+        ) : isPdf ? (
           <iframe src={viewUrl} title={doc.file_name} className="h-[70vh] w-full" />
         ) : isImage ? (
           // biome-ignore lint/performance/noImgElement: flux authentifié via l'API, next/image ne peut pas optimiser ce endpoint privé
