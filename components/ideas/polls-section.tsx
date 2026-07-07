@@ -1,7 +1,7 @@
 "use client";
 
 import { Trash2 } from "lucide-react";
-import { useActionState, useState, useTransition } from "react";
+import { useActionState, useOptimistic, useState, useTransition } from "react";
 import {
   closePoll,
   createPoll,
@@ -49,6 +49,37 @@ export function PollsSection({
     status: "idle",
   });
   const [pending, startTransition] = useTransition();
+
+  // PHIL-S03 : mise à jour optimiste — le vote s'affiche instantanément, sans
+  // attendre l'aller-retour serveur (qui reconcilie ensuite via revalidatePath).
+  const [optimisticPolls, applyVote] = useOptimistic(
+    polls,
+    (current: Poll[], action: { pollId: string; optionIndex: number }) =>
+      current.map((p) => {
+        if (p.id !== action.pollId) {
+          return p;
+        }
+        const mine = p.votes.some(
+          (v) => v.user_id === myId && v.option_index === action.optionIndex,
+        );
+        const votes = p.allow_multiple
+          ? mine
+            ? p.votes.filter((v) => !(v.user_id === myId && v.option_index === action.optionIndex))
+            : [...p.votes, { user_id: myId, option_index: action.optionIndex }]
+          : [
+              ...p.votes.filter((v) => v.user_id !== myId),
+              { user_id: myId, option_index: action.optionIndex },
+            ];
+        return { ...p, votes };
+      }),
+  );
+
+  const vote = (pollId: string, optionIndex: number) => {
+    startTransition(async () => {
+      applyVote({ pollId, optionIndex });
+      await votePoll(tripId, pollId, optionIndex);
+    });
+  };
 
   const nameOf = (userId: string) => names[userId] ?? t("ideas.pollVoterFallback");
   const fmtDate = (iso: string) => new Date(iso).toLocaleDateString(locale);
@@ -101,13 +132,13 @@ export function PollsSection({
         </form>
       ) : null}
 
-      {polls.length === 0 && !showForm ? (
+      {optimisticPolls.length === 0 && !showForm ? (
         <p className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-4 py-8 text-center text-sm text-encre-douce">
           {t("ideas.pollsEmpty")}
         </p>
       ) : null}
 
-      {polls.map((poll) => {
+      {optimisticPolls.map((poll) => {
         const myVotes = poll.votes.filter((v) => v.user_id === myId).map((v) => v.option_index);
         const voters = new Set(poll.votes.map((v) => v.user_id)).size;
         const endPast = poll.closes_at ? new Date(poll.closes_at) < new Date() : false;
@@ -174,8 +205,8 @@ export function PollsSection({
                   <div key={option} className="flex flex-col gap-0.5">
                     <button
                       type="button"
-                      disabled={closed || pending}
-                      onClick={() => startTransition(() => votePoll(tripId, poll.id, i))}
+                      disabled={closed}
+                      onClick={() => vote(poll.id, i)}
                       className={cn(
                         "relative overflow-hidden rounded-md border px-3 py-1.5 text-left text-sm transition-colors",
                         mine
