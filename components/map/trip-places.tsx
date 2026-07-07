@@ -5,9 +5,9 @@ import { useActionState, useTransition } from "react";
 import {
   addTripPlace,
   deleteTripPlace,
-  PLACE_CATEGORIES,
   type PlaceState,
 } from "@/app/(app)/trips/[tripId]/map/actions";
+import { PLACE_CATEGORIES } from "@/app/(app)/trips/[tripId]/map/place-constants";
 import { useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

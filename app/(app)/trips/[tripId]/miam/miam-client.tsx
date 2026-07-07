@@ -11,10 +11,10 @@ import {
   addShoppingItem,
   deleteMeal,
   deleteShoppingItem,
-  MEAL_SLOTS,
   type MiamState,
   toggleShoppingItem,
 } from "./actions";
+import { MEAL_SLOTS } from "./meal-constants";
 
 export type Meal = {
   id: string;

@@ -6,9 +6,7 @@ import { requireUser } from "@/lib/auth/require-user";
 import { geocode } from "@/lib/geo/geocode";
 import { getT } from "@/lib/i18n/server";
 import { areUuids } from "@/lib/validation";
-
-export const PLACE_CATEGORIES = ["SUPERMARKET", "SHOP", "PHARMACY", "MARKET", "OTHER"] as const;
-export type PlaceCategory = (typeof PLACE_CATEGORIES)[number];
+import { PLACE_CATEGORIES } from "./place-constants";
 
 const placeSchema = z.object({
   tripId: z.string().uuid(),

@@ -5,9 +5,7 @@ import { z } from "zod";
 import { requireUser } from "@/lib/auth/require-user";
 import { getT } from "@/lib/i18n/server";
 import { areUuids } from "@/lib/validation";
-
-export const MEAL_SLOTS = ["BREAKFAST", "LUNCH", "DINNER", "OTHER"] as const;
-export type MealSlot = (typeof MEAL_SLOTS)[number];
+import { MEAL_SLOTS } from "./meal-constants";
 
 export type MiamState = { status: "idle" | "error"; message?: string };
 
