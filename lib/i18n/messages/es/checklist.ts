@@ -153,6 +153,13 @@ export const checklistEs = {
     pollNeeds: "Hace falta una pregunta y de 2 a 5 opciones.",
     pollCreateFailed: "No se pudo crear.",
     pollDelete: "Eliminar la encuesta",
+    pollEdit: "Editar la encuesta",
+    pollEditSave: "Guardar",
+    pollEditHint:
+      "Mantén el mismo número de opciones — los votos ya emitidos siguen vinculados a ellas.",
+    pollEditCount:
+      "Mantén el mismo número de opciones que al principio (los votos están vinculados).",
+    pollEditFailed: "La edición ha fallado.",
     pollAllowMultiple: "Opción múltiple",
     pollClosesLabel: "Fecha de fin",
     pollClosesOn: "termina el",

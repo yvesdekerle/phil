@@ -127,6 +127,53 @@ export async function votePoll(tripId: string, pollId: string, optionIndex: numb
   revalidatePath(`/trips/${tripId}/polls`);
 }
 
+/**
+ * Édite un sondage (PHIL-S06) : question + libellés d'options. Conserve le
+ * MÊME nombre d'options dans le MÊME ordre — les votes (`poll_votes.option_index`)
+ * référencent l'index, donc en changer le compte les désaligne. Réservé au
+ * créateur/OWNER par la RLS `polls_update_creator_or_owner` (count exact en filet).
+ */
+export async function editPoll(
+  tripId: string,
+  pollId: string,
+  question: string,
+  options: string[],
+): Promise<PollState> {
+  const t = await getT();
+  if (!areUuids(tripId, pollId)) {
+    return { status: "error", message: t("ideas.pollEditFailed") };
+  }
+  const parsed = z
+    .object({
+      question: z.string().trim().min(1).max(200),
+      options: z.array(z.string().trim().min(1).max(80)).min(2).max(5),
+    })
+    .safeParse({ question, options: options.map((o) => o.trim()).filter(Boolean) });
+  if (!parsed.success) {
+    return { status: "error", message: t("ideas.pollNeeds") };
+  }
+
+  const { supabase } = await requireUser();
+  const { data: poll } = await supabase.from("polls").select("options").eq("id", pollId).single();
+  if (!poll) {
+    return { status: "error", message: t("ideas.pollEditFailed") };
+  }
+  const currentCount = ((poll.options ?? []) as unknown[]).length;
+  if (parsed.data.options.length !== currentCount) {
+    return { status: "error", message: t("ideas.pollEditCount") };
+  }
+
+  const { error, count } = await supabase
+    .from("polls")
+    .update({ question: parsed.data.question, options: parsed.data.options }, { count: "exact" })
+    .eq("id", pollId);
+  if (error || count === 0) {
+    return { status: "error", message: t("ideas.pollEditFailed") };
+  }
+  revalidatePath(`/trips/${tripId}/polls`);
+  return { status: "idle" };
+}
+
 export async function closePoll(tripId: string, pollId: string): Promise<void> {
   if (!areUuids(tripId, pollId)) {
     return;

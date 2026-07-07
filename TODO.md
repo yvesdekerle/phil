@@ -987,8 +987,8 @@ Le seed démo (`scripts/seed-demo-maurice.ts`) doit porter des **photos d'exempl
 
 ---
 
-### [ ] PHIL-S06 — Éditer un sondage (corriger question / libellés d'options)
-Permettre au créateur (ou OWNER) de **modifier un sondage existant** : la **question** et le **texte des options** (ex. corriger le typo « Créaole » → « Créole »). **Conserver le même nombre d'options dans le même ordre** pour ne pas casser les votes déjà enregistrés (qui référencent l'index). Bouton « Modifier » à côté de « Clore » / supprimer. *(Demandé le 2026-07-08.)*
+### [x] PHIL-S06 — Éditer un sondage (corriger question / libellés d'options) *(fait le 2026-07-08)*
+Action `editPoll(tripId, pollId, question, options)` : met à jour `question` + `options`, **refuse un nombre d'options différent de l'origine** (les votes référencent l'index → préservés), bornée au créateur/OWNER par la RLS `polls_update_creator_or_owner` (count exact en filet). UI : bouton crayon « Modifier » (canManage) → `PollEditForm` pré-rempli (question + options une par ligne), hint « garde le même nombre d'options ». Clés i18n `ideas.pollEdit*` (fr/en/es). *(Demandé le 2026-07-08.)*
 
 ## Catégorie T — Coffre chiffré de bout en bout (E2EE)
 

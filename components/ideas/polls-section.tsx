@@ -1,11 +1,12 @@
 "use client";
 
-import { Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { useActionState, useOptimistic, useState, useTransition } from "react";
 import {
   closePoll,
   createPoll,
   deletePoll,
+  editPoll,
   type PollState,
   votePoll,
 } from "@/app/(app)/trips/[tripId]/ideas/poll-actions";
@@ -78,6 +79,21 @@ export function PollsSection({
     startTransition(async () => {
       applyVote({ pollId, optionIndex });
       await votePoll(tripId, pollId, optionIndex);
+    });
+  };
+
+  // PHIL-S06 : édition de la question / des libellés d'options (votes préservés).
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editError, setEditError] = useState<string | null>(null);
+  const saveEdit = (pollId: string, question: string, options: string[]) => {
+    startTransition(async () => {
+      const res = await editPoll(tripId, pollId, question, options);
+      if (res.status === "error") {
+        setEditError(res.message ?? null);
+        return;
+      }
+      setEditError(null);
+      setEditingId(null);
     });
   };
 
@@ -185,6 +201,21 @@ export function PollsSection({
                   <button
                     type="button"
                     disabled={pending}
+                    onClick={() => {
+                      setEditError(null);
+                      setEditingId(editingId === poll.id ? null : poll.id);
+                    }}
+                    className="text-encre-douce transition-colors hover:text-encre"
+                    aria-label={t("ideas.pollEdit")}
+                    title={t("ideas.pollEdit")}
+                  >
+                    <Pencil className="size-3.5" aria-hidden="true" />
+                  </button>
+                ) : null}
+                {canManage ? (
+                  <button
+                    type="button"
+                    disabled={pending}
                     onClick={() => startTransition(() => deletePoll(tripId, poll.id))}
                     className="text-encre-douce transition-colors hover:text-bordeaux"
                     aria-label={t("ideas.pollDelete")}
@@ -195,53 +226,124 @@ export function PollsSection({
                 ) : null}
               </span>
             </div>
-            <div className="flex flex-col gap-1.5">
-              {poll.options.map((option, i) => {
-                const optionVotes = poll.votes.filter((v) => v.option_index === i);
-                const count = optionVotes.length;
-                const pct = voters ? Math.round((count / voters) * 100) : 0;
-                const mine = myVotes.includes(i);
-                return (
-                  <div key={option} className="flex flex-col gap-0.5">
-                    <button
-                      type="button"
-                      disabled={closed}
-                      onClick={() => vote(poll.id, i)}
-                      className={cn(
-                        "relative overflow-hidden rounded-md border px-3 py-1.5 text-left text-sm transition-colors",
-                        mine
-                          ? "border-bordeaux text-encre"
-                          : "border-laiton-clair text-encre-douce hover:text-encre",
-                        closed && "cursor-default",
-                      )}
-                    >
-                      <span
-                        className="absolute inset-y-0 left-0 bg-bordeaux/10"
-                        style={{ width: `${pct}%` }}
-                        aria-hidden="true"
-                      />
-                      <span className="relative flex justify-between">
-                        <span>
-                          {option}
-                          {mine ? " ✓" : ""}
+            {editingId === poll.id ? (
+              <PollEditForm
+                poll={poll}
+                pending={pending}
+                error={editError}
+                onCancel={() => {
+                  setEditingId(null);
+                  setEditError(null);
+                }}
+                onSave={(question, options) => saveEdit(poll.id, question, options)}
+              />
+            ) : (
+              <div className="flex flex-col gap-1.5">
+                {poll.options.map((option, i) => {
+                  const optionVotes = poll.votes.filter((v) => v.option_index === i);
+                  const count = optionVotes.length;
+                  const pct = voters ? Math.round((count / voters) * 100) : 0;
+                  const mine = myVotes.includes(i);
+                  return (
+                    <div key={option} className="flex flex-col gap-0.5">
+                      <button
+                        type="button"
+                        disabled={closed}
+                        onClick={() => vote(poll.id, i)}
+                        className={cn(
+                          "relative overflow-hidden rounded-md border px-3 py-1.5 text-left text-sm transition-colors",
+                          mine
+                            ? "border-bordeaux text-encre"
+                            : "border-laiton-clair text-encre-douce hover:text-encre",
+                          closed && "cursor-default",
+                        )}
+                      >
+                        <span
+                          className="absolute inset-y-0 left-0 bg-bordeaux/10"
+                          style={{ width: `${pct}%` }}
+                          aria-hidden="true"
+                        />
+                        <span className="relative flex justify-between">
+                          <span>
+                            {option}
+                            {mine ? " ✓" : ""}
+                          </span>
+                          <span className="text-xs">
+                            {count} · {pct}%
+                          </span>
                         </span>
-                        <span className="text-xs">
-                          {count} · {pct}%
-                        </span>
-                      </span>
-                    </button>
-                    {count > 0 ? (
-                      <p className="px-1 text-[0.7rem] text-encre-douce">
-                        {optionVotes.map((v) => nameOf(v.user_id)).join(", ")}
-                      </p>
-                    ) : null}
-                  </div>
-                );
-              })}
-            </div>
+                      </button>
+                      {count > 0 ? (
+                        <p className="px-1 text-[0.7rem] text-encre-douce">
+                          {optionVotes.map((v) => nameOf(v.user_id)).join(", ")}
+                        </p>
+                      ) : null}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </article>
         );
       })}
     </div>
+  );
+}
+
+/** Formulaire d'édition d'un sondage (PHIL-S06) : question + libellés d'options. */
+function PollEditForm({
+  poll,
+  pending,
+  error,
+  onCancel,
+  onSave,
+}: {
+  poll: Poll;
+  pending: boolean;
+  error: string | null;
+  onCancel: () => void;
+  onSave: (question: string, options: string[]) => void;
+}) {
+  const t = useT();
+  const [question, setQuestion] = useState(poll.question);
+  const [optionsText, setOptionsText] = useState(poll.options.join("\n"));
+
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        onSave(
+          question,
+          optionsText.split("\n").map((o) => o.trim()),
+        );
+      }}
+      className="flex flex-col gap-2 rounded-md border border-laiton-clair bg-parchemin/40 p-2.5"
+    >
+      <Input
+        value={question}
+        onChange={(e) => setQuestion(e.target.value)}
+        maxLength={200}
+        required
+        aria-label={t("ideas.questionPlaceholder")}
+      />
+      <textarea
+        value={optionsText}
+        onChange={(e) => setOptionsText(e.target.value)}
+        rows={Math.max(2, poll.options.length)}
+        required
+        className="rounded-md border border-laiton-clair bg-papier px-3 py-2 text-sm text-encre"
+        aria-label={t("ideas.optionsPlaceholder")}
+      />
+      <p className="text-xs text-encre-douce">{t("ideas.pollEditHint")}</p>
+      <div className="flex items-center gap-2">
+        <Button type="submit" size="sm" disabled={pending}>
+          {t("ideas.pollEditSave")}
+        </Button>
+        <Button type="button" size="sm" variant="outline" onClick={onCancel} disabled={pending}>
+          {t("ideas.cancel")}
+        </Button>
+      </div>
+      {error ? <p className="text-xs text-bordeaux">{error}</p> : null}
+    </form>
   );
 }
