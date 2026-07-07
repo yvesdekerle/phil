@@ -60,6 +60,24 @@ export default async function VaultPage({
   }
   const documents = (data ?? []) as VaultDocument[];
 
+  // PHIL-T01 : documents partagés AVEC moi (par d'autres, via leur coffre).
+  const { data: sharedRows } = await supabase
+    .from("document_shares")
+    .select(
+      "id, expires_at, documents(id, file_name, category, label), profiles!document_shares_shared_by_fkey(display_name)",
+    )
+    .eq("shared_with", user.id);
+  const now = new Date();
+  const sharedWithMe = (sharedRows ?? [])
+    .filter((s) => s.documents && (!s.expires_at || new Date(s.expires_at) > now))
+    .map((s) => ({
+      id: s.documents?.id ?? "",
+      fileName: s.documents?.file_name ?? "",
+      category: s.documents?.category ?? "other",
+      sharedBy: s.profiles?.display_name ?? t("documents.share.travelerFallback"),
+      expiresAt: s.expires_at,
+    }));
+
   return (
     <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8">
       <div className="mb-6 flex items-center justify-between">
@@ -117,6 +135,7 @@ export default async function VaultPage({
         ))}
       </div>
 
+      <h2 className="mb-3 text-sm font-medium text-encre">Mes documents</h2>
       {documents.length === 0 ? (
         <div className="flex flex-col items-center gap-4 rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-6 py-16 text-center">
           <p className="font-display text-2xl text-encre italic">
@@ -167,6 +186,35 @@ export default async function VaultPage({
           ))}
         </ul>
       )}
+
+      {sharedWithMe.length > 0 ? (
+        <>
+          <h2 className="mt-8 mb-3 text-sm font-medium text-encre">Documents partagés avec moi</h2>
+          <ul className="flex flex-col gap-2">
+            {sharedWithMe.map((s) => (
+              <li key={s.id}>
+                <Link
+                  href={`/vault/${s.id}`}
+                  className="flex items-center gap-4 rounded-lg border border-laiton-clair bg-papier px-4 py-3 transition-shadow hover:shadow-[0_2px_12px_rgba(31,42,68,0.1)]"
+                >
+                  <CategoryIcon category={s.category} />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-medium text-encre">
+                      {s.fileName}
+                    </span>
+                    <span className="block text-xs text-encre-douce">
+                      {t("documents.share.sharedBy")} {s.sharedBy}
+                      {s.expiresAt
+                        ? ` · valide jusqu'au ${format(parseISO(s.expiresAt), "d MMM yyyy", { locale: dfLocale })}`
+                        : ""}
+                    </span>
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : null}
     </main>
   );
 }
