@@ -980,6 +980,9 @@ Le seed démo (`scripts/seed-demo-maurice.ts`) doit porter des **photos d'exempl
 
 ---
 
+### [ ] PHIL-S06 — Éditer un sondage (corriger question / libellés d'options)
+Permettre au créateur (ou OWNER) de **modifier un sondage existant** : la **question** et le **texte des options** (ex. corriger le typo « Créaole » → « Créole »). **Conserver le même nombre d'options dans le même ordre** pour ne pas casser les votes déjà enregistrés (qui référencent l'index). Bouton « Modifier » à côté de « Clore » / supprimer. *(Demandé le 2026-07-08.)*
+
 ## Catégorie T — Coffre chiffré de bout en bout (E2EE)
 
 ### [ ] PHIL-T01 — Coffre E2EE (biométrie sans mot de passe) *(épopée — plan : `docs/E2EE-COFFRE.md`)*
