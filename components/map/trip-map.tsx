@@ -118,20 +118,28 @@ export function TripMap({
     }
 
     for (const m of sorted) {
-      // Pastille ronde (numéro / maison / vignette photo), bord clair + ombre
-      const base = `border-radius:9999px;border:2.5px solid #fbf8f1;box-shadow:0 2px 8px rgba(31,42,68,.45);display:flex;align-items:center;justify-content:center;`;
-      const html = m.thumbUrl
-        ? `<div style="${base}width:44px;height:44px;background:#fbf8f1 url('${m.thumbUrl}') center/cover"></div>`
-        : m.house
-          ? `<div style="${base}width:28px;height:28px;background:${m.color};color:#fbf8f1"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></svg></div>`
-          : `<div style="${base}width:26px;height:26px;background:${m.color};color:#fbf8f1;font:700 12px/1 system-ui">${m.label ? escapeHtml(m.label) : ""}</div>`;
+      // Pastille ronde (numéro / maison / vignette photo), bord clair + ombre.
+      // Le marqueur sélectionné (popup ouvert) reçoit un anneau bordeaux (PHIL-Q37c).
       const size = m.thumbUrl ? 44 : m.house ? 28 : 26;
-      const icon = L.divIcon({
-        className: "",
-        html,
-        iconSize: [size, size],
-        iconAnchor: [size / 2, size / 2],
-      });
+      const iconHtml = (highlighted: boolean) => {
+        const shadow = highlighted
+          ? "box-shadow:0 0 0 3px #6e1f2e,0 3px 12px rgba(31,42,68,.5);"
+          : "box-shadow:0 2px 8px rgba(31,42,68,.45);";
+        const base = `border-radius:9999px;border:2.5px solid #fbf8f1;${shadow}display:flex;align-items:center;justify-content:center;`;
+        return m.thumbUrl
+          ? `<div style="${base}width:44px;height:44px;background:#fbf8f1 url('${m.thumbUrl}') center/cover"></div>`
+          : m.house
+            ? `<div style="${base}width:28px;height:28px;background:${m.color};color:#fbf8f1"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></svg></div>`
+            : `<div style="${base}width:26px;height:26px;background:${m.color};color:#fbf8f1;font:700 12px/1 system-ui">${m.label ? escapeHtml(m.label) : ""}</div>`;
+      };
+      const makeIcon = (highlighted: boolean) =>
+        L.divIcon({
+          className: "",
+          html: iconHtml(highlighted),
+          iconSize: [size, size],
+          iconAnchor: [size / 2, size / 2],
+        });
+      const icon = makeIcon(false);
       const distance =
         distanceFrom && (m.lat !== distanceFrom.lat || m.lng !== distanceFrom.lng)
           ? `<br/><span style="color:#5a6379">${haversineKm(distanceFrom, m).toFixed(1)} km ${t("map.from")} ${escapeHtml(distanceFrom.label)}</span>`
@@ -144,6 +152,9 @@ export function TripMap({
           `<strong>${escapeHtml(m.title)}</strong>${m.subtitle ? `<br/>${escapeHtml(m.subtitle)}` : ""}${distance}${link}`,
         )
         .addTo(layer);
+      // Surbrillance du marqueur pendant que son popup est ouvert.
+      marker.on("popupopen", () => marker.setIcon(makeIcon(true)));
+      marker.on("popupclose", () => marker.setIcon(icon));
       byId.set(m.id, marker);
     }
 
