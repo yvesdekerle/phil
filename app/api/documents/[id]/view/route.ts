@@ -4,7 +4,6 @@ import { createClient } from "@/lib/supabase/server";
 import { areUuids } from "@/lib/validation";
 import { logVaultAccess } from "@/lib/vault/audit";
 import { canWatermark, watermarkImage, watermarkPdf } from "@/lib/vault/watermark";
-import { isVaultUnlocked } from "@/lib/webauthn/vault-session";
 
 /**
  * Sert le fichier d'un document en inline (PHIL-E03a, durci par PHIL-E03b).
@@ -71,21 +70,10 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     });
   }
 
-  // E03b : verrou passkey sur les documents du coffre.
-  if (doc.scope === "VAULT") {
-    const { data: passkeys } = await supabase
-      .from("user_passkeys")
-      .select("id")
-      .eq("user_id", user.id)
-      .limit(1);
-    if ((passkeys ?? []).length > 0 && !(await isVaultUnlocked(user.id))) {
-      return Response.json(
-        { error: "Coffre verrouillé — déverrouille-le d'abord." },
-        { status: 403 },
-      );
-    }
-  }
-
+  // Verrou biométrique : porté par la porte du coffre côté client (CoffreGate,
+  // E2EE) ou l'ancien verrou HMAC selon l'activation. L'accès reste borné par la
+  // RLS (client de session) ; les docs chiffrés sont de toute façon servis
+  // chiffrés. Les docs non chiffrés reposent donc sur RLS + porte cliente.
   const { data: blob, error } = await admin.storage.from("documents").download(doc.storage_path);
   if (error || !blob) {
     logger.error("document_blob_download_failed", { documentId: id, code: error?.name });

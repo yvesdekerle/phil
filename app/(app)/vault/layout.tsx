@@ -1,13 +1,15 @@
 import { redirect } from "next/navigation";
+import { CoffreGate } from "@/components/vault/coffre-gate";
 import { createClient } from "@/lib/supabase/server";
 import { isVaultUnlocked } from "@/lib/webauthn/vault-session";
 import { VaultUnlock } from "./vault-unlock";
 
 /**
- * Gate du coffre (PHIL-C05) : si une passkey existe, la session
- * « vault unlocked » (15 min) est exigée pour toutes les pages /vault.
- * Sans passkey : accès par la session standard (l'activation est proposée
- * sur la page Sécurité).
+ * Gate du coffre.
+ *  - Coffre E2EE activé (PHIL-T01) : verrou biométrique UNIQUE côté client
+ *    (`CoffreGate`). Une biométrie déverrouille la clé maîtresse, qui ouvre
+ *    ensuite tous les documents chiffrés sans redemander.
+ *  - Sinon : ancien verrou passkey/HMAC (PHIL-C05).
  */
 export default async function VaultLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -16,6 +18,15 @@ export default async function VaultLayout({ children }: { children: React.ReactN
   } = await supabase.auth.getUser();
   if (!user) {
     redirect("/login");
+  }
+
+  const { data: coffreKey } = await supabase
+    .from("user_crypto_keys")
+    .select("user_id")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (coffreKey) {
+    return <CoffreGate>{children}</CoffreGate>;
   }
 
   const { data: passkeys } = await supabase
