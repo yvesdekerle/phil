@@ -1,14 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { getCoffreMaster } from "@/lib/crypto/coffre-session";
+import { getCoffreMaster, isCoffreUnlocked } from "@/lib/crypto/coffre-session";
 import { fromBase64, openDocument } from "@/lib/crypto/vault-crypto";
 
 /**
  * Viewer d'un document chiffré E2EE (PHIL-T01, Phase 1). Le serveur n'a servi que
- * le CHIFFRÉ : on déverrouille la maîtresse (Face ID), on déchiffre EN MÉMOIRE,
- * puis on affiche via une object URL. Le clair ne quitte jamais l'onglet.
+ * le CHIFFRÉ : on déchiffre EN MÉMOIRE puis on affiche via une object URL. Le
+ * clair ne quitte jamais l'onglet.
+ *
+ * Si la session est déjà déverrouillée (maîtresse en mémoire), on affiche
+ * directement ; sinon on demande la biométrie (Face ID / empreinte) pour
+ * autoriser le déchiffrement.
  */
 export function EncryptedDocumentViewer({
   docId,
@@ -27,10 +31,12 @@ export function EncryptedDocumentViewer({
 }) {
   const [url, setUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [needsUnlock, setNeedsUnlock] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const decrypt = async () => {
+  const decrypt = useCallback(async () => {
     setError(null);
+    setNeedsUnlock(false);
     setLoading(true);
     try {
       const master = await getCoffreMaster();
@@ -45,14 +51,24 @@ export function EncryptedDocumentViewer({
         wrappedDek: fromBase64(wrappedDek),
         dekIv: fromBase64(dekIv),
       });
-      const blob = new Blob([plain as BlobPart], { type: mimeType });
-      setUrl(URL.createObjectURL(blob));
+      setUrl(URL.createObjectURL(new Blob([plain as BlobPart], { type: mimeType })));
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erreur de déchiffrement");
+      setNeedsUnlock(true);
     } finally {
       setLoading(false);
     }
-  };
+  }, [docId, mimeType, fileIv, wrappedDek, dekIv]);
+
+  // Session déjà déverrouillée → affichage direct (pas de biométrie redondante).
+  // Sinon → on présente le bouton qui déclenchera Face ID / empreinte.
+  useEffect(() => {
+    if (isCoffreUnlocked()) {
+      void decrypt();
+    } else {
+      setNeedsUnlock(true);
+    }
+  }, [decrypt]);
 
   if (url) {
     if (mimeType === "application/pdf") {
@@ -75,12 +91,19 @@ export function EncryptedDocumentViewer({
 
   return (
     <div className="flex flex-col items-center gap-3 px-6 py-12 text-center">
-      <p className="text-sm text-encre-douce">
-        Document chiffré de bout en bout. Déverrouille-le avec Face ID / empreinte pour l'afficher.
-      </p>
-      <Button type="button" onClick={decrypt} disabled={loading}>
-        {loading ? "Déchiffrement…" : "Déchiffrer et afficher"}
-      </Button>
+      {needsUnlock ? (
+        <>
+          <p className="text-sm text-encre-douce">
+            Document chiffré de bout en bout. Déverrouille-le avec Face ID / empreinte pour
+            l'afficher.
+          </p>
+          <Button type="button" onClick={() => void decrypt()} disabled={loading}>
+            {loading ? "Déchiffrement…" : "Déchiffrer et afficher"}
+          </Button>
+        </>
+      ) : (
+        <p className="text-sm text-encre-douce">Ouverture du document…</p>
+      )}
       {error ? <p className="text-sm text-bordeaux">{error}</p> : null}
     </div>
   );
