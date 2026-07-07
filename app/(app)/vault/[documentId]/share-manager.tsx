@@ -72,7 +72,7 @@ export function ShareManager({
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
   const [members, setMembers] = useState<Member[] | null>(null);
   const [state, setState] = useState<DocumentActionState>({ status: "idle" });
-  const [shareUntil, setShareUntil] = useState<string>(""); // "" = permanent
+  const [shareDuration, setShareDuration] = useState<"1h" | "24h" | "1w" | "trip" | "none">("trip");
   const [pending, startTransition] = useTransition();
 
   const load = useCallback(async () => {
@@ -98,7 +98,7 @@ export function ShareManager({
 
   async function pickTrip(trip: Trip) {
     setSelectedTrip(trip);
-    setShareUntil(trip.end_date); // défaut N05 : fin du voyage
+    setShareDuration("trip"); // défaut : fin du voyage
     setMembers(null);
     const supabase = createClient();
     const [{ data }, { data: auth }] = await Promise.all([
@@ -220,11 +220,25 @@ export function ShareManager({
         }
       }
 
+      const durationMs: Record<string, number> = {
+        "1h": 3_600_000,
+        "24h": 86_400_000,
+        "1w": 604_800_000,
+      };
+      const expiresAt =
+        shareDuration === "none"
+          ? null
+          : shareDuration === "trip"
+            ? selectedTrip
+              ? `${selectedTrip.end_date}T23:59:59Z`
+              : null
+            : new Date(Date.now() + durationMs[shareDuration]).toISOString();
+
       const result = await shareDocument(
         documentId,
         tripId,
         sharedWith,
-        shareUntil ? `${shareUntil}T23:59:59Z` : null,
+        expiresAt,
         wrappedDek,
         dekIv,
         storagePath,
@@ -298,16 +312,18 @@ export function ShareManager({
             ) : (
               <div className="flex max-h-72 flex-col gap-2 overflow-y-auto py-1">
                 <label className="flex items-center justify-between gap-3 rounded-md border border-laiton-clair/60 bg-parchemin/40 px-3 py-2 text-xs text-encre-douce">
-                  <span>
-                    {t("documents.share.until")}{" "}
-                    <span className="text-encre">{t("documents.share.untilHint")}</span>
-                  </span>
-                  <input
-                    type="date"
-                    value={shareUntil}
-                    onChange={(e) => setShareUntil(e.target.value)}
+                  <span>{t("documents.share.until")}</span>
+                  <select
+                    value={shareDuration}
+                    onChange={(e) => setShareDuration(e.target.value as typeof shareDuration)}
                     className="rounded border border-laiton-clair bg-papier px-2 py-1 text-xs text-encre"
-                  />
+                  >
+                    <option value="1h">1 heure</option>
+                    <option value="24h">24 heures</option>
+                    <option value="1w">1 semaine</option>
+                    <option value="trip">Fin du voyage</option>
+                    <option value="none">Sans limite</option>
+                  </select>
                 </label>
                 <button
                   type="button"
