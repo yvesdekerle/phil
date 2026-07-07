@@ -1154,6 +1154,7 @@ export type Database = {
       trip_meals: {
         Row: {
           cook_id: string | null;
+          cook_ids: string[];
           created_at: string;
           created_by: string;
           day: string;
@@ -1165,6 +1166,7 @@ export type Database = {
         };
         Insert: {
           cook_id?: string | null;
+          cook_ids?: string[];
           created_at?: string;
           created_by: string;
           day: string;
@@ -1176,6 +1178,7 @@ export type Database = {
         };
         Update: {
           cook_id?: string | null;
+          cook_ids?: string[];
           created_at?: string;
           created_by?: string;
           day?: string;

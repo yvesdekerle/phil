@@ -20,7 +20,7 @@ export default async function MiamPage({ params }: { params: Promise<{ tripId: s
     await Promise.all([
       supabase
         .from("trip_meals")
-        .select("id, day, slot, title, cook_id, notes, created_by")
+        .select("id, day, slot, title, cook_ids, notes, created_by")
         .eq("trip_id", tripId)
         .order("day", { ascending: true }),
       supabase

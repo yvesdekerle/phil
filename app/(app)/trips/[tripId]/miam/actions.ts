@@ -14,7 +14,6 @@ const mealSchema = z.object({
   day: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   slot: z.enum(MEAL_SLOTS),
   title: z.string().trim().min(1).max(200),
-  cookId: z.union([z.literal(""), z.string().uuid()]).optional(),
   notes: z.string().trim().max(500).optional(),
 });
 
@@ -31,20 +30,24 @@ export async function addMeal(_prev: MiamState, formData: FormData): Promise<Mia
     day: formData.get("day"),
     slot: formData.get("slot"),
     title: formData.get("title"),
-    cookId: formData.get("cookId") ?? "",
     notes: formData.get("notes") ?? "",
   });
   const t = await getT();
   if (!parsed.success) {
     return { status: "error", message: t("miam.invalidInput") };
   }
+  // PHIL-S01 : plusieurs cuisiniers (checkboxes name="cookIds").
+  const cookIds = formData
+    .getAll("cookIds")
+    .map(String)
+    .filter((id) => areUuids(id));
   const { supabase, user } = await requireUser();
   const { error } = await supabase.from("trip_meals").insert({
     trip_id: parsed.data.tripId,
     day: parsed.data.day,
     slot: parsed.data.slot,
     title: parsed.data.title,
-    cook_id: parsed.data.cookId || null,
+    cook_ids: cookIds,
     notes: parsed.data.notes || null,
     created_by: user.id,
   });

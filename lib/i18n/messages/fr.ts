@@ -100,6 +100,7 @@ export const fr = {
     slotAria: "Moment du repas",
     mealPlaceholder: "Ex : cari poulet, barbecue…",
     cookAria: "Qui cuisine ?",
+    cooksLabel: "Aux fourneaux",
     noCook: "Personne assignée",
     you: "Toi",
     notesPlaceholder: "Notes (optionnel) — ingrédients, qui achète…",

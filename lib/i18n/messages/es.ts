@@ -106,6 +106,7 @@ export const es: PartialMessages = {
     slotAria: "Momento de la comida",
     mealPlaceholder: "Ej.: curry de pollo, barbacoa…",
     cookAria: "¿Quién cocina?",
+    cooksLabel: "A los fogones",
     noCook: "Nadie asignado",
     you: "Tú",
     notesPlaceholder: "Notas (opcional) — ingredientes, quién compra…",

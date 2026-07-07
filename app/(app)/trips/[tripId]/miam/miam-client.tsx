@@ -21,7 +21,7 @@ export type Meal = {
   day: string;
   slot: string;
   title: string;
-  cook_id: string | null;
+  cook_ids: string[];
   notes: string | null;
   created_by: string;
 };
@@ -63,8 +63,8 @@ export function MiamClient({
   const [, shopAction] = useActionState<MiamState, FormData>(addShoppingItem, { status: "idle" });
   const [pending, startTransition] = useTransition();
 
-  const nameOf = (userId: string | null) =>
-    (userId && members.find((m) => m.userId === userId)?.name) || t("miam.travelerFallback");
+  const nameOf = (userId: string) =>
+    members.find((m) => m.userId === userId)?.name ?? t("miam.travelerFallback");
   const dayLabel = (day: string) =>
     new Date(`${day}T12:00:00`).toLocaleDateString(locale, {
       weekday: "long",
@@ -211,9 +211,9 @@ export function MiamClient({
                         </span>
                         <span className="min-w-0 flex-1 text-sm">
                           <span className="text-encre">{meal.title}</span>
-                          {meal.cook_id ? (
+                          {meal.cook_ids.length > 0 ? (
                             <span className="ml-1.5 text-xs text-encre-douce">
-                              {t("miam.cookBy")} {nameOf(meal.cook_id)}
+                              {t("miam.cookBy")} {meal.cook_ids.map(nameOf).join(", ")}
                             </span>
                           ) : null}
                           {meal.notes ? (
@@ -272,19 +272,17 @@ export function MiamClient({
                 maxLength={200}
                 className="h-8 min-w-40 flex-1 text-sm"
               />
-              <select
-                name="cookId"
-                defaultValue=""
-                className="h-8 rounded border border-laiton-clair bg-papier px-2 text-sm text-encre-douce"
-                aria-label={t("miam.cookAria")}
-              >
-                <option value="">{t("miam.noCook")}</option>
-                {members.map((m) => (
-                  <option key={m.userId} value={m.userId}>
+            </div>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="mr-1 text-xs text-encre-douce">{t("miam.cooksLabel")}</span>
+              {members.map((m) => (
+                <label key={m.userId} className="cursor-pointer">
+                  <input type="checkbox" name="cookIds" value={m.userId} className="peer sr-only" />
+                  <span className="rounded-full border border-laiton-clair px-2 py-0.5 text-xs text-encre-douce transition-colors peer-checked:border-bordeaux peer-checked:bg-bordeaux peer-checked:text-papier">
                     {m.userId === myId ? t("miam.you") : m.name}
-                  </option>
-                ))}
-              </select>
+                  </span>
+                </label>
+              ))}
             </div>
             <div className="flex items-center gap-2">
               <Input

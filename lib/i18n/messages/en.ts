@@ -105,6 +105,7 @@ export const en: PartialMessages = {
     slotAria: "Meal time",
     mealPlaceholder: "E.g. chicken curry, barbecue…",
     cookAria: "Who cooks?",
+    cooksLabel: "Cooking",
     noCook: "Nobody assigned",
     you: "You",
     notesPlaceholder: "Notes (optional) — ingredients, who buys…",
