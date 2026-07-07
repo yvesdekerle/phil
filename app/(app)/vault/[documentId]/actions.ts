@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { getT } from "@/lib/i18n/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { areUuids } from "@/lib/validation";
 import { logVaultAccess } from "@/lib/vault/audit";
@@ -93,9 +94,12 @@ export async function shareDocument(
   tripId: string,
   sharedWith: string | null = null,
   expiresAt: string | null = null,
-  // PHIL-T01 Phase 3 : DEK ré-emballée pour le destinataire (docs chiffrés).
+  // PHIL-T01 : blob filigrané dédié au destinataire (copie re-chiffrée), sa DEK
+  // ré-emballée pour lui (ECDH) et l'IV du fichier filigrané.
   wrappedDek: string | null = null,
   dekIv: string | null = null,
+  storagePath: string | null = null,
+  encFileIv: string | null = null,
 ): Promise<DocumentActionState> {
   const t = await getT();
   if (expiresAt !== null && Number.isNaN(Date.parse(expiresAt))) {
@@ -122,6 +126,8 @@ export async function shareDocument(
     expires_at: expiresAt,
     wrapped_dek: wrappedDek,
     dek_iv: dekIv,
+    storage_path: storagePath,
+    enc_file_iv: encFileIv,
   });
 
   if (error) {
@@ -163,6 +169,14 @@ export async function unshareDocument(
     redirect("/login");
   }
 
+  // Récupère le blob filigrané dédié (le cas échéant) pour le purger après retrait.
+  const { data: shareRow } = await supabase
+    .from("document_shares")
+    .select("storage_path")
+    .eq("id", shareId)
+    .eq("document_id", documentId)
+    .maybeSingle();
+
   const { error, count } = await supabase
     .from("document_shares")
     .delete({ count: "exact" })
@@ -171,6 +185,11 @@ export async function unshareDocument(
 
   if (error || count === 0) {
     return { status: "error", message: t("documents.msg.unshareFailed") };
+  }
+
+  if (shareRow?.storage_path) {
+    const admin = createAdminClient();
+    await admin.storage.from("documents").remove([shareRow.storage_path]);
   }
 
   await logVaultAccess({

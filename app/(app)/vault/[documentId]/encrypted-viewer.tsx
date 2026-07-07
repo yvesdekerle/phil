@@ -16,42 +16,37 @@ import {
 } from "@/lib/crypto/vault-crypto";
 
 /**
- * Viewer d'un document chiffré E2EE (PHIL-T01). Le serveur n'a servi que le
- * CHIFFRÉ : on déchiffre EN MÉMOIRE puis on affiche via object URL.
+ * Viewer d'un document chiffré E2EE (PHIL-T01). Le serveur ne sert que du CHIFFRÉ :
+ * on déchiffre EN MÉMOIRE et on affiche le fichier tel quel (le clair ne quitte
+ * jamais l'onglet).
  *
  * Deux modes :
- *  - propriétaire : DEK déballée avec sa clé maîtresse, document affiché brut ;
- *  - destinataire (Phase 3) : DEK déballée via ECDH (sa privée + la publique du
- *    propriétaire), et le filigrane à SON email est INCRUSTÉ dans le document
- *    (il survit au téléchargement). Repli : brut + filigrane CSS si l'incrustation
- *    échoue (PDF récalcitrant).
+ *  - propriétaire : `sourceUrl` = le blob du document, DEK déballée avec la maîtresse ;
+ *  - destinataire : `sourceUrl` = le blob DÉDIÉ du partage (déjà filigrané à son
+ *    identité), DEK déballée via ECDH (sa privée + la publique du propriétaire).
+ * Aucun filigrane côté client : pour un destinataire il est déjà incrusté au partage.
  */
 export function EncryptedDocumentViewer({
-  docId,
+  sourceUrl,
   mimeType,
   fileName,
   fileIv,
   wrappedDek,
   dekIv,
-  viewerLabel,
   mode,
   ownerPublicKeyJwk,
 }: {
-  docId: string;
+  sourceUrl: string;
   mimeType: string;
   fileName: string;
   fileIv: string;
   wrappedDek: string;
   dekIv: string;
-  /** Email du lecteur, pour le filigrane (mode destinataire). */
-  viewerLabel: string;
   mode: "owner" | "recipient";
   /** Clé publique du propriétaire (mode destinataire), pour dériver la clé partagée. */
   ownerPublicKeyJwk: JsonWebKey | null;
 }) {
   const [url, setUrl] = useState<string | null>(null);
-  const [resultMime, setResultMime] = useState(mimeType);
-  const [overlay, setOverlay] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [needsUnlock, setNeedsUnlock] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -61,13 +56,12 @@ export function EncryptedDocumentViewer({
     setNeedsUnlock(false);
     setLoading(true);
     try {
-      const res = await fetch(`/api/documents/${docId}/view`);
+      const res = await fetch(sourceUrl);
       if (!res.ok) {
         throw new Error("Fichier indisponible");
       }
       const ciphertext = new Uint8Array(await res.arrayBuffer());
 
-      // Déballage de la DEK selon le mode.
       let dek: CryptoKey;
       if (mode === "recipient" && ownerPublicKeyJwk) {
         const myPriv = await getCoffrePrivateKey();
@@ -79,45 +73,17 @@ export function EncryptedDocumentViewer({
         dek = await unwrapKey(master, fromBase64(wrappedDek), fromBase64(dekIv));
       }
       const plain = await decryptBytes(dek, ciphertext, fromBase64(fileIv));
-
-      // Filigrane : INCRUSTÉ dans le document pour un destinataire (survit au
-      // téléchargement). Repli sur brut + overlay CSS si l'incrustation échoue.
-      let displayBytes = plain;
-      let displayMime = mimeType;
-      let cssOverlay = false;
-      if (mode === "recipient") {
-        try {
-          const { canWatermark, watermarkImage, watermarkPdf } = await import(
-            "@/lib/vault/watermark"
-          );
-          if (canWatermark(mimeType)) {
-            displayBytes =
-              mimeType === "application/pdf"
-                ? await watermarkPdf(plain, viewerLabel)
-                : await watermarkImage(plain, mimeType, viewerLabel);
-            displayMime = "application/pdf";
-          } else {
-            cssOverlay = true;
-          }
-        } catch {
-          displayBytes = plain;
-          displayMime = mimeType;
-          cssOverlay = true;
-        }
-      }
-      setResultMime(displayMime);
-      setOverlay(cssOverlay);
-      setUrl(URL.createObjectURL(new Blob([displayBytes as BlobPart], { type: displayMime })));
+      setUrl(URL.createObjectURL(new Blob([plain as BlobPart], { type: mimeType })));
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erreur de déchiffrement");
       setNeedsUnlock(true);
     } finally {
       setLoading(false);
     }
-  }, [docId, mimeType, fileIv, wrappedDek, dekIv, viewerLabel, mode, ownerPublicKeyJwk]);
+  }, [sourceUrl, mimeType, fileIv, wrappedDek, dekIv, mode, ownerPublicKeyJwk]);
 
-  // Session déjà déverrouillée → affichage direct. Garde-fou : une seule
-  // tentative auto (évite le double-rendu React en dev).
+  // Session déjà déverrouillée → affichage direct. Garde-fou : une seule tentative
+  // auto (évite le double-rendu React en dev).
   const autoStarted = useRef(false);
   useEffect(() => {
     if (autoStarted.current) {
@@ -132,40 +98,22 @@ export function EncryptedDocumentViewer({
   }, [decrypt]);
 
   if (url) {
-    const content =
-      resultMime === "application/pdf" ? (
-        <iframe src={url} title={fileName} className="h-[70vh] w-full" />
-      ) : resultMime.startsWith("image/") ? (
+    if (mimeType === "application/pdf") {
+      return <iframe src={url} title={fileName} className="h-[70vh] w-full" />;
+    }
+    if (mimeType.startsWith("image/")) {
+      return (
         // biome-ignore lint/performance/noImgElement: object URL déchiffrée en mémoire, pas un endpoint optimisable
         <img src={url} alt={fileName} className="mx-auto max-h-[70vh] w-auto" />
-      ) : (
-        <div className="px-6 py-12 text-center text-sm text-encre-douce">
-          <a href={url} download={fileName} className="text-bordeaux underline underline-offset-4">
-            Télécharger le fichier déchiffré
-          </a>
-        </div>
-      );
-
-    if (overlay) {
-      const label = viewerLabel.replace(/[<>&"]/g, "");
-      const svg = encodeURIComponent(
-        `<svg xmlns="http://www.w3.org/2000/svg" width="360" height="200"><text x="8" y="120" fill="rgba(110,31,46,0.15)" font-family="sans-serif" font-size="13" transform="rotate(-30 180 110)">Phil · ${label}</text></svg>`,
-      );
-      return (
-        <div className="relative">
-          {content}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 z-10 select-none"
-            style={{
-              backgroundImage: `url("data:image/svg+xml,${svg}")`,
-              backgroundRepeat: "repeat",
-            }}
-          />
-        </div>
       );
     }
-    return content;
+    return (
+      <div className="px-6 py-12 text-center text-sm text-encre-douce">
+        <a href={url} download={fileName} className="text-bordeaux underline underline-offset-4">
+          Télécharger le fichier déchiffré
+        </a>
+      </div>
+    );
   }
 
   return (

@@ -14,8 +14,11 @@ import {
 } from "@/components/ui/dialog";
 import { getCoffreMaster, getCoffrePrivateKey } from "@/lib/crypto/coffre-session";
 import {
+  decryptBytes,
   deriveSharedWrapKey,
+  encryptBytes,
   fromBase64,
+  generateDek,
   importEcdhPublic,
   toBase64,
   unwrapKey,
@@ -47,13 +50,19 @@ export function ShareManager({
   encrypted,
   encWrappedDek,
   encDekIv,
+  encFileIv,
+  mimeType,
+  ownerId,
 }: {
   documentId: string;
   shares: Share[];
-  /** Document chiffré E2EE : le partage ré-emballe la DEK pour le destinataire. */
+  /** Document chiffré E2EE : le partage duplique une copie filigranée pour le destinataire. */
   encrypted: boolean;
   encWrappedDek: string;
   encDekIv: string;
+  encFileIv: string;
+  mimeType: string;
+  ownerId: string;
 }) {
   const t = useT();
   const il = intlLocale(useLocale());
@@ -115,9 +124,12 @@ export function ShareManager({
     startTransition(async () => {
       let wrappedDek: string | null = null;
       let dekIv: string | null = null;
+      let storagePath: string | null = null;
+      let sharedFileIv: string | null = null;
 
-      // PHIL-T01 Phase 3 : document chiffré → ré-emballer la DEK pour le
-      // destinataire (ECDH : sa clé publique + ma clé privée). Individuel requis.
+      // PHIL-T01 : document chiffré → on DUPLIQUE une copie filigranée à l'identité
+      // du destinataire, re-chiffrée pour lui. Il ne reçoit jamais la version propre
+      // → filigrane infalsifiable. Partage individuel requis.
       if (encrypted) {
         if (!sharedWith) {
           setState({
@@ -127,6 +139,8 @@ export function ShareManager({
           return;
         }
         try {
+          const recipientName =
+            members?.find((m) => m.userId === sharedWith)?.name ?? "Destinataire";
           const [master, myPriv, pubJwk] = await Promise.all([
             getCoffreMaster(),
             getCoffrePrivateKey(),
@@ -139,12 +153,50 @@ export function ShareManager({
             });
             return;
           }
+
+          // 1. Récupérer + déchiffrer l'original.
+          const res = await fetch(`/api/documents/${documentId}/view`);
+          if (!res.ok) {
+            throw new Error("Document original indisponible");
+          }
+          const origCipher = new Uint8Array(await res.arrayBuffer());
+          const origDek = await unwrapKey(master, fromBase64(encWrappedDek), fromBase64(encDekIv));
+          const plain = await decryptBytes(origDek, origCipher, fromBase64(encFileIv));
+
+          // 2. Incruster le filigrane à l'identité du destinataire.
+          const { canWatermark, watermarkImage, watermarkPdf } = await import(
+            "@/lib/vault/watermark"
+          );
+          const stamped = canWatermark(mimeType)
+            ? mimeType === "application/pdf"
+              ? await watermarkPdf(plain, recipientName)
+              : await watermarkImage(plain, mimeType, recipientName)
+            : plain;
+
+          // 3. Re-chiffrer cette copie avec une NOUVELLE clé.
+          const newDek = await generateDek();
+          const sealed = await encryptBytes(newDek, stamped);
+
+          // 4. Uploader le blob dédié (chiffré) dans le dossier du propriétaire.
+          const supabase = createClient();
+          const path = `${ownerId}/shares/${crypto.randomUUID()}.pdf`;
+          const { error: upErr } = await supabase.storage
+            .from("documents")
+            .upload(path, new Blob([sealed.data as BlobPart], { type: "application/pdf" }), {
+              contentType: "application/pdf",
+            });
+          if (upErr) {
+            throw new Error("Envoi de la copie filigranée impossible");
+          }
+
+          // 5. Emballer la clé du blob pour le destinataire (ECDH).
           const recipientPub = await importEcdhPublic(pubJwk as JsonWebKey);
           const sharedKey = await deriveSharedWrapKey(myPriv, recipientPub);
-          const dek = await unwrapKey(master, fromBase64(encWrappedDek), fromBase64(encDekIv));
-          const reWrapped = await wrapKey(sharedKey, dek);
-          wrappedDek = toBase64(reWrapped.data);
-          dekIv = toBase64(reWrapped.iv);
+          const wrapped = await wrapKey(sharedKey, newDek);
+          wrappedDek = toBase64(wrapped.data);
+          dekIv = toBase64(wrapped.iv);
+          storagePath = path;
+          sharedFileIv = toBase64(sealed.iv);
         } catch (e) {
           setState({
             status: "error",
@@ -161,6 +213,8 @@ export function ShareManager({
         shareUntil ? `${shareUntil}T23:59:59Z` : null,
         wrappedDek,
         dekIv,
+        storagePath,
+        sharedFileIv,
       );
       setState(result);
       if (result.status === "success") {

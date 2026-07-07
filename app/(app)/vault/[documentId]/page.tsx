@@ -30,7 +30,7 @@ export default async function VaultDocumentPage({
     supabase
       .from("document_shares")
       .select(
-        "id, trip_id, shared_with, expires_at, wrapped_dek, dek_iv, trips(name, end_date), profiles!document_shares_shared_with_fkey(display_name)",
+        "id, trip_id, shared_with, expires_at, wrapped_dek, dek_iv, enc_file_iv, storage_path, trips(name, end_date), profiles!document_shares_shared_with_fkey(display_name)",
       )
       .eq("document_id", documentId),
   ]);
@@ -55,24 +55,29 @@ export default async function VaultDocumentPage({
   const isPdf = doc.mime_type === "application/pdf";
   const metadata = (doc.metadata ?? {}) as Record<string, string>;
 
-  // Email du lecteur pour le filigrane (apposé uniquement côté destinataire).
-  const viewerLabel = user.email ?? user.id;
-
-  // PHIL-T01 Phase 3 : le lecteur est le propriétaire, ou un destinataire d'un
-  // partage E2EE (DEK ré-emballée pour lui + clé publique du propriétaire).
+  // PHIL-T01 : le lecteur est le propriétaire, ou un destinataire d'un partage
+  // E2EE — il lit alors le BLOB DÉDIÉ (déjà filigrané) via sa propre clé.
   const isOwner = doc.owner_id === user.id;
-  let recipientDek: { wrappedDek: string; dekIv: string } | null = null;
+  let recipient: { sourceUrl: string; wrappedDek: string; dekIv: string; fileIv: string } | null =
+    null;
   let ownerPublicKeyJwk: JsonWebKey | null = null;
   if (doc.encrypted && !isOwner) {
-    const myShare = (shareRows ?? []).find((s) => s.shared_with === user.id && s.wrapped_dek);
-    if (myShare?.wrapped_dek && myShare.dek_iv) {
+    const myShare = (shareRows ?? []).find(
+      (s) => s.shared_with === user.id && s.wrapped_dek && s.storage_path,
+    );
+    if (myShare?.wrapped_dek && myShare.dek_iv && myShare.enc_file_iv) {
       const { data: ownerKey } = await supabase
         .from("user_crypto_keys")
         .select("public_key")
         .eq("user_id", doc.owner_id)
         .maybeSingle();
       if (ownerKey) {
-        recipientDek = { wrappedDek: myShare.wrapped_dek, dekIv: myShare.dek_iv };
+        recipient = {
+          sourceUrl: `/api/document-shares/${myShare.id}/view`,
+          wrappedDek: myShare.wrapped_dek,
+          dekIv: myShare.dek_iv,
+          fileIv: myShare.enc_file_iv,
+        };
         ownerPublicKeyJwk = ownerKey.public_key as JsonWebKey;
       }
     }
@@ -117,6 +122,9 @@ export default async function VaultDocumentPage({
             encrypted={doc.encrypted}
             encWrappedDek={doc.enc_wrapped_dek ?? ""}
             encDekIv={doc.enc_dek_iv ?? ""}
+            encFileIv={doc.enc_file_iv ?? ""}
+            mimeType={doc.mime_type}
+            ownerId={user.id}
           />
           <DocumentActions
             documentId={doc.id}
@@ -131,14 +139,13 @@ export default async function VaultDocumentPage({
       <div className="overflow-hidden rounded-lg border border-laiton-clair bg-papier">
         {doc.encrypted ? (
           <EncryptedDocumentViewer
-            docId={doc.id}
-            mimeType={doc.mime_type}
+            sourceUrl={recipient ? recipient.sourceUrl : `/api/documents/${doc.id}/view`}
+            mimeType={recipient ? "application/pdf" : doc.mime_type}
             fileName={doc.file_name}
-            fileIv={doc.enc_file_iv ?? ""}
-            wrappedDek={recipientDek ? recipientDek.wrappedDek : (doc.enc_wrapped_dek ?? "")}
-            dekIv={recipientDek ? recipientDek.dekIv : (doc.enc_dek_iv ?? "")}
-            viewerLabel={viewerLabel}
-            mode={recipientDek ? "recipient" : "owner"}
+            fileIv={recipient ? recipient.fileIv : (doc.enc_file_iv ?? "")}
+            wrappedDek={recipient ? recipient.wrappedDek : (doc.enc_wrapped_dek ?? "")}
+            dekIv={recipient ? recipient.dekIv : (doc.enc_dek_iv ?? "")}
+            mode={recipient ? "recipient" : "owner"}
             ownerPublicKeyJwk={ownerPublicKeyJwk}
           />
         ) : isPdf ? (
