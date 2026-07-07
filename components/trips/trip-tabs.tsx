@@ -8,11 +8,11 @@ import { cn } from "@/lib/utils";
 const TABS = [
   { segment: "", key: "calendar" },
   { segment: "ideas", key: "ideas" },
+  { segment: "miam", key: "miam" },
   { segment: "polls", key: "polls" },
   { segment: "documents", key: "documents" },
   { segment: "lodging", key: "lodging" },
   { segment: "checklist", key: "checklist" },
-  { segment: "miam", key: "miam" },
   { segment: "photos", key: "photos" },
   { segment: "budget", key: "budget" },
   { segment: "participants", key: "participants" },
