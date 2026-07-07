@@ -14,7 +14,6 @@ import {
   importEcdhPublic,
   unwrapKey,
 } from "@/lib/crypto/vault-crypto";
-import { canWatermark, watermarkImage, watermarkPdf } from "@/lib/vault/watermark";
 
 /**
  * Viewer d'un document chiffré E2EE (PHIL-T01). Le serveur n'a servi que le
@@ -81,6 +80,8 @@ export function EncryptedDocumentViewer({
 
       // Filigrane côté client : traçabilité des captures. Comme côté serveur,
       // images et PDF ressortent en PDF filigrané ; HEIC non filigranable.
+      // pdf-lib est chargé à la volée (allège le bundle initial de la page).
+      const { canWatermark, watermarkImage, watermarkPdf } = await import("@/lib/vault/watermark");
       let bytes = plain;
       let outMime = mimeType;
       if (canWatermark(mimeType)) {
