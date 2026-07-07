@@ -922,8 +922,11 @@ Un seul projet Supabase sert dev/preview/prod (contient les vrais documents d'id
 ### [ ] PHIL-R12 — 🟠 Rate limiting sur les endpoints coûteux *(infra Upstash)*
 Brancher `rateLimitOk` sur `geo/search`, `import-reservation` (Gemini), invitations. Le code est inerte sans Upstash → provisionner Upstash puis câbler.
 
-### [ ] PHIL-R13 — 🟠 Tests des zones critiques restantes
-`vault-session` (HMAC — exporter `sign/verify` pour testabilité) et intégration `deleteAccount` sur base jetable. (Filigrane fait en R14.)
+### [x] PHIL-R13 — 🟠 Tests des zones critiques restantes *(fait le 2026-07-08)*
+Logique pure extraite pour testabilité (sans `next/headers`/DB) puis testée sous Vitest :
+- **Session coffre** : `lib/webauthn/vault-session-token.ts` (dérivation clé, `signPayload`/`buildSessionToken`/`parseSessionToken`) — `vault-session.ts` n'est plus qu'un habillage cookie. Tests `tests/unit/vault-session.test.ts` (12) : round-trip, refus signature/clé/payload/échéance falsifiés, garde temps constant, expiration, mauvais user.
+- **Suppression de compte (soldes)** : `lib/account/reassign.ts` (`pickTripSuccessor` = reprise OWNER, `beneficiaryCollisions` = PK bénéficiaires) extraits de `deletion.ts`. Tests `tests/unit/account-reassign.test.ts` (10). Ajoutés à la couverture vitest. (Filigrane fait en R14.)
+> Reste (action Yves) : le test d'**intégration** `deleteAccount` bout-en-bout sur base jetable (code monétaire, non exécutable ici sans 2ᵉ projet Supabase — cf. R11) ; la décision de promotion et les collisions, elles, sont désormais couvertes.
 
 ### [~] PHIL-R15 — 🟡 messages FR en dur → `t()` *(en cours le 2026-07-07)*
 Fait : `events/[eventId]/actions.ts` (11 messages + 2 `console.log` d'audit → `logger.info`, ferme aussi le PII B12 de ce fichier), `vault/[documentId]/actions.ts` (12 messages → `documents.msg.*`), message partagé « capitaine ou éditeur » → clé unique `events.msg.createDenied` (events/new ×3). NB : R15 s'est révélé plus large que l'estimation d'audit (~30 chaînes, pas 20). Reste : `import/actions.ts` (2, dont le createDenied — ajouter `getT`), `journal-actions.ts` (2, ajouter `getT`), `note-actions.ts` (2), `budget/actions.ts` (« Date invalide. » — schéma au niveau module, à déplacer dans la fonction), `vault/new/actions.ts` (3, ajouter `getT`).

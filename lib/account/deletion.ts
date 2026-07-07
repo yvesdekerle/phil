@@ -3,6 +3,7 @@
 import "server-only";
 import { logger } from "@/lib/observability/logger";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { beneficiaryCollisions, pickTripSuccessor } from "./reassign";
 
 type Admin = ReturnType<typeof createAdminClient>;
 
@@ -98,15 +99,16 @@ async function reassignGroupDataToGhost(
     admin.from("expense_beneficiaries").select("expense_id").eq("user_id", userId),
     admin.from("expense_beneficiaries").select("expense_id").eq("user_id", ghostId),
   ]);
-  const ghostExpenses = new Set((ghosts ?? []).map((r) => r.expense_id));
-  for (const { expense_id } of mine ?? []) {
-    if (ghostExpenses.has(expense_id)) {
-      await admin
-        .from("expense_beneficiaries")
-        .delete()
-        .eq("expense_id", expense_id)
-        .eq("user_id", userId);
-    }
+  const collisions = beneficiaryCollisions(
+    (mine ?? []).map((r) => r.expense_id),
+    (ghosts ?? []).map((r) => r.expense_id),
+  );
+  for (const expense_id of collisions) {
+    await admin
+      .from("expense_beneficiaries")
+      .delete()
+      .eq("expense_id", expense_id)
+      .eq("user_id", userId);
   }
   log(
     "expense_beneficiaries",
@@ -171,14 +173,13 @@ export async function deleteAccount(userId: string): Promise<void> {
       continue;
     }
 
-    const hasOtherOwner = others.some((p) => p.role === "OWNER");
-    if (!hasOtherOwner) {
-      const successor = others.find((p) => p.role === "EDITOR") ?? others[0];
+    const successorId = pickTripSuccessor(others);
+    if (successorId) {
       await admin
         .from("trip_participants")
         .update({ role: "OWNER" })
         .eq("trip_id", trip_id)
-        .eq("user_id", successor.user_id);
+        .eq("user_id", successorId);
     }
   }
 
