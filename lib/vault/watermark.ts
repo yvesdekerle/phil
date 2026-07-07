@@ -9,13 +9,13 @@ import { degrees, PDFDocument, rgb, StandardFonts } from "pdf-lib";
 const WATERMARK_COLOR = rgb(0.43, 0.12, 0.18); // bordeaux Phil
 const WATERMARK_OPACITY = 0.18;
 
-function watermarkLines(viewerEmail: string): string {
+function watermarkLines(viewer: string): string {
   const timestamp = new Intl.DateTimeFormat("fr-FR", {
     dateStyle: "short",
     timeStyle: "short",
     timeZone: "UTC",
   }).format(new Date());
-  return `${viewerEmail} — ${timestamp} UTC — Confidentiel - Ne pas diffuser`;
+  return `Phil · vu par ${viewer} · ${timestamp} UTC`;
 }
 
 async function applyWatermark(pdf: PDFDocument, text: string): Promise<void> {
@@ -45,9 +45,9 @@ async function applyWatermark(pdf: PDFDocument, text: string): Promise<void> {
 }
 
 /** Applique le filigrane à un PDF existant. */
-export async function watermarkPdf(pdfBytes: Uint8Array, viewerEmail: string): Promise<Uint8Array> {
+export async function watermarkPdf(pdfBytes: Uint8Array, viewer: string): Promise<Uint8Array> {
   const pdf = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
-  await applyWatermark(pdf, watermarkLines(viewerEmail));
+  await applyWatermark(pdf, watermarkLines(viewer));
   return pdf.save();
 }
 
@@ -55,14 +55,14 @@ export async function watermarkPdf(pdfBytes: Uint8Array, viewerEmail: string): P
 export async function watermarkImage(
   imageBytes: Uint8Array,
   mimeType: string,
-  viewerEmail: string,
+  viewer: string,
 ): Promise<Uint8Array> {
   const pdf = await PDFDocument.create();
   const image =
     mimeType === "image/png" ? await pdf.embedPng(imageBytes) : await pdf.embedJpg(imageBytes);
   const page = pdf.addPage([image.width, image.height]);
   page.drawImage(image, { x: 0, y: 0, width: image.width, height: image.height });
-  await applyWatermark(pdf, watermarkLines(viewerEmail));
+  await applyWatermark(pdf, watermarkLines(viewer));
   return pdf.save();
 }
 

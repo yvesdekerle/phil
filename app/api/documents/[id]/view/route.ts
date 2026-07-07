@@ -73,11 +73,18 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     // E03b : filigrane dynamique (E06). HEIC non pris en charge : servi tel quel.
     if (canWatermark(doc.mime_type)) {
       const bytes = new Uint8Array(await blob.arrayBuffer());
-      const viewerEmail = user.email ?? "voyageur@phil";
+      // Filigrane « Phil · vu par Prénom Nom · id » — traçabilité des captures.
+      const { data: viewerProfile } = await supabase
+        .from("profiles")
+        .select("display_name")
+        .eq("id", user.id)
+        .single();
+      const viewerName = viewerProfile?.display_name ?? user.email ?? "Voyageur";
+      const viewer = `${viewerName} · ${user.id.slice(0, 8)}`;
       const marked =
         doc.mime_type === "application/pdf"
-          ? await watermarkPdf(bytes, viewerEmail)
-          : await watermarkImage(bytes, doc.mime_type, viewerEmail);
+          ? await watermarkPdf(bytes, viewer)
+          : await watermarkImage(bytes, doc.mime_type, viewer);
       body = Buffer.from(marked);
       contentType = "application/pdf";
       if (!fileName.toLowerCase().endsWith(".pdf")) {
