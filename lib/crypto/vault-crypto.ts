@@ -118,6 +118,24 @@ export function importAesKey(raw: Uint8Array, usages: KeyUsage[]): Promise<Crypt
   return subtle.importKey("raw", bs(raw), AES, true, usages);
 }
 
+/**
+ * Dérive une clé d'emballage (AES-GCM) depuis un code de secours, via PBKDF2.
+ * Sert à emballer la maîtresse pour la récupération sans biométrie (perte de
+ * tous les appareils).
+ */
+export async function deriveKeyFromCode(code: string, salt: Uint8Array): Promise<CryptoKey> {
+  const base = await subtle.importKey("raw", bs(new TextEncoder().encode(code)), "PBKDF2", false, [
+    "deriveKey",
+  ]);
+  return subtle.deriveKey(
+    { name: "PBKDF2", salt: bs(salt), iterations: 200_000, hash: "SHA-256" },
+    base,
+    AES,
+    true,
+    ["wrapKey", "unwrapKey"],
+  );
+}
+
 export function exportKeyJwk(key: CryptoKey): Promise<JsonWebKey> {
   return subtle.exportKey("jwk", key) as Promise<JsonWebKey>;
 }

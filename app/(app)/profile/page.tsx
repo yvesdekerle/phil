@@ -9,6 +9,7 @@ import { getOwnProfile } from "@/lib/supabase/profiles";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "./actions";
 import { CoffreActivation } from "./coffre-activation";
+import { CoffreRecovery } from "./coffre-recovery";
 import { DeleteAccountSection } from "./delete-account";
 import { NotificationPreferencesForm } from "./notification-preferences";
 import { ProfileForm } from "./profile-form";
@@ -34,6 +35,12 @@ export default async function ProfilePage() {
     .from("user_crypto_keys")
     .select("user_id")
     .eq("user_id", user.id)
+    .maybeSingle();
+  const { data: recoveryWrap } = await supabase
+    .from("user_master_key_wraps")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("method", "RECOVERY")
     .maybeSingle();
 
   return (
@@ -110,6 +117,11 @@ export default async function ProfilePage() {
               userName={displayName || user.email || "Voyageur"}
               activated={Boolean(coffreKey)}
             />
+            {coffreKey ? (
+              <div className="mt-4 border-t border-laiton-clair/50 pt-4">
+                <CoffreRecovery hasRecovery={Boolean(recoveryWrap)} />
+              </div>
+            ) : null}
           </CardContent>
         </Card>
 

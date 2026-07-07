@@ -149,3 +149,40 @@ export async function getUserPublicKey(userId: string): Promise<Json | null> {
     .maybeSingle();
   return data?.public_key ?? null;
 }
+
+/** Stocke l'enveloppe de récupération (code de secours) — remplace l'ancienne. */
+export async function storeRecoveryWrap(input: unknown): Promise<StoreResult> {
+  const schema = z.object({
+    wrappedKey: z.string().min(1),
+    wrapIv: z.string().min(1),
+    salt: z.string().min(1),
+  });
+  const parsed = schema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: "invalid" };
+  }
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { ok: false, error: "unauthenticated" };
+  }
+  const { error } = await supabase.from("user_master_key_wraps").upsert(
+    {
+      user_id: user.id,
+      label: "recovery",
+      method: "RECOVERY",
+      wrapped_key: parsed.data.wrappedKey,
+      wrap_iv: parsed.data.wrapIv,
+      prf_salt: parsed.data.salt,
+      credential_id: null,
+    },
+    { onConflict: "user_id,label" },
+  );
+  if (error) {
+    return { ok: false, error: error.message };
+  }
+  revalidatePath("/profile");
+  return { ok: true };
+}

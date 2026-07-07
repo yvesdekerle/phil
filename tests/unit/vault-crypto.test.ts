@@ -131,6 +131,26 @@ describe("vault-crypto — sérialisation (stockage)", () => {
     ).resolves.toBeDefined();
   });
 
+  it("code de secours (PBKDF2) : même code + sel → déballe la maîtresse", async () => {
+    const master = await vc.generateMasterKey();
+    const salt = globalThis.crypto.getRandomValues(new Uint8Array(16));
+    const kek = await vc.deriveKeyFromCode("ABCD-2345-EFGH-6789", salt);
+    const { data, iv } = await vc.wrapKey(kek, master);
+    const kek2 = await vc.deriveKeyFromCode("ABCD-2345-EFGH-6789", salt);
+    await expect(
+      vc.unwrapKey(kek2, data, iv, ["wrapKey", "unwrapKey", "encrypt", "decrypt"]),
+    ).resolves.toBeDefined();
+  });
+
+  it("mauvais code de secours → échec", async () => {
+    const master = await vc.generateMasterKey();
+    const salt = globalThis.crypto.getRandomValues(new Uint8Array(16));
+    const { data, iv } = await vc.wrapKey(await vc.deriveKeyFromCode("BON-CODE", salt), master);
+    await expect(
+      vc.unwrapKey(await vc.deriveKeyFromCode("MAUVAIS-CODE", salt), data, iv),
+    ).rejects.toThrow();
+  });
+
   it("secret brut (façon PRF) importable comme clé d'emballage de la maîtresse", async () => {
     const prfSecret = globalThis.crypto.getRandomValues(new Uint8Array(32));
     const master = await vc.generateMasterKey();

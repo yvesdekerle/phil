@@ -72,3 +72,37 @@ export async function unlockMaster(wrap: MasterWrap): Promise<CryptoKey> {
     ["wrapKey", "unwrapKey", "encrypt", "decrypt"],
   );
 }
+
+// --- Code de secours (Phase 4) : récupération si tous les appareils sont perdus ---
+
+// Alphabet sans caractères ambigus (I, L, O, 0, 1).
+const RECOVERY_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+const RECOVERY_GROUPS = 4;
+const RECOVERY_GROUP_LEN = 4;
+
+/** Code de secours lisible : 4 groupes de 4 (ex. « ABCD-2345-EFGH-6789 »). */
+export function generateRecoveryCode(): string {
+  const bytes = crypto.getRandomValues(new Uint8Array(RECOVERY_GROUPS * RECOVERY_GROUP_LEN));
+  const chars = Array.from(bytes, (b) => RECOVERY_ALPHABET[b % RECOVERY_ALPHABET.length]);
+  const groups: string[] = [];
+  for (let i = 0; i < RECOVERY_GROUPS; i++) {
+    groups.push(chars.slice(i * RECOVERY_GROUP_LEN, (i + 1) * RECOVERY_GROUP_LEN).join(""));
+  }
+  return groups.join("-");
+}
+
+export type RecoveryWrap = { code: string; wrappedKey: string; wrapIv: string; salt: string };
+
+/** Emballe la maîtresse avec une clé dérivée d'un nouveau code de secours. */
+export async function createRecoveryWrap(master: CryptoKey): Promise<RecoveryWrap> {
+  const code = generateRecoveryCode();
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const kek = await vc.deriveKeyFromCode(code, salt);
+  const wrapped = await vc.wrapKey(kek, master);
+  return {
+    code,
+    wrappedKey: vc.toBase64(wrapped.data),
+    wrapIv: vc.toBase64(wrapped.iv),
+    salt: vc.toBase64(salt),
+  };
+}
