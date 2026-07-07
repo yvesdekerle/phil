@@ -984,7 +984,7 @@ Le seed démo (`scripts/seed-demo-maurice.ts`) doit porter des **photos d'exempl
 
 ### [ ] PHIL-T01 — Coffre E2EE (biométrie sans mot de passe) *(épopée — plan : `docs/E2EE-COFFRE.md`)*
 Chiffrement de bout en bout du coffre : le serveur ne voit jamais le contenu ni les clés. Déverrouillage WebAuthn PRF (Face ID/empreinte), **sans mot de passe**. Multi-appareils par QR, code de secours optionnel, partage à une personne avec durée limitée (1h défaut), filigrane côté client. Design complet et arbitrages dans `docs/E2EE-COFFRE.md`. À construire par phases vérifiables :
-- [ ] **Phase 0** — fondations clés (`lib/crypto/`, PRF, migrations `user_crypto_keys` + `user_master_key_wraps`, activation à l'onboarding).
+- [~] **Phase 0** — fondations clés livrées (`lib/crypto/` + 9 tests, PRF, migration `vault_crypto_keys` appliquée, écran d'activation dans le profil). **À valider sur appareil réel** : activation Face ID + support PRF. Onboarding auto à câbler ensuite.
 - [ ] **Phase 1** — chiffrement client des documents du coffre (upload + viewer client).
 - [ ] **Phase 2** — filigrane côté client + verrou biométrique sur tous les documents.
 - [ ] **Phase 3** — partage E2EE (ré-emballage de clé) + expiration 1h.

@@ -8,6 +8,7 @@ import { parsePreferences } from "@/lib/notifications/preferences";
 import { getOwnProfile } from "@/lib/supabase/profiles";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "./actions";
+import { CoffreActivation } from "./coffre-activation";
 import { DeleteAccountSection } from "./delete-account";
 import { NotificationPreferencesForm } from "./notification-preferences";
 import { ProfileForm } from "./profile-form";
@@ -27,6 +28,13 @@ export default async function ProfilePage() {
   const profile = await getOwnProfile(supabase);
   const displayName = profile?.display_name ?? "";
   const avatarUrl = profile?.avatar_url ?? undefined;
+
+  // PHIL-T01 Phase 0 : le coffre chiffré est-il déjà activé (clés présentes) ?
+  const { data: coffreKey } = await supabase
+    .from("user_crypto_keys")
+    .select("user_id")
+    .eq("user_id", user.id)
+    .maybeSingle();
 
   return (
     <main className="flex flex-1 flex-col items-center px-4 py-12">
@@ -85,6 +93,23 @@ export default async function ProfilePage() {
             <div className="mt-4 border-t border-laiton-clair/50 pt-4">
               <PushToggle />
             </div>
+          </CardContent>
+        </Card>
+
+        <Card className="mt-6">
+          <CardHeader>
+            <p className="text-sm font-medium text-encre">Coffre chiffré</p>
+          </CardHeader>
+          <CardContent>
+            <p className="mb-3 text-sm text-encre-douce">
+              Chiffre tes documents d'identité de bout en bout : le serveur ne peut jamais les lire.
+              Déverrouillage par Face ID / empreinte sur cet appareil.
+            </p>
+            <CoffreActivation
+              userId={user.id}
+              userName={displayName || user.email || "Voyageur"}
+              activated={Boolean(coffreKey)}
+            />
           </CardContent>
         </Card>
 
