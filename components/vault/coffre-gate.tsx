@@ -1,28 +1,67 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useT } from "@/components/i18n/provider";
+import { Button } from "@/components/ui/button";
 import { getCoffreMaster, isCoffreUnlocked } from "@/lib/crypto/coffre-session";
 
 /**
- * Entrée du coffre E2EE (PHIL-T01). Plus d'écran de verrouillage : le contenu
- * s'affiche directement et la clé maîtresse est déverrouillée (biométrie) EN
- * ARRIÈRE-PLAN à la première entrée de la session — le prompt système apparaît,
- * puis les documents chiffrés s'ouvrent sans redemander.
- *
- * La clé reste en mémoire pour la session (onglet) ; un rechargement complet la
- * redemande au 1er besoin. La vraie protection reste la RLS (serveur) + le E2EE
- * (un document chiffré ne se déchiffre qu'avec la clé déverrouillée par biométrie).
+ * Entrée du coffre E2EE (PHIL-T01). Le contenu reste CACHÉ tant que la biométrie
+ * (Face ID / empreinte) n'a pas réussi — elle se déclenche automatiquement à
+ * l'arrivée. Écran minimal pendant la vérification (pas de porte). La clé reste
+ * ensuite en mémoire pour la session (onglet) : revenir au coffre ne redemande
+ * rien tant qu'on ne recharge pas. Si le prompt auto est bloqué, un bouton reste.
  */
 export function CoffreGate({ children }: { children: React.ReactNode }) {
+  const t = useT();
+  const [unlocked, setUnlocked] = useState(false);
+  const [checked, setChecked] = useState(false);
+  const [failed, setFailed] = useState(false);
+
+  const unlock = useCallback(async () => {
+    setFailed(false);
+    try {
+      await getCoffreMaster();
+      setUnlocked(true);
+    } catch {
+      setFailed(true);
+    }
+  }, []);
+
   const started = useRef(false);
   useEffect(() => {
-    if (started.current || isCoffreUnlocked()) {
+    if (started.current) {
       return;
     }
     started.current = true;
-    // Réchauffe la maîtresse (biométrie) sans bloquer l'affichage.
-    void getCoffreMaster().catch(() => {});
-  }, []);
+    if (isCoffreUnlocked()) {
+      setUnlocked(true);
+      setChecked(true);
+      return;
+    }
+    setChecked(true);
+    void unlock();
+  }, [unlock]);
 
-  return <>{children}</>;
+  if (unlocked) {
+    return <>{children}</>;
+  }
+  if (!checked) {
+    return null;
+  }
+
+  return (
+    <main className="flex flex-1 flex-col items-center justify-center gap-4 px-4 py-24 text-center">
+      {failed ? (
+        <>
+          <p className="max-w-xs text-sm text-encre-douce">{t("vault.unlock.lockedBody")}</p>
+          <Button type="button" onClick={() => void unlock()}>
+            {t("vault.unlock.button")}
+          </Button>
+        </>
+      ) : (
+        <p className="text-sm text-encre-douce">{t("vault.unlock.verifying")}</p>
+      )}
+    </main>
+  );
 }
