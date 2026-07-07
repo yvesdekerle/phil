@@ -55,6 +55,14 @@ export default async function VaultDocumentPage({
   const isPdf = doc.mime_type === "application/pdf";
   const metadata = (doc.metadata ?? {}) as Record<string, string>;
 
+  // Identité du lecteur pour le filigrane client des documents chiffrés.
+  const { data: viewerProfile } = await supabase
+    .from("profiles")
+    .select("display_name")
+    .eq("id", user.id)
+    .single();
+  const viewerLabel = `${viewerProfile?.display_name ?? user.email ?? "Voyageur"} · ${user.id.slice(0, 8)}`;
+
   return (
     <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8">
       <Link
@@ -107,6 +115,7 @@ export default async function VaultDocumentPage({
             fileIv={doc.enc_file_iv ?? ""}
             wrappedDek={doc.enc_wrapped_dek ?? ""}
             dekIv={doc.enc_dek_iv ?? ""}
+            viewerLabel={viewerLabel}
           />
         ) : isPdf ? (
           <iframe src={viewUrl} title={doc.file_name} className="h-[70vh] w-full" />

@@ -4,15 +4,15 @@ import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { getCoffreMaster, isCoffreUnlocked } from "@/lib/crypto/coffre-session";
 import { fromBase64, openDocument } from "@/lib/crypto/vault-crypto";
+import { canWatermark, watermarkImage, watermarkPdf } from "@/lib/vault/watermark";
 
 /**
- * Viewer d'un document chiffré E2EE (PHIL-T01, Phase 1). Le serveur n'a servi que
- * le CHIFFRÉ : on déchiffre EN MÉMOIRE puis on affiche via une object URL. Le
+ * Viewer d'un document chiffré E2EE (PHIL-T01). Le serveur n'a servi que le
+ * CHIFFRÉ : on déchiffre EN MÉMOIRE, on appose le filigrane côté client
+ * (Phase 2, « Phil · vu par… », baked-in), puis on affiche via object URL. Le
  * clair ne quitte jamais l'onglet.
  *
- * Si la session est déjà déverrouillée (maîtresse en mémoire), on affiche
- * directement ; sinon on demande la biométrie (Face ID / empreinte) pour
- * autoriser le déchiffrement.
+ * Session déjà déverrouillée → affichage direct ; sinon biométrie.
  */
 export function EncryptedDocumentViewer({
   docId,
@@ -21,6 +21,7 @@ export function EncryptedDocumentViewer({
   fileIv,
   wrappedDek,
   dekIv,
+  viewerLabel,
 }: {
   docId: string;
   mimeType: string;
@@ -28,8 +29,11 @@ export function EncryptedDocumentViewer({
   fileIv: string;
   wrappedDek: string;
   dekIv: string;
+  /** Identité du lecteur pour le filigrane : « Prénom Nom · id ». */
+  viewerLabel: string;
 }) {
   const [url, setUrl] = useState<string | null>(null);
+  const [resultMime, setResultMime] = useState(mimeType);
   const [error, setError] = useState<string | null>(null);
   const [needsUnlock, setNeedsUnlock] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -51,17 +55,29 @@ export function EncryptedDocumentViewer({
         wrappedDek: fromBase64(wrappedDek),
         dekIv: fromBase64(dekIv),
       });
-      setUrl(URL.createObjectURL(new Blob([plain as BlobPart], { type: mimeType })));
+
+      // Filigrane côté client (Phase 2) : traçabilité des captures. Comme côté
+      // serveur, images et PDF ressortent en PDF filigrané ; HEIC non filigranable.
+      let bytes = plain;
+      let outMime = mimeType;
+      if (canWatermark(mimeType)) {
+        bytes =
+          mimeType === "application/pdf"
+            ? await watermarkPdf(plain, viewerLabel)
+            : await watermarkImage(plain, mimeType, viewerLabel);
+        outMime = "application/pdf";
+      }
+      setResultMime(outMime);
+      setUrl(URL.createObjectURL(new Blob([bytes as BlobPart], { type: outMime })));
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erreur de déchiffrement");
       setNeedsUnlock(true);
     } finally {
       setLoading(false);
     }
-  }, [docId, mimeType, fileIv, wrappedDek, dekIv]);
+  }, [docId, mimeType, fileIv, wrappedDek, dekIv, viewerLabel]);
 
   // Session déjà déverrouillée → affichage direct (pas de biométrie redondante).
-  // Sinon → on présente le bouton qui déclenchera Face ID / empreinte.
   useEffect(() => {
     if (isCoffreUnlocked()) {
       void decrypt();
@@ -71,10 +87,10 @@ export function EncryptedDocumentViewer({
   }, [decrypt]);
 
   if (url) {
-    if (mimeType === "application/pdf") {
+    if (resultMime === "application/pdf") {
       return <iframe src={url} title={fileName} className="h-[70vh] w-full" />;
     }
-    if (mimeType.startsWith("image/")) {
+    if (resultMime.startsWith("image/")) {
       return (
         // biome-ignore lint/performance/noImgElement: object URL déchiffrée en mémoire, pas un endpoint optimisable
         <img src={url} alt={fileName} className="mx-auto max-h-[70vh] w-auto" />
