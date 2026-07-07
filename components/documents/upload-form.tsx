@@ -130,9 +130,9 @@ export function UploadForm({
       try {
         const master = await getCoffreMaster();
         const sealed = await sealDocument(master, new Uint8Array(await file.arrayBuffer()));
-        uploadBody = new Blob([sealed.ciphertext as BlobPart], {
-          type: "application/octet-stream",
-        });
+        // Le Blob porte le type d'origine (le bucket filtre les MIME) ; son
+        // contenu est du chiffré. La route le sert ensuite en octet-stream.
+        uploadBody = new Blob([sealed.ciphertext as BlobPart], { type: file.type });
         encMeta = {
           fileIv: toBase64(sealed.iv),
           wrappedDek: toBase64(sealed.wrappedDek),
