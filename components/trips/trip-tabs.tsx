@@ -12,6 +12,7 @@ const TABS = [
   { segment: "ideas", key: "ideas" },
   { segment: "polls", key: "polls" },
   { segment: "checklist", key: "checklist" },
+  { segment: "miam", key: "miam" },
   { segment: "photos", key: "photos" },
   { segment: "budget", key: "budget" },
   { segment: "participants", key: "participants" },
