@@ -17,14 +17,14 @@ import {
 
 /**
  * Viewer d'un document chiffré E2EE (PHIL-T01). Le serveur n'a servi que le
- * CHIFFRÉ : on déchiffre EN MÉMOIRE et on affiche le fichier BRUT via object URL
- * (le clair ne quitte jamais l'onglet).
+ * CHIFFRÉ : on déchiffre EN MÉMOIRE puis on affiche via object URL.
  *
  * Deux modes :
- *  - propriétaire : la DEK est déballée avec sa clé maîtresse ;
- *  - destinataire (Phase 3) : la DEK (ré-emballée pour lui) est déballée via ECDH
- *    (sa clé privée + la clé publique du propriétaire), et le document reçoit un
- *    filigrane à SON email en surimpression (traçabilité des captures).
+ *  - propriétaire : DEK déballée avec sa clé maîtresse, document affiché brut ;
+ *  - destinataire (Phase 3) : DEK déballée via ECDH (sa privée + la publique du
+ *    propriétaire), et le filigrane à SON email est INCRUSTÉ dans le document
+ *    (il survit au téléchargement). Repli : brut + filigrane CSS si l'incrustation
+ *    échoue (PDF récalcitrant).
  */
 export function EncryptedDocumentViewer({
   docId,
@@ -50,6 +50,8 @@ export function EncryptedDocumentViewer({
   ownerPublicKeyJwk: JsonWebKey | null;
 }) {
   const [url, setUrl] = useState<string | null>(null);
+  const [resultMime, setResultMime] = useState(mimeType);
+  const [overlay, setOverlay] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [needsUnlock, setNeedsUnlock] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -77,17 +79,45 @@ export function EncryptedDocumentViewer({
         dek = await unwrapKey(master, fromBase64(wrappedDek), fromBase64(dekIv));
       }
       const plain = await decryptBytes(dek, ciphertext, fromBase64(fileIv));
-      setUrl(URL.createObjectURL(new Blob([plain as BlobPart], { type: mimeType })));
+
+      // Filigrane : INCRUSTÉ dans le document pour un destinataire (survit au
+      // téléchargement). Repli sur brut + overlay CSS si l'incrustation échoue.
+      let displayBytes = plain;
+      let displayMime = mimeType;
+      let cssOverlay = false;
+      if (mode === "recipient") {
+        try {
+          const { canWatermark, watermarkImage, watermarkPdf } = await import(
+            "@/lib/vault/watermark"
+          );
+          if (canWatermark(mimeType)) {
+            displayBytes =
+              mimeType === "application/pdf"
+                ? await watermarkPdf(plain, viewerLabel)
+                : await watermarkImage(plain, mimeType, viewerLabel);
+            displayMime = "application/pdf";
+          } else {
+            cssOverlay = true;
+          }
+        } catch {
+          displayBytes = plain;
+          displayMime = mimeType;
+          cssOverlay = true;
+        }
+      }
+      setResultMime(displayMime);
+      setOverlay(cssOverlay);
+      setUrl(URL.createObjectURL(new Blob([displayBytes as BlobPart], { type: displayMime })));
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erreur de déchiffrement");
       setNeedsUnlock(true);
     } finally {
       setLoading(false);
     }
-  }, [docId, mimeType, fileIv, wrappedDek, dekIv, mode, ownerPublicKeyJwk]);
+  }, [docId, mimeType, fileIv, wrappedDek, dekIv, viewerLabel, mode, ownerPublicKeyJwk]);
 
-  // Session déjà déverrouillée → affichage direct (pas de biométrie redondante).
-  // Garde-fou : une seule tentative auto (évite le double-rendu React en dev).
+  // Session déjà déverrouillée → affichage direct. Garde-fou : une seule
+  // tentative auto (évite le double-rendu React en dev).
   const autoStarted = useRef(false);
   useEffect(() => {
     if (autoStarted.current) {
@@ -102,23 +132,21 @@ export function EncryptedDocumentViewer({
   }, [decrypt]);
 
   if (url) {
-    const isPdf = mimeType === "application/pdf";
-    const isImage = mimeType.startsWith("image/");
-    const content = isPdf ? (
-      <iframe src={url} title={fileName} className="h-[70vh] w-full" />
-    ) : isImage ? (
-      // biome-ignore lint/performance/noImgElement: object URL déchiffrée en mémoire, pas un endpoint optimisable
-      <img src={url} alt={fileName} className="mx-auto max-h-[70vh] w-auto" />
-    ) : (
-      <div className="px-6 py-12 text-center text-sm text-encre-douce">
-        <a href={url} download={fileName} className="text-bordeaux underline underline-offset-4">
-          Télécharger le fichier déchiffré
-        </a>
-      </div>
-    );
+    const content =
+      resultMime === "application/pdf" ? (
+        <iframe src={url} title={fileName} className="h-[70vh] w-full" />
+      ) : resultMime.startsWith("image/") ? (
+        // biome-ignore lint/performance/noImgElement: object URL déchiffrée en mémoire, pas un endpoint optimisable
+        <img src={url} alt={fileName} className="mx-auto max-h-[70vh] w-auto" />
+      ) : (
+        <div className="px-6 py-12 text-center text-sm text-encre-douce">
+          <a href={url} download={fileName} className="text-bordeaux underline underline-offset-4">
+            Télécharger le fichier déchiffré
+          </a>
+        </div>
+      );
 
-    // Filigrane à l'email en surimpression : uniquement pour un destinataire.
-    if (mode === "recipient") {
+    if (overlay) {
       const label = viewerLabel.replace(/[<>&"]/g, "");
       const svg = encodeURIComponent(
         `<svg xmlns="http://www.w3.org/2000/svg" width="360" height="200"><text x="8" y="120" fill="rgba(110,31,46,0.15)" font-family="sans-serif" font-size="13" transform="rotate(-30 180 110)">Phil · ${label}</text></svg>`,

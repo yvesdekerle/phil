@@ -48,7 +48,9 @@ async function applyWatermark(pdf: PDFDocument, text: string): Promise<void> {
 export async function watermarkPdf(pdfBytes: Uint8Array, viewer: string): Promise<Uint8Array> {
   const pdf = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
   await applyWatermark(pdf, watermarkLines(viewer));
-  return pdf.save();
+  // useObjectStreams:false → structure PDF classique, mieux acceptée par les
+  // lecteurs (le défaut avec object streams était refusé sur certains PDF).
+  return pdf.save({ useObjectStreams: false });
 }
 
 /** Convertit une image JPG/PNG en PDF pleine page, puis filigrane. */
@@ -63,7 +65,7 @@ export async function watermarkImage(
   const page = pdf.addPage([image.width, image.height]);
   page.drawImage(image, { x: 0, y: 0, width: image.width, height: image.height });
   await applyWatermark(pdf, watermarkLines(viewer));
-  return pdf.save();
+  return pdf.save({ useObjectStreams: false });
 }
 
 /** Le filigrane sait-il traiter ce type ? (HEIC : non pris en charge en v1.) */
