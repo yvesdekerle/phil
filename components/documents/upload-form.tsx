@@ -146,11 +146,12 @@ export function UploadForm({
     }
 
     const supabase = createClient();
+    // Le bucket filtre les types MIME (pdf/images) : on garde le type d'origine
+    // comme étiquette même pour du chiffré (le contenu reste du chiffré ; la route
+    // le sert en octet-stream). Sinon "application/octet-stream" → 400.
     const { error: uploadError } = await supabase.storage
       .from("documents")
-      .upload(storagePath, uploadBody, {
-        contentType: encrypt ? "application/octet-stream" : file.type,
-      });
+      .upload(storagePath, uploadBody, { contentType: file.type });
 
     if (uploadError) {
       setPhase("idle");
