@@ -55,13 +55,8 @@ export default async function VaultDocumentPage({
   const isPdf = doc.mime_type === "application/pdf";
   const metadata = (doc.metadata ?? {}) as Record<string, string>;
 
-  // Identité du lecteur pour le filigrane client des documents chiffrés.
-  const { data: viewerProfile } = await supabase
-    .from("profiles")
-    .select("display_name")
-    .eq("id", user.id)
-    .single();
-  const viewerLabel = `${viewerProfile?.display_name ?? user.email ?? "Voyageur"} · ${user.id.slice(0, 8)}`;
+  // Email du lecteur pour le filigrane (apposé uniquement côté destinataire).
+  const viewerLabel = user.email ?? user.id;
 
   // PHIL-T01 Phase 3 : le lecteur est le propriétaire, ou un destinataire d'un
   // partage E2EE (DEK ré-emballée pour lui + clé publique du propriétaire).

@@ -78,18 +78,21 @@ export function EncryptedDocumentViewer({
       }
       const plain = await decryptBytes(dek, ciphertext, fromBase64(fileIv));
 
-      // Filigrane côté client : traçabilité des captures. Comme côté serveur,
-      // images et PDF ressortent en PDF filigrané ; HEIC non filigranable.
-      // pdf-lib est chargé à la volée (allège le bundle initial de la page).
-      const { canWatermark, watermarkImage, watermarkPdf } = await import("@/lib/vault/watermark");
+      // Filigrane : UNIQUEMENT pour un destinataire (traçabilité, à son email) ;
+      // jamais sur son propre document. pdf-lib chargé à la volée.
       let bytes = plain;
       let outMime = mimeType;
-      if (canWatermark(mimeType)) {
-        bytes =
-          mimeType === "application/pdf"
-            ? await watermarkPdf(plain, viewerLabel)
-            : await watermarkImage(plain, mimeType, viewerLabel);
-        outMime = "application/pdf";
+      if (mode === "recipient") {
+        const { canWatermark, watermarkImage, watermarkPdf } = await import(
+          "@/lib/vault/watermark"
+        );
+        if (canWatermark(mimeType)) {
+          bytes =
+            mimeType === "application/pdf"
+              ? await watermarkPdf(plain, viewerLabel)
+              : await watermarkImage(plain, mimeType, viewerLabel);
+          outMime = "application/pdf";
+        }
       }
       setResultMime(outMime);
       setUrl(URL.createObjectURL(new Blob([bytes as BlobPart], { type: outMime })));
