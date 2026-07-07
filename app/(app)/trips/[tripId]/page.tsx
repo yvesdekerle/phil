@@ -122,42 +122,46 @@ export default async function TripCalendarPage({
     : null;
 
   return (
-    <div className="flex flex-col gap-6">
-      {tripOngoing && todayKey ? (
-        <TodayHero
-          tripId={tripId}
-          current={currentEvent ? heroOf(currentEvent) : null}
-          next={nextEvent ? heroOf(nextEvent) : null}
-          dayKey={todayKey}
-          weather={todayWeather ? <WeatherLine day={todayWeather} /> : undefined}
-          travelToNext={travelToNext}
-          navigateToNext={navigateToNext}
-        />
-      ) : null}
-      {trip ? <WeatherStrip days={weatherDays} destination={trip.destination} /> : null}
-      <div className="flex items-center justify-between gap-3">
-        <TripViewToggle tripId={tripId} active="calendar" />
-        {canEdit ? (
-          <Button asChild>
-            <Link href={`/trips/${tripId}/events/new`}>{t("calendar.addEvent")}</Link>
-          </Button>
+    // Pleine largeur comme Timeline/Carte (PHIL-Q37c) : évite le saut de gabarit
+    // au changement de vue du Journal.
+    <div className="relative left-1/2 right-1/2 -mx-[50vw] w-screen px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex max-w-[104rem] flex-col gap-6">
+        {tripOngoing && todayKey ? (
+          <TodayHero
+            tripId={tripId}
+            current={currentEvent ? heroOf(currentEvent) : null}
+            next={nextEvent ? heroOf(nextEvent) : null}
+            dayKey={todayKey}
+            weather={todayWeather ? <WeatherLine day={todayWeather} /> : undefined}
+            travelToNext={travelToNext}
+            navigateToNext={navigateToNext}
+          />
         ) : null}
+        {trip ? <WeatherStrip days={weatherDays} destination={trip.destination} /> : null}
+        <div className="flex items-center justify-between gap-3">
+          <TripViewToggle tripId={tripId} active="calendar" />
+          {canEdit ? (
+            <Button asChild>
+              <Link href={`/trips/${tripId}/events/new`}>{t("calendar.addEvent")}</Link>
+            </Button>
+          ) : null}
+        </div>
+
+        {canEdit && trip ? (
+          <QuickAdd
+            tripId={tripId}
+            defaultDate={
+              tripOngoing && todayKey
+                ? todayKey
+                : trip.start_date >= nowIso.slice(0, 10)
+                  ? trip.start_date
+                  : trip.end_date
+            }
+          />
+        ) : null}
+
+        <CalendarDays tripId={tripId} events={events} todayKey={todayKey} canEdit={canEdit} />
       </div>
-
-      {canEdit && trip ? (
-        <QuickAdd
-          tripId={tripId}
-          defaultDate={
-            tripOngoing && todayKey
-              ? todayKey
-              : trip.start_date >= nowIso.slice(0, 10)
-                ? trip.start_date
-                : trip.end_date
-          }
-        />
-      ) : null}
-
-      <CalendarDays tripId={tripId} events={events} todayKey={todayKey} canEdit={canEdit} />
     </div>
   );
 }
