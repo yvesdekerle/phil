@@ -153,6 +153,11 @@ export const checklistEs = {
     pollNeeds: "Hace falta una pregunta y de 2 a 5 opciones.",
     pollCreateFailed: "No se pudo crear.",
     pollDelete: "Eliminar la encuesta",
+    pollAllowMultiple: "Opción múltiple",
+    pollClosesLabel: "Fecha de fin",
+    pollClosesOn: "termina el",
+    pollEnded: "terminada",
+    pollVoterFallback: "Viajero",
     pollsEmpty: "Ninguna encuesta todavía — lanza la primera para decidir en grupo.",
   },
   lodging: {

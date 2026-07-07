@@ -157,6 +157,11 @@ export const checklistFr = {
     pollNeeds: "Il faut une question et 2 à 5 options.",
     pollCreateFailed: "Création impossible.",
     pollDelete: "Supprimer le sondage",
+    pollAllowMultiple: "Choix multiple",
+    pollClosesLabel: "Date de fin",
+    pollClosesOn: "se termine le",
+    pollEnded: "terminé",
+    pollVoterFallback: "Voyageur",
     pollsEmpty: "Aucun sondage pour l'instant — lance le premier pour trancher en groupe.",
   },
   lodging: {
