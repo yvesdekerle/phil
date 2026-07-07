@@ -20,7 +20,7 @@ export const fr = {
     aria: "Sections du voyage",
     calendar: "Journal",
     map: "Carte",
-    lodging: "Logement",
+    lodging: "Logements",
     documents: "Documents",
     ideas: "Idées",
     polls: "Sondages",
