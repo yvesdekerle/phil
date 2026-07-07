@@ -163,19 +163,21 @@ export function ShareManager({
           const origDek = await unwrapKey(master, fromBase64(encWrappedDek), fromBase64(encDekIv));
           const plain = await decryptBytes(origDek, origCipher, fromBase64(encFileIv));
 
-          // 2. Incruster le filigrane à l'identité du destinataire. Si pdf-lib
-          //    n'y arrive pas (PDF récalcitrant), on partage le doc brut re-chiffré
-          //    — le partage réussit, sans filigrane incrusté pour ce PDF précis.
-          const { canWatermark, watermarkImage, watermarkPdf } = await import(
-            "@/lib/vault/watermark"
-          );
+          // 2. Incruster le filigrane à l'identité du destinataire.
+          //    - image : PDF neuf à partir de l'image (fiable) ;
+          //    - PDF : rendu en images via PDF.js (tolérant) puis reconstruction
+          //      d'un PDF filigrané → robuste sur N'IMPORTE quel PDF.
+          //    Repli : doc brut re-chiffré si l'étape échoue.
           let stamped = plain;
           try {
-            if (canWatermark(mimeType)) {
-              stamped =
-                mimeType === "application/pdf"
-                  ? await watermarkPdf(plain, recipientName)
-                  : await watermarkImage(plain, mimeType, recipientName);
+            const { canWatermark, watermarkImage, watermarkImagePages } = await import(
+              "@/lib/vault/watermark"
+            );
+            if (mimeType === "application/pdf") {
+              const { renderPdfToPngs } = await import("@/lib/vault/pdf-render");
+              stamped = await watermarkImagePages(await renderPdfToPngs(plain), recipientName);
+            } else if (canWatermark(mimeType)) {
+              stamped = await watermarkImage(plain, mimeType, recipientName);
             }
           } catch {
             stamped = plain;

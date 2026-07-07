@@ -71,6 +71,24 @@ export async function watermarkImage(
   return pdf.save({ useObjectStreams: false });
 }
 
+/**
+ * Nouveau PDF : une page par PNG fourni (ex. rendu d'un PDF via PDF.js), filigrané.
+ * Robuste — on CRÉE un PDF neuf, on n'édite pas un PDF existant fragile.
+ */
+export async function watermarkImagePages(
+  pngPages: Uint8Array[],
+  viewer: string,
+): Promise<Uint8Array> {
+  const pdf = await PDFDocument.create();
+  for (const png of pngPages) {
+    const image = await pdf.embedPng(png);
+    const page = pdf.addPage([image.width, image.height]);
+    page.drawImage(image, { x: 0, y: 0, width: image.width, height: image.height });
+  }
+  await applyWatermark(pdf, watermarkLines(viewer));
+  return pdf.save({ useObjectStreams: false });
+}
+
 /** Le filigrane sait-il traiter ce type ? (HEIC : non pris en charge en v1.) */
 export function canWatermark(mimeType: string): boolean {
   return mimeType === "application/pdf" || mimeType === "image/jpeg" || mimeType === "image/png";
