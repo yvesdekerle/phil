@@ -1015,8 +1015,17 @@ Rappeler aux participants de **voter sur les sondages / réagir aux idées** en 
 ### [x] PHIL-U03 — Retirer le libellé « Timeline » redondant à droite *(fait le 2026-07-08)*
 `timeline/page.tsx` : retiré le `<h1>` « Timeline » qui doublonnait avec `TripViewToggle` (déjà porteur de la vue active). Vue alignée sur la carte (toggle seul, sans titre). Clé i18n `calendar.timeline.title` conservée (parité).
 
-### [ ] PHIL-U04 — Idées « façon Yallah » : swipe d'activités par voyage — **GROS CHANTIER**
-Reprendre le concept de **Yallah** dans l'onglet Idées : pour chaque voyage, une **liste d'activités** proposées avec **swipe** (like/pass), etc. Réf. code : `/Users/yvesdekerle/Sources/perso/yallah`. **Analyse complète obligatoire avant tout dev** (modèle de données, source des activités, UX swipe, intégration au voyage).
+### [~] PHIL-U04 — Idées « façon Yallah » : swipe d'activités par voyage — **GROS CHANTIER**
+Reprendre le concept de **Yallah** dans l'onglet Idées : pour chaque voyage, une **liste d'activités** proposées avec **swipe** (like/pass). Réf. code : `/Users/yvesdekerle/Sources/perso/yallah`.
+
+**Analyse Yallah faite (2026-07-08).** Points clés : SPA React 19 + Vite (pas Next), swipe **100 % maison** (pointer events + rAF, aucune lib — portable tel quel), backend Firebase optionnel. **Yallah n'a AUCUN consensus** : chacun swipe dans son coin, on affiche les verdicts côte à côte → c'est la valeur que Phil ajoute en SQL. 4 verdicts : droite=YES, gauche=NO, **haut=SUPER** (quota 5), **bas=MAYBE** (⚠️ le README Yallah inverse l'axe vertical — se fier à `src/utils/swipe.ts`, pas au tableau). Activités curées à la main (markdown → JSON), photos Pexels, coords Nominatim — **pas** d'API de découverte au runtime.
+
+**Phase 0 — Fondation (fait le 2026-07-08)** : migration `20260708120000_trip_activities_swipe.sql` — tables `trip_activities` (scopée voyage, prix/durée texte libre, tags[], source manual/seed/external) + `activity_votes` (**1 ligne par (activité, user)**, unique, verdict YES/NO/MAYBE/SUPER, quota_hit), RLS calquée sur `trip_meals` (participant lit/écrit ses votes, créateur/OWNER supprime), **vue `activity_vote_summary`** (consensus pondéré SUPER×2+YES−NO, `security_invoker`), realtime. **À appliquer (`pnpm db:push` + `pnpm db:types`) avant les phases suivantes.** Ajouter `trip_activities.created_by` à la réattribution fantôme (R18).
+
+**Reste :**
+- **Phase 1 — cœur swipe (saisie manuelle)** : porter depuis Yallah `useSwipeGesture.ts` + `utils/swipe.ts` (maths pures, TESTABLES — corriger l'axe vertical), `SwipeDeck`/`Card`/`ActionRow`/feedback re-stylés en tokens Phil. Server actions `castVote` (upsert, **quota SUPER côté serveur**), `undoVote`, `resetMyVotes`, `addTripActivity`. Page/onglet + Server Component qui sert `[…votés, …non-votés]`.
+- **Phase 2 — consensus** : écran classement via `activity_vote_summary` (badges « X/Y partants », mise en avant des « matchs » tout-le-monde-YES/SUPER), barres de progression par participant (garder la révélation différée `meDone` anti-biais), realtime.
+- **Phase 3 — génération par destination** (optionnel) : POI depuis les coords du voyage via **OpenTripMap** (free tier, clé simple) en `source='seed'` ; photos Pexels ; géocodage Nominatim de secours. Découplé du MVP.
 
 ### [ ] PHIL-U05 — Clarifier la division BDD locale vs prod
 Documenter (et éventuellement mettre en place) la **séparation base locale / production**. Aujourd'hui le dev tape la base distante linkée (pas de stack Supabase locale). À creuser : base de dev/test dédiée, seed, isolement des données.
