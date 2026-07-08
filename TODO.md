@@ -1009,8 +1009,12 @@ Chiffrement de bout en bout du coffre : le serveur ne voit jamais le contenu ni 
 ### [x] PHIL-U01 — Pastilles « à préparer avant le voyage » *(fait le 2026-07-08)*
 Composant serveur `components/trips/trip-readiness.tsx` : pastilles d'un coup d'œil (hébergement / transport / activités / repas / valise), vertes si en place, avec compteur `n/5`. Lecture seule des données existantes (`trip_events.type`, `trip_meals`, `checklist_items`), pas de migration. Affiché sur la vue voyage tant que le voyage n'est pas passé (`end_date >= today`). i18n `readiness.*` (fr/en/es). *(Reste possible : afficher aussi à la création, et rendre les pastilles cliquables vers l'onglet concerné.)*
 
-### [ ] PHIL-U02 — Notifications/rappels pour voter (sondages, idées)
-Rappeler aux participants de **voter sur les sondages / réagir aux idées** en attente. Idéalement une **pastille de notification** (sur l'avatar profil ? à côté du sélecteur de langue ?) indiquant les actions en attente.
+### [x] PHIL-U02 — Notifications/rappels pour voter (sondages, idées) *(fait le 2026-07-08)*
+Pastilles « actions en attente » **in-app** (pas d'email/cron). Placement retenu (décision Yves) : **cartes de la liste `/trips` + onglets du voyage**. « En attente » pour l'utilisateur courant = **sondages ouverts non votés** + **idées `POOL` non réagies** + **activités non swipées**.
+- Logique pure testée `lib/notifications/pending.ts` (`countPending`, Map tripId→compteurs, 6 tests) + helper serveur `lib/notifications/pending-server.ts` (`getPendingByTrip`, requêtes plates bornées aux voyages + agrégation ; Map vide sans voyage → 0 requête).
+- Badge total (bordeaux) sur `TripCard` (liste `/trips`) ; badge par onglet Idées/Sondages/À swiper dans `TripTabs` (compteurs passés par le layout voyage). a11y `role="img"` + `aria-label`. i18n `pending.tripAria`/`tabAria` (fr/en/es).
+- Bénéfice realtime « gratuit » : les pages Idées/Sondages/Activités ont déjà `RealtimeRefresh` → `router.refresh()` rafraîchit aussi le layout, donc les pastilles d'onglet se mettent à jour en direct.
+- Note : les idées `POOL` non upvotées comptent comme « en attente » (soft) — facile à retirer du compteur si trop bruyant.
 
 ### [x] PHIL-U03 — Retirer le libellé « Timeline » redondant à droite *(fait le 2026-07-08)*
 `timeline/page.tsx` : retiré le `<h1>` « Timeline » qui doublonnait avec `TripViewToggle` (déjà porteur de la vue active). Vue alignée sur la carte (toggle seul, sans titre). Clé i18n `calendar.timeline.title` conservée (parité).

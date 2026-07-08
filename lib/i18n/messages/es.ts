@@ -89,6 +89,10 @@ export const es: PartialMessages = {
     meals: "Comidas",
     packing: "Maleta",
   },
+  pending: {
+    tripAria: "{n} acción(es) pendiente(s) en este viaje",
+    tabAria: "{n} pendiente(s)",
+  },
   guide: {
     kicker: "Guía de viaje",
     print: "Descargar en PDF",

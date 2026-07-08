@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { TripCard } from "@/components/trips/trip-card";
 import { Button } from "@/components/ui/button";
 import { getT } from "@/lib/i18n/server";
+import { getPendingByTrip } from "@/lib/notifications/pending-server";
 import { createClient } from "@/lib/supabase/server";
 import { sortTrips, type Trip } from "@/lib/trips/status";
 
@@ -22,6 +23,11 @@ export default async function TripsPage() {
   const rows = (data ?? []) as TripWithCount[];
   const counts = new Map(rows.map((t) => [t.id, t.trip_participants[0]?.count ?? 1]));
   const trips = sortTrips(rows);
+  const pending = await getPendingByTrip(
+    supabase,
+    user.id,
+    rows.map((t) => t.id),
+  );
   const t = await getT();
 
   return (
@@ -44,7 +50,12 @@ export default async function TripsPage() {
       ) : (
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {trips.map((trip) => (
-            <TripCard key={trip.id} trip={trip} participantCount={counts.get(trip.id) ?? 1} />
+            <TripCard
+              key={trip.id}
+              trip={trip}
+              participantCount={counts.get(trip.id) ?? 1}
+              pendingCount={pending.get(trip.id)?.total ?? 0}
+            />
           ))}
         </div>
       )}

@@ -83,6 +83,10 @@ export const fr = {
     meals: "Repas",
     packing: "Valise",
   },
+  pending: {
+    tripAria: "{n} action(s) en attente sur ce voyage",
+    tabAria: "{n} en attente",
+  },
   guide: {
     kicker: "Guide de voyage",
     print: "Télécharger en PDF",

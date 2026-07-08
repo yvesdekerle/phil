@@ -15,9 +15,11 @@ const STATUS_STYLES: Record<string, string> = {
 export async function TripCard({
   trip,
   participantCount,
+  pendingCount = 0,
 }: {
   trip: Trip;
   participantCount: number;
+  pendingCount?: number;
 }) {
   const status = tripStatus(trip);
   const isPast = status === "passe" || status === "archive";
@@ -55,6 +57,16 @@ export async function TripCard({
         >
           {t(`trips.status.${status}`)}
         </span>
+        {pendingCount > 0 ? (
+          <span
+            role="img"
+            className="absolute top-3 left-3 flex min-w-5 items-center justify-center rounded-full bg-bordeaux px-1.5 py-0.5 text-xs font-semibold text-papier shadow-sm"
+            aria-label={t("pending.tripAria").replace("{n}", String(pendingCount))}
+            title={t("pending.tripAria").replace("{n}", String(pendingCount))}
+          >
+            {pendingCount}
+          </span>
+        ) : null}
       </div>
 
       <div className="px-4 py-3.5">

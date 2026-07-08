@@ -3,6 +3,7 @@ import { TripOfflineSync } from "@/components/offline/trip-sync";
 import { CoverImage } from "@/components/trips/cover-image";
 import { TripTabs } from "@/components/trips/trip-tabs";
 import { getDateFnsLocale, getIntlLocale, getT } from "@/lib/i18n/server";
+import { getPendingByTrip } from "@/lib/notifications/pending-server";
 import { createClient } from "@/lib/supabase/server";
 import { formatDateRange } from "@/lib/trips/format";
 import { tripStatus } from "@/lib/trips/status";
@@ -35,6 +36,10 @@ export default async function TripLayout({
   }
 
   const status = tripStatus(trip);
+  // PHIL-U02 : pastilles « à voter » sur les onglets Sondages / Idées / À swiper.
+  const pending = user
+    ? ((await getPendingByTrip(supabase, user.id, [tripId])).get(tripId) ?? null)
+    : null;
   const t = await getT();
   const dfLocale = await getDateFnsLocale();
   const il = await getIntlLocale();
@@ -117,7 +122,14 @@ export default async function TripLayout({
 
       {/* PHIL-Q37c : le menu du voyage reste collé en haut au défilement */}
       <nav className="sticky top-2 z-[1001] mt-2 rounded-lg border border-laiton-clair bg-papier px-5 shadow-[0_2px_10px_rgba(31,42,68,0.05)] print:hidden">
-        <TripTabs tripId={trip.id} />
+        <TripTabs
+          tripId={trip.id}
+          pending={
+            pending
+              ? { ideas: pending.ideas, activities: pending.activities, polls: pending.polls }
+              : undefined
+          }
+        />
       </nav>
 
       <div className="py-6">{children}</div>

@@ -21,10 +21,14 @@ const TABS = [
   { segment: "settings", key: "settings" },
 ] as const;
 
-export function TripTabs({ tripId }: { tripId: string }) {
+type PendingByTab = { ideas: number; activities: number; polls: number };
+
+export function TripTabs({ tripId, pending }: { tripId: string; pending?: PendingByTab }) {
   const pathname = usePathname();
   const t = useT();
   const base = `/trips/${tripId}`;
+  const badgeFor = (key: string): number =>
+    pending && (key === "ideas" || key === "activities" || key === "polls") ? pending[key] : 0;
 
   return (
     <nav
@@ -38,19 +42,29 @@ export function TripTabs({ tripId }: { tripId: string }) {
           tab.segment === ""
             ? pathname === base || pathname === `${base}/timeline`
             : pathname === href;
+        const badge = badgeFor(tab.key);
         return (
           <Link
             key={tab.key}
             href={href}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "whitespace-nowrap border-b-2 px-3 py-2.5 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-laiton",
+              "flex items-center gap-1.5 whitespace-nowrap border-b-2 px-3 py-2.5 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-laiton",
               active
                 ? "border-bordeaux font-medium text-bordeaux"
                 : "border-transparent text-encre-douce hover:border-laiton-clair hover:text-encre",
             )}
           >
             {t(`tripTabs.${tab.key}`)}
+            {badge > 0 ? (
+              <span
+                role="img"
+                className="flex min-w-4 items-center justify-center rounded-full bg-bordeaux px-1 text-[0.65rem] font-semibold text-papier"
+                aria-label={t("pending.tabAria").replace("{n}", String(badge))}
+              >
+                {badge}
+              </span>
+            ) : null}
           </Link>
         );
       })}
