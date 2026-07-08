@@ -1045,7 +1045,9 @@ Guide de voyage **template** rempli avec les données du voyage, en **HTML sur l
 - **Après** : total dépensé par devise, nombre de photos, carnet de bord (journal).
 Chrome de l'app masqué à l'impression (`print:hidden` sur header app + couverture/onglets voyage), pied de page **branding Phil** (« Généré par Phil · <app_url> »). Bouton `PrintGuideButton`. i18n `guide.*` + `tripTabs.guide` (fr/en/es).
 
-**Reste (Phase 2, itérations)** : soldes détaillés « qui doit combien à qui » (réutiliser le calcul de référence de l'onglet Budget), vignettes photos réelles (URLs bucket), notes d'événements, mise en page fidèle au PDF Islande (sauts de page par section, page de garde avec couverture).
+**Phase 2 (fait le 2026-07-08)** : section **Après** enrichie — **soldes détaillés « qui doit combien à qui »** (réutilise `computeBalances`/`computeSettlements` + conversion `getRates`/`toBase` de l'onglet Budget, règlements simplifiés glouton ; paiements `is_settlement` inclus comme dans Équilibre ; « tout est équilibré » si rien à solder) + **vraies vignettes photos** (grille des 12 premières via `/api/photos/[id]/view?thumb=1`, compteur « +N de plus »). i18n `guide.settlements`/`settled`/`photosMore` (fr/en/es).
+
+**Reste (Phase 2, itérations)** : notes d'événements dans le programme, mise en page encore plus fidèle au PDF Islande (sauts de page par section, page de garde avec couverture).
 
 ---
 

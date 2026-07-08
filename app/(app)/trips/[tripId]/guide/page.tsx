@@ -1,4 +1,6 @@
 import { notFound, redirect } from "next/navigation";
+import { computeBalances, computeSettlements } from "@/lib/budget/balances";
+import { getRates, toBase } from "@/lib/budget/rates";
 import { eventDayKey, eventTime } from "@/lib/events/datetime";
 import type { TripEvent } from "@/lib/events/types";
 import { getDateFnsLocale, getIntlLocale, getT } from "@/lib/i18n/server";
@@ -33,7 +35,7 @@ export default async function TripGuidePage({ params }: { params: Promise<{ trip
     { data: checklist },
     { data: expenses },
     { data: journal },
-    { count: photoCount },
+    { data: photos, count: photoCount },
   ] = await Promise.all([
     supabase
       .from("trips")
@@ -56,13 +58,23 @@ export default async function TripGuidePage({ params }: { params: Promise<{ trip
       .select("id, section, title, done, quantity")
       .eq("trip_id", tripId)
       .order("position", { ascending: true }),
-    supabase.from("expenses").select("amount, currency, is_settlement").eq("trip_id", tripId),
+    supabase
+      .from("expenses")
+      .select(
+        "amount, currency, is_settlement, paid_by, split_mode, expense_beneficiaries(user_id, share)",
+      )
+      .eq("trip_id", tripId),
     supabase
       .from("journal_entries")
       .select("day, author_id, body, profiles!journal_entries_author_id_fkey(display_name)")
       .eq("trip_id", tripId)
       .order("day", { ascending: true }),
-    supabase.from("trip_photos").select("id", { count: "exact", head: true }).eq("trip_id", tripId),
+    supabase
+      .from("trip_photos")
+      .select("id, caption", { count: "exact" })
+      .eq("trip_id", tripId)
+      .order("created_at", { ascending: true })
+      .limit(12),
   ]);
 
   if (!trip) {
@@ -125,6 +137,32 @@ export default async function TripGuidePage({ params }: { params: Promise<{ trip
   }
   const money = (amount: number, currency: string): string =>
     new Intl.NumberFormat(il, { style: "currency", currency }).format(amount);
+
+  // Soldes détaillés « qui doit combien à qui » : on reprend le calcul de
+  // référence de l'onglet Budget (conversion dans la devise principale via les
+  // taux, puis règlements simplifiés glouton). Les paiements de règlement
+  // (is_settlement) sont inclus — ils remboursent une dette (comme Équilibre).
+  const primary = trip.currency_primary ?? "EUR";
+  const rates = await getRates(primary);
+  const forBalance = (expenses ?? []).map((e) => {
+    const raw = Number(e.amount);
+    const amount =
+      e.currency === primary ? raw : rates ? (toBase(raw, e.currency, rates) ?? raw) : raw;
+    const convertible =
+      e.currency === primary || (rates != null && toBase(raw, e.currency, rates) !== null);
+    return {
+      amount,
+      currency: convertible ? primary : e.currency,
+      paid_by: e.paid_by,
+      splitMode: e.split_mode as "equal" | "shares" | "exact",
+      beneficiaries: (e.expense_beneficiaries ?? []).map((b) => ({
+        userId: b.user_id,
+        share: b.share === null ? null : Number(b.share),
+      })),
+    };
+  });
+  const settlements = computeSettlements(computeBalances(forBalance, primary));
+  const hasExpenses = (expenses ?? []).some((e) => !e.is_settlement);
 
   return (
     <div className="phil-guide mx-auto max-w-3xl">
@@ -237,13 +275,58 @@ export default async function TripGuidePage({ params }: { params: Promise<{ trip
               ))}
             </ul>
           )}
-          <p className="mt-1 text-xs text-encre-douce">{t("guide.balancesNote")}</p>
+        </GuideBlock>
+
+        <GuideBlock title={t("guide.settlements")}>
+          {settlements.length === 0 ? (
+            <p className="text-sm text-encre-douce">
+              {hasExpenses ? t("guide.settled") : t("guide.emptySpending")}
+            </p>
+          ) : (
+            <ul className="flex flex-col gap-1 text-sm text-encre">
+              {settlements.map((s) => (
+                <li key={`${s.from}-${s.to}`} className="flex items-center gap-1.5">
+                  <span className="font-medium">{nameOf(s.from)}</span>
+                  <span className="text-encre-douce">→</span>
+                  <span className="font-medium">{nameOf(s.to)}</span>
+                  <span className="ml-auto font-medium text-bordeaux tabular-nums">
+                    {money(s.amount, primary)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+          <p className="mt-1.5 text-xs text-encre-douce">{t("guide.balancesNote")}</p>
         </GuideBlock>
 
         <GuideBlock title={t("guide.photos")}>
-          <p className="text-sm text-encre-douce">
-            {t("guide.photosCount").replace("{n}", String(photoCount ?? 0))}
-          </p>
+          {(photoCount ?? 0) === 0 ? (
+            <p className="text-sm text-encre-douce">{t("guide.photosCount").replace("{n}", "0")}</p>
+          ) : (
+            <>
+              <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+                {(photos ?? []).map((p) => (
+                  // biome-ignore lint/performance/noImgElement: vignette servie par notre API authentifiée (Supabase Storage), pas d'optimiseur Next
+                  <img
+                    key={p.id}
+                    src={`/api/photos/${p.id}/view?thumb=1`}
+                    alt={p.caption ?? t("guide.photos")}
+                    loading="lazy"
+                    className="aspect-square w-full rounded-md border border-laiton-clair object-cover"
+                  />
+                ))}
+              </div>
+              <p className="mt-2 text-xs text-encre-douce">
+                {t("guide.photosCount").replace("{n}", String(photoCount ?? 0))}
+                {(photoCount ?? 0) > (photos ?? []).length
+                  ? ` · ${t("guide.photosMore").replace(
+                      "{n}",
+                      String((photoCount ?? 0) - (photos ?? []).length),
+                    )}`
+                  : ""}
+              </p>
+            </>
+          )}
         </GuideBlock>
 
         <GuideBlock title={t("guide.journal")}>
