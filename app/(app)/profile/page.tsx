@@ -81,7 +81,7 @@ export default async function ProfilePage() {
             <ProfileForm
               defaultValues={{
                 displayName,
-                locale: profile?.locale === "en" ? "en" : profile?.locale === "es" ? "es" : "fr",
+                locale: profile?.locale === "fr" ? "fr" : profile?.locale === "es" ? "es" : "en",
                 timezone: profile?.timezone ?? "Europe/Paris",
                 whatsapp: profile?.whatsapp ?? "",
               }}

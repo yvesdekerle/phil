@@ -1,4 +1,7 @@
-/** Messages français (PHIL-Q37) — source de vérité des clés. */
+/**
+ * Messages français (PHIL-Q37) — surcouche complète de l'anglais source
+ * (anglais-first, R19b). Une clé manquante retombe sur l'anglais.
+ */
 export const fr = {
   nav: {
     trips: "Voyages",

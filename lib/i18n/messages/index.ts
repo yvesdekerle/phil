@@ -31,29 +31,12 @@ import { publicFr } from "./fr/public";
 import { vaultFr } from "./fr/vault";
 
 /**
- * Dictionnaire complet (PHIL-Q37). Le français (`fr`) est la source complète,
- * fusionnée depuis la coque + un fichier par écran (`fr/<cluster>.ts`).
- * L'anglais (`en`) est un sous-ensemble : ce qui manque retombe sur le français.
+ * Dictionnaire complet (PHIL-Q37, **anglais-first** depuis R19b). L'anglais
+ * (`en`) est la source de vérité complète, fusionnée depuis la coque + un fichier
+ * par écran (`en/<cluster>.ts`). Le français et l'espagnol sont des surcouches :
+ * une clé manquante y retombe sur l'anglais.
  */
-export const fr = {
-  ...frShell,
-  ...budgetFr,
-  ...calendarFr,
-  ...checklistFr,
-  ...emailFr,
-  ...geoFr,
-  ...metaFr,
-  ...profileFr,
-  ...publicFr,
-  ...vaultFr,
-};
-
-export type Messages = typeof fr;
-
-type DeepPartial<T> = { [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K] };
-export type PartialMessages = DeepPartial<Messages>;
-
-export const en: PartialMessages = {
+export const en = {
   ...enShell,
   ...budgetEn,
   ...calendarEn,
@@ -64,6 +47,24 @@ export const en: PartialMessages = {
   ...profileEn,
   ...publicEn,
   ...vaultEn,
+};
+
+export type Messages = typeof en;
+
+type DeepPartial<T> = { [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K] };
+export type PartialMessages = DeepPartial<Messages>;
+
+export const fr: PartialMessages = {
+  ...frShell,
+  ...budgetFr,
+  ...calendarFr,
+  ...checklistFr,
+  ...emailFr,
+  ...geoFr,
+  ...metaFr,
+  ...profileFr,
+  ...publicFr,
+  ...vaultFr,
 };
 
 export const es: PartialMessages = {
@@ -79,7 +80,7 @@ export const es: PartialMessages = {
   ...vaultEs,
 };
 
-export const messages: { fr: Messages; en: PartialMessages; es: PartialMessages } = { fr, en, es };
+export const messages: { en: Messages; fr: PartialMessages; es: PartialMessages } = { en, fr, es };
 
 /** Fusion profonde : `over` recouvre `base` récursivement (objets uniquement). */
 function deepMerge<T>(base: T, over: unknown): T {
@@ -104,14 +105,14 @@ function deepMerge<T>(base: T, over: unknown): T {
  * bundle JS client. Pour `fr`, c'est la source déjà complète.
  */
 export function completeMessages(locale: "fr" | "en" | "es"): Messages {
-  return locale === "fr" ? fr : deepMerge(fr, messages[locale]);
+  return locale === "en" ? en : deepMerge(en, messages[locale]);
 }
 
 /**
  * Traducteur **serveur** : `t("nav.trips")`. Cherche dans la langue active,
- * **retombe sur le français** si la clé manque, puis sur la clé brute. (Côté
- * client, `makeTranslator` de `../translate` opère sur un dict déjà complet.)
+ * **retombe sur l'anglais** (source) si la clé manque, puis sur la clé brute.
+ * (Côté client, `makeTranslator` de `../translate` opère sur un dict déjà complet.)
  */
-export function translator(dict: unknown, fallback: Messages = fr) {
+export function translator(dict: unknown, fallback: Messages = en) {
   return (key: string): string => lookup(dict, key) ?? lookup(fallback, key) ?? key;
 }
