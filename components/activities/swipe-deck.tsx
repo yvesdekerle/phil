@@ -1,10 +1,11 @@
 "use client";
 
 import { Check, Heart, RotateCcw, Star, X } from "lucide-react";
-import { type PointerEvent, useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { castVote, undoVote } from "@/app/(app)/trips/[tripId]/activities/actions";
 import { useT } from "@/components/i18n/provider";
-import { dragRotation, dragVerdict, exitOffset, type Verdict } from "@/lib/activities/swipe";
+import { dragRotation, exitOffset, type Verdict } from "@/lib/activities/swipe";
+import { useSwipeGesture } from "@/lib/activities/use-swipe-gesture";
 import { cn } from "@/lib/utils";
 
 export type SwipeActivity = {
@@ -29,60 +30,53 @@ const VERDICT_COLOR: Record<Verdict, string> = {
   SUPER: "text-bleu-nuit",
 };
 
-/** Deck de swipe (PHIL-U04) : glisse ou boutons, verdict via `lib/activities/swipe`. */
+type Exit = { activity: SwipeActivity; from: { x: number; y: number }; verdict: Verdict };
+
+/** Deck de swipe (PHIL-U04) : geste rAF fluide (porté de Yallah) + boutons. */
 export function SwipeDeck({ tripId, activities }: { tripId: string; activities: SwipeActivity[] }) {
   const t = useT();
   const [queue, setQueue] = useState(activities);
   const [history, setHistory] = useState<SwipeActivity[]>([]);
-  const [drag, setDrag] = useState({ x: 0, y: 0 });
-  const [dragging, setDragging] = useState(false);
-  const [exiting, setExiting] = useState<Verdict | null>(null);
-  const start = useRef<{ x: number; y: number } | null>(null);
+  const [exit, setExit] = useState<Exit | null>(null);
+  const [feedback, setFeedback] = useState<Verdict | null>(null);
+  const lastFeedback = useRef<Verdict | null>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
   const [, startTransition] = useTransition();
 
   const top = queue[0];
 
-  function commit(verdict: Verdict) {
-    if (!top || exiting) {
+  function commit(verdict: Verdict, from: { x: number; y: number }) {
+    const card = queue[0];
+    if (!card || exit) {
       return;
     }
-    setExiting(verdict);
-    startTransition(() => castVote(tripId, top.id, verdict));
-    window.setTimeout(() => {
-      setHistory((h) => [top, ...h]);
-      setQueue((q) => q.slice(1));
-      setDrag({ x: 0, y: 0 });
-      setExiting(null);
-    }, 220);
+    startTransition(() => castVote(tripId, card.id, verdict));
+    setHistory((h) => [card, ...h]);
+    setQueue((q) => q.slice(1));
+    setExit({ activity: card, from, verdict });
+    lastFeedback.current = null;
+    setFeedback(null);
+    window.setTimeout(() => setExit(null), 340);
   }
 
-  function onPointerDown(e: PointerEvent<HTMLDivElement>) {
-    if (exiting) {
-      return;
-    }
-    start.current = { x: e.clientX, y: e.clientY };
-    setDragging(true);
-    e.currentTarget.setPointerCapture(e.pointerId);
-  }
-  function onPointerMove(e: PointerEvent<HTMLDivElement>) {
-    if (!start.current) {
-      return;
-    }
-    setDrag({ x: e.clientX - start.current.x, y: e.clientY - start.current.y });
-  }
-  function onPointerUp() {
-    if (!start.current) {
-      return;
-    }
-    start.current = null;
-    setDragging(false);
-    const verdict = dragVerdict(drag.x, drag.y);
-    if (verdict) {
-      commit(verdict);
-    } else {
-      setDrag({ x: 0, y: 0 });
-    }
-  }
+  const gesture = useSwipeGesture({
+    disabled: !!exit || !top,
+    cardRef,
+    onSwipe: (verdict, from) => commit(verdict, from),
+    onDragMove: (x, y) => {
+      // Throttle React : ne re-render que quand la CATÉGORIE de verdict change
+      // (le transform de la carte, lui, reste impératif dans le hook → fluide).
+      const v = dragVerdictCategory(x, y);
+      if (v !== lastFeedback.current) {
+        lastFeedback.current = v;
+        setFeedback(v);
+      }
+    },
+    onDragEnd: () => {
+      lastFeedback.current = null;
+      setFeedback(null);
+    },
+  });
 
   function undo() {
     const last = history[0];
@@ -94,7 +88,7 @@ export function SwipeDeck({ tripId, activities }: { tripId: string; activities: 
     setQueue((q) => [last, ...q]);
   }
 
-  if (!top) {
+  if (!top && !exit) {
     return (
       <p className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-4 py-10 text-center text-sm text-encre-douce">
         {t("activities.deckEmpty")}
@@ -102,57 +96,54 @@ export function SwipeDeck({ tripId, activities }: { tripId: string; activities: 
     );
   }
 
-  const offset = exiting ? exitOffset(exiting) : drag;
-  const rotation = dragRotation(offset.x);
-  const preview = dragging ? dragVerdict(drag.x, drag.y) : null;
-
   return (
     <div className="flex flex-col items-center gap-4">
       <div className="relative h-96 w-full max-w-sm select-none">
         {queue[1] ? <ActivityCard activity={queue[1]} behind /> : null}
-        <div
-          className="absolute inset-0 cursor-grab touch-none active:cursor-grabbing"
-          style={{
-            transform: `translate(${offset.x}px, ${offset.y}px) rotate(${rotation}deg)`,
-            transition: dragging ? "none" : "transform 0.22s ease-out",
-          }}
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
-          onPointerCancel={onPointerUp}
-        >
-          <ActivityCard
-            activity={top}
-            preview={preview ? t(`activities.${VERDICT_KEY[preview]}`) : null}
-            previewColor={preview ? VERDICT_COLOR[preview] : ""}
-          />
-        </div>
+        {top ? (
+          <div
+            key={top.id}
+            ref={cardRef}
+            className="absolute inset-0 cursor-grab touch-none active:cursor-grabbing"
+            onPointerDown={gesture.onPointerDown}
+            onPointerMove={gesture.onPointerMove}
+            onPointerUp={gesture.onPointerUp}
+            onPointerCancel={gesture.onPointerCancel}
+          >
+            <ActivityCard
+              activity={top}
+              preview={feedback ? t(`activities.${VERDICT_KEY[feedback]}`) : null}
+              previewColor={feedback ? VERDICT_COLOR[feedback] : ""}
+            />
+          </div>
+        ) : null}
+        {exit ? <ExitCard exit={exit} /> : null}
       </div>
 
       <div className="flex items-center gap-3">
         <VerdictButton
-          onClick={() => commit("NO")}
+          onClick={() => commit("NO", { x: 0, y: 0 })}
           label={t("activities.no")}
           className="text-bordeaux"
         >
           <X aria-hidden="true" />
         </VerdictButton>
         <VerdictButton
-          onClick={() => commit("MAYBE")}
+          onClick={() => commit("MAYBE", { x: 0, y: 0 })}
           label={t("activities.maybe")}
           className="text-laiton"
         >
           <Check aria-hidden="true" />
         </VerdictButton>
         <VerdictButton
-          onClick={() => commit("SUPER")}
+          onClick={() => commit("SUPER", { x: 0, y: 0 })}
           label={t("activities.super")}
           className="text-bleu-nuit"
         >
           <Star aria-hidden="true" />
         </VerdictButton>
         <VerdictButton
-          onClick={() => commit("YES")}
+          onClick={() => commit("YES", { x: 0, y: 0 })}
           label={t("activities.yes")}
           className="text-vert"
         >
@@ -164,12 +155,54 @@ export function SwipeDeck({ tripId, activities }: { tripId: string; activities: 
         type="button"
         onClick={undo}
         disabled={history.length === 0}
-        className="flex items-center gap-1.5 text-xs text-encre-douce underline-offset-4 hover:text-encre disabled:opacity-40 disabled:no-underline"
+        className="flex items-center gap-1.5 text-xs text-encre-douce underline-offset-4 hover:text-encre disabled:no-underline disabled:opacity-40"
       >
         <RotateCcw className="size-3.5" aria-hidden="true" />
         {t("activities.undo")}
       </button>
       <p className="text-center text-xs text-encre-douce">{t("activities.swipeHint")}</p>
+    </div>
+  );
+}
+
+/** Catégorie de verdict pour l'aperçu (même logique que dragVerdict, sans le seuil bas). */
+function dragVerdictCategory(x: number, y: number): Verdict | null {
+  if (Math.abs(x) < 12 && Math.abs(y) < 12) {
+    return null;
+  }
+  const horizontal = Math.abs(x) > Math.abs(y) * 0.7;
+  if (horizontal) {
+    return x > 0 ? "YES" : "NO";
+  }
+  return y < 0 ? "SUPER" : "MAYBE";
+}
+
+/** Carte sortante, animée hors-écran depuis la position de relâchement. */
+function ExitCard({ exit }: { exit: Exit }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) {
+      return;
+    }
+    const to = exitOffset(exit.verdict);
+    const id = requestAnimationFrame(() => {
+      node.style.transition = "transform 0.32s ease-out, opacity 0.32s ease-out";
+      node.style.transform = `translate3d(${to.x}px, ${to.y}px, 0) rotate(${dragRotation(to.x)}deg)`;
+      node.style.opacity = "0";
+    });
+    return () => cancelAnimationFrame(id);
+  }, [exit]);
+
+  return (
+    <div
+      ref={ref}
+      className="absolute inset-0 z-10"
+      style={{
+        transform: `translate3d(${exit.from.x}px, ${exit.from.y}px, 0) rotate(${dragRotation(exit.from.x)}deg)`,
+      }}
+    >
+      <ActivityCard activity={exit.activity} />
     </div>
   );
 }
@@ -222,7 +255,7 @@ function ActivityCard({
       {preview ? (
         <span
           className={cn(
-            "absolute right-4 top-4 rounded-md border-2 px-2 py-0.5 font-display text-lg uppercase",
+            "absolute top-4 right-4 rounded-md border-2 px-2 py-0.5 font-display text-lg uppercase",
             previewColor,
           )}
         >

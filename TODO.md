@@ -1025,9 +1025,12 @@ Reprendre le concept de **Yallah** dans l'onglet Idées : pour chaque voyage, un
 **Phase 1 — cœur swipe (fait le 2026-07-08)** : `lib/activities/swipe.ts` (maths pures `dragVerdict`/`dragRotation`/`dragIntensity`/`exitOffset`, **axe vertical corrigé** haut=SUPER/bas=MAYBE, 8 tests). Deck `components/activities/swipe-deck.tsx` (glisse pointer + boutons, aperçu du verdict, undo, optimiste), `add-activity-form.tsx`. Server actions `app/(app)/trips/[tripId]/activities/actions.ts` : `castVote` (upsert `(activité,user)` + **quota SUPER 5 côté serveur** → YES+quota_hit), `undoVote`, `resetMyVotes`, `addTripActivity`. Page `activities/page.tsx` (onglet **À swiper**) : deck des non-votées + **classement de consensus** basique via `activity_vote_summary`. i18n `activities.*` fr/en/es. **UI non testée en vrai (nécessite clic/mobile) — à valider par Yves.**
 
 **Reste :**
-- **Phase 2 — consensus riche** : mise en avant des « matchs » (tout l'équipage YES/SUPER), barres de progression par participant + révélation différée `meDone` (anti-biais), realtime (Supabase postgres_changes sur `activity_votes`). (Le classement pondéré de base est déjà en place.)
+- **Phase 2 — reprendre les features de Yallah (Yves : « Yallah était fluide, autant reprendre les features »)** :
+  - [x] **Geste rAF haute-fréquence (fait le 2026-07-08)** : `lib/activities/use-swipe-gesture.ts` porté de Yallah — transform écrit **impérativement** par `requestAnimationFrame` (jamais de setState par frame), `translate3d`+`will-change` GPU, `setPointerCapture`, snap-back animé, distinction tap/drag (`TAP_MAX_MS`/`TAP_MAX_DIST`). Carte sortante sur une couche dédiée (`ExitCard`), feedback throttlé au changement de catégorie de verdict. Remplace le drag setState-par-move.
+  - **Feedback visuel riche** : tampons/teinte animés par verdict (`DragFeedback`/`HeartStamp`/`SuperLikeFX`), carousel photos + lightbox au tap (le hook expose déjà `onTap`).
+  - **Consensus riche** : « matchs » (tout l'équipage YES/SUPER), barres de progression par participant + révélation différée `meDone` (anti-biais), realtime (postgres_changes sur `activity_votes`). (Classement pondéré de base déjà en place.)
 - **Phase 3 — génération par destination** (optionnel) : POI depuis les coords du voyage via **OpenTripMap** (free tier, clé simple) en `source='seed'` ; photos Pexels ; géocodage Nominatim de secours. Découplé du MVP.
-- Photos sur les cartes (bucket), tags emoji, geste rAF haute-fréquence de Yallah si le drag simple ne suffit pas.
+- Photos sur les cartes (bucket), tags emoji.
 - Ajouter `trip_activities.created_by` à la réattribution fantôme (R18).
 
 ### [ ] PHIL-U05 — Clarifier la division BDD locale vs prod

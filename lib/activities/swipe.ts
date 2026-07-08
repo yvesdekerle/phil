@@ -9,6 +9,9 @@ export type Verdict = "YES" | "NO" | "MAYBE" | "SUPER";
 
 /** Distance (px) au-delà de laquelle un déplacement déclenche un verdict. */
 export const SWIPE_THRESHOLD = 90;
+/** Un relâchement rapide et court (< 250 ms, < 8 px) compte comme un tap, pas un swipe. */
+export const TAP_MAX_MS = 250;
+export const TAP_MAX_DIST = 8;
 const TRIGGER = SWIPE_THRESHOLD * 0.4;
 const HORIZONTAL_BIAS = 0.7;
 const MAX_ROTATION = 18;
