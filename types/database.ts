@@ -33,6 +33,58 @@ export type Database = {
   };
   public: {
     Tables: {
+      activity_votes: {
+        Row: {
+          activity_id: string;
+          created_at: string;
+          id: string;
+          quota_hit: boolean;
+          trip_id: string;
+          user_id: string;
+          verdict: string;
+        };
+        Insert: {
+          activity_id: string;
+          created_at?: string;
+          id?: string;
+          quota_hit?: boolean;
+          trip_id: string;
+          user_id: string;
+          verdict: string;
+        };
+        Update: {
+          activity_id?: string;
+          created_at?: string;
+          id?: string;
+          quota_hit?: boolean;
+          trip_id?: string;
+          user_id?: string;
+          verdict?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "activity_votes_activity_id_fkey";
+            columns: ["activity_id"];
+            isOneToOne: false;
+            referencedRelation: "trip_activities";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "activity_votes_trip_id_fkey";
+            columns: ["trip_id"];
+            isOneToOne: false;
+            referencedRelation: "trips";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "activity_votes_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       candidate_votes: {
         Row: {
           candidate_id: string;
@@ -976,6 +1028,81 @@ export type Database = {
           },
         ];
       };
+      trip_activities: {
+        Row: {
+          category: string | null;
+          created_at: string;
+          created_by: string;
+          description: string | null;
+          duration_text: string | null;
+          external_ref: string | null;
+          id: string;
+          lat: number | null;
+          lng: number | null;
+          location: string | null;
+          photo_urls: string[];
+          price_text: string | null;
+          rating: number | null;
+          source: string;
+          tags: string[];
+          title: string;
+          trip_id: string;
+        };
+        Insert: {
+          category?: string | null;
+          created_at?: string;
+          created_by: string;
+          description?: string | null;
+          duration_text?: string | null;
+          external_ref?: string | null;
+          id?: string;
+          lat?: number | null;
+          lng?: number | null;
+          location?: string | null;
+          photo_urls?: string[];
+          price_text?: string | null;
+          rating?: number | null;
+          source?: string;
+          tags?: string[];
+          title: string;
+          trip_id: string;
+        };
+        Update: {
+          category?: string | null;
+          created_at?: string;
+          created_by?: string;
+          description?: string | null;
+          duration_text?: string | null;
+          external_ref?: string | null;
+          id?: string;
+          lat?: number | null;
+          lng?: number | null;
+          location?: string | null;
+          photo_urls?: string[];
+          price_text?: string | null;
+          rating?: number | null;
+          source?: string;
+          tags?: string[];
+          title?: string;
+          trip_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "trip_activities_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "trip_activities_trip_id_fkey";
+            columns: ["trip_id"];
+            isOneToOne: false;
+            referencedRelation: "trips";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       trip_events: {
         Row: {
           created_at: string;
@@ -1674,7 +1801,33 @@ export type Database = {
       };
     };
     Views: {
-      [_ in never]: never;
+      activity_vote_summary: {
+        Row: {
+          activity_id: string | null;
+          likes: number | null;
+          maybes: number | null;
+          nos: number | null;
+          score: number | null;
+          supers: number | null;
+          trip_id: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "activity_votes_activity_id_fkey";
+            columns: ["activity_id"];
+            isOneToOne: false;
+            referencedRelation: "trip_activities";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "activity_votes_trip_id_fkey";
+            columns: ["trip_id"];
+            isOneToOne: false;
+            referencedRelation: "trips";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Functions: {
       create_expense_with_beneficiaries: {
