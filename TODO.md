@@ -1050,6 +1050,20 @@ Reprendre le concept de **Yallah** dans l'onglet Idées : pour chaque voyage, un
 - Photos sur les cartes (bucket), tags emoji.
 - Ajouter `trip_activities.created_by` à la réattribution fantôme (R18).
 
+> **⚠️ Refonte demandée par Yves (2026-07-08) → voir PHIL-U07.** Le swipe ne doit PAS vivre sur un pool séparé (`trip_activities`) : il doit swiper **les idées** (`trip_ideas`). L'onglet « À swiper » et le pool `trip_activities` sont donc à **retirer** au profit de U07. Les parties génériques de U04 (geste rAF, `swipe.ts`, `swipe-feedback.tsx`, `consensus.ts`) sont **réutilisées** par U07 — rien de perdu.
+
+### [~] PHIL-U07 — « Match tes activités » : swipe façon Tinder/Bumble sur les idées (refonte U04)
+**Décision Yves (2026-07-08, captures à l'appui)** : au lieu du simple cœur d'up-vote sur la carte d'idée, l'équipage **swipe les idées** comme sur Tinder/Bumble — **like (YES) / super like (SUPER) / dislike (NO) / pourquoi pas (MAYBE)** — et les cartes affichent les compteurs (❤️ ⭐ 👎…). Un CTA **« Match tes activités »** dans l'onglet **Idées** lance le swipe. « Les idées SONT les activités » → un seul pool.
+
+**Phase 0 — migration (écrite le 2026-07-08, à appliquer par Yves)** : `20260708150000_idea_votes_verdict.sql` — `idea_votes` gagne `verdict` (YES/NO/MAYBE/SUPER, défaut 'YES' → les cœurs existants deviennent des like) + `quota_hit`. PK `(idea_id, user_id)` déjà unique (upsert). **`pnpm db:push` + `pnpm db:types`.**
+
+**Phase 1 — code (après la migration)** :
+- Server action `castIdeaVerdict(tripId, ideaId, verdict)` : upsert `idea_votes` + quota SUPER serveur (rétrograde en YES + `quota_hit`). Remplace/complète l'up-vote actuel.
+- **Deck de swipe sur les idées** : réutilise `swipe-deck`/`swipe-feedback`/`use-swipe-gesture` (génériques) branchés sur `trip_ideas` (les idées `POOL`). CTA « Match tes activités » dans `ideas/page.tsx` → lance le swipe (sous-page `ideas/match` ou inline).
+- **Compteurs sur les cartes d'idées** (`IdeaCard`) : ⭐ supers · ❤️ likes · 👎 nos (via `consensus.ts` réutilisé), « matchs » quand tout l'équipage aime.
+- **Retrait** de l'onglet « À swiper » (`activities` de `TripTabs`) + bascule de la pastille U02 `activities`→`ideas`. Le pool `trip_activities` devient dormant (UI retirée ; table gardée, drop ultérieur possible).
+- i18n `ideas.match.*` (fr/en/es). Adapter `getPendingByTrip` (pending = idées `POOL` non swipées).
+
 ### [ ] PHIL-U05 — Clarifier la division BDD locale vs prod
 Documenter (et éventuellement mettre en place) la **séparation base locale / production**. Aujourd'hui le dev tape la base distante linkée (pas de stack Supabase locale). À creuser : base de dev/test dédiée, seed, isolement des données.
 
