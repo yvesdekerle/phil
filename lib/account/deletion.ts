@@ -31,6 +31,10 @@ async function getOrCreateGhostId(admin: Admin): Promise<string> {
   if (!ghostId) {
     throw new Error("Compte « Voyageur parti » introuvable");
   }
+  // PHIL-R18 : une fois la migration `profiles_is_system` appliquée (db:push) et
+  // les types régénérés (db:types), ajouter `is_system: true` ici pour que le nom
+  // du fantôme soit lisible dans les soldes (policy `profiles_select_system`). La
+  // migration marque déjà un fantôme préexistant ; ce flag couvre les suivants.
   await admin.from("profiles").update({ display_name: GHOST_NAME }).eq("id", ghostId);
   return ghostId;
 }
@@ -90,6 +94,42 @@ async function reassignGroupDataToGhost(
   log(
     "journal_entries",
     (await admin.from("journal_entries").update({ author_id: ghostId }).eq("author_id", userId))
+      .error,
+  );
+  // PHIL-R18 : tables collaboratives ajoutées après coup, toutes en `created_by`
+  // cascade sur profiles → sans réattribution, les activités/repas/courses/lieux
+  // du groupe disparaîtraient avec le partant. Les votes (activity_votes) restent
+  // personnels → purgés par la cascade, comme poll_votes/idea_votes.
+  log(
+    "trip_activities",
+    (await admin.from("trip_activities").update({ created_by: ghostId }).eq("created_by", userId))
+      .error,
+  );
+  log(
+    "trip_meals.created_by",
+    (await admin.from("trip_meals").update({ created_by: ghostId }).eq("created_by", userId)).error,
+  );
+  log(
+    "trip_meals.cook_id",
+    (await admin.from("trip_meals").update({ cook_id: ghostId }).eq("cook_id", userId)).error,
+  );
+  log(
+    "shopping_items.created_by",
+    (await admin.from("shopping_items").update({ created_by: ghostId }).eq("created_by", userId))
+      .error,
+  );
+  log(
+    "shopping_items.checked_by",
+    (await admin.from("shopping_items").update({ checked_by: ghostId }).eq("checked_by", userId))
+      .error,
+  );
+  log(
+    "shopping_items.buyer_id",
+    (await admin.from("shopping_items").update({ buyer_id: ghostId }).eq("buyer_id", userId)).error,
+  );
+  log(
+    "trip_places",
+    (await admin.from("trip_places").update({ created_by: ghostId }).eq("created_by", userId))
       .error,
   );
 
