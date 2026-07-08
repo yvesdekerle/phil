@@ -1117,8 +1117,9 @@ Reprendre le concept de **Yallah** dans l'onglet Idées : pour chaque voyage, un
 
 **Reste (nettoyage mineur, non bloquant)** : purger les clés i18n `activities.*` devenues inutiles (le deck a disparu, `ActivityConsensus` en garde une partie) ; renommer `activity-consensus`/`consensus.ts` (nom « activity » alors qu'ils servent les idées) ; **drop** de la table `trip_activities` + `activity_votes` (migration, quand tu confirmes que rien n'y est resté).
 
-### [ ] PHIL-U05 — Clarifier la division BDD locale vs prod
+### [x] PHIL-U05 — Clarifier la division BDD locale vs prod *(fait le 2026-07-08)*
 Documenter (et éventuellement mettre en place) la **séparation base locale / production**. Aujourd'hui le dev tape la base distante linkée (pas de stack Supabase locale). À creuser : base de dev/test dédiée, seed, isolement des données.
+> `docs/BASE-DE-DONNEES.md` (volet **documentation** ; la mise en place = R11). Clarifie l'état actuel : **un seul projet distant `phil`** sert dev+preview+prod, tout tape dessus via `.env.local` (`pnpm dev`, `db:push`, `db:types`, `verify:rls`, seeds) — tableau des cibles réelles à l'appui. Détaille le **risque** (migration/reset/seed/verify-rls opèrent sur la prod contenant les vraies pièces d'identité), puis **3 options** : (A) stack locale `supabase start` pour les opérations destructives, (B) **2ᵉ projet `phil-dev` = R11, recommandé** (clés par env Vercel, prod isolée, débloque R17), (C) statu quo discipliné. **Reco** + chaîne **U05 (clarifie) → R11 (provisionne) → R17 (CI RLS)** + garde-fous en attendant. Lié dans le README. Doc seule → build/lint/type-check inchangés.
 
 ### [x] PHIL-U06 — Générateur de guide de voyage (avant / pendant / après) *(fait le 2026-07-08)*
 Guide de voyage **template** rempli avec les données du voyage, en **HTML sur le site ET PDF** (une seule source : bouton « Télécharger en PDF » → `window.print()` cadré par `@media print` ; approche free-tier, un vrai PDF serveur type Puppeteer ne tient pas dans le Hobby Vercel). Réf. : `tmp/guide/guide_islande.pdf`.
