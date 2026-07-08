@@ -1,6 +1,7 @@
 import { format, parseISO } from "date-fns";
 import { notFound, redirect } from "next/navigation";
 import { CategoryIcon } from "@/components/vault/category-icon";
+import { EncryptedDocumentNumber } from "@/components/vault/encrypted-document-number";
 import { OfflineVaultToggle } from "@/components/vault/offline-vault-toggle";
 import { getDateFnsLocale, getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
@@ -98,9 +99,16 @@ export default async function VaultDocumentPage({
             {doc.expires_at
               ? `${t("vault.detail.expiresOnPrefix")} ${format(parseISO(doc.expires_at), "d MMMM yyyy", { locale: dfLocale })}`
               : t("vault.detail.noExpiry")}
-            {metadata.document_number
-              ? ` · ${t("vault.detail.numberPrefix")} ${metadata.document_number}`
-              : ""}
+            {/* PHIL-R10 : n° chiffré → déchiffré côté client (propriétaire) ; legacy clair en repli. */}
+            {isOwner && metadata.enc_document_number && metadata.enc_document_number_iv ? (
+              <EncryptedDocumentNumber
+                prefix={t("vault.detail.numberPrefix")}
+                encValue={metadata.enc_document_number}
+                iv={metadata.enc_document_number_iv}
+              />
+            ) : metadata.document_number ? (
+              ` · ${t("vault.detail.numberPrefix")} ${metadata.document_number}`
+            ) : null}
           </p>
         </div>
       </div>
@@ -124,6 +132,9 @@ export default async function VaultDocumentPage({
             fileName={doc.file_name}
             category={doc.category}
             expiresAt={doc.expires_at ?? ""}
+            encrypted={doc.encrypted}
+            encDocumentNumber={metadata.enc_document_number ?? ""}
+            encDocumentNumberIv={metadata.enc_document_number_iv ?? ""}
             documentNumber={metadata.document_number ?? ""}
           />
           <OfflineVaultToggle documentId={doc.id} />

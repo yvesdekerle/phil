@@ -29,6 +29,9 @@ const buildCreateDocumentSchema = (t: (key: string) => string) =>
     encFileIv: z.string().max(64).optional(),
     encWrappedDek: z.string().max(255).optional(),
     encDekIv: z.string().max(64).optional(),
+    // PHIL-R10 : n° de pièce chiffré E2EE (base64), en lieu et place du clair.
+    encDocumentNumber: z.string().max(255).optional(),
+    encDocumentNumberIv: z.string().max(64).optional(),
   });
 
 export type CreateDocumentState = {
@@ -60,6 +63,8 @@ export async function createDocument(
     encFileIv: formData.get("encFileIv") ?? "",
     encWrappedDek: formData.get("encWrappedDek") ?? "",
     encDekIv: formData.get("encDekIv") ?? "",
+    encDocumentNumber: formData.get("encDocumentNumber") ?? "",
+    encDocumentNumberIv: formData.get("encDocumentNumberIv") ?? "",
   });
 
   if (!parsed.success) {
@@ -84,13 +89,21 @@ export async function createDocument(
     return { status: "error", message: t("documents.msg.storagePathInvalid") };
   }
 
+  // PHIL-T01 : document chiffré E2EE → les trois métadonnées sont obligatoires.
+  const isEncrypted = parsed.data.encrypted === "1";
+
+  // PHIL-R10 : chiffré → n° stocké chiffré (enc_document_number) ; sinon → clair
+  // (doc voyage legacy uniquement). Jamais de n° en clair sur un doc chiffré.
   const metadata: Record<string, string> = {};
-  if (parsed.data.documentNumber) {
+  if (isEncrypted) {
+    if (parsed.data.encDocumentNumber && parsed.data.encDocumentNumberIv) {
+      metadata.enc_document_number = parsed.data.encDocumentNumber;
+      metadata.enc_document_number_iv = parsed.data.encDocumentNumberIv;
+    }
+  } else if (parsed.data.documentNumber) {
     metadata.document_number = parsed.data.documentNumber;
   }
 
-  // PHIL-T01 : document chiffré E2EE → les trois métadonnées sont obligatoires.
-  const isEncrypted = parsed.data.encrypted === "1";
   if (
     isEncrypted &&
     (!parsed.data.encFileIv || !parsed.data.encWrappedDek || !parsed.data.encDekIv)

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useT } from "@/components/i18n/provider";
 import {
   AlertDialog,
@@ -24,6 +24,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { getCoffreMaster } from "@/lib/crypto/coffre-session";
+import { decryptBytes, encryptBytes, fromBase64, toBase64 } from "@/lib/crypto/vault-crypto";
 import { categoryLabel, type DocumentCategory, VAULT_CATEGORIES } from "@/lib/vault/categories";
 import { type DocumentActionState, deleteDocument, updateDocument } from "./actions";
 
@@ -32,6 +34,10 @@ type Props = {
   fileName: string;
   category: DocumentCategory;
   expiresAt: string;
+  // PHIL-R10 : n° de pièce chiffré E2EE (doc chiffré) ou en clair (legacy).
+  encrypted: boolean;
+  encDocumentNumber: string;
+  encDocumentNumberIv: string;
   documentNumber: string;
 };
 
@@ -42,18 +48,69 @@ export function DocumentActions({ documentId, ...defaults }: Props) {
   const [category, setCategory] = useState<DocumentCategory>(defaults.category);
   const [expiresAt, setExpiresAt] = useState(defaults.expiresAt);
   const [documentNumber, setDocumentNumber] = useState(defaults.documentNumber);
+  const [numberLoaded, setNumberLoaded] = useState(false);
   const [state, setState] = useState<DocumentActionState>({ status: "idle" });
   const [pending, startTransition] = useTransition();
 
+  // PHIL-R10 : à l'ouverture de l'édition d'un doc chiffré, déchiffre le n° pour
+  // préremplir (la maîtresse est déjà déverrouillée par la porte du coffre).
+  useEffect(() => {
+    if (!editing || numberLoaded || !defaults.encrypted || !defaults.encDocumentNumber) {
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const master = await getCoffreMaster();
+        const clear = await decryptBytes(
+          master,
+          fromBase64(defaults.encDocumentNumber),
+          fromBase64(defaults.encDocumentNumberIv),
+        );
+        if (!cancelled) {
+          setDocumentNumber(new TextDecoder().decode(clear));
+          setNumberLoaded(true);
+        }
+      } catch {
+        // Déchiffrement impossible → on laisse le champ vide.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    editing,
+    numberLoaded,
+    defaults.encrypted,
+    defaults.encDocumentNumber,
+    defaults.encDocumentNumberIv,
+  ]);
+
   function submit(e: React.FormEvent) {
     e.preventDefault();
-    const formData = new FormData();
-    formData.set("documentId", documentId);
-    formData.set("fileName", fileName);
-    formData.set("category", category);
-    formData.set("expiresAt", expiresAt);
-    formData.set("documentNumber", documentNumber);
     startTransition(async () => {
+      const formData = new FormData();
+      formData.set("documentId", documentId);
+      formData.set("fileName", fileName);
+      formData.set("category", category);
+      formData.set("expiresAt", expiresAt);
+      if (defaults.encrypted) {
+        formData.set("encrypted", "1");
+        const n = documentNumber.trim();
+        if (n) {
+          try {
+            const master = await getCoffreMaster();
+            const enc = await encryptBytes(master, new TextEncoder().encode(n));
+            formData.set("encDocumentNumber", toBase64(enc.data));
+            formData.set("encDocumentNumberIv", toBase64(enc.iv));
+          } catch {
+            setState({ status: "error", message: t("documents.msg.updateFailed") });
+            return;
+          }
+        }
+      } else {
+        formData.set("documentNumber", documentNumber);
+      }
       const result = await updateDocument({ status: "idle" }, formData);
       setState(result);
       if (result.status === "success") {

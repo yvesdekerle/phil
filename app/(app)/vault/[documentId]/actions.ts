@@ -26,6 +26,10 @@ export async function updateDocument(
     category: z.enum(CATEGORIES as [string, ...string[]]),
     expiresAt: z.union([z.literal(""), z.string().regex(/^\d{4}-\d{2}-\d{2}$/)]).optional(),
     documentNumber: z.string().trim().max(100).optional(),
+    // PHIL-R10 : édition d'un doc chiffré → n° ré-chiffré côté client.
+    encrypted: z.union([z.literal(""), z.literal("1")]).optional(),
+    encDocumentNumber: z.string().max(255).optional(),
+    encDocumentNumberIv: z.string().max(64).optional(),
   });
   const parsed = updateDocumentSchema.safeParse({
     documentId: formData.get("documentId"),
@@ -33,6 +37,9 @@ export async function updateDocument(
     category: formData.get("category"),
     expiresAt: formData.get("expiresAt") ?? "",
     documentNumber: formData.get("documentNumber") ?? "",
+    encrypted: formData.get("encrypted") ?? "",
+    encDocumentNumber: formData.get("encDocumentNumber") ?? "",
+    encDocumentNumberIv: formData.get("encDocumentNumberIv") ?? "",
   });
 
   if (!parsed.success) {
@@ -50,8 +57,15 @@ export async function updateDocument(
     redirect("/login");
   }
 
+  // PHIL-R10 : chiffré → n° ré-chiffré (enc_document_number) ou vidé si effacé ;
+  // sinon → clair (legacy). `metadata` est réécrit entièrement à chaque édition.
   const metadata: Record<string, string> = {};
-  if (parsed.data.documentNumber) {
+  if (parsed.data.encrypted === "1") {
+    if (parsed.data.encDocumentNumber && parsed.data.encDocumentNumberIv) {
+      metadata.enc_document_number = parsed.data.encDocumentNumber;
+      metadata.enc_document_number_iv = parsed.data.encDocumentNumberIv;
+    }
+  } else if (parsed.data.documentNumber) {
     metadata.document_number = parsed.data.documentNumber;
   }
 

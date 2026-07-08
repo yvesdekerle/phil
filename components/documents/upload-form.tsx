@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { getCoffreMaster } from "@/lib/crypto/coffre-session";
-import { sealDocument, toBase64 } from "@/lib/crypto/vault-crypto";
+import { encryptBytes, sealDocument, toBase64 } from "@/lib/crypto/vault-crypto";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { CATEGORIES, categoryLabel, type DocumentCategory } from "@/lib/vault/categories";
@@ -126,6 +126,9 @@ export function UploadForm({
     // emballée par la maîtresse) partent en base via le FormData.
     let uploadBody: Blob | File = file;
     let encMeta: { fileIv: string; wrappedDek: string; dekIv: string } | null = null;
+    // PHIL-R10 : le n° de pièce aussi est chiffré côté client (avec la maîtresse) —
+    // le serveur ne le voit jamais en clair.
+    let encDocNumber: { value: string; iv: string } | null = null;
     if (encrypt) {
       try {
         const master = await getCoffreMaster();
@@ -138,6 +141,10 @@ export function UploadForm({
           wrappedDek: toBase64(sealed.wrappedDek),
           dekIv: toBase64(sealed.dekIv),
         };
+        if (documentNumber.trim()) {
+          const enc = await encryptBytes(master, new TextEncoder().encode(documentNumber.trim()));
+          encDocNumber = { value: toBase64(enc.data), iv: toBase64(enc.iv) };
+        }
       } catch (err) {
         setPhase("idle");
         setError(err instanceof Error ? err.message : t("documents.upload.genericError"));
@@ -167,7 +174,6 @@ export function UploadForm({
     formData.set("storagePath", storagePath);
     formData.set("category", category);
     formData.set("expiresAt", expiresAt);
-    formData.set("documentNumber", documentNumber);
     formData.set("label", label);
     formData.set("eventId", eventId);
     if (encMeta) {
@@ -175,6 +181,14 @@ export function UploadForm({
       formData.set("encFileIv", encMeta.fileIv);
       formData.set("encWrappedDek", encMeta.wrappedDek);
       formData.set("encDekIv", encMeta.dekIv);
+      // Chiffré : on n'envoie QUE la version chiffrée du n° (jamais le clair).
+      if (encDocNumber) {
+        formData.set("encDocumentNumber", encDocNumber.value);
+        formData.set("encDocumentNumberIv", encDocNumber.iv);
+      }
+    } else {
+      // Non chiffré (doc voyage legacy) : n° en clair comme avant.
+      formData.set("documentNumber", documentNumber);
     }
     if (tripId) {
       formData.set("tripId", tripId);
