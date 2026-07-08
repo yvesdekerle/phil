@@ -617,17 +617,23 @@ export type Database = {
         Row: {
           created_at: string;
           idea_id: string;
+          quota_hit: boolean;
           user_id: string;
+          verdict: string;
         };
         Insert: {
           created_at?: string;
           idea_id: string;
+          quota_hit?: boolean;
           user_id: string;
+          verdict?: string;
         };
         Update: {
           created_at?: string;
           idea_id?: string;
+          quota_hit?: boolean;
           user_id?: string;
+          verdict?: string;
         };
         Relationships: [
           {

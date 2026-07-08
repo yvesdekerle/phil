@@ -1,3 +1,4 @@
+import { Sparkles } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { IdeaCard } from "@/components/ideas/idea-card";
@@ -67,6 +68,11 @@ export default async function TripIdeasPage({
   ]);
 
   const canPropose = me?.role === "OWNER" || me?.role === "EDITOR";
+
+  // PHIL-U07 : nombre d'idées du pool que je n'ai pas encore swipées (pour le CTA).
+  const toSwipeCount = (ideasData ?? []).filter(
+    (i) => i.status === "POOL" && !(i.idea_votes ?? []).some((v) => v.user_id === user.id),
+  ).length;
 
   // PHIL-Q37c : carte des idées géolocalisées + logements, distances depuis le logement choisi
   const locatedIdeas = (ideasData ?? []).filter(
@@ -207,6 +213,29 @@ export default async function TripIdeasPage({
           </Button>
         ) : null}
       </div>
+
+      {/* PHIL-U07 : lance le swipe façon Tinder/Bumble sur les idées du voyage. */}
+      <Link
+        href={`/trips/${tripId}/ideas/match`}
+        className="group flex items-center justify-between gap-3 rounded-xl border border-bordeaux/30 bg-gradient-to-br from-bordeaux/10 to-laiton/10 px-4 py-3.5 transition-colors hover:border-bordeaux/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-laiton"
+      >
+        <span className="flex items-center gap-3">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-bordeaux text-papier">
+            <Sparkles className="size-5" aria-hidden="true" />
+          </span>
+          <span className="flex flex-col">
+            <span className="font-display text-lg text-encre">{t("ideas.match.cta")}</span>
+            <span className="text-xs text-encre-douce">
+              {toSwipeCount > 0
+                ? t("ideas.match.ctaCount").replace("{n}", String(toSwipeCount))
+                : t("ideas.match.ctaDone")}
+            </span>
+          </span>
+        </span>
+        <span className="shrink-0 font-display text-2xl text-bordeaux transition-transform group-hover:translate-x-0.5">
+          →
+        </span>
+      </Link>
 
       <SearchForm
         action={`/trips/${tripId}/ideas`}
