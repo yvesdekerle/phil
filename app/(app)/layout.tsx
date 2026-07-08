@@ -21,7 +21,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <>
-      <header className="border-b border-laiton-clair/60">
+      <header className="border-b border-laiton-clair/60 print:hidden">
         <div className="mx-auto flex h-14 w-full max-w-5xl items-center justify-between px-4">
           <div className="flex items-center gap-6">
             <Link

@@ -83,7 +83,7 @@ export default async function TripLayout({
           {passportWarning.text}
         </div>
       ) : null}
-      <header className="overflow-hidden rounded-lg border border-laiton-clair bg-papier">
+      <header className="overflow-hidden rounded-lg border border-laiton-clair bg-papier print:hidden">
         <div className="relative h-40 bg-encre sm:h-52">
           {trip.cover_image_url ? (
             <CoverImage
@@ -116,7 +116,7 @@ export default async function TripLayout({
       </header>
 
       {/* PHIL-Q37c : le menu du voyage reste collé en haut au défilement */}
-      <nav className="sticky top-2 z-[1001] mt-2 rounded-lg border border-laiton-clair bg-papier px-5 shadow-[0_2px_10px_rgba(31,42,68,0.05)]">
+      <nav className="sticky top-2 z-[1001] mt-2 rounded-lg border border-laiton-clair bg-papier px-5 shadow-[0_2px_10px_rgba(31,42,68,0.05)] print:hidden">
         <TripTabs tripId={trip.id} />
       </nav>
 

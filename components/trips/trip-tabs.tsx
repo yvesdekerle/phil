@@ -16,6 +16,7 @@ const TABS = [
   { segment: "photos", key: "photos" },
   { segment: "budget", key: "budget" },
   { segment: "participants", key: "participants" },
+  { segment: "guide", key: "guide" },
   { segment: "settings", key: "settings" },
 ] as const;
 

@@ -1030,8 +1030,16 @@ Reprendre le concept de **Yallah** dans l'onglet Idées : pour chaque voyage, un
 ### [ ] PHIL-U05 — Clarifier la division BDD locale vs prod
 Documenter (et éventuellement mettre en place) la **séparation base locale / production**. Aujourd'hui le dev tape la base distante linkée (pas de stack Supabase locale). À creuser : base de dev/test dédiée, seed, isolement des données.
 
-### [ ] PHIL-U06 — Générateur de guide de voyage (avant / pendant / après)
-Permettre de créer un **guide de voyage** : avant (préparation), pendant, et **après** (rétro : infos passées, **dépenses ajustées**, photos…). En faire un **template** que chaque voyage remplit avec ses données. Réf. exemple : `tmp/guide/guide_islande.pdf`.
+### [~] PHIL-U06 — Générateur de guide de voyage (avant / pendant / après)
+Guide de voyage **template** rempli avec les données du voyage, en **HTML sur le site ET PDF** (une seule source : bouton « Télécharger en PDF » → `window.print()` cadré par `@media print` ; approche free-tier, un vrai PDF serveur type Puppeteer ne tient pas dans le Hobby Vercel). Réf. : `tmp/guide/guide_islande.pdf`.
+
+**Phase 1 (fait le 2026-07-08)** : page `/trips/[id]/guide` (onglet **Guide**), Server Component agrégeant les données existantes en 3 sections :
+- **Avant** : infos pratiques (destination, nuits, fuseau, monnaie), équipage, valise groupée par section (✓/○).
+- **Pendant** : programme jour par jour (events groupés par jour, heure + lieu).
+- **Après** : total dépensé par devise, nombre de photos, carnet de bord (journal).
+Chrome de l'app masqué à l'impression (`print:hidden` sur header app + couverture/onglets voyage), pied de page **branding Phil** (« Généré par Phil · <app_url> »). Bouton `PrintGuideButton`. i18n `guide.*` + `tripTabs.guide` (fr/en/es).
+
+**Reste (Phase 2, itérations)** : soldes détaillés « qui doit combien à qui » (réutiliser le calcul de référence de l'onglet Budget), vignettes photos réelles (URLs bucket), notes d'événements, mise en page fidèle au PDF Islande (sauts de page par section, page de garde avec couverture).
 
 ---
 
