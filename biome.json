@@ -39,7 +39,8 @@
       "scripts/**",
       "tests/**",
       "*.ts",
-      "*.json"
+      "*.json",
+      "!types/database.ts"
     ]
   }
 }
