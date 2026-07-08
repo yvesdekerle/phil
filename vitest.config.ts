@@ -33,6 +33,7 @@ export default defineConfig({
         "lib/webauthn/vault-session-token.ts",
         "lib/account/reassign.ts",
         "lib/trips/image-guard.ts",
+        "lib/activities/swipe.ts",
       ],
       thresholds: { lines: 85, functions: 85, statements: 85, branches: 75 },
     },
