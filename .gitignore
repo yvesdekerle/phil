@@ -44,6 +44,9 @@ next-env.d.ts
 # tmp working files
 /tmp/
 
+# checklist perso (local, non suivie)
+/yves-todo-list.md
+
 # IDE
 .idea/
 
