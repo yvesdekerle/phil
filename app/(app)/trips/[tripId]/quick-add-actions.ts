@@ -4,10 +4,11 @@ import { fromZonedTime } from "date-fns-tz";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import type { ActionState } from "@/lib/forms/action-state";
 import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 
-export type QuickAddState = { status: "idle" | "error"; message?: string };
+export type QuickAddState = ActionState;
 
 /**
  * Ajout rapide (PHIL-Q01) : titre + jour (+ heure, défaut 12h) → ACTIVITY

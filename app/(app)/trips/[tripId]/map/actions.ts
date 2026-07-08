@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth/require-user";
+import type { ActionState } from "@/lib/forms/action-state";
 import { geocode } from "@/lib/geo/geocode";
 import { getT } from "@/lib/i18n/server";
 import { areUuids } from "@/lib/validation";
@@ -16,7 +17,7 @@ const placeSchema = z.object({
   note: z.string().trim().max(300).optional(),
 });
 
-export type PlaceState = { status: "idle" | "error"; message?: string };
+export type PlaceState = ActionState;
 
 /** PHIL-S02 : épingle un commerce repéré (adresse géocodée) sur la carte. */
 export async function addTripPlace(_prev: PlaceState, formData: FormData): Promise<PlaceState> {

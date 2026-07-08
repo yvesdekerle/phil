@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import { getCoffreMaster } from "@/lib/crypto/coffre-session";
 import { encryptBytes, sealDocument, toBase64 } from "@/lib/crypto/vault-crypto";
+import type { ActionState } from "@/lib/forms/action-state";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { CATEGORIES, categoryLabel, type DocumentCategory } from "@/lib/vault/categories";
@@ -21,7 +22,7 @@ import { extensionFor, validateFile } from "@/lib/vault/upload";
 
 const ID_CATEGORIES: DocumentCategory[] = ["passport", "id_card", "driving_license"];
 
-export type UploadActionState = { status: "idle" | "error"; message?: string };
+export type UploadActionState = ActionState;
 
 type Props = {
   userId: string;

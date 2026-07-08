@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth/require-user";
+import type { ActionState } from "@/lib/forms/action-state";
 import { getT } from "@/lib/i18n/server";
 import { sendPushToUser } from "@/lib/notifications/push";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -17,7 +18,7 @@ const pollSchema = z.object({
   closesAt: z.union([z.literal(""), z.string().regex(/^\d{4}-\d{2}-\d{2}$/)]).optional(),
 });
 
-export type PollState = { status: "idle" | "error"; message?: string };
+export type PollState = ActionState;
 
 /** Ouvre un sondage éclair (PHIL-N12) + push à l'équipage. */
 export async function createPoll(_prev: PollState, formData: FormData): Promise<PollState> {

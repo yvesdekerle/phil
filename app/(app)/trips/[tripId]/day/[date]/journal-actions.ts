@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import type { ActionState } from "@/lib/forms/action-state";
 import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { areUuids } from "@/lib/validation";
@@ -13,7 +14,7 @@ const entrySchema = z.object({
   body: z.string().trim().min(1).max(2000),
 });
 
-export type JournalState = { status: "idle" | "error"; message?: string };
+export type JournalState = ActionState;
 
 /** Écrit (ou réécrit) son entrée de journal du jour (PHIL-P08). */
 export async function saveJournalEntry(

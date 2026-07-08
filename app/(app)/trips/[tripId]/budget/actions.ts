@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { EXPENSE_CATEGORIES } from "@/lib/budget/categories";
+import type { ActionState } from "@/lib/forms/action-state";
 import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { areUuids } from "@/lib/validation";
@@ -23,7 +24,7 @@ const expenseSchema = z.object({
   splitMode: z.enum(["equal", "shares", "exact"]).default("equal"),
 });
 
-export type ExpenseState = { status: "idle" | "error"; message?: string };
+export type ExpenseState = ActionState;
 
 /** Résultat d'une mutation directe (PHIL-Q58) — remonté à l'UI pour un toast. */
 export type ActionResult = { ok: boolean; message?: string };

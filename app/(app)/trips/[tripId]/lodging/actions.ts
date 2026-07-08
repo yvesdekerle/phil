@@ -4,13 +4,14 @@ import { fromZonedTime } from "date-fns-tz";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth/require-user";
+import type { ActionState } from "@/lib/forms/action-state";
 import { geolocateEvent } from "@/lib/geo/locate";
 import { getT } from "@/lib/i18n/server";
 import { areUuids } from "@/lib/validation";
 
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 
-export type CandidateState = { status: "idle" | "error"; message?: string };
+export type CandidateState = ActionState;
 
 /** Propose une option d'hébergement (PHIL-L01). */
 export async function addCandidate(

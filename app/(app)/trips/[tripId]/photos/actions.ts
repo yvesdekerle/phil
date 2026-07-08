@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import type { ActionState } from "@/lib/forms/action-state";
 import { getT } from "@/lib/i18n/server";
 import { MAX_PHOTO_BYTES, PHOTOS_PER_TRIP } from "@/lib/photos/limits";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -22,7 +23,7 @@ const registerSchema = z.object({
   lng: z.union([z.literal(""), z.coerce.number().min(-180).max(180)]).optional(),
 });
 
-export type PhotoState = { status: "idle" | "error"; message?: string };
+export type PhotoState = ActionState;
 
 async function removeBlobs(paths: (string | null | undefined)[]): Promise<void> {
   const admin = createAdminClient();

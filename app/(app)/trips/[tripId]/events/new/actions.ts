@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { LODGING_PLATFORMS } from "@/lib/events/lodging";
 import { TRANSPORT_MODES } from "@/lib/events/transport";
+import type { ActionState } from "@/lib/forms/action-state";
 import { geolocateEvent } from "@/lib/geo/locate";
 import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
@@ -17,10 +18,7 @@ const coordsSchema = {
   locationLng: z.union([z.literal(""), z.coerce.number().min(-180).max(180)]).optional(),
 };
 
-export type CreateEventState = {
-  status: "idle" | "error";
-  message?: string;
-};
+export type CreateEventState = ActionState;
 
 export async function createActivityEvent(
   _prev: CreateEventState,

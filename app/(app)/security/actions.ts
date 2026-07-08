@@ -7,15 +7,13 @@ import {
 } from "@simplewebauthn/server";
 import { cookies } from "next/headers";
 import { requireUser } from "@/lib/auth/require-user";
+import type { ActionStateWithSuccess } from "@/lib/forms/action-state";
 import { getT } from "@/lib/i18n/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { areUuids } from "@/lib/validation";
 import { CHALLENGE_COOKIE, getRpConfig } from "@/lib/webauthn/config";
 
-export type SecurityActionState = {
-  status: "idle" | "success" | "error";
-  message?: string;
-};
+export type SecurityActionState = ActionStateWithSuccess;
 
 /** Étape 1 : options d'enregistrement, challenge posé en cookie httpOnly (5 min). */
 export async function getRegistrationOptions() {

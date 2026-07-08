@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import type { ActionStateWithSuccess } from "@/lib/forms/action-state";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { messages, translator } from "@/lib/i18n/messages";
 import { getT } from "@/lib/i18n/server";
@@ -9,10 +10,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { areUuids } from "@/lib/validation";
 
-export type InviteFriendState = {
-  status: "idle" | "success" | "error";
-  message?: string;
-};
+export type InviteFriendState = ActionStateWithSuccess;
 
 /**
  * Ré-invitation en un clic (PHIL-D08) : crée une invitation classique

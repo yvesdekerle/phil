@@ -2,14 +2,12 @@
 
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import type { ActionState } from "@/lib/forms/action-state";
 import { getT } from "@/lib/i18n/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
-export type AcceptState = {
-  status: "idle" | "error";
-  message?: string;
-};
+export type AcceptState = ActionState;
 
 /**
  * Acceptation d'une invitation (PHIL-D06). L'invité n'étant pas participant,

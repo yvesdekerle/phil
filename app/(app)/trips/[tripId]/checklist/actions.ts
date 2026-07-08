@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth/require-user";
+import type { ActionState } from "@/lib/forms/action-state";
 import { getT } from "@/lib/i18n/server";
 import { areUuids } from "@/lib/validation";
 
@@ -21,7 +22,7 @@ const addSchema = z.object({
   category: z.string().trim().max(40).optional(),
 });
 
-export type ChecklistState = { status: "idle" | "error"; message?: string };
+export type ChecklistState = ActionState;
 
 export async function addChecklistItem(
   _prev: ChecklistState,

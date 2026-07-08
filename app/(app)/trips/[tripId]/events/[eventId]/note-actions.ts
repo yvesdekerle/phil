@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import type { ActionState } from "@/lib/forms/action-state";
 import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { areUuids } from "@/lib/validation";
@@ -13,7 +14,7 @@ const addNoteSchema = z.object({
   body: z.string().trim().min(1).max(1000),
 });
 
-export type NoteState = { status: "idle" | "error"; message?: string };
+export type NoteState = ActionState;
 
 export async function addEventNote(_prev: NoteState, formData: FormData): Promise<NoteState> {
   const t = await getT();

@@ -2,16 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import type { ActionStateWithSuccess } from "@/lib/forms/action-state";
 import { getT } from "@/lib/i18n/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { areUuids } from "@/lib/validation";
 import { logVaultAccess } from "@/lib/vault/audit";
 
-export type TripDocActionState = {
-  status: "idle" | "success" | "error";
-  message?: string;
-};
+export type TripDocActionState = ActionStateWithSuccess;
 
 /**
  * Suppression d'un document du voyage (PHIL-G04).

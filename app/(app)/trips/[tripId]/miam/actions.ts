@@ -3,11 +3,12 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth/require-user";
+import type { ActionState } from "@/lib/forms/action-state";
 import { getT } from "@/lib/i18n/server";
 import { areUuids } from "@/lib/validation";
 import { MEAL_SLOTS } from "./meal-constants";
 
-export type MiamState = { status: "idle" | "error"; message?: string };
+export type MiamState = ActionState;
 
 const mealSchema = z.object({
   tripId: z.string().uuid(),

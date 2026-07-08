@@ -2,14 +2,12 @@
 
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import type { ActionState } from "@/lib/forms/action-state";
 import { geolocateIdea } from "@/lib/geo/locate";
 import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 
-export type CreateIdeaState = {
-  status: "idle" | "error";
-  message?: string;
-};
+export type CreateIdeaState = ActionState;
 
 export async function createIdea(
   _prev: CreateIdeaState,

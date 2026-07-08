@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import type { ActionStateWithSuccess } from "@/lib/forms/action-state";
 import { geocode } from "@/lib/geo/geocode";
 import { getT } from "@/lib/i18n/server";
 import { logger } from "@/lib/observability/logger";
@@ -27,10 +28,7 @@ function coverFetchMessage(t: Translate, error: CoverFetchError): string {
   return t("settings.cover.errFetch");
 }
 
-export type TripSettingsState = {
-  status: "idle" | "success" | "error";
-  message?: string;
-};
+export type TripSettingsState = ActionStateWithSuccess;
 
 async function getMyRole(tripId: string): Promise<{ role: string | null; userId: string | null }> {
   const supabase = await createClient();

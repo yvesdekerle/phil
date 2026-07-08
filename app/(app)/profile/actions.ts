@@ -3,13 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import type { ActionStateWithSuccess } from "@/lib/forms/action-state";
 import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 
-export type ProfileFormState = {
-  status: "idle" | "success" | "error";
-  message?: string;
-};
+export type ProfileFormState = ActionStateWithSuccess;
 
 export async function updateProfile(
   _prev: ProfileFormState,

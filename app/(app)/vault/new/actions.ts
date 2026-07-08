@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import type { ActionState } from "@/lib/forms/action-state";
 import { getT } from "@/lib/i18n/server";
 import { logger } from "@/lib/observability/logger";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -34,10 +35,7 @@ const buildCreateDocumentSchema = (t: (key: string) => string) =>
     encDocumentNumberIv: z.string().max(64).optional(),
   });
 
-export type CreateDocumentState = {
-  status: "idle" | "error";
-  message?: string;
-};
+export type CreateDocumentState = ActionState;
 
 /**
  * Enregistre en base un document déjà uploadé dans Storage par le client

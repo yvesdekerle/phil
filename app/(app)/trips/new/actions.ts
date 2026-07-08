@@ -3,6 +3,7 @@
 import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import type { ActionState } from "@/lib/forms/action-state";
 import { geocode } from "@/lib/geo/geocode";
 import { getT } from "@/lib/i18n/server";
 import { logger } from "@/lib/observability/logger";
@@ -10,10 +11,7 @@ import { createClient } from "@/lib/supabase/server";
 import { ingestCoverUrl } from "@/lib/trips/cover-fetch";
 import { getTemplate } from "@/lib/trips/templates";
 
-export type CreateTripState = {
-  status: "idle" | "error";
-  message?: string;
-};
+export type CreateTripState = ActionState;
 
 export async function createTrip(
   _prev: CreateTripState,

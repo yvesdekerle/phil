@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import type { ActionState } from "@/lib/forms/action-state";
 import { getT } from "@/lib/i18n/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -32,10 +33,7 @@ function categoryFromLabel(label: string): (typeof TRIP_CATEGORIES)[number] {
   return "other";
 }
 
-export type CreateTripDocumentState = {
-  status: "idle" | "error";
-  message?: string;
-};
+export type CreateTripDocumentState = ActionState;
 
 /**
  * Enregistre un document uploadé directement dans le voyage (scope=TRIP).

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import type { ActionStateWithSuccess } from "@/lib/forms/action-state";
 import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 
@@ -16,7 +17,7 @@ const sheetSchema = z.object({
   notes: z.string().trim().max(1000),
 });
 
-export type SheetState = { status: "idle" | "success" | "error"; message?: string };
+export type SheetState = ActionStateWithSuccess;
 
 /** Enregistre ma fiche d'urgence pour ce voyage (PHIL-N06). */
 export async function saveEmergencySheet(

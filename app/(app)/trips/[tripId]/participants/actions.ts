@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth/require-user";
+import type { ActionStateWithSuccess } from "@/lib/forms/action-state";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { messages, translator } from "@/lib/i18n/messages";
 import { getT } from "@/lib/i18n/server";
@@ -11,10 +12,7 @@ import { rateLimitOk } from "@/lib/security/rate-limit";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { areUuids } from "@/lib/validation";
 
-export type ParticipantActionState = {
-  status: "idle" | "success" | "error";
-  message?: string;
-};
+export type ParticipantActionState = ActionStateWithSuccess;
 
 const roleSchema = z.enum(["OWNER", "EDITOR", "VIEWER"]);
 
@@ -175,11 +173,7 @@ const inviteSchema = z.object({
   role: z.enum(["EDITOR", "VIEWER"]),
 });
 
-export type InviteState = {
-  status: "idle" | "success" | "error";
-  message?: string;
-  inviteUrl?: string;
-};
+export type InviteState = ActionStateWithSuccess & { inviteUrl?: string };
 
 export async function createInvitation(
   _prev: InviteState,

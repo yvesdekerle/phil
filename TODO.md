@@ -971,7 +971,7 @@ Suite de R05 : rendre le profil système lisible (colonne `is_system` + policy S
 ### [~] PHIL-R20 — 🟡 Cohérence transversale (refactors)
 Lot de refactors DRY, un commit chacun :
 - [x] **`<TimezoneSelect>` partagé** *(fait le 2026-07-08)* : composant `components/ui/timezone-select.tsx` (contrôlé, `disabled` optionnel) factorisant le duo `Intl.supportedValuesOf("timeZone")` + `<Select>` dupliqué dans **7 formulaires** (profil, réglages voyage, nouveau voyage, transport/hébergement/activité, édition d'événement). ~10 lignes × 7 supprimées, imports `useMemo`/`Select*` inutiles purgés. `horloges/home-timezone-picker` laissé tel quel (natif `<option>`, UI distincte). `build`/`lint`/`type-check`/153 tests OK.
-- [ ] **Type `ActionState` unique** : ~13 `type XxxState = { status: "idle" | "error"; message?: string }` quasi identiques (+ variante `success`) → un type partagé.
+- [x] **Type `ActionState` unique** *(fait le 2026-07-08)* : `lib/forms/action-state.ts` → `ActionState` (idle/error) + `ActionStateWithSuccess` (idle/success/error). **28 types d'état** disséminés (`MiamState`, `DocumentActionState`, `CreateEventState`, …) ré-alias vers le type canonique (nom sémantique conservé, forme définie une fois) ; `InviteState = ActionStateWithSuccess & { inviteUrl?: string }`. Migration par codemod déterministe (scratchpad), imports triés. `build`/`lint`/`type-check`/153 tests OK (−21 lignes nettes).
 - [ ] **Standard formulaire `useActionState`** (migration des `useState`+`startTransition`).
 - [ ] **Routage des dates via un module** (centraliser `date-fns`/formatage).
 - [ ] **Palette JS centralisée** (audit A9 — tokens couleur utilisés en JS).

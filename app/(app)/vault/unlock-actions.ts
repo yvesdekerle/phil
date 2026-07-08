@@ -7,14 +7,12 @@ import {
 } from "@simplewebauthn/server";
 import { cookies } from "next/headers";
 import { requireUser } from "@/lib/auth/require-user";
+import type { ActionState } from "@/lib/forms/action-state";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { CHALLENGE_COOKIE, getRpConfig } from "@/lib/webauthn/config";
 import { createVaultSession } from "@/lib/webauthn/vault-session";
 
-export type UnlockState = {
-  status: "idle" | "error";
-  message?: string;
-};
+export type UnlockState = ActionState;
 
 /** Étape 1 : options d'authentification limitées aux passkeys de l'utilisateur. */
 export async function getAuthenticationOptionsAction() {

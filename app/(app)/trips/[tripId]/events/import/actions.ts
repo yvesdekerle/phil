@@ -4,6 +4,7 @@ import { fromZonedTime } from "date-fns-tz";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { TRANSPORT_MODES } from "@/lib/events/transport";
+import type { ActionState } from "@/lib/forms/action-state";
 import { geolocateEvent } from "@/lib/geo/locate";
 import { getT } from "@/lib/i18n/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -96,7 +97,7 @@ const importedEventSchema = (t: Translate) =>
       path: ["endsAtLocal"],
     });
 
-export type ImportedEventState = { status: "idle" | "error"; message?: string };
+export type ImportedEventState = ActionState;
 
 /**
  * Crée l'événement validé par l'utilisateur après import (PHIL-O01) et

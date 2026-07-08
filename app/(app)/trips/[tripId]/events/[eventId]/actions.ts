@@ -3,6 +3,7 @@
 import { fromZonedTime } from "date-fns-tz";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import type { ActionState } from "@/lib/forms/action-state";
 import { getT } from "@/lib/i18n/server";
 import { logger } from "@/lib/observability/logger";
 import { createClient } from "@/lib/supabase/server";
@@ -10,10 +11,7 @@ import { areUuids } from "@/lib/validation";
 
 const DATETIME_LOCAL = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
 
-export type EventActionState = {
-  status: "idle" | "error";
-  message?: string;
-};
+export type EventActionState = ActionState;
 
 export async function updateEvent(
   _prev: EventActionState,
