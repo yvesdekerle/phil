@@ -65,6 +65,10 @@ export const fr = {
     matchesEmpty: "Pas encore de match — il faut que tout l'équipage dise oui à la même activité.",
     revealLocked: "Termine tes votes pour révéler le verdict du groupe",
     revealRemaining: "Encore {n} à trancher",
+    detailHint: "Touche la carte pour ouvrir la fiche",
+    close: "Fermer",
+    prevPhoto: "Photo précédente",
+    nextPhoto: "Photo suivante",
     msg: {
       invalid: "Requête invalide.",
       titleRequired: "Donne un titre à cette activité.",

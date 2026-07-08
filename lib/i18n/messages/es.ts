@@ -71,6 +71,10 @@ export const es: PartialMessages = {
     matchesEmpty: "Aún no hay match — toda la tripulación debe decir sí a la misma actividad.",
     revealLocked: "Termina tus votos para revelar el veredicto del grupo",
     revealRemaining: "Quedan {n} por deslizar",
+    detailHint: "Toca la tarjeta para ver la ficha",
+    close: "Cerrar",
+    prevPhoto: "Foto anterior",
+    nextPhoto: "Foto siguiente",
     msg: {
       invalid: "Solicitud no válida.",
       titleRequired: "Ponle un título a esta actividad.",

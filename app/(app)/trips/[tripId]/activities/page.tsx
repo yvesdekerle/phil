@@ -4,7 +4,7 @@ import {
   type ConsensusActivity,
 } from "@/components/activities/activity-consensus";
 import { AddActivityForm } from "@/components/activities/add-activity-form";
-import { SwipeDeck } from "@/components/activities/swipe-deck";
+import { type SwipeActivity, SwipeDeck } from "@/components/activities/swipe-deck";
 import { RealtimeRefresh } from "@/components/realtime-refresh";
 import {
   consensusByActivity,
@@ -38,7 +38,9 @@ export default async function ActivitiesPage({ params }: { params: Promise<{ tri
   const [{ data: activities }, { data: votes }, { data: members }] = await Promise.all([
     supabase
       .from("trip_activities")
-      .select("id, title, description, category, location, tags")
+      .select(
+        "id, title, description, category, location, tags, photo_urls, price_text, duration_text",
+      )
       .eq("trip_id", tripId)
       .order("created_at", { ascending: true }),
     supabase.from("activity_votes").select("activity_id, user_id, verdict").eq("trip_id", tripId),
@@ -63,7 +65,19 @@ export default async function ActivitiesPage({ params }: { params: Promise<{ tri
   }));
 
   const myVotedIds = new Set(voteRows.filter((v) => v.userId === user.id).map((v) => v.activityId));
-  const deck = all.filter((a) => !myVotedIds.has(a.id));
+  const deck: SwipeActivity[] = all
+    .filter((a) => !myVotedIds.has(a.id))
+    .map((a) => ({
+      id: a.id,
+      title: a.title,
+      description: a.description,
+      category: a.category,
+      location: a.location,
+      tags: a.tags,
+      photoUrls: a.photo_urls,
+      priceText: a.price_text,
+      durationText: a.duration_text,
+    }));
   const meDone = hasVotedAll(user.id, voteRows, all.length);
 
   const rows = consensusByActivity(activityIds, voteRows, participants.length);

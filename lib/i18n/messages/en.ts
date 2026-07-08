@@ -71,6 +71,10 @@ export const en: PartialMessages = {
     matchesEmpty: "No match yet — the whole crew has to say yes to the same activity.",
     revealLocked: "Finish your votes to reveal the group's verdict",
     revealRemaining: "{n} still to swipe",
+    detailHint: "Tap the card to open its details",
+    close: "Close",
+    prevPhoto: "Previous photo",
+    nextPhoto: "Next photo",
     msg: {
       invalid: "Invalid request.",
       titleRequired: "Give this activity a title.",

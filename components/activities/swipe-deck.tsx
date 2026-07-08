@@ -1,12 +1,14 @@
 "use client";
 
 import { Check, Heart, RotateCcw, Star, X } from "lucide-react";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { castVote, undoVote } from "@/app/(app)/trips/[tripId]/activities/actions";
 import { useT } from "@/components/i18n/provider";
 import { dragRotation, exitOffset, type Verdict } from "@/lib/activities/swipe";
 import { useSwipeGesture } from "@/lib/activities/use-swipe-gesture";
 import { cn } from "@/lib/utils";
+import { ActivityDetailModal } from "./activity-detail-modal";
+import { DragFeedback, type DragFeedbackHandle, Stamp, SuperLikeFX } from "./swipe-feedback";
 
 export type SwipeActivity = {
   id: string;
@@ -15,19 +17,9 @@ export type SwipeActivity = {
   category: string | null;
   location: string | null;
   tags: string[];
-};
-
-const VERDICT_KEY: Record<Verdict, "yes" | "no" | "maybe" | "super"> = {
-  YES: "yes",
-  NO: "no",
-  MAYBE: "maybe",
-  SUPER: "super",
-};
-const VERDICT_COLOR: Record<Verdict, string> = {
-  YES: "text-vert",
-  NO: "text-bordeaux",
-  MAYBE: "text-laiton",
-  SUPER: "text-bleu-nuit",
+  photoUrls: string[];
+  priceText: string | null;
+  durationText: string | null;
 };
 
 type Exit = { activity: SwipeActivity; from: { x: number; y: number }; verdict: Verdict };
@@ -38,10 +30,21 @@ export function SwipeDeck({ tripId, activities }: { tripId: string; activities: 
   const [queue, setQueue] = useState(activities);
   const [history, setHistory] = useState<SwipeActivity[]>([]);
   const [exit, setExit] = useState<Exit | null>(null);
-  const [feedback, setFeedback] = useState<Verdict | null>(null);
-  const lastFeedback = useRef<Verdict | null>(null);
+  const [superFx, setSuperFx] = useState(false);
+  const [detail, setDetail] = useState<SwipeActivity | null>(null);
+  const feedbackRef = useRef<DragFeedbackHandle>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const [, startTransition] = useTransition();
+
+  const labels = useMemo<Record<Verdict, string>>(
+    () => ({
+      YES: t("activities.yes"),
+      NO: t("activities.no"),
+      MAYBE: t("activities.maybe"),
+      SUPER: t("activities.super"),
+    }),
+    [t],
+  );
 
   const top = queue[0];
 
@@ -54,8 +57,11 @@ export function SwipeDeck({ tripId, activities }: { tripId: string; activities: 
     setHistory((h) => [card, ...h]);
     setQueue((q) => q.slice(1));
     setExit({ activity: card, from, verdict });
-    lastFeedback.current = null;
-    setFeedback(null);
+    feedbackRef.current?.clear();
+    if (verdict === "SUPER") {
+      setSuperFx(true);
+      window.setTimeout(() => setSuperFx(false), 750);
+    }
     window.setTimeout(() => setExit(null), 340);
   }
 
@@ -63,19 +69,13 @@ export function SwipeDeck({ tripId, activities }: { tripId: string; activities: 
     disabled: !!exit || !top,
     cardRef,
     onSwipe: (verdict, from) => commit(verdict, from),
-    onDragMove: (x, y) => {
-      // Throttle React : ne re-render que quand la CATÉGORIE de verdict change
-      // (le transform de la carte, lui, reste impératif dans le hook → fluide).
-      const v = dragVerdictCategory(x, y);
-      if (v !== lastFeedback.current) {
-        lastFeedback.current = v;
-        setFeedback(v);
+    onTap: () => {
+      if (top) {
+        setDetail(top);
       }
     },
-    onDragEnd: () => {
-      lastFeedback.current = null;
-      setFeedback(null);
-    },
+    onDragMove: (x, y) => feedbackRef.current?.update(x, y),
+    onDragEnd: () => feedbackRef.current?.clear(),
   });
 
   function undo() {
@@ -110,14 +110,12 @@ export function SwipeDeck({ tripId, activities }: { tripId: string; activities: 
             onPointerUp={gesture.onPointerUp}
             onPointerCancel={gesture.onPointerCancel}
           >
-            <ActivityCard
-              activity={top}
-              preview={feedback ? t(`activities.${VERDICT_KEY[feedback]}`) : null}
-              previewColor={feedback ? VERDICT_COLOR[feedback] : ""}
-            />
+            <ActivityCard activity={top} />
           </div>
         ) : null}
-        {exit ? <ExitCard exit={exit} /> : null}
+        {top && !exit ? <DragFeedback ref={feedbackRef} labels={labels} /> : null}
+        {exit ? <ExitCard exit={exit} label={labels[exit.verdict]} /> : null}
+        {superFx ? <SuperLikeFX label={t("activities.super")} /> : null}
       </div>
 
       <div className="flex items-center gap-3">
@@ -161,24 +159,15 @@ export function SwipeDeck({ tripId, activities }: { tripId: string; activities: 
         {t("activities.undo")}
       </button>
       <p className="text-center text-xs text-encre-douce">{t("activities.swipeHint")}</p>
+      <p className="text-center text-xs text-encre-douce/70">{t("activities.detailHint")}</p>
+
+      {detail ? <ActivityDetailModal activity={detail} onClose={() => setDetail(null)} /> : null}
     </div>
   );
 }
 
-/** Catégorie de verdict pour l'aperçu (même logique que dragVerdict, sans le seuil bas). */
-function dragVerdictCategory(x: number, y: number): Verdict | null {
-  if (Math.abs(x) < 12 && Math.abs(y) < 12) {
-    return null;
-  }
-  const horizontal = Math.abs(x) > Math.abs(y) * 0.7;
-  if (horizontal) {
-    return x > 0 ? "YES" : "NO";
-  }
-  return y < 0 ? "SUPER" : "MAYBE";
-}
-
-/** Carte sortante, animée hors-écran depuis la position de relâchement. */
-function ExitCard({ exit }: { exit: Exit }) {
+/** Carte sortante, animée hors-écran depuis la position de relâchement, tampon inclus. */
+function ExitCard({ exit, label }: { exit: Exit; label: string }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const node = ref.current;
@@ -203,6 +192,7 @@ function ExitCard({ exit }: { exit: Exit }) {
       }}
     >
       <ActivityCard activity={exit.activity} />
+      <Stamp verdict={exit.verdict} intensity={1} label={label} />
     </div>
   );
 }
@@ -234,55 +224,65 @@ function VerdictButton({
   );
 }
 
-function ActivityCard({
-  activity,
-  behind,
-  preview,
-  previewColor,
-}: {
-  activity: SwipeActivity;
-  behind?: boolean;
-  preview?: string | null;
-  previewColor?: string;
-}) {
+function ActivityCard({ activity, behind }: { activity: SwipeActivity; behind?: boolean }) {
+  const photo = activity.photoUrls[0];
   return (
     <div
       className={cn(
-        "absolute inset-0 flex flex-col justify-end overflow-hidden rounded-2xl border border-laiton-clair bg-gradient-to-br from-parchemin to-papier p-5 shadow-lg",
+        "absolute inset-0 flex flex-col justify-end overflow-hidden rounded-2xl border border-laiton-clair p-5 shadow-lg",
+        photo ? "bg-encre bg-cover bg-center" : "bg-gradient-to-br from-parchemin to-papier",
         behind && "scale-95 opacity-60",
       )}
+      style={photo ? { backgroundImage: `url(${photo})` } : undefined}
     >
-      {preview ? (
-        <span
-          className={cn(
-            "absolute top-4 right-4 rounded-md border-2 px-2 py-0.5 font-display text-lg uppercase",
-            previewColor,
-          )}
-        >
-          {preview}
-        </span>
+      {photo ? (
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-encre/85 via-encre/25 to-transparent" />
       ) : null}
-      {activity.category ? (
-        <span className="mb-1 text-xs uppercase tracking-wide text-laiton">
-          {activity.category}
-        </span>
-      ) : null}
-      <h3 className="font-display text-2xl text-encre">{activity.title}</h3>
-      {activity.location ? (
-        <p className="mt-0.5 text-sm text-encre-douce">📍 {activity.location}</p>
-      ) : null}
-      {activity.description ? (
-        <p className="mt-2 line-clamp-3 text-sm text-encre-douce">{activity.description}</p>
-      ) : null}
-      {activity.tags.length > 0 ? (
-        <div className="mt-3 flex flex-wrap gap-1.5">
-          {activity.tags.map((tag) => (
-            <span key={tag} className="rounded-full bg-laiton/15 px-2 py-0.5 text-xs text-laiton">
-              {tag}
-            </span>
-          ))}
-        </div>
-      ) : null}
+      <div className="relative">
+        {activity.category ? (
+          <span
+            className={cn(
+              "mb-1 block text-xs uppercase tracking-wide",
+              photo ? "text-laiton-clair" : "text-laiton",
+            )}
+          >
+            {activity.category}
+          </span>
+        ) : null}
+        <h3 className={cn("font-display text-2xl", photo ? "text-papier" : "text-encre")}>
+          {activity.title}
+        </h3>
+        {activity.location ? (
+          <p className={cn("mt-0.5 text-sm", photo ? "text-papier/80" : "text-encre-douce")}>
+            📍 {activity.location}
+          </p>
+        ) : null}
+        {activity.description ? (
+          <p
+            className={cn(
+              "mt-2 line-clamp-3 text-sm",
+              photo ? "text-papier/85" : "text-encre-douce",
+            )}
+          >
+            {activity.description}
+          </p>
+        ) : null}
+        {activity.tags.length > 0 ? (
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {activity.tags.map((tag) => (
+              <span
+                key={tag}
+                className={cn(
+                  "rounded-full px-2 py-0.5 text-xs",
+                  photo ? "bg-papier/20 text-papier" : "bg-laiton/15 text-laiton",
+                )}
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }
