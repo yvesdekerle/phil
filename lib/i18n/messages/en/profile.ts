@@ -37,6 +37,7 @@ export const profileEn = {
       eventReminders: "Event reminders (day before)",
       weatherAlerts: "Day-before weather alert (rain forecast)",
       emptyDayReminders: "Reminder when tomorrow is empty",
+      pollReminders: "Reminder when a poll is closing soon",
       invalid: "Invalid preferences.",
       saveFailed: "Couldn't save.",
     },

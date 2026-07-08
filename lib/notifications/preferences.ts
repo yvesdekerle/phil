@@ -9,6 +9,8 @@ export const notificationPreferencesSchema = z.object({
   weather_alerts: z.boolean().default(true),
   // PHIL-Q18 : rappel de la veille quand le lendemain est vide
   empty_day_reminders: z.boolean().default(true),
+  // PHIL-S03 : rappel quand un sondage ferme bientôt et qu'on n'a pas voté
+  poll_reminders: z.boolean().default(true),
 });
 
 export type NotificationPreferences = z.infer<typeof notificationPreferencesSchema>;
@@ -19,6 +21,7 @@ export const DEFAULT_PREFERENCES: NotificationPreferences = {
   event_reminders: true,
   weather_alerts: true,
   empty_day_reminders: true,
+  poll_reminders: true,
 };
 
 /**
@@ -31,6 +34,7 @@ export const PREFERENCE_LABELS: Record<keyof NotificationPreferences, string> = 
   event_reminders: "profile.prefs.eventReminders",
   weather_alerts: "profile.prefs.weatherAlerts",
   empty_day_reminders: "profile.prefs.emptyDayReminders",
+  poll_reminders: "profile.prefs.pollReminders",
 };
 
 /** Parse tolérant : valeurs inconnues → défauts. */

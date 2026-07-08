@@ -980,8 +980,9 @@ Nouvel onglet du voyage **Miam** (FR) / **Yummy** (EN) / **Ñam** (ES) regroupan
 Sur la carte du voyage, épingler les **supermarchés / commerces repérés** par le groupe (nom, position, note courte — « ouvert tard », « bon marché »). Un membre repère un magasin → point sur la carte, visible de tous. Couche POI légère, distincte des événements. Lien possible avec la liste de courses (S01).
 > Migration écrite : `20260707100100_trip_places.sql` (table `trip_places`, catégories SUPERMARKET/SHOP/PHARMACY/MARKET/OTHER, lat/lng, RLS participant, temps réel). **À appliquer (`pnpm db:push` + `pnpm db:types`) avant l'UI.** Reste : couche de marqueurs sur `trip-map.tsx`, formulaire d'ajout, i18n, réattribution fantôme (R18).
 
-### [~] PHIL-S03 — Sondages : qui a voté quoi, choix simple/multiple, date de fin *(UI faite le 2026-07-07)*
-> UI livrée : votants affichés sous chaque option, badge choix multiple, choix simple (remplace) vs multiple (bascule), date de fin + auto-clôture à l'échéance. **Reste : le sweep cron** (rappel avant échéance + clôture auto) — à câbler dans `cron/event-reminders`.
+### [x] PHIL-S03 — Sondages : qui a voté quoi, choix simple/multiple, date de fin *(fait le 2026-07-08)*
+> UI livrée (2026-07-07) : votants affichés sous chaque option, badge choix multiple, choix simple (remplace) vs multiple (bascule), date de fin + auto-clôture à l'échéance.
+> **Sweep cron (fait le 2026-07-08)** : dans `cron/event-reminders` — clôture auto des sondages échus (`closed_at`, backstop du read-time) + **rappel push** aux participants qui n'ont pas voté quand un sondage ferme sous 24 h. Nouvelle préférence `poll_reminders` (défaut on, `profile.prefs.pollReminders` fr/en/es). ⚠️ **Dette** : les pushes du cron sont tous en français en dur — localiser par destinataire (all pushes) est un chantier à part.
 Trois demandes (2026-07-07) :
 - **Voir qui a voté et quel vote** : la donnée existe déjà (`poll_votes.user_id` + `option_index`, RLS membres) → UI seule (votants par option).
 - **Choix simple (1 parmi X) vs choix multiple** : `allow_multiple` sur `polls`. En multiple, un utilisateur peut cocher plusieurs options (PK `poll_votes` étendue à `(poll_id, user_id, option_index)`) ; en simple, l'action de vote remplace le vote précédent.

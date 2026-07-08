@@ -14,7 +14,8 @@ export async function sendPushToUser(
     | "expiry_alerts"
     | "event_reminders"
     | "weather_alerts"
-    | "empty_day_reminders",
+    | "empty_day_reminders"
+    | "poll_reminders",
 ): Promise<void> {
   const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
   const privateKey = process.env.VAPID_PRIVATE_KEY;

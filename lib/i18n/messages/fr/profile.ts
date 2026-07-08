@@ -37,6 +37,7 @@ export const profileFr = {
       eventReminders: "Rappels d'événements (J-1)",
       weatherAlerts: "Alerte météo de la veille (pluie annoncée)",
       emptyDayReminders: "Rappel quand la journée de demain est vide",
+      pollReminders: "Rappel quand un sondage ferme bientôt",
       invalid: "Préférences invalides.",
       saveFailed: "Enregistrement impossible.",
     },

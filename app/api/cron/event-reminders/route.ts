@@ -148,11 +148,55 @@ export async function GET(request: Request) {
       }
     }
 
+    // PHIL-S03 — sondages : clôture auto des échus (backstop du read-time) +
+    // rappel aux participants qui n'ont pas voté quand un sondage ferme sous 24 h.
+    const nowIso = new Date().toISOString();
+    const soonIso = new Date(Date.now() + 24 * 3600 * 1000).toISOString();
+    await admin
+      .from("polls")
+      .update({ closed_at: nowIso })
+      .is("closed_at", null)
+      .not("closes_at", "is", null)
+      .lt("closes_at", nowIso);
+
+    const { data: closingPolls } = await admin
+      .from("polls")
+      .select("id, trip_id, question")
+      .is("closed_at", null)
+      .not("closes_at", "is", null)
+      .gte("closes_at", nowIso)
+      .lt("closes_at", soonIso);
+
+    let pollRemindersSent = 0;
+    for (const poll of closingPolls ?? []) {
+      const [{ data: members }, { data: voters }] = await Promise.all([
+        admin.from("trip_participants").select("user_id").eq("trip_id", poll.trip_id),
+        admin.from("poll_votes").select("user_id").eq("poll_id", poll.id),
+      ]);
+      const votedSet = new Set((voters ?? []).map((v) => v.user_id));
+      for (const member of members ?? []) {
+        if (votedSet.has(member.user_id)) {
+          continue;
+        }
+        await sendPushToUser(
+          member.user_id,
+          {
+            title: "Un sondage ferme bientôt",
+            body: `« ${poll.question} » — donne ton avis avant la clôture.`,
+            url: `/trips/${poll.trip_id}/polls`,
+          },
+          "poll_reminders",
+        );
+        pollRemindersSent++;
+      }
+    }
+
     return Response.json({
       events: (events ?? []).length,
       notifications: sent,
       weatherAlerts: weatherSent,
       emptyDayReminders: emptyDaySent,
+      pollReminders: pollRemindersSent,
     });
   } catch {
     // PHIL-Q58 : une requête qui jette ne doit pas laisser le cron en erreur brute

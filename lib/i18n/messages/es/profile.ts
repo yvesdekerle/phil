@@ -37,6 +37,7 @@ export const profileEs = {
       eventReminders: "Recordatorios de eventos (víspera)",
       weatherAlerts: "Alerta meteorológica de la víspera (lluvia anunciada)",
       emptyDayReminders: "Aviso cuando el día de mañana está vacío",
+      pollReminders: "Aviso cuando una encuesta está por cerrar",
       invalid: "Preferencias no válidas.",
       saveFailed: "No se ha podido guardar.",
     },
