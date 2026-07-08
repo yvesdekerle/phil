@@ -85,6 +85,10 @@ export const vaultEn = {
       unshareFailed: "Removing the share failed.",
       unshared: "Share removed.",
       deleteFailed: "Deletion failed.",
+      badFormat: "Format not accepted.",
+      storagePathInvalid: "Invalid storage path.",
+      encryptionMetaMissing: "Missing encryption metadata.",
+      saveFailed: "Saving failed. Try again in a moment.",
     },
     categories: {
       passport: "Passport",

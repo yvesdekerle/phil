@@ -68,6 +68,8 @@ export const calendarEs = {
       update: "Actualizar mi entrada",
       write: "Escribir en el diario",
       delete: "Borrar",
+      invalidInput: "Entrada no válida.",
+      saveFailed: "No se pudo guardar.",
     },
   },
   events: {
@@ -102,6 +104,9 @@ export const calendarEs = {
       editDenied: "No se pudo modificar: debes ser capitán o editor del viaje.",
       deleteDenied: "No se pudo eliminar: reservado al capitán o al creador del evento.",
       createDenied: "No se pudo crear: debes ser capitán o editor del viaje.",
+      storagePathInvalid: "Ruta de almacenamiento no válida.",
+      draftNotFound: "Borrador no encontrado o ya procesado.",
+      noteAddFailed: "No se pudo añadir.",
     },
     you: "Tú",
     traveler: "Viajero",

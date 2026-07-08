@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { areUuids } from "@/lib/validation";
 
@@ -15,13 +16,14 @@ const addNoteSchema = z.object({
 export type NoteState = { status: "idle" | "error"; message?: string };
 
 export async function addEventNote(_prev: NoteState, formData: FormData): Promise<NoteState> {
+  const t = await getT();
   const parsed = addNoteSchema.safeParse({
     tripId: formData.get("tripId"),
     eventId: formData.get("eventId"),
     body: formData.get("body"),
   });
   if (!parsed.success) {
-    return { status: "error", message: "Saisie invalide." };
+    return { status: "error", message: t("events.msg.invalidInput") };
   }
 
   const supabase = await createClient();
@@ -38,7 +40,7 @@ export async function addEventNote(_prev: NoteState, formData: FormData): Promis
     body: parsed.data.body,
   });
   if (error) {
-    return { status: "error", message: "Ajout impossible." };
+    return { status: "error", message: t("events.msg.noteAddFailed") };
   }
   revalidatePath(`/trips/${parsed.data.tripId}/events/${parsed.data.eventId}`);
   return { status: "idle" };

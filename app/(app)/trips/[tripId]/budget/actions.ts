@@ -17,7 +17,8 @@ const expenseSchema = z.object({
   beneficiaries: z.array(z.string().uuid()).min(1),
   category: z.enum(EXPENSE_CATEGORIES),
   eventId: z.union([z.literal(""), z.string().uuid()]).optional(),
-  spentOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date invalide."),
+  // Message non surfacé (l'échec de parse remonte `budget.errors.invalidExpense`).
+  spentOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   // PHIL-Q21 : division à la Tricount
   splitMode: z.enum(["equal", "shares", "exact"]).default("equal"),
 });

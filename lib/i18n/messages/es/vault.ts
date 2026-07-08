@@ -86,6 +86,10 @@ export const vaultEs = {
       unshareFailed: "No se pudo retirar el uso compartido.",
       unshared: "Uso compartido retirado.",
       deleteFailed: "No se pudo eliminar.",
+      badFormat: "Formato no aceptado.",
+      storagePathInvalid: "Ruta de almacenamiento no válida.",
+      encryptionMetaMissing: "Faltan los metadatos de cifrado.",
+      saveFailed: "No se pudo guardar. Inténtalo de nuevo en un momento.",
     },
     categories: {
       passport: "Pasaporte",

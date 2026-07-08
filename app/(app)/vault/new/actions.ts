@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { getT } from "@/lib/i18n/server";
 import { logger } from "@/lib/observability/logger";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -9,23 +10,26 @@ import { logVaultAccess } from "@/lib/vault/audit";
 import { VAULT_CATEGORIES } from "@/lib/vault/categories";
 import { isAllowedMimeType, MAX_FILE_SIZE_BYTES } from "@/lib/vault/upload";
 
-const createDocumentSchema = z.object({
-  documentId: z.string().uuid(),
-  fileName: z.string().trim().min(1).max(255),
-  mimeType: z.string().refine(isAllowedMimeType, "Format non accepté."),
-  sizeBytes: z.coerce.number().int().positive().max(MAX_FILE_SIZE_BYTES),
-  storagePath: z.string().min(1),
-  category: z.enum(VAULT_CATEGORIES as [string, ...string[]]),
-  expiresAt: z.union([z.literal(""), z.string().regex(/^\d{4}-\d{2}-\d{2}$/)]).optional(),
-  documentNumber: z.string().trim().max(100).optional(),
-  // PHIL-Q34 : "Autre" → libellé libre saisi à la main
-  label: z.string().trim().max(60).optional(),
-  // PHIL-T01 : métadonnées de chiffrement E2EE (base64), présentes si chiffré.
-  encrypted: z.union([z.literal(""), z.literal("1")]).optional(),
-  encFileIv: z.string().max(64).optional(),
-  encWrappedDek: z.string().max(255).optional(),
-  encDekIv: z.string().max(64).optional(),
-});
+// Fabrique du schéma (PHIL-R15) : `t` est requis pour localiser le message du
+// refine mime, seul message de validation susceptible d'être remonté à l'UI.
+const buildCreateDocumentSchema = (t: (key: string) => string) =>
+  z.object({
+    documentId: z.string().uuid(),
+    fileName: z.string().trim().min(1).max(255),
+    mimeType: z.string().refine(isAllowedMimeType, t("documents.msg.badFormat")),
+    sizeBytes: z.coerce.number().int().positive().max(MAX_FILE_SIZE_BYTES),
+    storagePath: z.string().min(1),
+    category: z.enum(VAULT_CATEGORIES as [string, ...string[]]),
+    expiresAt: z.union([z.literal(""), z.string().regex(/^\d{4}-\d{2}-\d{2}$/)]).optional(),
+    documentNumber: z.string().trim().max(100).optional(),
+    // PHIL-Q34 : "Autre" → libellé libre saisi à la main
+    label: z.string().trim().max(60).optional(),
+    // PHIL-T01 : métadonnées de chiffrement E2EE (base64), présentes si chiffré.
+    encrypted: z.union([z.literal(""), z.literal("1")]).optional(),
+    encFileIv: z.string().max(64).optional(),
+    encWrappedDek: z.string().max(255).optional(),
+    encDekIv: z.string().max(64).optional(),
+  });
 
 export type CreateDocumentState = {
   status: "idle" | "error";
@@ -41,7 +45,8 @@ export async function createDocument(
   _prev: CreateDocumentState,
   formData: FormData,
 ): Promise<CreateDocumentState> {
-  const parsed = createDocumentSchema.safeParse({
+  const t = await getT();
+  const parsed = buildCreateDocumentSchema(t).safeParse({
     documentId: formData.get("documentId"),
     fileName: formData.get("fileName"),
     mimeType: formData.get("mimeType"),
@@ -59,7 +64,10 @@ export async function createDocument(
 
   if (!parsed.success) {
     logger.warn("document_create_invalid_input", { code: parsed.error.issues[0]?.code });
-    return { status: "error", message: parsed.error.issues[0]?.message ?? "Saisie invalide." };
+    return {
+      status: "error",
+      message: parsed.error.issues[0]?.message ?? t("documents.msg.invalidInput"),
+    };
   }
 
   const supabase = await createClient();
@@ -73,7 +81,7 @@ export async function createDocument(
   // Le chemin doit vivre dans le dossier de l'utilisateur (même règle que la
   // policy storage) et correspondre au document déclaré.
   if (!parsed.data.storagePath.startsWith(`${user.id}/${parsed.data.documentId}`)) {
-    return { status: "error", message: "Chemin de stockage invalide." };
+    return { status: "error", message: t("documents.msg.storagePathInvalid") };
   }
 
   const metadata: Record<string, string> = {};
@@ -87,7 +95,7 @@ export async function createDocument(
     isEncrypted &&
     (!parsed.data.encFileIv || !parsed.data.encWrappedDek || !parsed.data.encDekIv)
   ) {
-    return { status: "error", message: "Métadonnées de chiffrement manquantes." };
+    return { status: "error", message: t("documents.msg.encryptionMetaMissing") };
   }
 
   const { error } = await supabase.from("documents").insert({
@@ -118,7 +126,7 @@ export async function createDocument(
     // La ligne n'a pas pu être créée : on retire le blob orphelin.
     const admin = createAdminClient();
     await admin.storage.from("documents").remove([parsed.data.storagePath]);
-    return { status: "error", message: "L'enregistrement a échoué. Réessaie dans un instant." };
+    return { status: "error", message: t("documents.msg.saveFailed") };
   }
 
   await logVaultAccess({

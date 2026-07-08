@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { areUuids } from "@/lib/validation";
 
@@ -19,13 +20,14 @@ export async function saveJournalEntry(
   _prev: JournalState,
   formData: FormData,
 ): Promise<JournalState> {
+  const t = await getT();
   const parsed = entrySchema.safeParse({
     tripId: formData.get("tripId"),
     day: formData.get("day"),
     body: formData.get("body"),
   });
   if (!parsed.success) {
-    return { status: "error", message: "Saisie invalide." };
+    return { status: "error", message: t("calendar.journal.invalidInput") };
   }
   const supabase = await createClient();
   const {
@@ -42,7 +44,7 @@ export async function saveJournalEntry(
     updated_at: new Date().toISOString(),
   });
   if (error) {
-    return { status: "error", message: "Enregistrement impossible." };
+    return { status: "error", message: t("calendar.journal.saveFailed") };
   }
   revalidatePath(`/trips/${parsed.data.tripId}/day/${parsed.data.day}`);
   return { status: "idle" };

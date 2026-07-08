@@ -131,7 +131,7 @@ export async function createImportedEvent(
     redirect("/login");
   }
   if (!d.storagePath.startsWith(`${user.id}/${d.documentId}`)) {
-    return { status: "error", message: "Chemin de stockage invalide." };
+    return { status: "error", message: t("events.msg.storagePathInvalid") };
   }
 
   const eventId = crypto.randomUUID();
@@ -143,7 +143,7 @@ export async function createImportedEvent(
     await admin.storage.from("documents").remove([d.storagePath]);
     return {
       status: "error",
-      message: "La création a échoué — il faut être capitaine ou éditeur du voyage.",
+      message: t("events.msg.createDenied"),
     };
   }
 
@@ -220,7 +220,7 @@ export async function finalizeDraft(
     .eq("status", "PENDING")
     .single();
   if (!draft) {
-    return { status: "error", message: "Brouillon introuvable ou déjà traité." };
+    return { status: "error", message: t("events.msg.draftNotFound") };
   }
 
   const eventId = crypto.randomUUID();
@@ -230,7 +230,7 @@ export async function finalizeDraft(
   if (eventError) {
     return {
       status: "error",
-      message: "La création a échoué — il faut être capitaine ou éditeur du voyage.",
+      message: t("events.msg.createDenied"),
     };
   }
 

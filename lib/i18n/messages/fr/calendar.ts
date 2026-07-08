@@ -68,6 +68,8 @@ export const calendarFr = {
       update: "Mettre à jour mon entrée",
       write: "Écrire dans le journal",
       delete: "Effacer",
+      invalidInput: "Saisie invalide.",
+      saveFailed: "Enregistrement impossible.",
     },
   },
   events: {
@@ -103,6 +105,9 @@ export const calendarFr = {
       deleteDenied:
         "La suppression a échoué — réservée au capitaine ou au créateur de l'événement.",
       createDenied: "La création a échoué — il faut être capitaine ou éditeur du voyage.",
+      storagePathInvalid: "Chemin de stockage invalide.",
+      draftNotFound: "Brouillon introuvable ou déjà traité.",
+      noteAddFailed: "Ajout impossible.",
     },
     you: "Toi",
     traveler: "Voyageur",

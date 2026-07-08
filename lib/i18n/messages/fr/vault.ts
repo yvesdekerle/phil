@@ -86,6 +86,10 @@ export const vaultFr = {
       unshareFailed: "Le retrait du partage a échoué.",
       unshared: "Partage retiré.",
       deleteFailed: "La suppression a échoué.",
+      badFormat: "Format non accepté.",
+      storagePathInvalid: "Chemin de stockage invalide.",
+      encryptionMetaMissing: "Métadonnées de chiffrement manquantes.",
+      saveFailed: "L'enregistrement a échoué. Réessaie dans un instant.",
     },
     categories: {
       passport: "Passeport",

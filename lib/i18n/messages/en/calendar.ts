@@ -67,6 +67,8 @@ export const calendarEn = {
       update: "Update my entry",
       write: "Write in the logbook",
       delete: "Erase",
+      invalidInput: "Invalid input.",
+      saveFailed: "Could not save.",
     },
   },
   events: {
@@ -101,6 +103,9 @@ export const calendarEn = {
       editDenied: "The change failed — you must be captain or editor of the trip.",
       deleteDenied: "Deletion failed — reserved for the captain or the event's creator.",
       createDenied: "Creation failed — you must be captain or editor of the trip.",
+      storagePathInvalid: "Invalid storage path.",
+      draftNotFound: "Draft not found or already handled.",
+      noteAddFailed: "Could not add.",
     },
     you: "You",
     traveler: "Traveller",
