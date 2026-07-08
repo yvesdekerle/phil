@@ -201,6 +201,50 @@ export type Database = {
           },
         ];
       };
+      device_pairings: {
+        Row: {
+          configured_public_key: Json | null;
+          created_at: string;
+          expires_at: string;
+          id: string;
+          new_public_key: Json;
+          status: string;
+          user_id: string;
+          wrap_iv: string | null;
+          wrapped_master: string | null;
+        };
+        Insert: {
+          configured_public_key?: Json | null;
+          created_at?: string;
+          expires_at?: string;
+          id?: string;
+          new_public_key: Json;
+          status?: string;
+          user_id: string;
+          wrap_iv?: string | null;
+          wrapped_master?: string | null;
+        };
+        Update: {
+          configured_public_key?: Json | null;
+          created_at?: string;
+          expires_at?: string;
+          id?: string;
+          new_public_key?: Json;
+          status?: string;
+          user_id?: string;
+          wrap_iv?: string | null;
+          wrapped_master?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "device_pairings_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       document_shares: {
         Row: {
           dek_iv: string | null;
