@@ -1,5 +1,6 @@
-import { locales } from "@/lib/i18n/config";
-import { messages, translator } from "@/lib/i18n/messages";
+import { checklistEn } from "@/lib/i18n/messages/en/checklist";
+import { checklistEs } from "@/lib/i18n/messages/es/checklist";
+import { checklistFr } from "@/lib/i18n/messages/fr/checklist";
 
 /**
  * Catalogue de la Valise (PHIL-Q10/Q20, i18n PHIL-Q37) — les affaires et
@@ -123,6 +124,19 @@ export function catalogItemTitle(name: string, qty: number): string {
 
 const normalize = (s: string) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").trim();
 
+// Noms du catalogue par langue (slice `checklist.catalog.*` uniquement) : assez
+// pour reconnaître un item ajouté dans une autre langue, sans embarquer TOUT le
+// catalogue de messages dans le bundle client — `packing-catalog` est importé
+// par le composant client de la Valise (PHIL-R19).
+const catalogOf = (m: {
+  checklist?: { catalog?: Record<string, string> };
+}): Record<string, string> => m.checklist?.catalog ?? {};
+const CATALOG_NAMES: Record<string, string>[] = [
+  catalogOf(checklistFr),
+  catalogOf(checklistEn),
+  catalogOf(checklistEs),
+];
+
 /**
  * L'item de valise (peu importe la langue où il a été ajouté) correspond-il à
  * cette clé de catalogue ? On compare le titre stocké au nom du catalogue dans
@@ -130,7 +144,8 @@ const normalize = (s: string) => s.toLowerCase().normalize("NFD").replace(/[̀-�
  */
 export function matchesCatalogKey(checklistTitle: string, key: string): boolean {
   const base = normalize(checklistTitle).replace(/\s*×\d+$/, "");
-  return locales.some(
-    (loc) => normalize(translator(messages[loc])(`checklist.catalog.${key}`)) === base,
-  );
+  return CATALOG_NAMES.some((names) => {
+    const name = names[key];
+    return typeof name === "string" && normalize(name) === base;
+  });
 }

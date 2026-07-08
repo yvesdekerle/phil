@@ -951,8 +951,12 @@ Suite de R05 : rendre le profil système lisible (colonne `is_system` + policy S
 
 **Part 2 — câblage (fait le 2026-07-08)** : migration appliquée (`db:push`) + types régénérés (`db:types` → `is_system` sur profiles) ; `is_system: true` câblé dans `getOrCreateGhostId` (deletion.ts). `verify:rls` 30/30 (nouvelle policy `profiles_select_system` sans régression). Ticket clos.
 
-### [ ] PHIL-R19 — 🟡 Perf : `React.cache` + Suspense + bundle i18n
+### [~] PHIL-R19 — 🟡 Perf : `React.cache` + Suspense + bundle i18n
 `React.cache()` sur `getUser`/profil/trip, `<Suspense>` météo/OSRM + `loading.tsx` sous `trips/[tripId]`, purger le catalogue i18n trilingue du bundle client (~150 Ko).
+
+**Bundle i18n purgé (fait le 2026-07-08)** : le catalogue trilingue ne part plus dans le bundle client. Logique de traduction pure extraite dans `lib/i18n/translate.ts` (`lookup`/`makeTranslator`, **sans données**) ; le provider client n'importe plus `messages`/`translator` (dict par défaut `{}`, `import type` pour le type seul). Le repli fr est **fusionné côté serveur** via `completeMessages(locale)` (deep-merge fr+locale) passé au provider par `app/layout.tsx` → le client reçoit un dict complet, plus besoin du fr dans le bundle. Fuite transitive corrigée : `lib/trips/packing-catalog.ts` (importé par le composant client Valise) n'importe plus tout `messages`, seulement le slice `checklist.catalog.*` des 3 langues. **Vérifié** : chaînes de budget/vault/meta/calendar/es toutes absentes des chunks client (`grep` sur `.next/static/chunks`) ; 5 tests `i18n-complete` verrouillent le repli-par-fusion. `app/error.tsx` (useT) rend dans le provider, `global-error.tsx` n'utilise pas useT → pas de régression.
+
+**Reste** : `React.cache()` sur `getUser`/profil/trip (dédup des appels réseau auth par requête), `<Suspense>` météo/OSRM + `loading.tsx` sous `trips/[tripId]`.
 
 ### [ ] PHIL-R20 — 🟡 Cohérence transversale (refactors)
 Type `ActionState` unique, standard formulaire `useActionState`, `<TimezoneSelect>` partagé, routage des dates via un module, palette JS centralisée (audit A9).

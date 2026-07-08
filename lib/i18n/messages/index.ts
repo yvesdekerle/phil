@@ -1,3 +1,4 @@
+import { lookup } from "../translate";
 import { en as enShell } from "./en";
 import { budgetEn } from "./en/budget";
 import { calendarEn } from "./en/calendar";
@@ -80,16 +81,36 @@ export const es: PartialMessages = {
 
 export const messages: { fr: Messages; en: PartialMessages; es: PartialMessages } = { fr, en, es };
 
-function lookup(dict: unknown, key: string): string | undefined {
-  const value = key
-    .split(".")
-    .reduce<unknown>((acc, k) => (acc as Record<string, unknown> | undefined)?.[k], dict);
-  return typeof value === "string" ? value : undefined;
+/** Fusion profonde : `over` recouvre `base` récursivement (objets uniquement). */
+function deepMerge<T>(base: T, over: unknown): T {
+  if (over == null || typeof over !== "object" || Array.isArray(over)) {
+    return base;
+  }
+  const out: Record<string, unknown> = { ...(base as Record<string, unknown>) };
+  for (const [k, v] of Object.entries(over as Record<string, unknown>)) {
+    const b = out[k];
+    out[k] =
+      b && typeof b === "object" && !Array.isArray(b) && v && typeof v === "object"
+        ? deepMerge(b, v)
+        : v;
+  }
+  return out as T;
 }
 
 /**
- * Traducteur : `t("nav.trips")`. Cherche dans la langue active, **retombe sur
- * le français** si la clé manque (traduction en cours), puis sur la clé brute.
+ * Dictionnaire **complet** de la langue active, repli français fusionné dessous
+ * (PHIL-R19). Sérialisé tel quel vers le client : il n'a alors plus besoin du
+ * catalogue fr pour combler les clés non traduites → rien de tout ça dans le
+ * bundle JS client. Pour `fr`, c'est la source déjà complète.
+ */
+export function completeMessages(locale: "fr" | "en" | "es"): Messages {
+  return locale === "fr" ? fr : deepMerge(fr, messages[locale]);
+}
+
+/**
+ * Traducteur **serveur** : `t("nav.trips")`. Cherche dans la langue active,
+ * **retombe sur le français** si la clé manque, puis sur la clé brute. (Côté
+ * client, `makeTranslator` de `../translate` opère sur un dict déjà complet.)
  */
 export function translator(dict: unknown, fallback: Messages = fr) {
   return (key: string): string => lookup(dict, key) ?? lookup(fallback, key) ?? key;

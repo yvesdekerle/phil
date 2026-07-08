@@ -2,10 +2,13 @@
 
 import { createContext, useContext, useMemo } from "react";
 import type { Locale } from "@/lib/i18n/config";
-import { messages, type PartialMessages, translator } from "@/lib/i18n/messages";
+import type { PartialMessages } from "@/lib/i18n/messages";
+import { makeTranslator } from "@/lib/i18n/translate";
 
 type Ctx = { locale: Locale; dict: PartialMessages };
-const I18nContext = createContext<Ctx>({ locale: "fr", dict: messages.fr });
+// Dict vide par défaut : le provider reçoit toujours un dict complet en prop
+// (sérialisé par le serveur). Aucun catalogue de messages dans le bundle client.
+const I18nContext = createContext<Ctx>({ locale: "fr", dict: {} });
 
 /**
  * Fournit la langue + les messages actifs aux composants client (PHIL-Q37).
@@ -27,7 +30,7 @@ export function I18nProvider({
 /** Hook de traduction : `const t = useT(); t("nav.trips")`. */
 export function useT() {
   const { dict } = useContext(I18nContext);
-  return useMemo(() => translator(dict), [dict]);
+  return useMemo(() => makeTranslator(dict), [dict]);
 }
 
 export function useLocale(): Locale {

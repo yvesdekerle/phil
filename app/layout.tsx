@@ -7,7 +7,7 @@ import { I18nProvider } from "@/components/i18n/provider";
 import { OfflineAuthGuard } from "@/components/offline/offline-auth-guard";
 import { OfflineBanner } from "@/components/offline/offline-banner";
 import { ServiceWorkerRegister } from "@/components/pwa/sw-register";
-import { messages } from "@/lib/i18n/messages";
+import { completeMessages } from "@/lib/i18n/messages";
 import { getLocale, getT } from "@/lib/i18n/server";
 import { cn } from "@/lib/utils";
 
@@ -52,7 +52,7 @@ export default async function RootLayout({
       className={cn("h-full antialiased font-sans", figtree.variable, bodoni.variable)}
     >
       <body className="min-h-full flex flex-col font-sans">
-        <I18nProvider locale={locale} dict={messages[locale]}>
+        <I18nProvider locale={locale} dict={completeMessages(locale)}>
           <ServiceWorkerRegister />
           <OfflineAuthGuard />
           <OfflineBanner />
