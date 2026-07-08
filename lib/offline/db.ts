@@ -53,6 +53,13 @@ export type OfflineVaultDocMeta = {
  */
 export type OfflineCryptoWraps = { key: string; wraps: MasterWrapDto[] };
 
+/**
+ * File d'attente d'audit (PHIL-T01 Phase 5b) : une consultation d'un document du
+ * coffre faite offline ne peut pas écrire dans `vault_access_log` → on la met en
+ * file et on la rejoue à la reconnexion.
+ */
+export type OfflineVaultAudit = { id?: number; document_id: string; at: string };
+
 /** Base locale IndexedDB pour la lecture offline (PHIL-I03/I05). */
 export const offlineDb = new Dexie("phil-offline") as Dexie & {
   trips: EntityTable<Trip, "id">;
@@ -63,6 +70,7 @@ export const offlineDb = new Dexie("phil-offline") as Dexie & {
   document_blobs: EntityTable<OfflineDocumentBlob, "id">;
   vault_docs_meta: EntityTable<OfflineVaultDocMeta, "id">;
   crypto_wraps: EntityTable<OfflineCryptoWraps, "key">;
+  vault_audit_queue: EntityTable<OfflineVaultAudit, "id">;
 };
 
 offlineDb.version(1).stores({
@@ -83,4 +91,9 @@ offlineDb.version(2).stores({
 offlineDb.version(3).stores({
   vault_docs_meta: "id",
   crypto_wraps: "key",
+});
+
+// PHIL-T01 Phase 5b : file d'audit des consultations offline (rejouée en ligne).
+offlineDb.version(4).stores({
+  vault_audit_queue: "++id",
 });

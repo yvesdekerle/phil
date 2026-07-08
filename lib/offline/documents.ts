@@ -1,5 +1,6 @@
 import { decryptBytes, fromBase64, unwrapKey } from "@/lib/crypto/vault-crypto";
 import { offlineDb } from "./db";
+import { enqueueVaultAudit } from "./vault-audit";
 import { getOfflineMaster } from "./vault-crypto-cache";
 
 /** Limite de stockage offline des fichiers (PHIL-I04). */
@@ -71,6 +72,8 @@ export async function openOfflineDocument(documentId: string): Promise<boolean> 
       fromBase64(entry.file_iv),
     );
     blob = new Blob([plain as BlobPart], { type: entry.mime_type });
+    // PHIL-T01 Phase 5b : consultation d'un doc chiffré → à auditer (différé si offline).
+    await enqueueVaultAudit(documentId);
   }
   const url = URL.createObjectURL(blob);
   window.open(url, "_blank");
