@@ -1,4 +1,5 @@
 import Dexie, { type EntityTable } from "dexie";
+import type { MasterWrapDto } from "@/app/(app)/profile/coffre-actions";
 import type { TripEvent } from "@/lib/events/types";
 import type { TripIdea } from "@/lib/ideas/types";
 import type { Trip } from "@/lib/trips/status";
@@ -28,7 +29,29 @@ export type OfflineDocumentBlob = {
   size_bytes: number;
   blob: Blob;
   savedAt: string;
+  // PHIL-T01 Phase 4b — document chiffré : `blob` est le CHIFFRÉ ; ces champs
+  // permettent de le déchiffrer offline (DEK emballée par la maîtresse du coffre).
+  encrypted?: boolean;
+  wrapped_dek?: string;
+  dek_iv?: string;
+  file_iv?: string;
 };
+
+/** Métadonnées d'un document du coffre gardé offline (PHIL-T01 Phase 4b). */
+export type OfflineVaultDocMeta = {
+  id: string;
+  file_name: string;
+  category: string;
+  mime_type: string;
+  uploaded_at: string;
+};
+
+/**
+ * Enveloppes PRF de la maîtresse mises en cache pour déverrouiller le coffre
+ * offline (PHIL-T01 Phase 4b). C'est du CHIFFRÉ au repos (la maîtresse scellée
+ * par la biométrie), jamais la clé en clair.
+ */
+export type OfflineCryptoWraps = { key: string; wraps: MasterWrapDto[] };
 
 /** Base locale IndexedDB pour la lecture offline (PHIL-I03/I05). */
 export const offlineDb = new Dexie("phil-offline") as Dexie & {
@@ -38,6 +61,8 @@ export const offlineDb = new Dexie("phil-offline") as Dexie & {
   ideas: EntityTable<TripIdea, "id">;
   sync_meta: EntityTable<SyncMeta, "key">;
   document_blobs: EntityTable<OfflineDocumentBlob, "id">;
+  vault_docs_meta: EntityTable<OfflineVaultDocMeta, "id">;
+  crypto_wraps: EntityTable<OfflineCryptoWraps, "key">;
 };
 
 offlineDb.version(1).stores({
@@ -51,4 +76,11 @@ offlineDb.version(1).stores({
 // PHIL-I04 : fichiers disponibles offline
 offlineDb.version(2).stores({
   document_blobs: "id",
+});
+
+// PHIL-T01 Phase 4b : coffre chiffré consultable offline (métadonnées coffre +
+// enveloppes maîtresse en cache pour le déverrouillage biométrique local).
+offlineDb.version(3).stores({
+  vault_docs_meta: "id",
+  crypto_wraps: "key",
 });

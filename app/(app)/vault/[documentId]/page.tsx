@@ -1,6 +1,7 @@
 import { format, parseISO } from "date-fns";
 import { notFound, redirect } from "next/navigation";
 import { CategoryIcon } from "@/components/vault/category-icon";
+import { OfflineVaultToggle } from "@/components/vault/offline-vault-toggle";
 import { getDateFnsLocale, getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { categoryLabel } from "@/lib/vault/categories";
@@ -125,6 +126,7 @@ export default async function VaultDocumentPage({
             expiresAt={doc.expires_at ?? ""}
             documentNumber={metadata.document_number ?? ""}
           />
+          <OfflineVaultToggle documentId={doc.id} />
         </div>
       ) : null}
 

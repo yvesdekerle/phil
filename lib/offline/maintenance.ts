@@ -20,6 +20,8 @@ export async function runOfflineMaintenance(
     .map((b) => b.id);
   if (staleBlobIds.length > 0) {
     await offlineDb.document_blobs.bulkDelete(staleBlobIds);
+    // PHIL-T01 Phase 4b : retirer aussi la métadonnée coffre orpheline.
+    await offlineDb.vault_docs_meta.bulkDelete(staleBlobIds);
   }
 
   // 2) Voyages terminés

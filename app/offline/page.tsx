@@ -7,7 +7,12 @@ import { eventTime, groupEventsByDay } from "@/lib/events/datetime";
 import type { TripEvent } from "@/lib/events/types";
 import { dateFnsLocale, intlLocale } from "@/lib/i18n/dates";
 import type { TripIdea } from "@/lib/ideas/types";
-import { type OfflineDocumentMeta, offlineDb, type SyncMeta } from "@/lib/offline/db";
+import {
+  type OfflineDocumentMeta,
+  type OfflineVaultDocMeta,
+  offlineDb,
+  type SyncMeta,
+} from "@/lib/offline/db";
 import { openOfflineDocument } from "@/lib/offline/documents";
 import { formatDateRange } from "@/lib/trips/format";
 import type { Trip } from "@/lib/trips/status";
@@ -30,11 +35,14 @@ export default function OfflinePage() {
   const il = intlLocale(locale);
   const [trips, setTrips] = useState<OfflineTrip[] | null>(null);
   const [offlineDocIds, setOfflineDocIds] = useState<Set<string>>(new Set());
+  const [vaultDocs, setVaultDocs] = useState<OfflineVaultDocMeta[]>([]);
+  const [openError, setOpenError] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
       const blobIds = await offlineDb.document_blobs.toCollection().primaryKeys();
       setOfflineDocIds(new Set(blobIds as string[]));
+      setVaultDocs(await offlineDb.vault_docs_meta.toArray());
       const allTrips = await offlineDb.trips.toArray();
       const loaded = await Promise.all(
         allTrips.map(async (trip) => ({
@@ -49,6 +57,16 @@ export default function OfflinePage() {
     })();
   }, []);
 
+  // Ouvre un document offline (déchiffre après biométrie locale pour le coffre).
+  async function openDoc(id: string) {
+    setOpenError(null);
+    try {
+      await openOfflineDocument(id);
+    } catch (e) {
+      setOpenError(e instanceof Error ? e.message : "Ouverture impossible hors ligne.");
+    }
+  }
+
   return (
     <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8">
       <h1 className="font-display text-3xl text-encre">Carnet hors ligne</h1>
@@ -56,9 +74,15 @@ export default function OfflinePage() {
         Ce que Phil a rangé dans la malle avant de perdre le réseau.
       </p>
 
+      {openError ? (
+        <p className="mb-4 rounded-md border border-bordeaux/30 bg-bordeaux/5 px-3 py-2 text-sm text-bordeaux">
+          {openError}
+        </p>
+      ) : null}
+
       {trips === null ? (
         <p className="text-sm text-encre-douce">Ouverture de la malle…</p>
-      ) : trips.length === 0 ? (
+      ) : trips.length === 0 && vaultDocs.length === 0 ? (
         <div className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-6 py-14 text-center">
           <p className="font-display text-xl text-encre italic">La malle est vide</p>
           <p className="mt-2 text-sm text-encre-douce">
@@ -135,7 +159,7 @@ export default function OfflinePage() {
                         {offlineDocIds.has(doc.id) ? (
                           <button
                             type="button"
-                            onClick={() => void openOfflineDocument(doc.id)}
+                            onClick={() => void openDoc(doc.id)}
                             className="shrink-0 rounded-full border border-laiton-clair px-2.5 py-0.5 text-xs font-medium text-encre transition-colors hover:bg-parchemin"
                           >
                             Ouvrir (offline)
@@ -165,6 +189,33 @@ export default function OfflinePage() {
           ))}
         </div>
       )}
+
+      {vaultDocs.length > 0 ? (
+        <section className="mt-8 rounded-lg border border-laiton-clair bg-papier px-5 py-4">
+          <h2 className="font-display text-2xl text-encre">Coffre</h2>
+          <p className="text-sm text-encre-douce">
+            Tes documents chiffrés — déchiffrés sur cet appareil après Face ID / empreinte.
+          </p>
+          <ul className="mt-4 flex flex-col gap-1 text-sm text-encre">
+            {vaultDocs.map((doc) => (
+              <li key={doc.id} className="flex items-center gap-2">
+                <span className="min-w-0 flex-1 truncate">{doc.file_name}</span>
+                {offlineDocIds.has(doc.id) ? (
+                  <button
+                    type="button"
+                    onClick={() => void openDoc(doc.id)}
+                    className="shrink-0 rounded-full border border-laiton-clair px-2.5 py-0.5 text-xs font-medium text-encre transition-colors hover:bg-parchemin"
+                  >
+                    Ouvrir (offline)
+                  </button>
+                ) : (
+                  <span className="shrink-0 text-xs text-encre-douce">non téléchargé</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
     </main>
   );
 }

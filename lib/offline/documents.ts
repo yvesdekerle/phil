@@ -1,4 +1,6 @@
+import { decryptBytes, fromBase64, unwrapKey } from "@/lib/crypto/vault-crypto";
 import { offlineDb } from "./db";
+import { getOfflineMaster } from "./vault-crypto-cache";
 
 /** Limite de stockage offline des fichiers (PHIL-I04). */
 export const OFFLINE_STORAGE_LIMIT_BYTES = 100 * 1024 * 1024; // 100 Mo
@@ -49,13 +51,28 @@ export async function removeDocumentOffline(documentId: string): Promise<void> {
   await offlineDb.document_blobs.delete(documentId);
 }
 
-/** Ouvre un document offline dans un nouvel onglet via une object URL. */
+/**
+ * Ouvre un document offline dans un nouvel onglet via une object URL. Un document
+ * chiffré (coffre, PHIL-T01 Phase 4b) est déchiffré EN MÉMOIRE après biométrie
+ * locale avant d'être affiché — le clair ne touche jamais le disque.
+ */
 export async function openOfflineDocument(documentId: string): Promise<boolean> {
   const entry = await offlineDb.document_blobs.get(documentId);
   if (!entry) {
     return false;
   }
-  const url = URL.createObjectURL(entry.blob);
+  let blob = entry.blob;
+  if (entry.encrypted && entry.wrapped_dek && entry.dek_iv && entry.file_iv) {
+    const master = await getOfflineMaster();
+    const dek = await unwrapKey(master, fromBase64(entry.wrapped_dek), fromBase64(entry.dek_iv));
+    const plain = await decryptBytes(
+      dek,
+      new Uint8Array(await entry.blob.arrayBuffer()),
+      fromBase64(entry.file_iv),
+    );
+    blob = new Blob([plain as BlobPart], { type: entry.mime_type });
+  }
+  const url = URL.createObjectURL(blob);
   window.open(url, "_blank");
   return true;
 }
