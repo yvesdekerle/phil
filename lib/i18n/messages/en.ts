@@ -64,6 +64,13 @@ export const en: PartialMessages = {
     consensusTitle: "The group ranking",
     consensusEmpty: "No one has voted yet.",
     votesSummary: "{supers} ★ · {likes} yes · {nos} no",
+    someone: "A traveller",
+    progressTitle: "Where the crew stands",
+    progressDone: "all done",
+    matchesTitle: "Your matches",
+    matchesEmpty: "No match yet — the whole crew has to say yes to the same activity.",
+    revealLocked: "Finish your votes to reveal the group's verdict",
+    revealRemaining: "{n} still to swipe",
     msg: {
       invalid: "Invalid request.",
       titleRequired: "Give this activity a title.",

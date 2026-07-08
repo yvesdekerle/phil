@@ -64,6 +64,13 @@ export const es: PartialMessages = {
     consensusTitle: "La clasificación del grupo",
     consensusEmpty: "Nadie ha votado todavía.",
     votesSummary: "{supers} ★ · {likes} sí · {nos} no",
+    someone: "Un viajero",
+    progressTitle: "Cómo va la tripulación",
+    progressDone: "al día",
+    matchesTitle: "Vuestros matches",
+    matchesEmpty: "Aún no hay match — toda la tripulación debe decir sí a la misma actividad.",
+    revealLocked: "Termina tus votos para revelar el veredicto del grupo",
+    revealRemaining: "Quedan {n} por deslizar",
     msg: {
       invalid: "Solicitud no válida.",
       titleRequired: "Ponle un título a esta actividad.",

@@ -58,6 +58,13 @@ export const fr = {
     consensusTitle: "Le classement du groupe",
     consensusEmpty: "Personne n'a encore voté.",
     votesSummary: "{supers} ★ · {likes} oui · {nos} non",
+    someone: "Un voyageur",
+    progressTitle: "Où en est l'équipage",
+    progressDone: "à jour",
+    matchesTitle: "Vos matchs",
+    matchesEmpty: "Pas encore de match — il faut que tout l'équipage dise oui à la même activité.",
+    revealLocked: "Termine tes votes pour révéler le verdict du groupe",
+    revealRemaining: "Encore {n} à trancher",
     msg: {
       invalid: "Requête invalide.",
       titleRequired: "Donne un titre à cette activité.",

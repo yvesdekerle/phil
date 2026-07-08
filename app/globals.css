@@ -14,6 +14,8 @@
   --bordeaux-fonce: #571723;
   --laiton: #a98a54;
   --laiton-clair: #d9c9a3;
+  --vert: #3f7a5a;
+  --bleu-nuit: #2b3a67;
   /* Tokens shadcn/ui remappés sur la palette Phil */
   --background: var(--parchemin);
   --foreground: var(--encre);
@@ -58,6 +60,8 @@
   --color-bordeaux-fonce: var(--bordeaux-fonce);
   --color-laiton: var(--laiton);
   --color-laiton-clair: var(--laiton-clair);
+  --color-vert: var(--vert);
+  --color-bleu-nuit: var(--bleu-nuit);
   --font-sans: var(--font-figtree);
   --font-display: var(--font-bodoni);
   --font-heading: var(--font-figtree);

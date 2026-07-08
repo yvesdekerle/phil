@@ -1,13 +1,28 @@
 import { redirect } from "next/navigation";
+import {
+  ActivityConsensus,
+  type ConsensusActivity,
+} from "@/components/activities/activity-consensus";
 import { AddActivityForm } from "@/components/activities/add-activity-form";
 import { SwipeDeck } from "@/components/activities/swipe-deck";
+import { RealtimeRefresh } from "@/components/realtime-refresh";
+import {
+  consensusByActivity,
+  hasVotedAll,
+  matches,
+  participantProgress,
+  ranked,
+  type Verdict,
+  type VoteRow,
+} from "@/lib/activities/consensus";
 import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 
 /**
- * PHIL-U04 — Onglet « À swiper » : deck d'activités du voyage + classement de
- * consensus du groupe (vue `activity_vote_summary`). Chacun swipe ses activités
- * non encore votées ; le classement agrège tous les votes de l'équipage.
+ * PHIL-U04 — Onglet « À swiper » : deck d'activités du voyage + consensus du
+ * groupe (Phase 2). Chacun swipe ses activités non votées ; le consensus agrège
+ * tous les votes de l'équipage — progression toujours visible, matchs et
+ * classement **révélés une fois qu'on a soi-même tout tranché** (anti-biais).
  */
 export default async function ActivitiesPage({ params }: { params: Promise<{ tripId: string }> }) {
   const { tripId } = await params;
@@ -20,42 +35,57 @@ export default async function ActivitiesPage({ params }: { params: Promise<{ tri
     redirect("/login");
   }
 
-  const [{ data: activities }, { data: myVotes }, { data: summary }] = await Promise.all([
+  const [{ data: activities }, { data: votes }, { data: members }] = await Promise.all([
     supabase
       .from("trip_activities")
       .select("id, title, description, category, location, tags")
       .eq("trip_id", tripId)
       .order("created_at", { ascending: true }),
+    supabase.from("activity_votes").select("activity_id, user_id, verdict").eq("trip_id", tripId),
     supabase
-      .from("activity_votes")
-      .select("activity_id")
-      .eq("trip_id", tripId)
-      .eq("user_id", user.id),
-    supabase
-      .from("activity_vote_summary")
-      .select("activity_id, supers, likes, nos, score")
+      .from("trip_participants")
+      .select("user_id, profiles!trip_participants_user_id_fkey(display_name)")
       .eq("trip_id", tripId),
   ]);
 
   const all = activities ?? [];
-  const votedIds = new Set((myVotes ?? []).map((v) => v.activity_id));
-  const deck = all.filter((a) => !votedIds.has(a.id));
-
+  const activityIds = all.map((a) => a.id);
   const titleById = new Map(all.map((a) => [a.id, a.title]));
-  const ranking = (summary ?? [])
-    .map((s) => ({
-      activityId: s.activity_id,
-      title: titleById.get(s.activity_id ?? "") ?? "",
-      supers: s.supers ?? 0,
-      likes: s.likes ?? 0,
-      nos: s.nos ?? 0,
-      score: s.score ?? 0,
-    }))
-    .filter((r) => r.title)
-    .sort((a, b) => b.score - a.score);
+
+  const voteRows: VoteRow[] = (votes ?? []).map((v) => ({
+    activityId: v.activity_id,
+    userId: v.user_id,
+    verdict: v.verdict as Verdict,
+  }));
+  const participants = (members ?? []).map((m) => ({
+    userId: m.user_id,
+    name: m.profiles?.display_name ?? t("activities.someone"),
+  }));
+
+  const myVotedIds = new Set(voteRows.filter((v) => v.userId === user.id).map((v) => v.activityId));
+  const deck = all.filter((a) => !myVotedIds.has(a.id));
+  const meDone = hasVotedAll(user.id, voteRows, all.length);
+
+  const rows = consensusByActivity(activityIds, voteRows, participants.length);
+  const enrich = (r: (typeof rows)[number]): ConsensusActivity => ({
+    activityId: r.activityId,
+    title: titleById.get(r.activityId) ?? "",
+    supers: r.supers,
+    likes: r.likes,
+    nos: r.nos,
+  });
+  const matchRows = matches(rows)
+    .map(enrich)
+    .filter((r) => r.title);
+  const rankingRows = ranked(rows)
+    .filter((r) => r.voters > 0)
+    .map(enrich)
+    .filter((r) => r.title);
+  const progress = participantProgress(participants, voteRows, all.length);
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6">
+      <RealtimeRefresh tables={["trip_activities", "activity_votes"]} />
       <div>
         <h1 className="font-display text-2xl text-encre">{t("activities.title")}</h1>
         <p className="mt-1 text-sm text-encre-douce">{t("activities.intro")}</p>
@@ -71,32 +101,15 @@ export default async function ActivitiesPage({ params }: { params: Promise<{ tri
 
       <AddActivityForm tripId={tripId} />
 
-      <section className="flex flex-col gap-2">
-        <h2 className="text-sm font-medium text-encre">{t("activities.consensusTitle")}</h2>
-        {ranking.length === 0 ? (
-          <p className="text-sm text-encre-douce">{t("activities.consensusEmpty")}</p>
-        ) : (
-          <ol className="flex flex-col gap-1.5">
-            {ranking.map((r, i) => (
-              <li
-                key={r.activityId}
-                className="flex items-center justify-between gap-3 rounded-lg border border-laiton-clair bg-papier px-4 py-2"
-              >
-                <span className="flex min-w-0 items-center gap-2">
-                  <span className="font-display text-laiton">{i + 1}</span>
-                  <span className="truncate text-sm text-encre">{r.title}</span>
-                </span>
-                <span className="shrink-0 text-xs text-encre-douce">
-                  {t("activities.votesSummary")
-                    .replace("{supers}", String(r.supers))
-                    .replace("{likes}", String(r.likes))
-                    .replace("{nos}", String(r.nos))}
-                </span>
-              </li>
-            ))}
-          </ol>
-        )}
-      </section>
+      {all.length > 0 ? (
+        <ActivityConsensus
+          progress={progress}
+          matches={matchRows}
+          ranking={rankingRows}
+          meDone={meDone}
+          remaining={deck.length}
+        />
+      ) : null}
     </div>
   );
 }
