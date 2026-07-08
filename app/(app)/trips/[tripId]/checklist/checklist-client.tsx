@@ -1,6 +1,6 @@
 "use client";
 
-import { GripVertical, Plus, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronUp, GripVertical, Plus, Trash2 } from "lucide-react";
 import { useActionState, useEffect, useState, useTransition } from "react";
 import { useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
@@ -85,10 +85,18 @@ export function ChecklistClient({
     .map((g) => ({ ...g, items: g.items.filter((i) => !isInList(i.key)) }))
     .filter((g) => g.items.length > 0);
 
-  // La liste (sélectionnés), groupée par catégorie
-  const categories = [...new Set(sectionItems.map(catKey))].sort((a, b) =>
-    a === MISC ? 1 : b === MISC ? -1 : a.localeCompare(b, "fr"),
-  );
+  // La liste (sélectionnés), groupée par catégorie. PHIL-S04 : l'ordre des
+  // catégories suit la position (section-globale) de leur premier élément — MISC
+  // en dernier —, ce qui les rend réordonnables via les flèches ↑/↓.
+  const minPos = (cat: string) =>
+    Math.min(...sectionItems.filter((i) => catKey(i) === cat).map((i) => i.position));
+  const categories = [...new Set(sectionItems.map(catKey))].sort((a, b) => {
+    if (a === MISC) return 1;
+    if (b === MISC) return -1;
+    const d = minPos(a) - minPos(b);
+    return d !== 0 ? d : a.localeCompare(b, "fr");
+  });
+  const orderableCats = categories.filter((c) => c !== MISC);
   const categorySuggestions = [
     ...new Set([
       ...PACKING_CATALOG.filter((c) => c.section === tab).map((c) =>
@@ -109,7 +117,20 @@ export function ChecklistClient({
     });
   };
 
-  // PHIL-S04 : drop d'un élément sur un autre de la MÊME catégorie → réordonne.
+  // Réécrit les positions de TOUS les éléments de la section dans l'ordre donné
+  // (positions section-globales → l'ordre des catégories est persistable).
+  const persistSection = (orderedIds: string[]) => {
+    setLocalItems((prev) =>
+      prev.map((i) => {
+        const idx = orderedIds.indexOf(i.id);
+        return idx >= 0 ? { ...i, position: idx } : i;
+      }),
+    );
+    startTransition(() => reorderChecklistItems(tripId, orderedIds));
+  };
+
+  // PHIL-S04 : drop d'un élément sur un autre de la MÊME catégorie → réordonne,
+  // en conservant l'ordre section-global (les autres catégories ne bougent pas).
   const handleDrop = (target: ChecklistItem) => {
     const draggedId = dragId;
     setDragId(null);
@@ -120,17 +141,32 @@ export function ChecklistClient({
     if (!dragged || catKey(dragged) !== catKey(target)) {
       return;
     }
-    const ordered = itemsOfCategory(catKey(target)).filter((i) => i.id !== draggedId);
-    const targetIdx = ordered.findIndex((i) => i.id === target.id);
-    ordered.splice(targetIdx, 0, dragged);
-    const orderedIds = ordered.map((i) => i.id);
-    setLocalItems((prev) =>
-      prev.map((i) => {
-        const idx = orderedIds.indexOf(i.id);
-        return idx >= 0 ? { ...i, position: idx } : i;
-      }),
+    const reordered = itemsOfCategory(catKey(target)).filter((i) => i.id !== draggedId);
+    reordered.splice(
+      reordered.findIndex((i) => i.id === target.id),
+      0,
+      dragged,
     );
-    startTransition(() => reorderChecklistItems(tripId, orderedIds));
+    persistSection(
+      categories.flatMap((c) =>
+        (c === catKey(target) ? reordered : itemsOfCategory(c)).map((i) => i.id),
+      ),
+    );
+  };
+
+  // PHIL-S04 : monte/descend une catégorie (hors MISC, gardé en dernier).
+  const moveCategory = (category: string, dir: -1 | 1) => {
+    const idx = orderableCats.indexOf(category);
+    const swap = idx + dir;
+    if (idx < 0 || swap < 0 || swap >= orderableCats.length) {
+      return;
+    }
+    const next = [...orderableCats];
+    [next[idx], next[swap]] = [next[swap], next[idx]];
+    if (categories.includes(MISC)) {
+      next.push(MISC);
+    }
+    persistSection(next.flatMap((c) => itemsOfCategory(c).map((i) => i.id)));
   };
 
   return (
@@ -174,105 +210,132 @@ export function ChecklistClient({
           {t("checklist.emptyList")}
         </p>
       ) : (
-        categories.map((category) => (
-          <section key={category}>
-            <h2 className="mb-1.5 text-xs font-medium text-laiton uppercase tracking-wide">
-              {category}
-            </h2>
-            <ul className="flex flex-col gap-1.5">
-              {itemsOfCategory(category).map((item) => (
-                <li
-                  key={item.id}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={() => handleDrop(item)}
-                  className={cn(
-                    "flex flex-wrap items-center gap-2 rounded-md border border-laiton-clair/60 bg-papier px-2 py-2",
-                    dragId === item.id && "opacity-40",
-                  )}
-                >
-                  <button
-                    type="button"
-                    draggable
-                    onDragStart={() => setDragId(item.id)}
-                    onDragEnd={() => setDragId(null)}
-                    className="shrink-0 cursor-grab text-laiton-clair hover:text-laiton"
-                    aria-label={t("checklist.reorderAria")}
-                  >
-                    <GripVertical className="size-4" aria-hidden="true" />
-                  </button>
-                  <input
-                    type="checkbox"
-                    checked={item.done}
-                    disabled={pending}
-                    onChange={(e) =>
-                      startTransition(() =>
-                        toggleChecklistItem(
-                          tripId,
-                          item.id,
-                          e.target.checked,
-                          item.event_id ?? undefined,
-                        ),
-                      )
-                    }
-                    className="size-4 accent-[#6e1f2e]"
-                    aria-label={`${t("checklist.doneAria")} ${item.title}`}
-                  />
-                  <span
-                    className={cn(
-                      "min-w-0 flex-1 text-sm",
-                      item.done ? "text-encre-douce line-through" : "text-encre",
-                    )}
-                  >
-                    {item.title}
-                    {item.quantity ? (
-                      <span className="ml-1.5 rounded-full bg-laiton/15 px-1.5 py-0.5 text-[0.65rem] font-medium text-laiton">
-                        × {item.quantity}
-                      </span>
-                    ) : null}
-                    {item.eventTitle ? (
-                      <span className="ml-1.5 rounded-full bg-laiton/15 px-2 py-0.5 text-[0.65rem] text-laiton">
-                        {item.eventTitle}
-                      </span>
-                    ) : null}
-                  </span>
-                  <select
-                    value={item.assigned_to ?? ""}
-                    disabled={pending}
-                    onChange={(e) =>
-                      startTransition(() =>
-                        assignChecklistItem(tripId, item.id, e.target.value || null),
-                      )
-                    }
-                    className="rounded border border-laiton-clair bg-papier px-1.5 py-1 text-xs text-encre-douce"
-                    aria-label={t("checklist.assignAria")}
-                  >
-                    <option value="">{t("checklist.assignNobody")}</option>
-                    {members.map((m) => (
-                      <option key={m.userId} value={m.userId}>
-                        {m.userId === myId ? t("checklist.you") : m.name}
-                      </option>
-                    ))}
-                  </select>
-                  {item.created_by === myId || isOwner ? (
+        categories.map((category) => {
+          const oi = orderableCats.indexOf(category);
+          return (
+            <section key={category}>
+              <div className="mb-1.5 flex items-center gap-1">
+                <h2 className="text-xs font-medium text-laiton uppercase tracking-wide">
+                  {category}
+                </h2>
+                {oi >= 0 && orderableCats.length > 1 ? (
+                  <span className="flex items-center">
                     <button
                       type="button"
+                      onClick={() => moveCategory(category, -1)}
+                      disabled={oi === 0}
+                      aria-label={t("checklist.moveCategoryUp")}
+                      className="rounded p-0.5 text-encre-douce hover:text-encre disabled:opacity-30"
+                    >
+                      <ChevronUp className="size-3.5" aria-hidden="true" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => moveCategory(category, 1)}
+                      disabled={oi === orderableCats.length - 1}
+                      aria-label={t("checklist.moveCategoryDown")}
+                      className="rounded p-0.5 text-encre-douce hover:text-encre disabled:opacity-30"
+                    >
+                      <ChevronDown className="size-3.5" aria-hidden="true" />
+                    </button>
+                  </span>
+                ) : null}
+              </div>
+              <ul className="flex flex-col gap-1.5">
+                {itemsOfCategory(category).map((item) => (
+                  <li
+                    key={item.id}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={() => handleDrop(item)}
+                    className={cn(
+                      "flex flex-wrap items-center gap-2 rounded-md border border-laiton-clair/60 bg-papier px-2 py-2",
+                      dragId === item.id && "opacity-40",
+                    )}
+                  >
+                    <button
+                      type="button"
+                      draggable
+                      onDragStart={() => setDragId(item.id)}
+                      onDragEnd={() => setDragId(null)}
+                      className="shrink-0 cursor-grab text-laiton-clair hover:text-laiton"
+                      aria-label={t("checklist.reorderAria")}
+                    >
+                      <GripVertical className="size-4" aria-hidden="true" />
+                    </button>
+                    <input
+                      type="checkbox"
+                      checked={item.done}
                       disabled={pending}
-                      onClick={() =>
+                      onChange={(e) =>
                         startTransition(() =>
-                          deleteChecklistItem(tripId, item.id, item.event_id ?? undefined),
+                          toggleChecklistItem(
+                            tripId,
+                            item.id,
+                            e.target.checked,
+                            item.event_id ?? undefined,
+                          ),
                         )
                       }
-                      className="text-encre-douce hover:text-bordeaux"
-                      aria-label={`${t("checklist.removePrefix")} ${item.title} ${t("checklist.removeSuffix")}`}
+                      className="size-4 accent-[#6e1f2e]"
+                      aria-label={`${t("checklist.doneAria")} ${item.title}`}
+                    />
+                    <span
+                      className={cn(
+                        "min-w-0 flex-1 text-sm",
+                        item.done ? "text-encre-douce line-through" : "text-encre",
+                      )}
                     >
-                      <Trash2 className="size-4" aria-hidden="true" />
-                    </button>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
-          </section>
-        ))
+                      {item.title}
+                      {item.quantity ? (
+                        <span className="ml-1.5 rounded-full bg-laiton/15 px-1.5 py-0.5 text-[0.65rem] font-medium text-laiton">
+                          × {item.quantity}
+                        </span>
+                      ) : null}
+                      {item.eventTitle ? (
+                        <span className="ml-1.5 rounded-full bg-laiton/15 px-2 py-0.5 text-[0.65rem] text-laiton">
+                          {item.eventTitle}
+                        </span>
+                      ) : null}
+                    </span>
+                    <select
+                      value={item.assigned_to ?? ""}
+                      disabled={pending}
+                      onChange={(e) =>
+                        startTransition(() =>
+                          assignChecklistItem(tripId, item.id, e.target.value || null),
+                        )
+                      }
+                      className="rounded border border-laiton-clair bg-papier px-1.5 py-1 text-xs text-encre-douce"
+                      aria-label={t("checklist.assignAria")}
+                    >
+                      <option value="">{t("checklist.assignNobody")}</option>
+                      {members.map((m) => (
+                        <option key={m.userId} value={m.userId}>
+                          {m.userId === myId ? t("checklist.you") : m.name}
+                        </option>
+                      ))}
+                    </select>
+                    {item.created_by === myId || isOwner ? (
+                      <button
+                        type="button"
+                        disabled={pending}
+                        onClick={() =>
+                          startTransition(() =>
+                            deleteChecklistItem(tripId, item.id, item.event_id ?? undefined),
+                          )
+                        }
+                        className="text-encre-douce hover:text-bordeaux"
+                        aria-label={`${t("checklist.removePrefix")} ${item.title} ${t("checklist.removeSuffix")}`}
+                      >
+                        <Trash2 className="size-4" aria-hidden="true" />
+                      </button>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          );
+        })
       )}
 
       {/* Ajouter ses propres éléments : titre, quantité (optionnel), catégorie */}

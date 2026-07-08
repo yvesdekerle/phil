@@ -989,8 +989,9 @@ Trois demandes (2026-07-07) :
 - **Date de fin programmée (+ rappel si possible)** : `closes_at` sur `polls` (distinct de `closed_at`). Auto-clôture + rappel avant échéance à câbler dans le cron.
 > Migration écrite : `20260707110000_polls_multi_schedule.sql`. **À appliquer avant l'UI/cron.** Reste : UI (type à la création, votants par option, badge date de fin), logique vote simple/multiple, sweep cron clôture/rappel.
 
-### [~] PHIL-S04 — Valise : quantité optionnelle, retrait de la date, réordonnancement *(UI faite le 2026-07-07)*
-> UI livrée : champ quantité optionnel (+ badge), champ date retiré du formulaire, **drag-drop des éléments** (poignée, par catégorie, colonne `position`). **Reste : réordonner les CATÉGORIES** (mécanisme d'ordre à cadrer — texte libre aujourd'hui).
+### [x] PHIL-S04 — Valise : quantité optionnelle, retrait de la date, réordonnancement *(fait le 2026-07-08)*
+> UI livrée (2026-07-07) : champ quantité optionnel (+ badge), champ date retiré du formulaire, **drag-drop des éléments** (poignée, par catégorie, colonne `position`).
+> **Réordonnancement des catégories (fait le 2026-07-08)** : flèches ↑/↓ sur chaque en-tête de catégorie (hors « Divers » gardé en dernier). Mécanisme retenu = **positions section-globales** (aucune migration) : l'ordre des catégories suit la position min de leurs éléments ; monter/descendre une catégorie réécrit les positions de toute la section via `reorderChecklistItems`. Le drag d'éléments reste par catégorie mais persiste l'ordre global. i18n `checklist.moveCategoryUp/Down`.
 Demandes (2026-07-07) sur le formulaire d'ajout d'élément :
 - **Quantité optionnelle** : champ `quantity` (texte libre — « 2 », « 3 paires »…).
 - **Retirer le champ date** : `due_date` sans usage clair → masquer du formulaire (colonne conservée, non rendue). UI seule.

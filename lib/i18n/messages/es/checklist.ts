@@ -2,6 +2,8 @@
 export const checklistEs = {
   checklist: {
     sectionsAria: "Secciones de la maleta",
+    moveCategoryUp: "Subir la categoría",
+    moveCategoryDown: "Bajar la categoría",
     travelerFallback: "Viajero",
     tabs: {
       a_emporter: "Para llevar",
