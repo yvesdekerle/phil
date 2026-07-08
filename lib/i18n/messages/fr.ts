@@ -64,6 +64,14 @@ export const fr = {
       addFailed: "Ajout impossible.",
     },
   },
+  readiness: {
+    title: "Avant le départ",
+    lodging: "Hébergement",
+    transport: "Transport",
+    activities: "Activités",
+    meals: "Repas",
+    packing: "Valise",
+  },
   guide: {
     kicker: "Guide de voyage",
     print: "Télécharger en PDF",

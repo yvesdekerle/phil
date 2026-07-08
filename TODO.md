@@ -1006,8 +1006,8 @@ Chiffrement de bout en bout du coffre : le serveur ne voit jamais le contenu ni 
 
 ## Catégorie U — Évolutions produit (demandées le 2026-07-07, à traiter APRÈS la sécurité E2EE PHIL-T01)
 
-### [ ] PHIL-U01 — Pastilles « à préparer avant le voyage »
-À la création d'un voyage (et sur la vue voyage), afficher des **pastilles/indicateurs** de ce qu'il reste à préparer avant le départ : logement réservé ? repas prévus ? etc. Une sorte de checklist de préparation visible d'un coup d'œil.
+### [x] PHIL-U01 — Pastilles « à préparer avant le voyage » *(fait le 2026-07-08)*
+Composant serveur `components/trips/trip-readiness.tsx` : pastilles d'un coup d'œil (hébergement / transport / activités / repas / valise), vertes si en place, avec compteur `n/5`. Lecture seule des données existantes (`trip_events.type`, `trip_meals`, `checklist_items`), pas de migration. Affiché sur la vue voyage tant que le voyage n'est pas passé (`end_date >= today`). i18n `readiness.*` (fr/en/es). *(Reste possible : afficher aussi à la création, et rendre les pastilles cliquables vers l'onglet concerné.)*
 
 ### [ ] PHIL-U02 — Notifications/rappels pour voter (sondages, idées)
 Rappeler aux participants de **voter sur les sondages / réagir aux idées** en attente. Idéalement une **pastille de notification** (sur l'avatar profil ? à côté du sélecteur de langue ?) indiquant les actions en attente.

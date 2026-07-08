@@ -70,6 +70,14 @@ export const es: PartialMessages = {
       addFailed: "No se pudo añadir.",
     },
   },
+  readiness: {
+    title: "Antes de salir",
+    lodging: "Alojamiento",
+    transport: "Transporte",
+    activities: "Actividades",
+    meals: "Comidas",
+    packing: "Maleta",
+  },
   guide: {
     kicker: "Guía de viaje",
     print: "Descargar en PDF",

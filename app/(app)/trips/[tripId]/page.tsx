@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { TodayHero } from "@/components/calendar/today-hero";
 import { TripViewToggle } from "@/components/calendar/trip-view-toggle";
+import { TripReadiness } from "@/components/trips/trip-readiness";
 import { WeatherLine, WeatherStrip } from "@/components/trips/trip-weather";
 import { Button } from "@/components/ui/button";
 import { eventDayKey, eventTime } from "@/lib/events/datetime";
@@ -138,6 +139,8 @@ export default async function TripCalendarPage({
           />
         ) : null}
         {trip ? <WeatherStrip days={weatherDays} destination={trip.destination} /> : null}
+        {/* PHIL-U01 : préparatifs, tant que le voyage n'est pas passé */}
+        {trip && trip.end_date >= nowIso.slice(0, 10) ? <TripReadiness tripId={tripId} /> : null}
         <div className="flex items-center justify-between gap-3">
           <TripViewToggle tripId={tripId} active="calendar" />
           {canEdit ? (
