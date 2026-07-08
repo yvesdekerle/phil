@@ -31,11 +31,12 @@ async function getOrCreateGhostId(admin: Admin): Promise<string> {
   if (!ghostId) {
     throw new Error("Compte « Voyageur parti » introuvable");
   }
-  // PHIL-R18 : une fois la migration `profiles_is_system` appliquée (db:push) et
-  // les types régénérés (db:types), ajouter `is_system: true` ici pour que le nom
-  // du fantôme soit lisible dans les soldes (policy `profiles_select_system`). La
-  // migration marque déjà un fantôme préexistant ; ce flag couvre les suivants.
-  await admin.from("profiles").update({ display_name: GHOST_NAME }).eq("id", ghostId);
+  // PHIL-R18 : `is_system` rend le fantôme lisible dans les soldes / « payé par »
+  // (policy `profiles_select_system`), même s'il n'est participant d'aucun voyage.
+  await admin
+    .from("profiles")
+    .update({ display_name: GHOST_NAME, is_system: true })
+    .eq("id", ghostId);
   return ghostId;
 }
 

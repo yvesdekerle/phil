@@ -942,14 +942,14 @@ Fini (2026-07-08) : `import/actions.ts` (chemin de stockage, brouillon introuvab
 ### [ ] PHIL-R17 — 🟡 Activer le job CI `rls`
 Fournir un projet Supabase de test + secrets GitHub pour que le job `rls` de `.github/workflows/ci.yml` s'exécute réellement.
 
-### [~] PHIL-R18 — 🟡 Profil « Voyageur parti » lisible dans les soldes
+### [x] PHIL-R18 — 🟡 Profil « Voyageur parti » lisible dans les soldes *(fait le 2026-07-08)*
 Suite de R05 : rendre le profil système lisible (colonne `is_system` + policy SELECT) pour afficher son nom dans les soldes plutôt qu'un libellé de repli.
 
 **Part A — réattribution des données de groupe (fait le 2026-07-08)** : `lib/account/deletion.ts` réattribue au fantôme les tables collaboratives ajoutées après coup, toutes en `created_by` cascade sur profiles (sinon supprimées avec le partant) : `trip_activities`, `trip_meals` (+`cook_id`), `shopping_items` (+`checked_by`/`buyer_id`), `trip_places`. Les votes restent personnels → purgés par cascade.
 
 **Part B — profil système lisible (migration écrite le 2026-07-08, à appliquer)** : `supabase/migrations/20260708130000_profiles_is_system.sql` — colonne `is_system` + policy `profiles_select_system` (tout authentifié lit un profil système) + marquage d'un fantôme préexistant. **À appliquer par Yves : `pnpm db:push` + `pnpm db:types`.**
 
-**Part 2 — câblage (après la migration)** : ajouter `is_system: true` à la mise à jour du fantôme dans `getOrCreateGhostId` (deletion.ts) une fois les types régénérés (repère `PHIL-R18` en place). Passe le ticket en `[x]`.
+**Part 2 — câblage (fait le 2026-07-08)** : migration appliquée (`db:push`) + types régénérés (`db:types` → `is_system` sur profiles) ; `is_system: true` câblé dans `getOrCreateGhostId` (deletion.ts). `verify:rls` 30/30 (nouvelle policy `profiles_select_system` sans régression). Ticket clos.
 
 ### [ ] PHIL-R19 — 🟡 Perf : `React.cache` + Suspense + bundle i18n
 `React.cache()` sur `getUser`/profil/trip, `<Suspense>` météo/OSRM + `loading.tsx` sous `trips/[tripId]`, purger le catalogue i18n trilingue du bundle client (~150 Ko).

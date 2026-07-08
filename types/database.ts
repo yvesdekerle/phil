@@ -895,6 +895,7 @@ export type Database = {
           created_at: string;
           display_name: string | null;
           id: string;
+          is_system: boolean;
           last_export_at: string | null;
           locale: string;
           notification_preferences: Json;
@@ -907,6 +908,7 @@ export type Database = {
           created_at?: string;
           display_name?: string | null;
           id: string;
+          is_system?: boolean;
           last_export_at?: string | null;
           locale?: string;
           notification_preferences?: Json;
@@ -919,6 +921,7 @@ export type Database = {
           created_at?: string;
           display_name?: string | null;
           id?: string;
+          is_system?: boolean;
           last_export_at?: string | null;
           locale?: string;
           notification_preferences?: Json;
