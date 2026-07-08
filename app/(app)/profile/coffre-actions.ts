@@ -205,7 +205,13 @@ export async function getUserEmail(userId: string): Promise<string | null> {
   return data.user?.email ?? null;
 }
 
-/** Stocke l'enveloppe de récupération (code de secours) — remplace l'ancienne. */
+/**
+ * Stocke l'enveloppe de récupération (code de secours) — remplace l'ancienne.
+ * PHIL-R21 : remplacement en **delete-then-insert** plutôt qu'`upsert`. La table
+ * n'a pas de policy UPDATE (et n'en a pas besoin : une enveloppe ne se modifie
+ * jamais en place, elle se remplace) — l'upsert échouait donc silencieusement à
+ * la régénération. DELETE + INSERT réutilisent les policies existantes.
+ */
 export async function storeRecoveryWrap(input: unknown): Promise<StoreResult> {
   const schema = z.object({
     wrappedKey: z.string().min(1),
@@ -223,18 +229,25 @@ export async function storeRecoveryWrap(input: unknown): Promise<StoreResult> {
   if (!user) {
     return { ok: false, error: "unauthenticated" };
   }
-  const { error } = await supabase.from("user_master_key_wraps").upsert(
-    {
-      user_id: user.id,
-      label: "recovery",
-      method: "RECOVERY",
-      wrapped_key: parsed.data.wrappedKey,
-      wrap_iv: parsed.data.wrapIv,
-      prf_salt: parsed.data.salt,
-      credential_id: null,
-    },
-    { onConflict: "user_id,label" },
-  );
+
+  const { error: deleteError } = await supabase
+    .from("user_master_key_wraps")
+    .delete()
+    .eq("user_id", user.id)
+    .eq("label", "recovery");
+  if (deleteError) {
+    return { ok: false, error: deleteError.message };
+  }
+
+  const { error } = await supabase.from("user_master_key_wraps").insert({
+    user_id: user.id,
+    label: "recovery",
+    method: "RECOVERY",
+    wrapped_key: parsed.data.wrappedKey,
+    wrap_iv: parsed.data.wrapIv,
+    prf_salt: parsed.data.salt,
+    credential_id: null,
+  });
   if (error) {
     return { ok: false, error: error.message };
   }

@@ -967,8 +967,11 @@ Suite de R05 : rendre le profil système lisible (colonne `is_system` + policy S
 ### [ ] PHIL-R20 — 🟡 Cohérence transversale (refactors)
 Type `ActionState` unique, standard formulaire `useActionState`, `<TimezoneSelect>` partagé, routage des dates via un module, palette JS centralisée (audit A9).
 
-### [ ] PHIL-R21 — 🟠 Policy UPDATE manquante sur `user_master_key_wraps` (régénération du code de secours)
-Découvert en PHIL-T01 Phase 4a. La table `user_master_key_wraps` n'a que des policies SELECT/INSERT/DELETE (migration `20260707140000_vault_crypto_keys.sql`). Or `storeRecoveryWrap` fait un `upsert(onConflict: user_id,label)` : à la **régénération** d'un code de secours (2ᵉ appel, ligne `recovery` existante), le chemin UPDATE est **bloqué par la RLS** → la régénération échoue silencieusement. Ajouter une policy `user_master_key_wraps_update_self` (`using`/`with check` = `user_id = auth.uid()`) via une nouvelle migration, puis `pnpm verify:rls`. NB : `storeDeviceWrap` (4a) contourne le souci en insérant un label unique — c'est bien la seule régénération du code de secours qui est cassée.
+### [x] PHIL-R21 — 🟠 Régénération du code de secours cassée par la RLS (fix sans migration) *(fait le 2026-07-08)*
+Découvert en PHIL-T01 Phase 4a. La table `user_master_key_wraps` n'a que des policies SELECT/INSERT/DELETE (migration `20260707140000_vault_crypto_keys.sql`). Or `storeRecoveryWrap` faisait un `upsert(onConflict: user_id,label)` : à la **régénération** d'un code de secours (2ᵉ appel, ligne `recovery` existante), le chemin UPDATE était **bloqué par la RLS** → régénération en échec silencieux.
+**Choix retenu (écart vs proposition initiale « ajouter une policy UPDATE ») :** correction **code seul, sans migration** → `storeRecoveryWrap` fait désormais **DELETE (label=recovery) puis INSERT**, réutilisant les policies existantes. Motivations : (1) marche **immédiatement**, sans `db:push` ; (2) **moindre privilège** — une enveloppe ne se modifie jamais en place (PRF : insérée une fois puis supprimée ; RECOVERY : remplacée), donc aucun besoin d'accorder un UPDATE global. `storeDeviceWrap` (4a) était déjà sûr (insert, label unique).
+Non-atomicité assumée : si l'INSERT échoue après le DELETE, l'utilisateur perd son ancien code de secours (qu'il remplaçait de toute façon) mais garde l'accès **appareil** (biométrie) → pas de perte de données ; l'erreur est remontée à l'UI.
+**Test manuel** : Profil → Coffre → « Générer un code de secours » (1er → OK, code affiché), puis « Régénérer un code de secours » (2ᵉ) → doit **réussir** et afficher un nouveau code (avant : échec silencieux). Pas de migration, pas de `verify:rls` à relancer (aucune policy modifiée).
 
 ---
 
