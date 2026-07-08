@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { getSessionUser } from "@/lib/auth/session";
 import type { Database } from "@/types/database";
 
 export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
@@ -9,9 +10,8 @@ export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
  * sans filtre verrait plusieurs lignes et échouerait.
  */
 export async function getOwnProfile(supabase: SupabaseClient<Database>): Promise<Profile | null> {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // PHIL-R19 : user mémoïsé par requête (dédup des appels auth.getUser()).
+  const user = await getSessionUser();
   if (!user) {
     return null;
   }

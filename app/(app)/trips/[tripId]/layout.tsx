@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { TripOfflineSync } from "@/components/offline/trip-sync";
 import { CoverImage } from "@/components/trips/cover-image";
 import { TripTabs } from "@/components/trips/trip-tabs";
+import { getSessionUser } from "@/lib/auth/session";
 import { getDateFnsLocale, getIntlLocale, getT } from "@/lib/i18n/server";
 import { getPendingByTrip } from "@/lib/notifications/pending-server";
 import { createClient } from "@/lib/supabase/server";
@@ -25,9 +26,7 @@ export default async function TripLayout({
 }) {
   const { tripId } = await params;
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getSessionUser();
   const { data: trip } = await supabase.from("trips").select("*").eq("id", tripId).single();
 
   if (!trip) {
