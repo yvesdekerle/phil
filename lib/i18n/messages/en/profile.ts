@@ -70,6 +70,12 @@ export const profileEn = {
     back: "← Back to profile",
     title: "Security",
     subtitle: "A second biometric lock on your vault — the key never leaves your device.",
+    e2eeTitle: "Already covered by the encrypted vault",
+    e2eeBody:
+      "Your vault is end-to-end encrypted and unlocks with Face ID / fingerprint, without a separate passkey. There's nothing left to set up here.",
+    e2eeCta: "Back to profile",
+    nudge:
+      "Turn on the end-to-end encrypted vault in your profile for a modern biometric lock — no need to register a passkey here.",
     passkeysTitle: "Passkeys (Face ID / Touch ID)",
     register: "Enable Face ID / Touch ID for the vault",
     registering: "Waiting for the device…",

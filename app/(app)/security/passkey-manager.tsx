@@ -21,7 +21,20 @@ type Passkey = {
   last_used_at: string | null;
 };
 
-export function PasskeyManager({ passkeys }: { passkeys: Passkey[] }) {
+/**
+ * Gestion des anciennes passkeys du coffre (verrou HMAC pré-E2EE, PHIL-C05).
+ * PHIL-T01 Phase 5a : l'inscription de nouvelles passkeys est **désactivée par
+ * défaut** (`canRegister=false`) — le coffre chiffré (PRF) est la voie unique.
+ * On garde la liste + la révocation pour qu'un utilisateur non migré puisse
+ * nettoyer ses anciennes passkeys.
+ */
+export function PasskeyManager({
+  passkeys,
+  canRegister = false,
+}: {
+  passkeys: Passkey[];
+  canRegister?: boolean;
+}) {
   const t = useT();
   const il = intlLocale(useLocale());
   const router = useRouter();
@@ -62,10 +75,12 @@ export function PasskeyManager({ passkeys }: { passkeys: Passkey[] }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <Button type="button" disabled={pending} onClick={register}>
-        <Fingerprint aria-hidden="true" />
-        {pending ? t("security.registering") : t("security.register")}
-      </Button>
+      {canRegister ? (
+        <Button type="button" disabled={pending} onClick={register}>
+          <Fingerprint aria-hidden="true" />
+          {pending ? t("security.registering") : t("security.register")}
+        </Button>
+      ) : null}
 
       {state.status !== "idle" ? (
         <p

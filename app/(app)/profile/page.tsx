@@ -144,9 +144,13 @@ export default async function ProfilePage() {
         </Card>
 
         <div className="mt-6 flex items-center justify-center gap-4">
-          <Button asChild variant="outline">
-            <Link href="/security">{t("profile.vaultSecurity")}</Link>
-          </Button>
+          {/* PHIL-T01 Phase 5a : le lien passkey/HMAC est masqué dès que le coffre
+              chiffré (E2EE) est actif — il n'apporte plus rien. */}
+          {coffreKey ? null : (
+            <Button asChild variant="outline">
+              <Link href="/security">{t("profile.vaultSecurity")}</Link>
+            </Button>
+          )}
           <Button asChild variant="outline">
             <a href="/api/export" download>
               {t("profile.exportData")}

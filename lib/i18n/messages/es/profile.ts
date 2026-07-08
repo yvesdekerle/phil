@@ -72,6 +72,12 @@ export const profileEs = {
     title: "Seguridad",
     subtitle:
       "Un segundo cerrojo biométrico en tu caja fuerte — la clave nunca sale de tu dispositivo.",
+    e2eeTitle: "Ya protegido por la caja cifrada",
+    e2eeBody:
+      "Tu caja fuerte está cifrada de extremo a extremo y se desbloquea con Face ID / huella, sin una passkey aparte. Aquí ya no hay nada que configurar.",
+    e2eeCta: "Volver al perfil",
+    nudge:
+      "Activa la caja cifrada de extremo a extremo en tu perfil para un cerrojo biométrico moderno — ya no hace falta registrar una passkey aquí.",
     passkeysTitle: "Passkeys (Face ID / Touch ID)",
     register: "Activar Face ID / Touch ID para la caja fuerte",
     registering: "Esperando al dispositivo…",

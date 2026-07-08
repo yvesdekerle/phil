@@ -70,6 +70,12 @@ export const profileFr = {
     back: "← Retour au profil",
     title: "Sécurité",
     subtitle: "Un second verrou biométrique sur ton coffre — la clé ne quitte jamais ton appareil.",
+    e2eeTitle: "Déjà couvert par le coffre chiffré",
+    e2eeBody:
+      "Ton coffre est chiffré de bout en bout et se déverrouille par Face ID / empreinte, sans passkey séparée. Il n'y a plus rien à régler ici.",
+    e2eeCta: "Retour au profil",
+    nudge:
+      "Active le coffre chiffré de bout en bout dans ton profil pour un verrou biométrique moderne — plus besoin d'enregistrer une passkey ici.",
     passkeysTitle: "Passkeys (Face ID / Touch ID)",
     register: "Activer Face ID / Touch ID pour le coffre",
     registering: "En attente de l'appareil…",
