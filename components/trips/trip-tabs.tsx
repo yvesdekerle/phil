@@ -8,7 +8,6 @@ import { cn } from "@/lib/utils";
 const TABS = [
   { segment: "", key: "calendar" },
   { segment: "ideas", key: "ideas" },
-  { segment: "activities", key: "activities" },
   { segment: "miam", key: "miam" },
   { segment: "polls", key: "polls" },
   { segment: "documents", key: "documents" },
@@ -21,14 +20,14 @@ const TABS = [
   { segment: "settings", key: "settings" },
 ] as const;
 
-type PendingByTab = { ideas: number; activities: number; polls: number };
+type PendingByTab = { ideas: number; polls: number };
 
 export function TripTabs({ tripId, pending }: { tripId: string; pending?: PendingByTab }) {
   const pathname = usePathname();
   const t = useT();
   const base = `/trips/${tripId}`;
   const badgeFor = (key: string): number =>
-    pending && (key === "ideas" || key === "activities" || key === "polls") ? pending[key] : 0;
+    pending && (key === "ideas" || key === "polls") ? pending[key] : 0;
 
   return (
     <nav

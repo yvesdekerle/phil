@@ -1032,7 +1032,8 @@ Pastilles « actions en attente » **in-app** (pas d'email/cron). Placement rete
 ### [x] PHIL-U03 — Retirer le libellé « Timeline » redondant à droite *(fait le 2026-07-08)*
 `timeline/page.tsx` : retiré le `<h1>` « Timeline » qui doublonnait avec `TripViewToggle` (déjà porteur de la vue active). Vue alignée sur la carte (toggle seul, sans titre). Clé i18n `calendar.timeline.title` conservée (parité).
 
-### [~] PHIL-U04 — Idées « façon Yallah » : swipe d'activités par voyage — **GROS CHANTIER**
+### [x] PHIL-U04 — Idées « façon Yallah » : swipe d'activités par voyage — **REPRIS PAR U07** *(2026-07-08)*
+> **Refondu par PHIL-U07** : le swipe ne vit plus sur un pool `trip_activities` séparé mais **sur les idées** (`trip_ideas`). Les briques génériques de U04 (geste rAF, `swipe.ts`, `swipe-feedback.tsx`, `consensus.ts`) sont **réutilisées** par U07 ; le pool d'activités et son onglet ont été retirés. Ci-dessous = l'historique U04 (contexte), les phases restantes (Phase 3 OpenTripMap, etc.) sont **caduques** ou à ré-évaluer pour les idées.
 Reprendre le concept de **Yallah** dans l'onglet Idées : pour chaque voyage, une **liste d'activités** proposées avec **swipe** (like/pass). Réf. code : `/Users/yvesdekerle/Sources/perso/yallah`.
 
 **Analyse Yallah faite (2026-07-08).** Points clés : SPA React 19 + Vite (pas Next), swipe **100 % maison** (pointer events + rAF, aucune lib — portable tel quel), backend Firebase optionnel. **Yallah n'a AUCUN consensus** : chacun swipe dans son coin, on affiche les verdicts côte à côte → c'est la valeur que Phil ajoute en SQL. 4 verdicts : droite=YES, gauche=NO, **haut=SUPER** (quota 5), **bas=MAYBE** (⚠️ le README Yallah inverse l'axe vertical — se fier à `src/utils/swipe.ts`, pas au tableau). Activités curées à la main (markdown → JSON), photos Pexels, coords Nominatim — **pas** d'API de découverte au runtime.
@@ -1052,17 +1053,18 @@ Reprendre le concept de **Yallah** dans l'onglet Idées : pour chaque voyage, un
 
 > **⚠️ Refonte demandée par Yves (2026-07-08) → voir PHIL-U07.** Le swipe ne doit PAS vivre sur un pool séparé (`trip_activities`) : il doit swiper **les idées** (`trip_ideas`). L'onglet « À swiper » et le pool `trip_activities` sont donc à **retirer** au profit de U07. Les parties génériques de U04 (geste rAF, `swipe.ts`, `swipe-feedback.tsx`, `consensus.ts`) sont **réutilisées** par U07 — rien de perdu.
 
-### [~] PHIL-U07 — « Match tes activités » : swipe façon Tinder/Bumble sur les idées (refonte U04)
-**Décision Yves (2026-07-08, captures à l'appui)** : au lieu du simple cœur d'up-vote sur la carte d'idée, l'équipage **swipe les idées** comme sur Tinder/Bumble — **like (YES) / super like (SUPER) / dislike (NO) / pourquoi pas (MAYBE)** — et les cartes affichent les compteurs (❤️ ⭐ 👎…). Un CTA **« Match tes activités »** dans l'onglet **Idées** lance le swipe. « Les idées SONT les activités » → un seul pool.
+### [x] PHIL-U07 — « Match tes activités » : swipe façon Tinder/Bumble sur les idées (refonte U04) *(fait le 2026-07-08)*
+**Décision Yves (2026-07-08, captures à l'appui)** : au lieu du simple cœur d'up-vote sur la carte d'idée, l'équipage **swipe les idées** comme sur Tinder/Bumble — **like / super like / dislike / pourquoi pas** — et les cartes affichent les compteurs (❤️ ⭐ 👎). Un CTA **« Match tes activités »** dans l'onglet **Idées** lance le swipe. « Les idées SONT les activités » → un seul pool.
 
-**Phase 0 — migration (écrite le 2026-07-08, à appliquer par Yves)** : `20260708150000_idea_votes_verdict.sql` — `idea_votes` gagne `verdict` (YES/NO/MAYBE/SUPER, défaut 'YES' → les cœurs existants deviennent des like) + `quota_hit`. PK `(idea_id, user_id)` déjà unique (upsert). **`pnpm db:push` + `pnpm db:types`.**
+**Phase 0 (fait le 2026-07-08, migration appliquée)** : `20260708150000_idea_votes_verdict.sql` — `idea_votes` gagne `verdict` (YES/NO/MAYBE/SUPER, défaut 'YES' → les cœurs deviennent des like) + `quota_hit`.
 
-**Phase 1 — code (après la migration)** :
-- Server action `castIdeaVerdict(tripId, ideaId, verdict)` : upsert `idea_votes` + quota SUPER serveur (rétrograde en YES + `quota_hit`). Remplace/complète l'up-vote actuel.
-- **Deck de swipe sur les idées** : réutilise `swipe-deck`/`swipe-feedback`/`use-swipe-gesture` (génériques) branchés sur `trip_ideas` (les idées `POOL`). CTA « Match tes activités » dans `ideas/page.tsx` → lance le swipe (sous-page `ideas/match` ou inline).
-- **Compteurs sur les cartes d'idées** (`IdeaCard`) : ⭐ supers · ❤️ likes · 👎 nos (via `consensus.ts` réutilisé), « matchs » quand tout l'équipage aime.
-- **Retrait** de l'onglet « À swiper » (`activities` de `TripTabs`) + bascule de la pastille U02 `activities`→`ideas`. Le pool `trip_activities` devient dormant (UI retirée ; table gardée, drop ultérieur possible).
-- i18n `ideas.match.*` (fr/en/es). Adapter `getPendingByTrip` (pending = idées `POOL` non swipées).
+**Phase 1a — swipe (fait le 2026-07-08)** : `castIdeaVerdict`/`undoIdeaVerdict` (upsert `idea_votes` + quota super serveur borné au voyage). Sous-page `/ideas/match` (deck + consensus/matchs, réutilise `use-swipe-gesture`/`swipe-feedback`/`consensus.ts`). CTA « Match tes activités » dans `ideas/page.tsx` avec compteur d'idées à swiper.
+
+**Phase 1b — cartes (fait le 2026-07-08)** : `IdeaCard` remplace le bouton cœur par les compteurs ⭐/❤️/👎 + badge « Match » quand tout l'équipage a swipé positif. `IdeaWithMeta` gagne `supers/likes/maybes/nos/isMatch`. Suppression de `VoteButton`/`toggleVote`.
+
+**Phase 1c — nettoyage (fait le 2026-07-08)** : onglet « À swiper » retiré de `TripTabs` ; `/activities` redirige vers `/ideas` ; pool `trip_activities` mis en dormance (composants `swipe-deck`/`activity-detail-modal`/`add-activity-form` + `activities/actions.ts` supprimés — génériques `swipe-feedback`/`activity-consensus`/`consensus.ts` conservés). Pastille U02 : `getPendingByTrip` compte désormais les **idées POOL non swipées** (plus d'activités).
+
+**Reste (nettoyage mineur, non bloquant)** : purger les clés i18n `activities.*` devenues inutiles (le deck a disparu, `ActivityConsensus` en garde une partie) ; renommer `activity-consensus`/`consensus.ts` (nom « activity » alors qu'ils servent les idées) ; **drop** de la table `trip_activities` + `activity_votes` (migration, quand tu confirmes que rien n'y est resté).
 
 ### [ ] PHIL-U05 — Clarifier la division BDD locale vs prod
 Documenter (et éventuellement mettre en place) la **séparation base locale / production**. Aujourd'hui le dev tape la base distante linkée (pas de stack Supabase locale). À creuser : base de dev/test dédiée, seed, isolement des données.

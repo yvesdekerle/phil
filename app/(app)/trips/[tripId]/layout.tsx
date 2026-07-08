@@ -126,11 +126,7 @@ export default async function TripLayout({
       <nav className="sticky top-2 z-[1001] mt-2 rounded-lg border border-laiton-clair bg-papier px-5 shadow-[0_2px_10px_rgba(31,42,68,0.05)] print:hidden">
         <TripTabs
           tripId={trip.id}
-          pending={
-            pending
-              ? { ideas: pending.ideas, activities: pending.activities, polls: pending.polls }
-              : undefined
-          }
+          pending={pending ? { ideas: pending.ideas, polls: pending.polls } : undefined}
         />
       </nav>
 

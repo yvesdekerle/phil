@@ -12,8 +12,6 @@ function input(over: Partial<PendingInput>): PendingInput {
     myVotedPollIds: new Set(),
     poolIdeas: [],
     myVotedIdeaIds: new Set(),
-    activities: [],
-    myVotedActivityIds: new Set(),
     ...over,
   };
 }
@@ -39,8 +37,8 @@ describe("countPending — sondages", () => {
   });
 });
 
-describe("countPending — idées & activités", () => {
-  it("compte les idées POOL non réagies", () => {
+describe("countPending — idées à swiper", () => {
+  it("compte les idées POOL non encore swipées", () => {
     const map = countPending(
       input({
         poolIdeas: [
@@ -52,20 +50,6 @@ describe("countPending — idées & activités", () => {
     );
     expect(map.get("t1")).toMatchObject({ ideas: 1, total: 1 });
   });
-
-  it("compte les activités non swipées", () => {
-    const map = countPending(
-      input({
-        activities: [
-          { id: "a1", tripId: "t1" },
-          { id: "a2", tripId: "t1" },
-          { id: "a3", tripId: "t1" },
-        ],
-        myVotedActivityIds: new Set(["a2"]),
-      }),
-    );
-    expect(map.get("t1")).toMatchObject({ activities: 2, total: 2 });
-  });
 });
 
 describe("countPending — agrégation multi-voyages", () => {
@@ -73,15 +57,14 @@ describe("countPending — agrégation multi-voyages", () => {
     const map = countPending(
       input({
         openPolls: [{ id: "p1", tripId: "t1", closesAt: null }],
-        activities: [
-          { id: "a1", tripId: "t1" },
-          { id: "a2", tripId: "t2" },
+        poolIdeas: [
+          { id: "i1", tripId: "t1" },
+          { id: "i2", tripId: "t2" },
         ],
-        poolIdeas: [{ id: "i1", tripId: "t2" }],
       }),
     );
-    expect(map.get("t1")).toMatchObject({ polls: 1, activities: 1, ideas: 0, total: 2 });
-    expect(map.get("t2")).toMatchObject({ polls: 0, activities: 1, ideas: 1, total: 2 });
+    expect(map.get("t1")).toMatchObject({ polls: 1, ideas: 1, total: 2 });
+    expect(map.get("t2")).toMatchObject({ polls: 0, ideas: 1, total: 1 });
   });
 
   it("aucune action en attente → Map vide (pas d'entrée à zéro)", () => {
