@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { PrepareOfflineButton } from "@/components/offline/prepare-offline-button";
+import { ExportTripCard } from "@/components/trips/export-trip-card";
 import { createClient } from "@/lib/supabase/server";
 import { CalendarFeed } from "./calendar-feed";
 import { CoverPosition } from "./cover-position";
@@ -75,6 +76,7 @@ export default async function TripSettingsPage({
           <PublicShareCard tripId={trip.id} token={trip.public_token} baseUrl={baseUrl} />
         ) : null}
         <PrepareOfflineButton tripId={trip.id} />
+        <ExportTripCard tripId={trip.id} />
       </TripSettingsForm>
     </div>
   );

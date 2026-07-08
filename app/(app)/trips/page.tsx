@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { ImportTripButton } from "@/components/trips/import-trip-button";
 import { TripCard } from "@/components/trips/trip-card";
 import { Button } from "@/components/ui/button";
 import { getT } from "@/lib/i18n/server";
@@ -34,9 +35,12 @@ export default async function TripsPage() {
     <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">
       <div className="mb-6 flex items-center justify-between gap-3">
         <h1 className="font-display text-3xl text-encre">{t("trips.title")}</h1>
-        <Button asChild>
-          <Link href="/trips/new">{t("trips.create")}</Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          <ImportTripButton />
+          <Button asChild>
+            <Link href="/trips/new">{t("trips.create")}</Link>
+          </Button>
+        </div>
       </div>
 
       {trips.length === 0 ? (

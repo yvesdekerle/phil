@@ -163,6 +163,21 @@ export const en = {
       passe: "Past",
       archive: "Archived",
     },
+    export: {
+      title: "Export this trip",
+      description:
+        "Download this trip as a JSON file (events, ideas, packing list, lodging options) — no documents or vault data.",
+      button: "Export (JSON)",
+    },
+    import: {
+      button: "Import a trip",
+      importing: "Importing…",
+      errEmpty: "No file selected.",
+      errTooLarge: "That file is too large.",
+      errInvalidJson: "That file isn't valid JSON.",
+      errInvalidFormat: "That file isn't a valid Phil trip export.",
+      errCreate: "Import failed — please try again.",
+    },
   },
   clocks: {
     title: "Clocks",

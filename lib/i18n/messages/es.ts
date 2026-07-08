@@ -165,6 +165,21 @@ export const es: PartialMessages = {
       passe: "Pasado",
       archive: "Archivado",
     },
+    export: {
+      title: "Exportar este viaje",
+      description:
+        "Descarga este viaje en JSON (eventos, ideas, equipaje, opciones de alojamiento) — sin documentos ni datos de la caja fuerte.",
+      button: "Exportar (JSON)",
+    },
+    import: {
+      button: "Importar un viaje",
+      importing: "Importando…",
+      errEmpty: "Ningún archivo seleccionado.",
+      errTooLarge: "Este archivo es demasiado grande.",
+      errInvalidJson: "Este archivo no es un JSON válido.",
+      errInvalidFormat: "Este archivo no es una exportación de viaje de Phil válida.",
+      errCreate: "La importación falló — inténtalo de nuevo.",
+    },
   },
   clocks: {
     title: "Relojes",

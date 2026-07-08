@@ -162,6 +162,21 @@ export const fr = {
       passe: "Passé",
       archive: "Archivé",
     },
+    export: {
+      title: "Exporter ce voyage",
+      description:
+        "Télécharge ce voyage en JSON (événements, idées, valise, candidats hébergement) — sans documents ni données du coffre.",
+      button: "Exporter (JSON)",
+    },
+    import: {
+      button: "Importer un voyage",
+      importing: "Import…",
+      errEmpty: "Aucun fichier sélectionné.",
+      errTooLarge: "Ce fichier est trop volumineux.",
+      errInvalidJson: "Ce fichier n'est pas un JSON valide.",
+      errInvalidFormat: "Ce fichier n'est pas un export de voyage Phil valide.",
+      errCreate: "L'import a échoué — réessaie.",
+    },
   },
   clocks: {
     title: "Horloges",
