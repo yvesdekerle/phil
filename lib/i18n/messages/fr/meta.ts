@@ -58,6 +58,7 @@ export const metaFr = {
     },
     msg: {
       roleInvalid: "Rôle invalide.",
+      tooManyInvites: "Trop d'invitations envoyées — réessaie dans une heure.",
       onlyCaptainRole: "Seul le capitaine peut changer les rôles.",
       ownRole: "Pour changer ton propre rôle, transfère la propriété.",
       useTransfer: "Utilise le transfert de propriété pour nommer un capitaine.",

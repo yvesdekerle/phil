@@ -57,6 +57,7 @@ export const metaEn = {
     },
     msg: {
       roleInvalid: "Invalid role.",
+      tooManyInvites: "Too many invitations sent — try again in an hour.",
       onlyCaptainRole: "Only the captain can change roles.",
       ownRole: "To change your own role, transfer ownership.",
       useTransfer: "Use ownership transfer to name a captain.",

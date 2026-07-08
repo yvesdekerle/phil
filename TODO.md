@@ -365,9 +365,11 @@ Quand le réseau revient, refetch automatique des données voyage en cours. Noti
 Configuration Next.js (`next.config.js` ou middleware) : Content-Security-Policy stricte, Strict-Transport-Security, X-Frame-Options DENY, X-Content-Type-Options nosniff, Referrer-Policy strict-origin-when-cross-origin, Permissions-Policy pour limiter les API navigateur.
 > Note : `headers()` dans `next.config.ts`. CSP : `script-src 'self' 'unsafe-inline'` (requis par l'hydratation Next sans infra de nonces — durcissement possible plus tard), `connect-src` limité à l'origine Supabase, `img-src https:` (couvertures URL libre), `frame-src 'self' blob:` (viewer PDF + offline), `frame-ancestors 'none'`, `object-src 'none'`. HSTS 2 ans + sous-domaines. Vérifié sur build prod : les 6 headers présents, app fonctionnelle sous CSP.
 
-### [~] PHIL-J02 — Rate limiting sur les endpoints critiques *(socle fait en Q44)*
+### [x] PHIL-J02 — Rate limiting sur les endpoints critiques *(câblage fait le 2026-07-08)*
 Limitation par IP et par user sur : login, upload de document, accès à un document, création d'invitation. Implémentation avec Upstash Redis (free tier 10k commandes/jour) ou via les headers Vercel Edge Config.
-> Q44 a posé `lib/security/rate-limit.ts` (Upstash, dégradation gracieuse) et l'a câblé sur le webhook inbound-email. Reste : **activer Upstash** (2 variables d'env) et étendre le câblage aux invitations et à l'accès document si besoin.
+> Q44 a posé `lib/security/rate-limit.ts` (Upstash, dégradation gracieuse) et l'a câblé sur le webhook inbound-email.
+> **Câblage étendu (fait le 2026-07-08)** : `createInvitation` (20/h par user → anti-abus des emails Resend, message `participants.msg.tooManyInvites`) + `/api/documents/[id]/view` (120/min par user → anti-scraping, 429). Tout est **inerte tant qu'Upstash n'est pas activé** (dégradation gracieuse).
+> **Activation Upstash** (2 variables d'env `UPSTASH_REDIS_REST_URL`/`_TOKEN`) = **côté Yves**, tracée par **R12** — dès qu'elles sont posées, la protection s'active sans changement de code.
 
 ### [x] PHIL-J03 — Validation Zod sur tous les endpoints *(fait le 2026-07-03)*
 Tout input utilisateur (formulaires, paramètres URL, body API) validé par un schéma Zod avant traitement. Erreurs renvoyées avec messages clairs côté client.

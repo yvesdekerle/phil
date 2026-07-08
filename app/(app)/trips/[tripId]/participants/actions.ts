@@ -7,6 +7,7 @@ import { requireUser } from "@/lib/auth/require-user";
 import { isLocale, type Locale } from "@/lib/i18n/config";
 import { messages, translator } from "@/lib/i18n/messages";
 import { getT } from "@/lib/i18n/server";
+import { rateLimitOk } from "@/lib/security/rate-limit";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { areUuids } from "@/lib/validation";
 
@@ -199,6 +200,12 @@ export async function createInvitation(
   }
 
   const { supabase, user } = await requireUser();
+
+  // PHIL-J02 : garde-fou anti-abus (envoi d'emails Resend) — 20 invitations / h
+  // par utilisateur. Inerte tant qu'Upstash n'est pas configuré.
+  if (!(await rateLimitOk("invite", user.id, { limit: 20, windowSec: 3600 }))) {
+    return { status: "error", message: t("participants.msg.tooManyInvites") };
+  }
   const d = parsed.data;
 
   // Déjà participant ? (comparaison via le profil de l'email impossible côté RLS,

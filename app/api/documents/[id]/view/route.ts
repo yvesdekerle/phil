@@ -1,4 +1,5 @@
 import { logger } from "@/lib/observability/logger";
+import { rateLimitOk } from "@/lib/security/rate-limit";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { areUuids } from "@/lib/validation";
@@ -28,6 +29,12 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   } = await supabase.auth.getUser();
   if (!user) {
     return Response.json({ error: "Authentification requise" }, { status: 401 });
+  }
+
+  // PHIL-J02 : garde anti-scraping — 120 ouvertures / min par utilisateur
+  // (large pour un usage normal). Inerte tant qu'Upstash n'est pas configuré.
+  if (!(await rateLimitOk("doc-view", user.id, { limit: 120, windowSec: 60 }))) {
+    return Response.json({ error: "Trop de requêtes" }, { status: 429 });
   }
 
   const { data: doc } = await supabase
