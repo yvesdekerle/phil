@@ -1071,7 +1071,7 @@ Reprendre le concept de **Yallah** dans l'onglet Idées : pour chaque voyage, un
 ### [ ] PHIL-U05 — Clarifier la division BDD locale vs prod
 Documenter (et éventuellement mettre en place) la **séparation base locale / production**. Aujourd'hui le dev tape la base distante linkée (pas de stack Supabase locale). À creuser : base de dev/test dédiée, seed, isolement des données.
 
-### [~] PHIL-U06 — Générateur de guide de voyage (avant / pendant / après)
+### [x] PHIL-U06 — Générateur de guide de voyage (avant / pendant / après) *(fait le 2026-07-08)*
 Guide de voyage **template** rempli avec les données du voyage, en **HTML sur le site ET PDF** (une seule source : bouton « Télécharger en PDF » → `window.print()` cadré par `@media print` ; approche free-tier, un vrai PDF serveur type Puppeteer ne tient pas dans le Hobby Vercel). Réf. : `tmp/guide/guide_islande.pdf`.
 
 **Phase 1 (fait le 2026-07-08)** : page `/trips/[id]/guide` (onglet **Guide**), Server Component agrégeant les données existantes en 3 sections :
@@ -1082,7 +1082,7 @@ Chrome de l'app masqué à l'impression (`print:hidden` sur header app + couvert
 
 **Phase 2 (fait le 2026-07-08)** : section **Après** enrichie — **soldes détaillés « qui doit combien à qui »** (réutilise `computeBalances`/`computeSettlements` + conversion `getRates`/`toBase` de l'onglet Budget, règlements simplifiés glouton ; paiements `is_settlement` inclus comme dans Équilibre ; « tout est équilibré » si rien à solder) + **vraies vignettes photos** (grille des 12 premières via `/api/photos/[id]/view?thumb=1`, compteur « +N de plus »). i18n `guide.settlements`/`settled`/`photosMore` (fr/en/es).
 
-**Reste (Phase 2, itérations)** : notes d'événements dans le programme, mise en page encore plus fidèle au PDF Islande (sauts de page par section, page de garde avec couverture).
+**Phase 3 — finitions (fait le 2026-07-08)** : **notes d'événements** affichées sous chaque événement du programme (jointure `event_notes`↔`trip_events`) + **page de garde** à l'impression (couverture du voyage + titre + destination + dates, `break-after-page`, header écran masqué en print pour éviter le doublon). Guide considéré complet ; d'autres raffinements de mise en page possibles au besoin.
 
 ---
 

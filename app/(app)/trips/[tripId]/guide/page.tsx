@@ -36,11 +36,12 @@ export default async function TripGuidePage({ params }: { params: Promise<{ trip
     { data: expenses },
     { data: journal },
     { data: photos, count: photoCount },
+    { data: eventNotes },
   ] = await Promise.all([
     supabase
       .from("trips")
       .select(
-        "id, name, destination, start_date, end_date, default_timezone, currency_primary, currency_secondary",
+        "id, name, destination, start_date, end_date, default_timezone, currency_primary, currency_secondary, cover_image_url",
       )
       .eq("id", tripId)
       .single(),
@@ -75,6 +76,11 @@ export default async function TripGuidePage({ params }: { params: Promise<{ trip
       .eq("trip_id", tripId)
       .order("created_at", { ascending: true })
       .limit(12),
+    supabase
+      .from("event_notes")
+      .select("event_id, body, created_at, trip_events!inner(trip_id)")
+      .eq("trip_events.trip_id", tripId)
+      .order("created_at", { ascending: true }),
   ]);
 
   if (!trip) {
@@ -107,6 +113,15 @@ export default async function TripGuidePage({ params }: { params: Promise<{ trip
     days.set(key, list);
   }
   const orderedDays = [...days.keys()].sort();
+
+  // PHIL-U06 : notes d'événements groupées par événement, pour le programme.
+  const notesByEvent = new Map<string, { body: string; at: string }[]>();
+  for (const n of eventNotes ?? []) {
+    const list = notesByEvent.get(n.event_id) ?? [];
+    list.push({ body: n.body, at: n.created_at });
+    notesByEvent.set(n.event_id, list);
+  }
+
   const dayLabel = (key: string): string =>
     new Date(`${key}T12:00:00`).toLocaleDateString(il, {
       weekday: "long",
@@ -168,7 +183,27 @@ export default async function TripGuidePage({ params }: { params: Promise<{ trip
     <div className="phil-guide mx-auto max-w-3xl">
       <style>{`@media print { @page { margin: 1.4cm; } .phil-guide a { text-decoration: none; color: inherit; } }`}</style>
 
-      <div className="mb-6 flex items-start justify-between gap-4">
+      {/* PHIL-U06 : page de garde — impression uniquement (couverture + titre). */}
+      <section className="hidden break-after-page print:block">
+        <div className="flex min-h-[80vh] flex-col items-center justify-center gap-5 text-center">
+          {trip.cover_image_url ? (
+            // biome-ignore lint/performance/noImgElement: page de garde imprimée, URL libre (bucket/legacy), pas d'optimiseur
+            <img
+              src={trip.cover_image_url.split("#")[0]}
+              alt=""
+              className="max-h-72 w-full max-w-lg rounded-2xl object-cover shadow-lg"
+            />
+          ) : null}
+          <p className="text-xs uppercase tracking-[0.3em] text-laiton">{t("guide.kicker")}</p>
+          <h1 className="font-display text-5xl text-encre">{trip.name}</h1>
+          <p className="text-lg text-encre-douce">{trip.destination}</p>
+          <p className="text-sm text-encre-douce">
+            {formatDateRange(trip.start_date, trip.end_date, dfLocale)}
+          </p>
+        </div>
+      </section>
+
+      <div className="mb-6 flex items-start justify-between gap-4 print:hidden">
         <div>
           <p className="text-xs uppercase tracking-wide text-laiton">{t("guide.kicker")}</p>
           <h1 className="font-display text-4xl text-encre">{trip.name}</h1>
@@ -176,7 +211,7 @@ export default async function TripGuidePage({ params }: { params: Promise<{ trip
             {trip.destination} · {formatDateRange(trip.start_date, trip.end_date, dfLocale)}
           </p>
         </div>
-        <div className="print:hidden">
+        <div>
           <PrintGuideButton />
         </div>
       </div>
@@ -239,20 +274,30 @@ export default async function TripGuidePage({ params }: { params: Promise<{ trip
               <div key={key} className="break-inside-avoid">
                 <p className="mb-1 font-display text-lg capitalize text-encre">{dayLabel(key)}</p>
                 <ul className="flex flex-col gap-1 border-l-2 border-laiton-clair pl-3">
-                  {(days.get(key) ?? []).map((e) => (
-                    <li key={e.id} className="text-sm">
-                      <span className="font-medium text-encre">
-                        {eventTime(e.starts_at, e.timezone ?? trip.default_timezone)}
-                      </span>{" "}
-                      <span className="text-encre">{e.title}</span>
-                      {e.location_name || e.location_address ? (
-                        <span className="text-encre-douce">
-                          {" "}
-                          — {e.location_address ?? e.location_name}
-                        </span>
-                      ) : null}
-                    </li>
-                  ))}
+                  {(days.get(key) ?? []).map((e) => {
+                    const notes = notesByEvent.get(e.id) ?? [];
+                    return (
+                      <li key={e.id} className="text-sm">
+                        <span className="font-medium text-encre">
+                          {eventTime(e.starts_at, e.timezone ?? trip.default_timezone)}
+                        </span>{" "}
+                        <span className="text-encre">{e.title}</span>
+                        {e.location_name || e.location_address ? (
+                          <span className="text-encre-douce">
+                            {" "}
+                            — {e.location_address ?? e.location_name}
+                          </span>
+                        ) : null}
+                        {notes.length > 0 ? (
+                          <ul className="mt-0.5 ml-4 flex flex-col gap-0.5 text-xs text-encre-douce italic">
+                            {notes.map((note) => (
+                              <li key={note.at}>— {note.body}</li>
+                            ))}
+                          </ul>
+                        ) : null}
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             ))}
