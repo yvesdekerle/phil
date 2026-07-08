@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useActionState, useState } from "react";
 import { PlaceInput } from "@/components/geo/place-input";
 import { useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
@@ -32,22 +32,16 @@ export function LodgingForm({
   const [platform, setPlatform] = useState<LodgingPlatform>("booking");
   const [address, setAddress] = useState("");
   const [timezone, setTimezone] = useState(defaultTimezone);
-  const [state, setState] = useState<CreateEventState>({ status: "idle" });
-  const [pending, startTransition] = useTransition();
-
-  function submit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    formData.set("tripId", tripId);
-    formData.set("platform", platform);
-    formData.set("timezone", timezone);
-    startTransition(async () => {
-      setState(await createLodgingEvent({ status: "idle" }, formData));
-    });
-  }
+  const [state, formAction, pending] = useActionState<CreateEventState, FormData>(
+    createLodgingEvent,
+    { status: "idle" },
+  );
 
   return (
-    <form onSubmit={submit} className="flex flex-col gap-5">
+    <form action={formAction} className="flex flex-col gap-5">
+      <input type="hidden" name="tripId" value={tripId} />
+      <input type="hidden" name="platform" value={platform} />
+      <input type="hidden" name="timezone" value={timezone} />
       <div className="flex flex-col gap-2">
         <Label htmlFor="name">{t("events.lodging.name")}</Label>
         <PlaceInput

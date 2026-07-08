@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useActionState, useState } from "react";
 import { useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,22 +30,15 @@ export function EditEventForm({
 }) {
   const t = useT();
   const [timezone, setTimezone] = useState(defaults.timezone);
-  const [state, setState] = useState<EventActionState>({ status: "idle" });
-  const [pending, startTransition] = useTransition();
-
-  function submit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    formData.set("tripId", tripId);
-    formData.set("eventId", eventId);
-    formData.set("timezone", timezone);
-    startTransition(async () => {
-      setState(await updateEvent({ status: "idle" }, formData));
-    });
-  }
+  const [state, formAction, pending] = useActionState<EventActionState, FormData>(updateEvent, {
+    status: "idle",
+  });
 
   return (
-    <form onSubmit={submit} className="flex flex-col gap-5">
+    <form action={formAction} className="flex flex-col gap-5">
+      <input type="hidden" name="tripId" value={tripId} />
+      <input type="hidden" name="eventId" value={eventId} />
+      <input type="hidden" name="timezone" value={timezone} />
       <div className="flex flex-col gap-2">
         <Label htmlFor="title">{t("events.form.title")}</Label>
         <Input id="title" name="title" defaultValue={defaults.title} />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useActionState, useState } from "react";
 import { useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,25 +35,19 @@ export function TransportForm({
   const [title, setTitle] = useState("");
   const [titleTouched, setTitleTouched] = useState(false);
   const [timezone, setTimezone] = useState(defaultTimezone);
-  const [state, setState] = useState<CreateEventState>({ status: "idle" });
-  const [pending, startTransition] = useTransition();
+  const [state, formAction, pending] = useActionState<CreateEventState, FormData>(
+    createTransportEvent,
+    { status: "idle" },
+  );
 
   const effectiveTitle = titleTouched ? title : suggestTransportTitle(mode, from, to);
 
-  function submit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    formData.set("tripId", tripId);
-    formData.set("mode", mode);
-    formData.set("timezone", timezone);
-    formData.set("title", effectiveTitle);
-    startTransition(async () => {
-      setState(await createTransportEvent({ status: "idle" }, formData));
-    });
-  }
-
   return (
-    <form onSubmit={submit} className="flex flex-col gap-5">
+    <form action={formAction} className="flex flex-col gap-5">
+      <input type="hidden" name="tripId" value={tripId} />
+      <input type="hidden" name="mode" value={mode} />
+      <input type="hidden" name="timezone" value={timezone} />
+      <input type="hidden" name="title" value={effectiveTitle} />
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col gap-2">
           <Label htmlFor="mode">{t("events.transport.mode")}</Label>

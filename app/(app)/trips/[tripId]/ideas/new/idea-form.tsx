@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useActionState } from "react";
 import { PlaceInput } from "@/components/geo/place-input";
 import { useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
@@ -10,20 +10,13 @@ import { type CreateIdeaState, createIdea } from "./actions";
 
 export function IdeaForm({ tripId }: { tripId: string }) {
   const t = useT();
-  const [state, setState] = useState<CreateIdeaState>({ status: "idle" });
-  const [pending, startTransition] = useTransition();
-
-  function submit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    formData.set("tripId", tripId);
-    startTransition(async () => {
-      setState(await createIdea({ status: "idle" }, formData));
-    });
-  }
+  const [state, formAction, pending] = useActionState<CreateIdeaState, FormData>(createIdea, {
+    status: "idle",
+  });
 
   return (
-    <form onSubmit={submit} className="flex flex-col gap-5">
+    <form action={formAction} className="flex flex-col gap-5">
+      <input type="hidden" name="tripId" value={tripId} />
       <div className="flex flex-col gap-2">
         <Label htmlFor="title">{t("ideas.fTitle")}</Label>
         <Input id="title" name="title" placeholder={t("ideas.fTitlePlaceholder")} />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useActionState, useState } from "react";
 import { PlaceInput } from "@/components/geo/place-input";
 import { useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
@@ -31,24 +31,16 @@ export function ActivityForm({
 }) {
   const t = useT();
   const [timezone, setTimezone] = useState(defaultTimezone);
-  const [state, setState] = useState<CreateEventState>({ status: "idle" });
-  const [pending, startTransition] = useTransition();
-
-  function submit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    formData.set("tripId", tripId);
-    formData.set("timezone", timezone);
-    if (prefill) {
-      formData.set("ideaId", prefill.ideaId);
-    }
-    startTransition(async () => {
-      setState(await createActivityEvent({ status: "idle" }, formData));
-    });
-  }
+  const [state, formAction, pending] = useActionState<CreateEventState, FormData>(
+    createActivityEvent,
+    { status: "idle" },
+  );
 
   return (
-    <form onSubmit={submit} className="flex flex-col gap-5">
+    <form action={formAction} className="flex flex-col gap-5">
+      <input type="hidden" name="tripId" value={tripId} />
+      <input type="hidden" name="timezone" value={timezone} />
+      {prefill ? <input type="hidden" name="ideaId" value={prefill.ideaId} /> : null}
       <div className="flex flex-col gap-2">
         <Label htmlFor="title">{t("events.form.title")}</Label>
         <Input
