@@ -9,7 +9,7 @@
  * la vide (il faudra re-déverrouiller). `lockCoffre()` la vide à la demande.
  */
 
-import { getMyMasterWrap, getMyPrivateKeyWrap } from "@/app/(app)/profile/coffre-actions";
+import { getMyMasterWraps, getMyPrivateKeyWrap } from "@/app/(app)/profile/coffre-actions";
 import { fromBase64, unwrapPrivateKey } from "./vault-crypto";
 import { unlockMaster } from "./vault-keys";
 
@@ -30,12 +30,20 @@ export async function getCoffreMaster(): Promise<CryptoKey> {
   if (cachedMaster) {
     return cachedMaster;
   }
-  const wrap = await getMyMasterWrap();
-  if (!wrap) {
+  const wraps = await getMyMasterWraps();
+  if (wraps.length === 0) {
     throw new Error("Coffre non activé — active-le d'abord dans ton profil.");
   }
-  cachedMaster = await unlockMaster(wrap);
+  cachedMaster = await unlockMaster(wraps);
   return cachedMaster;
+}
+
+/**
+ * Amorce la session avec une maîtresse déjà récupérée (restauration par code de
+ * secours, Phase 4a) — évite un second Face ID juste après l'enrôlement.
+ */
+export function primeCoffreMaster(master: CryptoKey): void {
+  cachedMaster = master;
 }
 
 /**

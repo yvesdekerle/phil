@@ -10,10 +10,23 @@
  * ⚠️ La partie PRF n'est pas testable hors navigateur — valider sur appareil.
  */
 
-import { createCoffreCredential, getPrfSecret } from "./prf";
+import { createCoffreCredential, getPrfSecret, getPrfSecretForDevices } from "./prf";
 import * as vc from "./vault-crypto";
 
 const PRF_SALT_BYTES = 32;
+const MASTER_USAGES: KeyUsage[] = ["wrapKey", "unwrapKey", "encrypt", "decrypt"];
+
+function sameBytes(a: Uint8Array, b: Uint8Array): boolean {
+  if (a.length !== b.length) {
+    return false;
+  }
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) {
+      return false;
+    }
+  }
+  return true;
+}
 
 /** Matériel à stocker côté serveur après activation (tout est chiffré/public). */
 export type CoffreKeyMaterial = {
@@ -58,19 +71,66 @@ export async function activateCoffre(userId: string, userName: string): Promise<
   };
 }
 
-/** Déverrouille la clé maîtresse via Face ID à partir des enveloppes stockées. */
-export async function unlockMaster(wrap: MasterWrap): Promise<CryptoKey> {
-  const prfSecret = await getPrfSecret(
-    vc.fromBase64(wrap.credentialId),
-    vc.fromBase64(wrap.prfSalt),
-  );
-  const kek = await vc.importAesKey(prfSecret, ["wrapKey", "unwrapKey"]);
+/**
+ * Déverrouille la clé maîtresse via Face ID (PHIL-T01, Phase 4a — multi-appareils).
+ * On présente toutes les enveloppes PRF connues du compte : l'authentificateur ne
+ * répond qu'avec la passkey présente sur CET appareil, on retient l'enveloppe
+ * correspondante et on la déballe avec le secret PRF renvoyé.
+ */
+export async function unlockMaster(wraps: MasterWrap[]): Promise<CryptoKey> {
+  if (wraps.length === 0) {
+    throw new Error("Coffre non activé sur ce compte.");
+  }
+  // Sel PRF partagé entre appareils (garanti à l'enrôlement) : un seul suffit.
+  const salt = vc.fromBase64(wraps[0].prfSalt);
+  const credentialIds = wraps.map((w) => vc.fromBase64(w.credentialId));
+  const { credentialId, secret } = await getPrfSecretForDevices(credentialIds, salt);
+  const wrap = wraps.find((w) => sameBytes(vc.fromBase64(w.credentialId), credentialId));
+  if (!wrap) {
+    throw new Error("Aucune enveloppe de clé pour cet appareil.");
+  }
+  const kek = await vc.importAesKey(secret, ["wrapKey", "unwrapKey"]);
   return vc.unwrapKey(
     kek,
     vc.fromBase64(wrap.wrappedMasterKey),
     vc.fromBase64(wrap.wrappedMasterIv),
-    ["wrapKey", "unwrapKey", "encrypt", "decrypt"],
+    MASTER_USAGES,
   );
+}
+
+/** Matériel d'une enveloppe PRF d'appareil, à stocker côté serveur. */
+export type DeviceWrapMaterial = {
+  credentialId: string;
+  wrappedMasterKey: string;
+  wrappedMasterIv: string;
+  prfSalt: string;
+};
+
+/**
+ * Enrôle CET appareil pour une maîtresse déjà en main (restauration Phase 4a,
+ * futur ajout par QR Phase 4c) : crée une passkey PRF locale et emballe la
+ * maîtresse par son secret. Réutilise `sharedSalt` s'il est fourni, pour garder
+ * le sel PRF identique entre tous les appareils (requis par `unlockMaster`).
+ */
+export async function enrollDevice(
+  userId: string,
+  userName: string,
+  master: CryptoKey,
+  sharedSalt?: string,
+): Promise<DeviceWrapMaterial> {
+  const credentialId = await createCoffreCredential(userId, userName);
+  const salt = sharedSalt
+    ? vc.fromBase64(sharedSalt)
+    : crypto.getRandomValues(new Uint8Array(PRF_SALT_BYTES));
+  const prfSecret = await getPrfSecret(credentialId, salt);
+  const kek = await vc.importAesKey(prfSecret, ["wrapKey", "unwrapKey"]);
+  const wrapped = await vc.wrapKey(kek, master);
+  return {
+    credentialId: vc.toBase64(credentialId),
+    wrappedMasterKey: vc.toBase64(wrapped.data),
+    wrappedMasterIv: vc.toBase64(wrapped.iv),
+    prfSalt: vc.toBase64(salt),
+  };
 }
 
 // --- Code de secours (Phase 4) : récupération si tous les appareils sont perdus ---
@@ -91,7 +151,25 @@ export function generateRecoveryCode(): string {
   return groups.join("-");
 }
 
+/**
+ * Remet un code saisi par l'utilisateur dans sa forme canonique (majuscules,
+ * groupes de 4 séparés par des tirets) — pour que la dérivation PBKDF2 retombe
+ * sur exactement la chaîne utilisée à la génération, quels que soient la casse,
+ * les espaces ou les tirets tapés.
+ */
+export function normalizeRecoveryCode(input: string): string {
+  const clean = input.toUpperCase().replace(/[^A-Z0-9]/g, "");
+  const groups: string[] = [];
+  for (let i = 0; i < clean.length; i += RECOVERY_GROUP_LEN) {
+    groups.push(clean.slice(i, i + RECOVERY_GROUP_LEN));
+  }
+  return groups.join("-");
+}
+
 export type RecoveryWrap = { code: string; wrappedKey: string; wrapIv: string; salt: string };
+
+/** Enveloppe de récupération telle que relue du serveur (sans le code, jamais stocké). */
+export type RecoveryStored = { wrappedKey: string; wrapIv: string; salt: string };
 
 /** Emballe la maîtresse avec une clé dérivée d'un nouveau code de secours. */
 export async function createRecoveryWrap(master: CryptoKey): Promise<RecoveryWrap> {
@@ -105,4 +183,18 @@ export async function createRecoveryWrap(master: CryptoKey): Promise<RecoveryWra
     wrapIv: vc.toBase64(wrapped.iv),
     salt: vc.toBase64(salt),
   };
+}
+
+/**
+ * Restaure la maîtresse à partir du code de secours (PHIL-T01, Phase 4a) : dérive
+ * la clé d'emballage (PBKDF2) et déballe. Lève (GCM) si le code est faux → sert
+ * aussi à valider la saisie. La maîtresse renvoyée est extractible : elle peut
+ * ensuite être ré-emballée pour cet appareil via `enrollDevice`.
+ */
+export async function unwrapMasterFromRecovery(
+  rec: RecoveryStored,
+  code: string,
+): Promise<CryptoKey> {
+  const kek = await vc.deriveKeyFromCode(normalizeRecoveryCode(code), vc.fromBase64(rec.salt));
+  return vc.unwrapKey(kek, vc.fromBase64(rec.wrappedKey), vc.fromBase64(rec.wrapIv), MASTER_USAGES);
 }

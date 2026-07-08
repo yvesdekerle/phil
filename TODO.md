@@ -967,6 +967,9 @@ Suite de R05 : rendre le profil système lisible (colonne `is_system` + policy S
 ### [ ] PHIL-R20 — 🟡 Cohérence transversale (refactors)
 Type `ActionState` unique, standard formulaire `useActionState`, `<TimezoneSelect>` partagé, routage des dates via un module, palette JS centralisée (audit A9).
 
+### [ ] PHIL-R21 — 🟠 Policy UPDATE manquante sur `user_master_key_wraps` (régénération du code de secours)
+Découvert en PHIL-T01 Phase 4a. La table `user_master_key_wraps` n'a que des policies SELECT/INSERT/DELETE (migration `20260707140000_vault_crypto_keys.sql`). Or `storeRecoveryWrap` fait un `upsert(onConflict: user_id,label)` : à la **régénération** d'un code de secours (2ᵉ appel, ligne `recovery` existante), le chemin UPDATE est **bloqué par la RLS** → la régénération échoue silencieusement. Ajouter une policy `user_master_key_wraps_update_self` (`using`/`with check` = `user_id = auth.uid()`) via une nouvelle migration, puis `pnpm verify:rls`. NB : `storeDeviceWrap` (4a) contourne le souci en insérant un label unique — c'est bien la seule régénération du code de secours qui est cassée.
+
 ---
 
 ## Catégorie S — Évolutions produit (demandées pendant l'audit, à traiter après)
@@ -1017,7 +1020,14 @@ Chiffrement de bout en bout du coffre : le serveur ne voit jamais le contenu ni 
 - [x] **Phase 1** — chiffrement des documents du coffre (upload scelle le fichier ; viewer client déchiffre ; route sert le chiffré). Validé (upload+affichage, fichier illisible côté Storage). *(Reste : chiffrer `document_number` encore en clair dans `metadata`, cf. B12.)*
 - [x] **Phase 2** — filigrane + **verrou biométrique unique** (`CoffreGate`, contenu caché tant que la biométrie n'a pas réussi).
 - [x] **Phase 3** — **partage infalsifiable** : copie filigranée dédiée re-chiffrée par destinataire (il n'a jamais la version propre), filigrane **nom + email**, robuste sur **tout PDF** (rendu PDF.js → PDF filigrané), **durée choisie** (1h/24h/1sem/fin voyage/sans limite), sections coffre « Mes documents » / « Partagés avec moi » avec validité affichée. *(Reste : partage **équipage** chiffré — ré-emballer pour chaque membre — désactivé pour les docs chiffrés.)*
-- [~] **Phase 4** — **code de secours** livré (génération : PBKDF2 → enveloppe RECOVERY). Reste : **offline chiffré** (le besoin initial « voir mes docs hors ligne ») ; **ajout d'appareil par QR** ; **flux de restauration** par le code de secours.
+- [~] **Phase 4** — multi-appareils, offline & récupération. Acquis avant découpage : **génération** du code de secours (PBKDF2 → enveloppe RECOVERY). Découpée en sous-tickets vérifiables (un commit chacun) :
+  - [x] **4a — Restauration par code de secours + déverrouillage multi-appareils** *(fait le 2026-07-08)* : rend le code de secours enfin utilisable (saisie → déballe la maîtresse → ré-enrôle la biométrie de cet appareil) et corrige le déverrouillage pour N appareils (essaie toutes les passkeys, matche le credential qui répond ; sel PRF partagé). Fondation dont 4c dépend.
+    - Crypto (`vault-keys.ts`) : `unlockMaster(wraps[])` multi-appareils (présente tous les credentials, matche celui qui répond via `getPrfSecretForDevices` dans `prf.ts`), `enrollDevice(userId, userName, master, sharedSalt?)` (réutilisé par 4c), `unwrapMasterFromRecovery(rec, code)` + `normalizeRecoveryCode`. Sel PRF **partagé** entre appareils (invariant tenu à l'enrôlement) → un seul `eval.first` suffit.
+    - Serveur (`coffre-actions.ts`) : `getMyMasterWraps()` (toutes les enveloppes PRF, plus `limit 1`), `getMyRecoveryWrap()`, `storeDeviceWrap()` (insert, label unique → pas de policy UPDATE requise). `coffre-session.ts` : `getCoffreMaster` passe la liste ; `primeCoffreMaster()` évite un 2ᵉ Face ID après restauration.
+    - UI : `coffre-restore.tsx` (profil → carte Coffre, visible si coffre activé **et** code de secours configuré) : saisie du code → déballe → Face ID pour enrôler cet appareil → nouvelle enveloppe PRF. 5 tests unitaires (`vault-keys.test.ts`, round-trip récup, normalisation, mauvais code). Découverte → **PHIL-R21** (policy UPDATE manquante → régénération du code de secours cassée).
+    - ⚠️ Test device requis (PRF non testable en CI) : générer un code de secours, l'utiliser depuis un profil/navigateur **sans** la passkey locale → Face ID → coffre déverrouillable.
+  - [ ] **4b — Offline chiffré** (le besoin initial « voir mes docs hors ligne ») : cache le chiffré + la DEK emballée + une enveloppe maîtresse locale ; le viewer offline déchiffre après biométrie.
+  - [ ] **4c — Ajout d'appareil par QR** : un appareil configuré emballe la maîtresse pour un nouvel appareil via un QR (échange de clé éphémère). Dépend de 4a.
 - [ ] **Phase 5** — consolidation de l'ancienne passkey `/security` (devenue vestige) + audit différé (offline). *(Reprise des docs existants : sans objet — Yves ne garde que des docs chiffrés.)*
 > ⚠️ Code le plus sensible du projet : bug = perte de données ou fausse sécurité. Tests crypto obligatoires (Phase 0) avant toute donnée réelle. Ferme aussi une partie de l'audit B12 (chiffrement au repos promis).
 

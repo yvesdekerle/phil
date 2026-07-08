@@ -84,11 +84,43 @@ export type MasterWrapDto = {
 };
 
 /**
- * Renvoie l'enveloppe PRF de la clé maîtresse de l'utilisateur (pour la
- * déverrouiller côté client via Face ID). null si coffre non activé.
- * NB : multi-appareils (Phase 4) → il faudra choisir l'enveloppe du bon appareil.
+ * Renvoie TOUTES les enveloppes PRF de la clé maîtresse (une par appareil
+ * enrôlé). Le client les présente ensemble à l'authentificateur, qui ne répond
+ * qu'avec la passkey présente sur cet appareil (PHIL-T01, Phase 4a). Liste vide
+ * si coffre non activé.
  */
-export async function getMyMasterWrap(): Promise<MasterWrapDto | null> {
+export async function getMyMasterWraps(): Promise<MasterWrapDto[]> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return [];
+  }
+  const { data } = await supabase
+    .from("user_master_key_wraps")
+    .select("wrapped_key, wrap_iv, credential_id, prf_salt")
+    .eq("user_id", user.id)
+    .eq("method", "PRF")
+    .order("created_at", { ascending: true });
+  return (data ?? [])
+    .filter((d) => d.credential_id && d.prf_salt)
+    .map((d) => ({
+      wrappedMasterKey: d.wrapped_key,
+      wrappedMasterIv: d.wrap_iv,
+      credentialId: d.credential_id as string,
+      prfSalt: d.prf_salt as string,
+    }));
+}
+
+export type RecoveryWrapDto = { wrappedKey: string; wrapIv: string; salt: string };
+
+/**
+ * Enveloppe de récupération (code de secours) de l'utilisateur, pour restaurer
+ * l'accès sur un nouvel appareil (PHIL-T01, Phase 4a). null si aucun code n'a été
+ * configuré. Le code lui-même n'est jamais côté serveur.
+ */
+export async function getMyRecoveryWrap(): Promise<RecoveryWrapDto | null> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -98,21 +130,14 @@ export async function getMyMasterWrap(): Promise<MasterWrapDto | null> {
   }
   const { data } = await supabase
     .from("user_master_key_wraps")
-    .select("wrapped_key, wrap_iv, credential_id, prf_salt")
+    .select("wrapped_key, wrap_iv, prf_salt")
     .eq("user_id", user.id)
-    .eq("method", "PRF")
-    .order("created_at", { ascending: true })
-    .limit(1)
+    .eq("method", "RECOVERY")
     .maybeSingle();
-  if (!data?.credential_id || !data.prf_salt) {
+  if (!data?.prf_salt) {
     return null;
   }
-  return {
-    wrappedMasterKey: data.wrapped_key,
-    wrappedMasterIv: data.wrap_iv,
-    credentialId: data.credential_id,
-    prfSalt: data.prf_salt,
-  };
+  return { wrappedKey: data.wrapped_key, wrapIv: data.wrap_iv, salt: data.prf_salt };
 }
 
 /** Enveloppe de la clé privée ECDH (déballée côté client via la maîtresse) — pour le partage. */
@@ -210,6 +235,60 @@ export async function storeRecoveryWrap(input: unknown): Promise<StoreResult> {
     },
     { onConflict: "user_id,label" },
   );
+  if (error) {
+    return { ok: false, error: error.message };
+  }
+  revalidatePath("/profile");
+  return { ok: true };
+}
+
+/**
+ * Enregistre une enveloppe PRF pour un appareil supplémentaire (restauration
+ * Phase 4a, futur ajout par QR) : la maîtresse a été récupérée côté client et
+ * ré-emballée par la biométrie de cet appareil. Refuse si le coffre n'est pas
+ * activé (garde-fou : on n'enrôle un appareil que sur un coffre existant).
+ */
+export async function storeDeviceWrap(input: unknown): Promise<StoreResult> {
+  const schema = z.object({
+    deviceLabel: z.string().min(1).max(80),
+    credentialId: z.string().min(1),
+    wrappedMasterKey: z.string().min(1),
+    wrappedMasterIv: z.string().min(1),
+    prfSalt: z.string().min(1),
+  });
+  const parsed = schema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: "invalid" };
+  }
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { ok: false, error: "unauthenticated" };
+  }
+
+  const { data: keys } = await supabase
+    .from("user_crypto_keys")
+    .select("user_id")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (!keys) {
+    return { ok: false, error: "not-activated" };
+  }
+
+  // Insert simple : le label porte un suffixe aléatoire (unicité garantie côté
+  // client) → pas de conflit à gérer, et pas besoin d'une policy UPDATE.
+  const m = parsed.data;
+  const { error } = await supabase.from("user_master_key_wraps").insert({
+    user_id: user.id,
+    label: m.deviceLabel,
+    method: "PRF",
+    wrapped_key: m.wrappedMasterKey,
+    wrap_iv: m.wrappedMasterIv,
+    prf_salt: m.prfSalt,
+    credential_id: m.credentialId,
+  });
   if (error) {
     return { ok: false, error: error.message };
   }

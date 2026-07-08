@@ -10,6 +10,7 @@ import { createClient } from "@/lib/supabase/server";
 import { signOut } from "./actions";
 import { CoffreActivation } from "./coffre-activation";
 import { CoffreRecovery } from "./coffre-recovery";
+import { CoffreRestore } from "./coffre-restore";
 import { DeleteAccountSection } from "./delete-account";
 import { NotificationPreferencesForm } from "./notification-preferences";
 import { ProfileForm } from "./profile-form";
@@ -120,6 +121,14 @@ export default async function ProfilePage() {
             {coffreKey ? (
               <div className="mt-4 border-t border-laiton-clair/50 pt-4">
                 <CoffreRecovery hasRecovery={Boolean(recoveryWrap)} />
+              </div>
+            ) : null}
+            {coffreKey && recoveryWrap ? (
+              <div className="mt-4 border-t border-laiton-clair/50 pt-4">
+                <CoffreRestore
+                  userId={user.id}
+                  userName={displayName || user.email || "Voyageur"}
+                />
               </div>
             ) : null}
           </CardContent>

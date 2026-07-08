@@ -85,3 +85,39 @@ export async function getPrfSecret(
   }
   return new Uint8Array(secret);
 }
+
+/**
+ * Déverrouillage multi-appareils (PHIL-T01, Phase 4a). On propose TOUTES les
+ * passkeys connues à l'authentificateur : seul l'appareil courant possède l'une
+ * d'elles, il répond, et `rawId` nous dit laquelle → on choisit la bonne
+ * enveloppe. Le sel PRF est partagé entre appareils (invariant tenu à l'enrôlement),
+ * donc un seul `eval.first` suffit. Renvoie le credential qui a répondu + son secret.
+ */
+export async function getPrfSecretForDevices(
+  credentialIds: Uint8Array[],
+  salt: Uint8Array,
+): Promise<{ credentialId: Uint8Array; secret: Uint8Array }> {
+  const assertion = (await navigator.credentials.get({
+    publicKey: {
+      challenge: challenge(),
+      rpId: rpId(),
+      allowCredentials: credentialIds.map((id) => ({
+        id: id as BufferSource,
+        type: "public-key",
+      })),
+      userVerification: "required",
+      extensions: {
+        prf: { eval: { first: salt as BufferSource } },
+      } as unknown as PrfGet as AuthenticationExtensionsClientInputs,
+    },
+  })) as PublicKeyCredential | null;
+  if (!assertion) {
+    throw new Error("Déverrouillage annulé");
+  }
+  const results = assertion.getClientExtensionResults() as unknown as PrfResults;
+  const secret = results.prf?.results?.first;
+  if (!secret) {
+    throw new Error("PRF non supporté sur cet appareil");
+  }
+  return { credentialId: new Uint8Array(assertion.rawId), secret: new Uint8Array(secret) };
+}
