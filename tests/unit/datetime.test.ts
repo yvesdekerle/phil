@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { eventDayKey, eventTime, groupEventsByDay } from "@/lib/events/datetime";
+import {
+  eventDayKey,
+  eventTime,
+  groupEventsByDay,
+  localToUtc,
+  localToUtcIso,
+} from "@/lib/events/datetime";
 import type { TripEvent } from "@/lib/events/types";
 
 /**
@@ -28,6 +34,33 @@ describe("eventTime / eventDayKey", () => {
     const utc = "2026-11-05T23:30:00Z";
     expect(eventDayKey(utc, "Europe/Paris")).toBe("2026-11-06"); // 00h30
     expect(eventDayKey(utc, "America/New_York")).toBe("2026-11-05"); // 18h30
+  });
+});
+
+/**
+ * Conversion écriture (PHIL-R20) : heure locale murale + fuseau IANA → instant UTC.
+ * Point d'entrée unique côté insertion, inverse de `eventTime`.
+ */
+describe("localToUtc / localToUtcIso", () => {
+  it("convertit une heure locale mauricienne (UTC+4) en UTC", () => {
+    // 19h00 à Maurice = 15h00 UTC
+    expect(localToUtcIso("2026-11-13T19:00", "Indian/Mauritius")).toBe("2026-11-13T15:00:00.000Z");
+  });
+
+  it("gère le passage de jour en reculant vers UTC", () => {
+    // 01h30 le 6 à Maurice = 21h30 le 5 en UTC
+    expect(localToUtcIso("2026-11-06T01:30", "Indian/Mauritius")).toBe("2026-11-05T21:30:00.000Z");
+  });
+
+  it("boucle avec eventTime (aller-retour UTC ↔ local)", () => {
+    const utcIso = localToUtcIso("2026-11-05T23:30", "Europe/Paris");
+    expect(eventTime(utcIso, "Europe/Paris")).toBe("23h30");
+  });
+
+  it("localToUtc renvoie une Date correspondant à l'ISO", () => {
+    expect(localToUtc("2026-11-13T19:00", "Indian/Mauritius").toISOString()).toBe(
+      "2026-11-13T15:00:00.000Z",
+    );
   });
 });
 

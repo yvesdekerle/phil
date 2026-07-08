@@ -1,8 +1,8 @@
 "use server";
 
-import { fromZonedTime } from "date-fns-tz";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { localToUtcIso } from "@/lib/events/datetime";
 import type { ActionState } from "@/lib/forms/action-state";
 import { getT } from "@/lib/i18n/server";
 import { logger } from "@/lib/observability/logger";
@@ -84,8 +84,8 @@ export async function updateEvent(
     .update(
       {
         title: d.title,
-        starts_at: fromZonedTime(d.startsAtLocal, d.timezone).toISOString(),
-        ends_at: d.endsAtLocal ? fromZonedTime(d.endsAtLocal, d.timezone).toISOString() : null,
+        starts_at: localToUtcIso(d.startsAtLocal, d.timezone),
+        ends_at: d.endsAtLocal ? localToUtcIso(d.endsAtLocal, d.timezone) : null,
         timezone: d.timezone,
         location_name: d.locationName || null,
         location_address: d.locationAddress || null,

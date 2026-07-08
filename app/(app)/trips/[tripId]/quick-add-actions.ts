@@ -1,9 +1,9 @@
 "use server";
 
-import { fromZonedTime } from "date-fns-tz";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { localToUtcIso } from "@/lib/events/datetime";
 import type { ActionState } from "@/lib/forms/action-state";
 import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
@@ -62,7 +62,7 @@ export async function quickAddEvent(
     trip_id: d.tripId,
     type: "ACTIVITY",
     title: d.title,
-    starts_at: fromZonedTime(`${d.date}T${d.time || "12:00"}`, trip.default_timezone).toISOString(),
+    starts_at: localToUtcIso(`${d.date}T${d.time || "12:00"}`, trip.default_timezone),
     timezone: trip.default_timezone,
     metadata: {},
     created_by: user.id,

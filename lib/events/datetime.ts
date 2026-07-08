@@ -1,6 +1,6 @@
 import type { Locale as DateFnsLocale } from "date-fns";
 import { fr } from "date-fns/locale";
-import { formatInTimeZone } from "date-fns-tz";
+import { formatInTimeZone, fromZonedTime } from "date-fns-tz";
 import type { TripEvent } from "./types";
 
 /**
@@ -9,6 +9,20 @@ import type { TripEvent } from "./types";
  */
 export function formatInTimezone(utcIso: string, timezone: string, fmt: string): string {
   return formatInTimeZone(utcIso, timezone, fmt, { locale: fr });
+}
+
+/**
+ * Convertit une heure locale murale ("yyyy-MM-ddTHH:mm", ex. `datetime-local`)
+ * exprimée dans un fuseau IANA vers l'instant UTC correspondant. Point d'entrée
+ * unique côté écriture (PHIL-R20) : tous les `*_at` sont stockés en UTC.
+ */
+export function localToUtc(local: string, timezone: string): Date {
+  return fromZonedTime(local, timezone);
+}
+
+/** Idem `localToUtc`, sérialisé en ISO UTC (usage le plus courant à l'insertion). */
+export function localToUtcIso(local: string, timezone: string): string {
+  return fromZonedTime(local, timezone).toISOString();
 }
 
 /** Heure locale de l'événement, ex : "18h00". */

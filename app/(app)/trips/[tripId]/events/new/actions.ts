@@ -1,8 +1,8 @@
 "use server";
 
-import { fromZonedTime } from "date-fns-tz";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { localToUtc, localToUtcIso } from "@/lib/events/datetime";
 import { LODGING_PLATFORMS } from "@/lib/events/lodging";
 import { TRANSPORT_MODES } from "@/lib/events/transport";
 import type { ActionState } from "@/lib/forms/action-state";
@@ -82,7 +82,7 @@ export async function createActivityEvent(
   }
 
   const d = parsed.data;
-  const startsAt = fromZonedTime(d.startsAtLocal, d.timezone);
+  const startsAt = localToUtc(d.startsAtLocal, d.timezone);
   const endsAt = d.durationMinutes
     ? new Date(startsAt.getTime() + d.durationMinutes * 60_000).toISOString()
     : null;
@@ -227,8 +227,8 @@ export async function createLodgingEvent(
     trip_id: d.tripId,
     type: "LODGING",
     title: d.name,
-    starts_at: fromZonedTime(d.checkInLocal, d.timezone).toISOString(),
-    ends_at: fromZonedTime(d.checkOutLocal, d.timezone).toISOString(),
+    starts_at: localToUtcIso(d.checkInLocal, d.timezone),
+    ends_at: localToUtcIso(d.checkOutLocal, d.timezone),
     timezone: d.timezone,
     location_name: d.name,
     location_address: d.address || null,
@@ -311,8 +311,8 @@ export async function createTransportEvent(
 
   const d = parsed.data;
   // Heure locale saisie dans le fuseau choisi -> instant UTC stocké.
-  const startsAt = fromZonedTime(d.startsAtLocal, d.timezone).toISOString();
-  const endsAt = d.endsAtLocal ? fromZonedTime(d.endsAtLocal, d.timezone).toISOString() : null;
+  const startsAt = localToUtcIso(d.startsAtLocal, d.timezone);
+  const endsAt = d.endsAtLocal ? localToUtcIso(d.endsAtLocal, d.timezone) : null;
 
   const metadata: Record<string, string> = { transport_mode: d.mode, from: d.from, to: d.to };
   if (d.bookingReference) {

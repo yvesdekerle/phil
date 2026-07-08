@@ -1,8 +1,8 @@
 "use server";
 
-import { fromZonedTime } from "date-fns-tz";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { localToUtcIso } from "@/lib/events/datetime";
 import { TRANSPORT_MODES } from "@/lib/events/transport";
 import type { ActionState } from "@/lib/forms/action-state";
 import { geolocateEvent } from "@/lib/geo/locate";
@@ -70,8 +70,8 @@ function eventInsertOf(d: EventFields, eventId: string, userId: string) {
     trip_id: d.tripId,
     type: d.kind,
     title: d.title,
-    starts_at: fromZonedTime(d.startsAtLocal, d.timezone).toISOString(),
-    ends_at: d.endsAtLocal ? fromZonedTime(d.endsAtLocal, d.timezone).toISOString() : null,
+    starts_at: localToUtcIso(d.startsAtLocal, d.timezone),
+    ends_at: d.endsAtLocal ? localToUtcIso(d.endsAtLocal, d.timezone) : null,
     timezone: d.timezone,
     location_name: d.locationName || (d.kind === "TRANSPORT" ? d.from || null : null),
     location_address: d.locationAddress || null,

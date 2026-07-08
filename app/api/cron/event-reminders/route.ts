@@ -1,5 +1,4 @@
-import { fromZonedTime } from "date-fns-tz";
-import { eventDayKey, eventTime } from "@/lib/events/datetime";
+import { eventDayKey, eventTime, localToUtcIso } from "@/lib/events/datetime";
 import { ensureTripCoords } from "@/lib/geo/locate";
 import { sendPushToUser } from "@/lib/notifications/push";
 import { logger } from "@/lib/observability/logger";
@@ -116,11 +115,8 @@ export async function GET(request: Request) {
         new Date(Date.now() + 24 * 3600 * 1000).toISOString(),
         trip.default_timezone,
       );
-      const dayStart = fromZonedTime(
-        `${tomorrowKey}T00:00:00`,
-        trip.default_timezone,
-      ).toISOString();
-      const dayEnd = fromZonedTime(`${tomorrowKey}T23:59:59`, trip.default_timezone).toISOString();
+      const dayStart = localToUtcIso(`${tomorrowKey}T00:00:00`, trip.default_timezone);
+      const dayEnd = localToUtcIso(`${tomorrowKey}T23:59:59`, trip.default_timezone);
       const { count } = await admin
         .from("trip_events")
         .select("id", { count: "exact", head: true })

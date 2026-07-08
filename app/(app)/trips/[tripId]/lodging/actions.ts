@@ -1,9 +1,9 @@
 "use server";
 
-import { fromZonedTime } from "date-fns-tz";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth/require-user";
+import { localToUtcIso } from "@/lib/events/datetime";
 import type { ActionState } from "@/lib/forms/action-state";
 import { geolocateEvent } from "@/lib/geo/locate";
 import { getT } from "@/lib/i18n/server";
@@ -181,8 +181,8 @@ export async function chooseCandidate(tripId: string, candidateId: string): Prom
     trip_id: tripId,
     type: "LODGING",
     title: candidate.title,
-    starts_at: fromZonedTime(`${candidate.check_in}T15:00`, tz).toISOString(),
-    ends_at: fromZonedTime(`${candidate.check_out}T11:00`, tz).toISOString(),
+    starts_at: localToUtcIso(`${candidate.check_in}T15:00`, tz),
+    ends_at: localToUtcIso(`${candidate.check_out}T11:00`, tz),
     timezone: tz,
     location_name: candidate.title,
     notes: candidate.notes,
