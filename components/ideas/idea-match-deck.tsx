@@ -99,7 +99,7 @@ export function IdeaMatchDeck({ tripId, ideas }: { tripId: string; ideas: SwipeI
 
   return (
     <div className="flex flex-col items-center gap-4">
-      <div className="relative h-96 w-full max-w-sm select-none">
+      <div className="relative h-[58vh] max-h-[32rem] min-h-80 w-full max-w-sm select-none sm:h-96">
         {queue[1] ? <IdeaCardFace idea={queue[1]} behind /> : null}
         {top ? (
           <div
