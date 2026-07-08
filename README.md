@@ -59,3 +59,4 @@ côté client ni préfixer un secret par `NEXT_PUBLIC_`.
 - **`TODO.md`** — roadmap et historique des tickets (source de vérité de l'avancement).
 - **`docs/FONCTIONNALITES.md`** — catalogue des fonctionnalités par catégorie.
 - **`docs/BACKUP.md`** — sauvegarde et restauration de la base et du Storage.
+- **`docs/INCIDENT.md`** — plan de réponse à incident (fuite, secret compromis, RGPD/CNIL).
