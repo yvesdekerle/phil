@@ -8,12 +8,13 @@ import { eventTime, groupEventsByDay } from "@/lib/events/datetime";
 import type { TripEvent } from "@/lib/events/types";
 import { getT } from "@/lib/i18n/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { palette } from "@/lib/ui/colors";
 import { areUuids } from "@/lib/validation";
 
 const MARKER_COLORS: Record<string, string> = {
-  TRANSPORT: "#1f2a44",
-  LODGING: "#b08d3f",
-  ACTIVITY: "#6e1f2e",
+  TRANSPORT: palette.encre,
+  LODGING: palette.laiton,
+  ACTIVITY: palette.bordeaux,
 };
 
 /**
@@ -56,7 +57,7 @@ export default async function PublicTripPage({ params }: { params: Promise<{ tok
       lng: e.location_lng as number,
       title: e.title,
       subtitle: t(`events.type.${e.type}`),
-      color: MARKER_COLORS[e.type] ?? "#6e1f2e",
+      color: MARKER_COLORS[e.type] ?? palette.bordeaux,
       order: i,
     }));
 

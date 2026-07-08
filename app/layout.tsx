@@ -9,6 +9,7 @@ import { OfflineBanner } from "@/components/offline/offline-banner";
 import { ServiceWorkerRegister } from "@/components/pwa/sw-register";
 import { completeMessages } from "@/lib/i18n/messages";
 import { getLocale, getT } from "@/lib/i18n/server";
+import { palette } from "@/lib/ui/colors";
 import { cn } from "@/lib/utils";
 
 const figtree = Figtree({
@@ -36,7 +37,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport = {
-  themeColor: "#f4eee1",
+  themeColor: palette.parchemin,
 };
 
 export default async function RootLayout({

@@ -130,7 +130,7 @@ export function MiamClient({
                   onChange={(e) =>
                     startTransition(() => toggleShoppingItem(tripId, item.id, e.target.checked))
                   }
-                  className="size-4 accent-[#6e1f2e]"
+                  className="size-4 accent-bordeaux"
                   aria-label={`${t("miam.checkAria")} ${item.label}`}
                 />
                 <span

@@ -14,6 +14,7 @@ import { getT } from "@/lib/i18n/server";
 import type { IdeaWithMeta } from "@/lib/ideas/types";
 import { fuzzyMatch } from "@/lib/search/fuzzy";
 import { createClient } from "@/lib/supabase/server";
+import { palette } from "@/lib/ui/colors";
 import { cn } from "@/lib/utils";
 
 export default async function TripIdeasPage({
@@ -127,7 +128,7 @@ export default async function TripIdeasPage({
         lng: l.location_lng as number,
         title: l.title,
         subtitle: t("map.lodging"),
-        color: "#3f6e5a",
+        color: palette.vert,
         house: true,
       }),
     ),
@@ -138,7 +139,7 @@ export default async function TripIdeasPage({
         lng: i.location_lng as number,
         title: i.title,
         subtitle: i.location_name ?? undefined,
-        color: "#6e1f2e",
+        color: palette.bordeaux,
       }),
     ),
   ];

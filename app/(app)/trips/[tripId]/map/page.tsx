@@ -11,11 +11,12 @@ import { geocode } from "@/lib/geo/geocode";
 import { formatMinutes, getTravelMinutes } from "@/lib/geo/travel-time";
 import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
+import { palette } from "@/lib/ui/colors";
 
 const TYPE_COLORS: Record<string, string> = {
-  TRANSPORT: "#1f2a44",
-  LODGING: "#3f6e5a", // vert wagon : les hébergements se repèrent au premier coup d'œil
-  ACTIVITY: "#6e1f2e",
+  TRANSPORT: palette.encre,
+  LODGING: palette.vert, // vert wagon : les hébergements se repèrent au premier coup d'œil
+  ACTIVITY: palette.bordeaux,
 };
 
 /** Cartes du voyage (PHIL-N01) : programme jour par jour, ou idées. */
@@ -86,7 +87,7 @@ export default async function TripMapPage({
       lng: i.location_lng as number,
       title: i.title,
       subtitle: i.location_name ?? undefined,
-      color: "#6e1f2e",
+      color: palette.bordeaux,
     }));
     // L'hébergement en repère sur la carte des idées
     if (lodgingOfDay) {
@@ -96,7 +97,7 @@ export default async function TripMapPage({
         lng: lodgingOfDay.location_lng as number,
         title: lodgingOfDay.title,
         subtitle: t("map.lodging"),
-        color: "#3f6e5a",
+        color: palette.vert,
         house: true,
       });
     }
@@ -115,7 +116,7 @@ export default async function TripMapPage({
       title: e.title,
       subtitle: `${eventTime(e.starts_at, e.timezone)}${e.location_name ? ` · ${e.location_name}` : ""}`,
       href: `/trips/${tripId}/events/${e.id}`,
-      color: TYPE_COLORS[e.type] ?? "#6e1f2e",
+      color: TYPE_COLORS[e.type] ?? palette.bordeaux,
       order: idx,
       house: e.type === "LODGING",
       label: e.type === "LODGING" ? undefined : String(++step),
@@ -136,7 +137,7 @@ export default async function TripMapPage({
             lng: homeCoords.lng,
             title: `${t("map.departure")} : ${from}`,
             subtitle: t("map.departureSubtitle"),
-            color: "#1f2a44",
+            color: palette.encre,
             order: -1,
             house: true,
           });

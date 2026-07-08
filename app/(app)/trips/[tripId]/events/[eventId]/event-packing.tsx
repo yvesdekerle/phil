@@ -67,7 +67,7 @@ export function EventPacking({
                     toggleChecklistItem(tripId, item.id, e.target.checked, eventId),
                   )
                 }
-                className="size-4 accent-[#6e1f2e]"
+                className="size-4 accent-bordeaux"
                 aria-label={`${t("events.packing.takenAriaPrefix")}${item.title}`}
               />
               <span

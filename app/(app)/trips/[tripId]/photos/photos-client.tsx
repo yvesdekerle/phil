@@ -16,6 +16,7 @@ import {
 } from "@/lib/photos/limits";
 import { makeThumbnail } from "@/lib/photos/thumbnail";
 import { createClient } from "@/lib/supabase/client";
+import { palette } from "@/lib/ui/colors";
 import { deletePhoto, type PhotoState, registerPhoto } from "./actions";
 
 type Photo = {
@@ -228,7 +229,7 @@ export function PhotosClient({
                 lng: p.lng as number,
                 title: p.caption ?? t("photos.markerTitle"),
                 subtitle: p.uploaderName,
-                color: "#6e1f2e",
+                color: palette.bordeaux,
                 thumbUrl: `/api/photos/${p.id}/view${p.hasThumb ? "?thumb=1" : ""}`,
               }),
             )}

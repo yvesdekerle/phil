@@ -276,7 +276,7 @@ export function ChecklistClient({
                           ),
                         )
                       }
-                      className="size-4 accent-[#6e1f2e]"
+                      className="size-4 accent-bordeaux"
                       aria-label={`${t("checklist.doneAria")} ${item.title}`}
                     />
                     <span

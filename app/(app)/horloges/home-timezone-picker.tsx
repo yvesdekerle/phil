@@ -41,7 +41,7 @@ export function HomeTimezonePicker({ value }: { value: string }) {
       {pending ? (
         <span className="text-xs text-encre-douce">…</span>
       ) : saved ? (
-        <span className="text-xs text-[#3f6e5a]">{t("clocks.saved")}</span>
+        <span className="text-xs text-vert">{t("clocks.saved")}</span>
       ) : null}
     </label>
   );

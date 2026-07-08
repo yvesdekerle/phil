@@ -4,6 +4,7 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useEffect, useRef } from "react";
 import { useT } from "@/components/i18n/provider";
+import { palette } from "@/lib/ui/colors";
 import { cn } from "@/lib/utils";
 
 export type MapMarker = {
@@ -101,14 +102,14 @@ export function TripMap({
       const points = pathMarkers.map((m) => [m.lat, m.lng] as [number, number]);
       if (points.length > 1) {
         L.polyline(points, {
-          color: "#fbf8f1",
+          color: palette.papier,
           weight: 7,
           opacity: 0.9,
           lineJoin: "round",
           lineCap: "round",
         }).addTo(layer);
         L.polyline(points, {
-          color: "#6e1f2e",
+          color: palette.bordeaux,
           weight: 3.5,
           opacity: 0.9,
           lineJoin: "round",
@@ -123,14 +124,14 @@ export function TripMap({
       const size = m.thumbUrl ? 44 : m.house ? 28 : 26;
       const iconHtml = (highlighted: boolean) => {
         const shadow = highlighted
-          ? "box-shadow:0 0 0 3px #6e1f2e,0 3px 12px rgba(31,42,68,.5);"
+          ? `box-shadow:0 0 0 3px ${palette.bordeaux},0 3px 12px rgba(31,42,68,.5);`
           : "box-shadow:0 2px 8px rgba(31,42,68,.45);";
-        const base = `border-radius:9999px;border:2.5px solid #fbf8f1;${shadow}display:flex;align-items:center;justify-content:center;`;
+        const base = `border-radius:9999px;border:2.5px solid ${palette.papier};${shadow}display:flex;align-items:center;justify-content:center;`;
         return m.thumbUrl
-          ? `<div style="${base}width:44px;height:44px;background:#fbf8f1 url('${m.thumbUrl}') center/cover"></div>`
+          ? `<div style="${base}width:44px;height:44px;background:${palette.papier} url('${m.thumbUrl}') center/cover"></div>`
           : m.house
-            ? `<div style="${base}width:28px;height:28px;background:${m.color};color:#fbf8f1"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></svg></div>`
-            : `<div style="${base}width:26px;height:26px;background:${m.color};color:#fbf8f1;font:700 12px/1 system-ui">${m.label ? escapeHtml(m.label) : ""}</div>`;
+            ? `<div style="${base}width:28px;height:28px;background:${m.color};color:${palette.papier}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></svg></div>`
+            : `<div style="${base}width:26px;height:26px;background:${m.color};color:${palette.papier};font:700 12px/1 system-ui">${m.label ? escapeHtml(m.label) : ""}</div>`;
       };
       const makeIcon = (highlighted: boolean) =>
         L.divIcon({
@@ -142,10 +143,10 @@ export function TripMap({
       const icon = makeIcon(false);
       const distance =
         distanceFrom && (m.lat !== distanceFrom.lat || m.lng !== distanceFrom.lng)
-          ? `<br/><span style="color:#5a6379">${haversineKm(distanceFrom, m).toFixed(1)} km ${t("map.from")} ${escapeHtml(distanceFrom.label)}</span>`
+          ? `<br/><span style="color:${palette.encreDouce}">${haversineKm(distanceFrom, m).toFixed(1)} km ${t("map.from")} ${escapeHtml(distanceFrom.label)}</span>`
           : "";
       const link = m.href
-        ? `<br/><a href="${m.href}" style="color:#6e1f2e">${t("map.viewDetails")}</a>`
+        ? `<br/><a href="${m.href}" style="color:${palette.bordeaux}">${t("map.viewDetails")}</a>`
         : "";
       const marker = L.marker([m.lat, m.lng], { icon })
         .bindPopup(

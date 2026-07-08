@@ -2,6 +2,7 @@
 
 import { forwardRef, useImperativeHandle, useMemo, useState } from "react";
 import { dragIntensity, dragVerdict, type Verdict } from "@/lib/activities/swipe";
+import { palette } from "@/lib/ui/colors";
 
 /**
  * Feedback visuel du swipe (PHIL-U04 Phase 2), porté de Yallah
@@ -12,10 +13,10 @@ import { dragIntensity, dragVerdict, type Verdict } from "@/lib/activities/swipe
  */
 
 const COLOR: Record<Verdict, string> = {
-  YES: "#3f7a5a", // vert
-  NO: "#6e1f2e", // bordeaux
-  MAYBE: "#a98a54", // laiton
-  SUPER: "#2b3a67", // bleu-nuit
+  YES: palette.vert,
+  NO: palette.bordeaux,
+  MAYBE: palette.laiton,
+  SUPER: palette.bleuNuit,
 };
 const ROTATION: Record<Verdict, number> = { YES: -8, NO: 10, MAYBE: -4, SUPER: 0 };
 
@@ -169,8 +170,8 @@ const SPARKLES: Sparkle[] = Array.from({ length: 10 }, (_, i) => {
  */
 export function SuperLikeFX({ label }: { label: string }) {
   const sparkles = useMemo(() => SPARKLES, []);
-  const gold = "#a98a54";
-  const nuit = "#2b3a67";
+  const gold = palette.laiton;
+  const nuit = palette.bleuNuit;
   return (
     <div className="pointer-events-none absolute inset-0 z-30 overflow-hidden">
       <div

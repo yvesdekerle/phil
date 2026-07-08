@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { logger } from "@/lib/observability/logger";
+import { palette } from "@/lib/ui/colors";
 
 /**
  * Dictionnaire autonome (PHIL-Q37) : cette page vit HORS du provider i18n
@@ -68,8 +69,8 @@ export default function GlobalError({
           gap: "1rem",
           padding: "2rem",
           textAlign: "center",
-          background: "#f4eee1",
-          color: "#1f2a44",
+          background: palette.parchemin,
+          color: palette.encre,
           fontFamily: "system-ui, sans-serif",
         }}
       >
@@ -81,8 +82,8 @@ export default function GlobalError({
           style={{
             border: "none",
             borderRadius: "9999px",
-            background: "#6e1f2e",
-            color: "#f4eee1",
+            background: palette.bordeaux,
+            color: palette.parchemin,
             padding: "0.5rem 1.25rem",
             fontSize: "0.9rem",
             cursor: "pointer",

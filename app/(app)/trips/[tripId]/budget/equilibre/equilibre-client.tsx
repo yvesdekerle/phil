@@ -94,11 +94,7 @@ export function EquilibreClient({
               <span
                 className={cn(
                   "font-medium tabular-nums",
-                  b.net > 0.01
-                    ? "text-[#3f6e5a]"
-                    : b.net < -0.01
-                      ? "text-bordeaux"
-                      : "text-encre-douce",
+                  b.net > 0.01 ? "text-vert" : b.net < -0.01 ? "text-bordeaux" : "text-encre-douce",
                 )}
               >
                 {b.net > 0 ? "+" : ""}

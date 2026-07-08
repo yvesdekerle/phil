@@ -33,7 +33,7 @@ export function VaultDoor({ state }: { state: VaultDoorState }) {
           height: 100%;
           object-fit: cover;
           border-radius: 0.5rem;
-          border: 1px solid #d9c9a3;
+          border: 1px solid var(--laiton-clair);
           box-shadow: 0 3px 18px rgba(31, 42, 68, 0.18);
         }
 

@@ -131,7 +131,7 @@ export function PollsSection({
           <p className="text-xs text-encre-douce">{t("ideas.optionsHint")}</p>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             <label className="flex items-center gap-2 text-sm text-encre">
-              <input type="checkbox" name="allowMultiple" className="size-4 accent-[#6e1f2e]" />
+              <input type="checkbox" name="allowMultiple" className="size-4 accent-bordeaux" />
               {t("ideas.pollAllowMultiple")}
             </label>
             <div className="flex items-center gap-2 text-sm text-encre-douce">

@@ -5,10 +5,11 @@ import L from "leaflet";
 import { useEffect, useRef, useTransition } from "react";
 import { toggleVisitedCountry } from "@/app/(app)/explorer/actions";
 import { useT } from "@/components/i18n/provider";
+import { palette } from "@/lib/ui/colors";
 
 /** Palette Phil pour les pays visités — teinte stable par pays. */
-const VISITED_COLORS = ["#6e1f2e", "#b08d3f", "#1f2a44", "#3f6e5a"];
-const UNVISITED = "#efe6d5"; // beige parchemin : "à visiter"
+const VISITED_COLORS = [palette.bordeaux, palette.laiton, palette.encre, palette.vert];
+const UNVISITED = "#efe6d5"; // beige parchemin clair (hors tokens) : "à visiter"
 
 function colorFor(code: string): string {
   let h = 0;
@@ -60,7 +61,7 @@ export function WorldMap({ visited }: { visited: string[] }) {
         const styleOf = (code: string): L.PathOptions =>
           visitedRef.current.has(code)
             ? { fillColor: colorFor(code), fillOpacity: 0.85, color: "#f7f1e3", weight: 0.7 }
-            : { fillColor: UNVISITED, fillOpacity: 1, color: "#d8c9a3", weight: 0.7 };
+            : { fillColor: UNVISITED, fillOpacity: 1, color: palette.laitonClair, weight: 0.7 };
 
         layer = L.geoJSON(geojson, {
           style: (f) => styleOf(f?.properties.code ?? ""),

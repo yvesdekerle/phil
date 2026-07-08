@@ -359,7 +359,7 @@ export function ExpensesClient({
                         return next;
                       })
                     }
-                    className="accent-[#6e1f2e]"
+                    className="accent-bordeaux"
                     aria-label={`${t("budget.form.beneficiaryAria")} ${nameOf(m.userId)}`}
                   />
                   <span className="min-w-0 flex-1 text-encre">{nameOf(m.userId)}</span>
