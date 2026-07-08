@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { TimezoneSelect } from "@/components/ui/timezone-select";
 import { type ProfileFormState, updateProfile } from "./actions";
 
 type FormValues = {
@@ -34,7 +35,6 @@ export function ProfileForm({ defaultValues }: { defaultValues: FormValues }) {
   const t = useT();
   const [state, setState] = useState<ProfileFormState>({ status: "idle" });
   const [pending, startTransition] = useTransition();
-  const timezones = useMemo(() => Intl.supportedValuesOf("timeZone"), []);
   const formSchema = useMemo(
     () =>
       z.object({
@@ -107,18 +107,11 @@ export function ProfileForm({ defaultValues }: { defaultValues: FormValues }) {
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="timezone">{t("profile.form.defaultTimezone")}</Label>
-        <Select value={watch("timezone")} onValueChange={(v) => setValue("timezone", v)}>
-          <SelectTrigger id="timezone" className="w-full">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {timezones.map((tz) => (
-              <SelectItem key={tz} value={tz}>
-                {tz}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <TimezoneSelect
+          id="timezone"
+          value={watch("timezone")}
+          onValueChange={(v) => setValue("timezone", v)}
+        />
       </div>
 
       <div className="flex flex-col gap-2">

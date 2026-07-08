@@ -968,8 +968,13 @@ Suite de R05 : rendre le profil système lisible (colonne `is_system` + policy S
 **React.cache + loading (fait le 2026-07-08)** : `lib/auth/session.ts` → `getSessionUser` mémoïsé par requête (`React.cache`), branché sur `requireUser` (toutes les server actions), `getOwnProfile` (layout app) et le layout voyage → les appels `auth.getUser()` du layout app + layout voyage sont dédupliqués (au lieu d'un aller-retour GoTrue chacun). `app/(app)/trips/[tripId]/loading.tsx` : squelette instantané (couverture + onglets + contenu) = **boundary Suspense au niveau route**, donc la météo/OSRM (fetch bloquant en RSC sur la page d'accueil voyage) **streament derrière le squelette** au lieu de bloquer un écran blanc. Combiné à la parallélisation des requêtes du layout (commit `b4a352b`) et à la purge bundle, ça couvre le gros de la latence.
 > Raffinements optionnels non retenus (loading.tsx les subsume) : `<Suspense>` par widget météo (extraction lourde car couplée à `today-hero`), et adoption de `getSessionUser` dans chaque page (les ~40 `auth.getUser()` de page restent directs — dédup layouts+actions suffit au hot path).
 
-### [ ] PHIL-R20 — 🟡 Cohérence transversale (refactors)
-Type `ActionState` unique, standard formulaire `useActionState`, `<TimezoneSelect>` partagé, routage des dates via un module, palette JS centralisée (audit A9).
+### [~] PHIL-R20 — 🟡 Cohérence transversale (refactors)
+Lot de refactors DRY, un commit chacun :
+- [x] **`<TimezoneSelect>` partagé** *(fait le 2026-07-08)* : composant `components/ui/timezone-select.tsx` (contrôlé, `disabled` optionnel) factorisant le duo `Intl.supportedValuesOf("timeZone")` + `<Select>` dupliqué dans **7 formulaires** (profil, réglages voyage, nouveau voyage, transport/hébergement/activité, édition d'événement). ~10 lignes × 7 supprimées, imports `useMemo`/`Select*` inutiles purgés. `horloges/home-timezone-picker` laissé tel quel (natif `<option>`, UI distincte). `build`/`lint`/`type-check`/153 tests OK.
+- [ ] **Type `ActionState` unique** : ~13 `type XxxState = { status: "idle" | "error"; message?: string }` quasi identiques (+ variante `success`) → un type partagé.
+- [ ] **Standard formulaire `useActionState`** (migration des `useState`+`startTransition`).
+- [ ] **Routage des dates via un module** (centraliser `date-fns`/formatage).
+- [ ] **Palette JS centralisée** (audit A9 — tokens couleur utilisés en JS).
 
 ### [x] PHIL-R21 — 🟠 Régénération du code de secours cassée par la RLS (fix sans migration) *(fait le 2026-07-08)*
 Découvert en PHIL-T01 Phase 4a. La table `user_master_key_wraps` n'a que des policies SELECT/INSERT/DELETE (migration `20260707140000_vault_crypto_keys.sql`). Or `storeRecoveryWrap` faisait un `upsert(onConflict: user_id,label)` : à la **régénération** d'un code de secours (2ᵉ appel, ligne `recovery` existante), le chemin UPDATE était **bloqué par la RLS** → régénération en échec silencieux.

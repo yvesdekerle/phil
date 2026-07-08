@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMemo, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { CurrencyInput } from "@/components/budget/currency-input";
@@ -20,13 +20,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { TimezoneSelect } from "@/components/ui/timezone-select";
 import { deleteTrip, setTripArchived, type TripSettingsState, updateTrip } from "./actions";
 
 const formSchema = z
@@ -89,7 +83,6 @@ export function TripSettingsForm({
   const t = useT();
   const [state, setState] = useState<TripSettingsState>({ status: "idle" });
   const [pending, startTransition] = useTransition();
-  const timezones = useMemo(() => Intl.supportedValuesOf("timeZone"), []);
 
   const {
     register,
@@ -187,22 +180,12 @@ export function TripSettingsForm({
 
         <div className="flex flex-col gap-2">
           <Label htmlFor="timezone">{t("settings.form.timezone")}</Label>
-          <Select
+          <TimezoneSelect
+            id="timezone"
             value={watch("timezone")}
             onValueChange={(v) => setValue("timezone", v)}
             disabled={!canEdit}
-          >
-            <SelectTrigger id="timezone" className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {timezones.map((tz) => (
-                <SelectItem key={tz} value={tz}>
-                  {tz}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          />
         </div>
       </form>
 

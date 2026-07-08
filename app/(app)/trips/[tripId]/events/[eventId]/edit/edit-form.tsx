@@ -1,17 +1,11 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { TimezoneSelect } from "@/components/ui/timezone-select";
 import { type EventActionState, updateEvent } from "../actions";
 
 type Defaults = {
@@ -38,7 +32,6 @@ export function EditEventForm({
   const [timezone, setTimezone] = useState(defaults.timezone);
   const [state, setState] = useState<EventActionState>({ status: "idle" });
   const [pending, startTransition] = useTransition();
-  const timezones = useMemo(() => Intl.supportedValuesOf("timeZone"), []);
 
   function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -81,18 +74,7 @@ export function EditEventForm({
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="timezone">{t("events.form.timezone")}</Label>
-        <Select value={timezone} onValueChange={setTimezone}>
-          <SelectTrigger id="timezone" className="w-full">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {timezones.map((tz) => (
-              <SelectItem key={tz} value={tz}>
-                {tz}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <TimezoneSelect id="timezone" value={timezone} onValueChange={setTimezone} />
       </div>
 
       <div className="grid grid-cols-2 gap-4">

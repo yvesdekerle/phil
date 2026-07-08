@@ -1,20 +1,14 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMemo, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { TimezoneSelect } from "@/components/ui/timezone-select";
 import { TRIP_TEMPLATES } from "@/lib/trips/templates";
 import { cn } from "@/lib/utils";
 import { type CreateTripState, createTrip } from "./actions";
@@ -44,7 +38,6 @@ export function TripForm({ defaultTimezone }: { defaultTimezone: string }) {
   const t = useT();
   const [state, setState] = useState<CreateTripState>({ status: "idle" });
   const [pending, startTransition] = useTransition();
-  const timezones = useMemo(() => Intl.supportedValuesOf("timeZone"), []);
 
   const {
     register,
@@ -172,18 +165,11 @@ export function TripForm({ defaultTimezone }: { defaultTimezone: string }) {
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="timezone">{t("newTrip.timezone")}</Label>
-        <Select value={watch("timezone")} onValueChange={(v) => setValue("timezone", v)}>
-          <SelectTrigger id="timezone" className="w-full">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {timezones.map((tz) => (
-              <SelectItem key={tz} value={tz}>
-                {tz}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <TimezoneSelect
+          id="timezone"
+          value={watch("timezone")}
+          onValueChange={(v) => setValue("timezone", v)}
+        />
         <p className="text-xs text-encre-douce">{t("newTrip.timezoneHint")}</p>
       </div>
 

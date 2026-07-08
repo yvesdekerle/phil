@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { PlaceInput } from "@/components/geo/place-input";
 import { useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { TimezoneSelect } from "@/components/ui/timezone-select";
 import {
   LODGING_PLATFORM_LABELS,
   LODGING_PLATFORMS,
@@ -33,7 +34,6 @@ export function LodgingForm({
   const [timezone, setTimezone] = useState(defaultTimezone);
   const [state, setState] = useState<CreateEventState>({ status: "idle" });
   const [pending, startTransition] = useTransition();
-  const timezones = useMemo(() => Intl.supportedValuesOf("timeZone"), []);
 
   function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -83,18 +83,7 @@ export function LodgingForm({
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="timezone">{t("events.form.timezone")}</Label>
-        <Select value={timezone} onValueChange={setTimezone}>
-          <SelectTrigger id="timezone" className="w-full">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {timezones.map((tz) => (
-              <SelectItem key={tz} value={tz}>
-                {tz}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <TimezoneSelect id="timezone" value={timezone} onValueChange={setTimezone} />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
