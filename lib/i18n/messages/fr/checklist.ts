@@ -178,6 +178,7 @@ export const checklistFr = {
       noneYet: "Aucune idée à swiper — proposes-en une depuis les idées.",
       deckEmpty: "Tu as tout passé en revue ! Regarde les matchs plus bas.",
       hint: "→ j'aime · ← non · ↑ coup de cœur · ↓ pourquoi pas",
+      badge: "Match",
       yes: "J'aime",
       no: "Non",
       maybe: "Pourquoi pas",

@@ -176,6 +176,7 @@ export const checklistEs = {
       noneYet: "Ninguna idea por deslizar — propón una desde las ideas.",
       deckEmpty: "¡Ya las revisaste todas! Mira los matches abajo.",
       hint: "→ me gusta · ← no · ↑ super like · ↓ por qué no",
+      badge: "Match",
       yes: "Me gusta",
       no: "No",
       maybe: "Por qué no",

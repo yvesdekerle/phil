@@ -43,30 +43,36 @@ export default async function TripIdeasPage({
   }
   const t = await getT();
 
-  const [{ data: ideasData }, { data: me }, { data: lodgings }] = await Promise.all([
-    supabase
-      .from("trip_ideas")
-      .select(
-        "*, profiles!trip_ideas_created_by_fkey(display_name), idea_votes(user_id), trip_events!trip_ideas_scheduled_event_id_fkey(id, starts_at, timezone)",
-      )
-      .eq("trip_id", tripId)
-      .in("status", showDismissed ? ["DISMISSED"] : ["POOL", "SCHEDULED"])
-      .order("created_at", { ascending: false }),
-    supabase
-      .from("trip_participants")
-      .select("role")
-      .eq("trip_id", tripId)
-      .eq("user_id", user.id)
-      .single(),
-    supabase
-      .from("trip_events")
-      .select("id, title, location_lat, location_lng")
-      .eq("trip_id", tripId)
-      .eq("type", "LODGING")
-      .not("location_lat", "is", null)
-      .order("starts_at", { ascending: true }),
-  ]);
+  const [{ data: ideasData }, { data: me }, { data: lodgings }, { count: crewCount }] =
+    await Promise.all([
+      supabase
+        .from("trip_ideas")
+        .select(
+          "*, profiles!trip_ideas_created_by_fkey(display_name), idea_votes(user_id, verdict), trip_events!trip_ideas_scheduled_event_id_fkey(id, starts_at, timezone)",
+        )
+        .eq("trip_id", tripId)
+        .in("status", showDismissed ? ["DISMISSED"] : ["POOL", "SCHEDULED"])
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("trip_participants")
+        .select("role")
+        .eq("trip_id", tripId)
+        .eq("user_id", user.id)
+        .single(),
+      supabase
+        .from("trip_events")
+        .select("id, title, location_lat, location_lng")
+        .eq("trip_id", tripId)
+        .eq("type", "LODGING")
+        .not("location_lat", "is", null)
+        .order("starts_at", { ascending: true }),
+      supabase
+        .from("trip_participants")
+        .select("user_id", { count: "exact", head: true })
+        .eq("trip_id", tripId),
+    ]);
 
+  const crewSize = crewCount ?? 1;
   const canPropose = me?.role === "OWNER" || me?.role === "EDITOR";
 
   // PHIL-U07 : nombre d'idées du pool que je n'ai pas encore swipées (pour le CTA).
@@ -138,11 +144,27 @@ export default async function TripIdeasPage({
   ];
 
   let ideas: IdeaWithMeta[] = (ideasData ?? []).map((row) => {
-    const votes = (row.idea_votes ?? []) as { user_id: string }[];
+    const votes = (row.idea_votes ?? []) as { user_id: string; verdict: string }[];
+    let supers = 0;
+    let likes = 0;
+    let maybes = 0;
+    let nos = 0;
+    for (const v of votes) {
+      if (v.verdict === "SUPER") supers += 1;
+      else if (v.verdict === "YES") likes += 1;
+      else if (v.verdict === "MAYBE") maybes += 1;
+      else nos += 1;
+    }
+    const positives = supers + likes;
     return {
       ...row,
-      voteCount: votes.length,
+      voteCount: positives,
       hasVoted: votes.some((v) => v.user_id === user.id),
+      supers,
+      likes,
+      maybes,
+      nos,
+      isMatch: crewSize > 0 && votes.length === crewSize && positives === crewSize,
       creatorName: row.profiles?.display_name ?? t("ideas.travelerFallback"),
       scheduledEvent: row.trip_events ?? null,
     };

@@ -1,4 +1,15 @@
-import { CalendarPlus, Car, Clock, Coins, ExternalLink, MapPin } from "lucide-react";
+import {
+  CalendarPlus,
+  Car,
+  Clock,
+  Coins,
+  ExternalLink,
+  Heart,
+  MapPin,
+  Sparkles,
+  Star,
+  ThumbsDown,
+} from "lucide-react";
 import Link from "next/link";
 import { Linkify } from "@/components/ui/linkify";
 import { formatInTimezone } from "@/lib/events/datetime";
@@ -6,7 +17,6 @@ import { getT } from "@/lib/i18n/server";
 import type { IdeaWithMeta } from "@/lib/ideas/types";
 import { cn } from "@/lib/utils";
 import { DismissButton } from "./dismiss-button";
-import { VoteButton } from "./vote-button";
 
 export async function IdeaCard({
   idea,
@@ -75,12 +85,30 @@ export async function IdeaCard({
               dismissed={idea.status === "DISMISSED"}
             />
           ) : null}
-          <VoteButton
-            tripId={tripId}
-            ideaId={idea.id}
-            count={idea.voteCount}
-            hasVoted={idea.hasVoted}
-          />
+          {/* PHIL-U07 : compteurs du swipe (le vote se fait dans « Match tes activités »). */}
+          <div className="flex shrink-0 items-center gap-2.5 text-sm">
+            {idea.isMatch ? (
+              <span className="flex items-center gap-1 rounded-full bg-vert/15 px-2 py-1 text-xs font-medium text-vert">
+                <Sparkles className="size-3.5" aria-hidden="true" /> {t("ideas.match.badge")}
+              </span>
+            ) : null}
+            {idea.supers > 0 ? (
+              <span
+                className="flex items-center gap-1 text-bleu-nuit"
+                title={t("ideas.match.super")}
+              >
+                <Star className="size-4 fill-current" aria-hidden="true" /> {idea.supers}
+              </span>
+            ) : null}
+            <span className="flex items-center gap-1 text-vert" title={t("ideas.match.yes")}>
+              <Heart className="size-4 fill-current" aria-hidden="true" /> {idea.likes}
+            </span>
+            {idea.nos > 0 ? (
+              <span className="flex items-center gap-1 text-bordeaux" title={t("ideas.match.no")}>
+                <ThumbsDown className="size-4" aria-hidden="true" /> {idea.nos}
+              </span>
+            ) : null}
+          </div>
         </div>
       </div>
 

@@ -168,6 +168,7 @@ export const checklistEn = {
       noneYet: "No idea to swipe — suggest one from the ideas.",
       deckEmpty: "You've been through them all! See the matches below.",
       hint: "→ like · ← no · ↑ super like · ↓ why not",
+      badge: "Match",
       yes: "Like",
       no: "No",
       maybe: "Why not",
