@@ -36,24 +36,26 @@ export default async function TripLayout({
   }
 
   const status = tripStatus(trip);
-  // PHIL-U02 : pastilles « à voter » sur les onglets Sondages / Idées / À swiper.
-  const pending = user
-    ? ((await getPendingByTrip(supabase, user.id, [tripId])).get(tripId) ?? null)
-    : null;
+
+  // PHIL-R19 : les deux lots de requêtes ne dépendent que de user+trip → en
+  // parallèle plutôt qu'en série (la base distante rend chaque aller-retour cher).
+  // PHIL-U02 : pastilles « à voter » sur les onglets. PHIL-N04 : validité passeport.
+  const [pendingMap, { data: passports }] = await Promise.all([
+    user ? getPendingByTrip(supabase, user.id, [tripId]) : Promise.resolve(null),
+    supabase
+      .from("documents")
+      .select("expires_at")
+      .eq("owner_id", user?.id ?? "")
+      .eq("category", "passport")
+      .is("deleted_at", null)
+      .not("expires_at", "is", null)
+      .order("expires_at", { ascending: false })
+      .limit(1),
+  ]);
+  const pending = pendingMap?.get(tripId) ?? null;
   const t = await getT();
   const dfLocale = await getDateFnsLocale();
   const il = await getIntlLocale();
-
-  // PHIL-N04 : validité du passeport vs dates du voyage (règle des 6 mois)
-  const { data: passports } = await supabase
-    .from("documents")
-    .select("expires_at")
-    .eq("owner_id", user?.id ?? "")
-    .eq("category", "passport")
-    .is("deleted_at", null)
-    .not("expires_at", "is", null)
-    .order("expires_at", { ascending: false })
-    .limit(1);
   const passportExpiry = passports?.[0]?.expires_at ?? null;
   let passportWarning: { level: "danger" | "warn"; text: string } | null = null;
   if (passportExpiry) {
