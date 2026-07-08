@@ -14,6 +14,7 @@
     "prepare": "husky",
     "db:push": "supabase db push",
     "db:types": "supabase gen types typescript --linked > types/database.ts",
+    "db:dump": "supabase db dump --linked --data-only -f tmp/backup-$(date +%F).sql",
     "verify:rls": "tsx scripts/verify-rls.ts",
     "build:sw": "esbuild app/sw.ts --bundle --minify --outfile=public/sw.js",
     "test": "vitest run",

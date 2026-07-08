@@ -387,8 +387,9 @@ Bannière minimaliste au premier visite : pas de tracking analytics par défaut,
 Activation de Dependabot ou Renovate sur le repo GitHub pour les MAJ de sécurité automatiques (fonctionnalité GitHub native, sans CI). `npm audit` à lancer régulièrement en local, et systématiquement avant un déploiement important.
 > Fait : `.github/dependabot.yml` (npm + github-actions, hebdo, bumps mineurs groupés) en Q48.
 
-### [ ] PHIL-J07 — Backup base de données
+### [x] PHIL-J07 — Backup base de données *(fait le 2026-07-08)*
 Supabase fait des backups automatiques quotidiens (rétention 7 jours sur free tier). Documenter la procédure de restauration. Optionnel : export hebdomadaire vers un stockage tiers via cron.
+> Runbook `docs/BACKUP.md` : ce qui compose l'état (schéma **déjà versionné** dans les migrations → un backup ne dumpe que **les données**), backups auto Supabase (7 j, pas de PITR en free, projet en pause après 7 j d'inactivité), **sauvegarde manuelle** `pnpm db:dump` (nouveau script → `supabase db dump --linked --data-only` vers `tmp/` **gitignoré** — ne jamais committer un dump), Storage **hors backup DB** (buckets `documents` chiffrés / `covers`+`photos` en clair), exports logiques complémentaires (RGPD C07 + voyage Q19), **restauration** (rejouer migrations `db:push` → recharger le dump `psql` → `db:types` + `verify:rls`), routine conseillée + note cron hebdo différé. Souligne que le coffre **E2EE** rend un dump des documents inexploitable sans les clés. Lié dans le README (commande + index docs). Pas de code applicatif (doc + 1 script npm) → build/lint/type-check inchangés.
 
 ### [ ] PHIL-J08 — Plan de réponse à incident
 Document `INCIDENT.md` avec : que faire en cas de fuite de données, contacts CNIL, procédure de notification aux utilisateurs, checklist de remédiation. Pas critique pour un usage perso mais bonne hygiène.

@@ -41,6 +41,7 @@ pnpm test:e2e       # tests e2e (Playwright)
 pnpm verify:rls     # vérification des politiques RLS (après migration sensible)
 pnpm db:push        # applique les migrations Supabase
 pnpm db:types       # régénère types/database.ts depuis le schéma distant
+pnpm db:dump        # sauvegarde les données dans tmp/ (voir docs/BACKUP.md)
 ```
 
 ## Sécurité
@@ -57,3 +58,4 @@ côté client ni préfixer un secret par `NEXT_PUBLIC_`.
   partage, conventions, choix techniques).
 - **`TODO.md`** — roadmap et historique des tickets (source de vérité de l'avancement).
 - **`docs/FONCTIONNALITES.md`** — catalogue des fonctionnalités par catégorie.
+- **`docs/BACKUP.md`** — sauvegarde et restauration de la base et du Storage.
