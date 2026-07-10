@@ -956,8 +956,9 @@ Fini (2026-07-08) : `import/actions.ts` (chemin de stockage, brouillon introuvab
 ### [x] PHIL-R16 — 🟡 États d'erreur DB sur les pages listes *(fait le 2026-07-07)*
 `vault/page.tsx` et `documents/page.tsx` : une erreur DB est loggée puis levée (boundary `error.tsx`) au lieu d'être masquée en « coffre vide » trompeur. Reste `lib/offline/sync.ts` (contexte offline, dégradation acceptable — à traiter avec la résilience offline).
 
-### [ ] PHIL-R17 — 🟡 Activer le job CI `rls`
+### [x] PHIL-R17 — 🟡 Activer le job CI `rls` *(fait le 2026-07-10)*
 Fournir un projet Supabase de test + secrets GitHub pour que le job `rls` de `.github/workflows/ci.yml` s'exécute réellement.
+> Débloqué par R11 : les 3 secrets (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`) posés dans GitHub avec les valeurs de **phil-dev** (base de test — `verify:rls` crée/supprime des users jetables, jamais contre la prod). Le job `rls` tourne `verify:rls` contre phil-dev à chaque push → **CI verte 30/30**. A nécessité 3 correctifs découverts au passage : **R24** (conflit pnpm) et **R25** (script lisait `.env.local` en dur + tests e2e figés en FR).
 
 ### [x] PHIL-R18 — 🟡 Profil « Voyageur parti » lisible dans les soldes *(fait le 2026-07-08)*
 Suite de R05 : rendre le profil système lisible (colonne `is_system` + policy SELECT) pour afficher son nom dans les soldes plutôt qu'un libellé de repli.
@@ -1008,6 +1009,12 @@ Découvert pendant R11. Aujourd'hui **prod et dev utilisent les clés legacy** (
 
 ### [x] PHIL-R24 — 🟡 Fix CI : conflit de version pnpm *(fait le 2026-07-10)*
 Découvert en activant R17 : les 3 jobs de `ci.yml` (quality/e2e/rls) échouaient avec « **Multiple versions of pnpm specified** » — `version: 10` dans `pnpm/action-setup@v4` **et** `packageManager: pnpm@10.33.0` dans `package.json`. `action-setup@v4` refuse les deux. **Fix** : retiré le `with: version: 10` des 3 étapes → la version est lue depuis `package.json` (source unique). Reste (non bloquant, warnings) : `actions/checkout@v4` + `pnpm/action-setup@v4` ciblent Node 20 (déprécié) — bump possible plus tard.
+
+### [x] PHIL-R25 — 🟡 Fix CI : job `rls` + tests e2e verts *(fait le 2026-07-10)*
+Découverts après R24 (une fois pnpm réglé, quality passait mais `rls`/`e2e` restaient rouges) :
+- **`rls`** : `scripts/verify-rls.ts` lisait `.env.local` **en dur** (`readFileSync`) → `ENOENT` en CI (fichier gitignoré, absent). Rendu **optionnel** (`existsSync`) : local = `.env.local`, CI = secrets GitHub déjà dans `process.env`.
+- **`e2e`** : `tests/e2e/auth-gating.spec.ts` assertait du **texte FR** (« Bienvenue à bord », « Politique de confidentialité ») alors que l'app est **anglais-first depuis R19** → un visiteur frais voit l'anglais. Rendu **indépendant de la langue** : bouton login via `/Google/i` (FR+EN), `/privacy` public = pas de redirection + un titre visible (plus de texte codé en dur).
+> Résultat : **CI 100 % verte** (quality + e2e + rls), le job rls tourne `verify:rls` 30/30 contre phil-dev.
 
 ---
 
