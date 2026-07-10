@@ -1006,6 +1006,9 @@ Découvert pendant R11. Aujourd'hui **prod et dev utilisent les clés legacy** (
 - **Portée** : valeurs des env vars dans Vercel (prod → phil-prod, preview/dev → phil-dev) + `.env.local` + `.env.example`. Décider si on **garde les noms** `NEXT_PUBLIC_SUPABASE_ANON_KEY` / `SUPABASE_SERVICE_ROLE_KEY` (valeurs changées, zéro code) ou si on **renomme** en `…PUBLISHABLE_KEY` / `…SECRET_KEY` (plus clair sémantiquement, mais touche `lib/supabase/*` + CLAUDE.md). Tester sur **dev d'abord** (login, RLS, admin, `verify:rls`), puis prod, puis **désactiver les clés legacy**.
 - Non urgent : les clés legacy fonctionnent encore. À faire avant qu'elles soient réellement coupées par Supabase.
 
+### [x] PHIL-R24 — 🟡 Fix CI : conflit de version pnpm *(fait le 2026-07-10)*
+Découvert en activant R17 : les 3 jobs de `ci.yml` (quality/e2e/rls) échouaient avec « **Multiple versions of pnpm specified** » — `version: 10` dans `pnpm/action-setup@v4` **et** `packageManager: pnpm@10.33.0` dans `package.json`. `action-setup@v4` refuse les deux. **Fix** : retiré le `with: version: 10` des 3 étapes → la version est lue depuis `package.json` (source unique). Reste (non bloquant, warnings) : `actions/checkout@v4` + `pnpm/action-setup@v4` ciblent Node 20 (déprécié) — bump possible plus tard.
+
 ---
 
 ## Catégorie S — Évolutions produit (demandées pendant l'audit, à traiter après)
