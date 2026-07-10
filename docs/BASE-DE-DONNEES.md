@@ -91,7 +91,38 @@ que la prod ne contient pas de données réelles — à ne **pas** conserver au-
    base **de dev/test**, jamais la prod.
 
 Chaîne de tickets : **U05** (ce document, clarifie) → **R11** (provisionne la
-séparation) → **R17** (active le job CI `rls` sur la base de test).
+séparation) → **R17** (active le job CI `rls` sur la base de test) → **R22**
+(automatise les migrations de prod).
+
+## Appliquer les migrations : dev à la main, prod en CI (R22)
+
+Une fois la séparation en place, le principe est **asymétrique** :
+
+- **Dev = manuel.** Boucle rapide : tu écris la migration, `pnpm db:push` l'applique
+  sur **phil-dev** tout de suite (la CLI reste liée à phil-dev au quotidien). C'est
+  ta base de jeu, aucun risque.
+- **Prod = CI.** On **n'applique jamais** une migration à la prod à la main (un
+  `supabase link <prod>` de travers taperait la mauvaise base). Le workflow
+  `.github/workflows/migrate-prod.yml` (**PHIL-R22**) s'en charge : sur un push
+  vers `main` qui **touche `supabase/migrations/`**, il fait `supabase db push` sur
+  phil-prod, **après une approbation manuelle** (environnement GitHub `production`).
+
+Flux type d'une évolution de schéma :
+
+```
+1. (branche) écris la migration + pnpm db:push   → phil-dev, visible aussitôt en local
+2. teste (pnpm dev sur phil-dev, pnpm verify:rls)
+3. merge dans main + push                          → la CI migre phil-prod (après ton clic d'appro)
+```
+
+⚠️ **Toujours vérifier le lien avant un `db:push` manuel** (`supabase link` choisit
+la base cible) — d'où l'intérêt de ne jamais lier la prod en local : elle n'est
+migrée que par la CI.
+
+> **Pourquoi pas au démarrage de l'app (façon Liquibase) ?** Vercel est serverless
+> (pas de « boot » unique, fonctions concurrentes, limite 10 s) et l'app se connecte
+> via PostgREST sans droits DDL. Migrer au runtime serait un anti-pattern → on migre
+> au **déploiement**, via la CI.
 
 ## En attendant la séparation — garde-fous
 
@@ -106,4 +137,5 @@ séparation) → **R17** (active le job CI `rls` sur la base de test).
 ---
 
 Voir aussi : `CLAUDE.md` (stack et conventions migrations), `docs/BACKUP.md`
-(sauvegarde avant migration), `TODO.md` (tickets R11, R17).
+(sauvegarde avant migration), `TODO.md` (tickets R11, R17, R22),
+`.github/workflows/migrate-prod.yml` (migrations prod automatisées).

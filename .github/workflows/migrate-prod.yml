@@ -1,0 +1,52 @@
+name: Migrate prod DB
+
+# Migrations de PRODUCTION automatisées (PHIL-R22).
+# Le dev reste manuel (`pnpm db:push` en local sur phil-dev) ; ce workflow ne
+# gère QUE la promotion vers la prod, là où un `link` manuel serait dangereux.
+#
+# Ne se déclenche que sur `main` ET quand une migration change.
+#
+# ⚠️ Activation (une fois, côté GitHub) :
+#   1. Settings → Environments → New environment « production »
+#      → cocher « Required reviewers » et t'ajouter → gate d'approbation manuel
+#        (chaque run attend ton clic avant de toucher la prod).
+#   2. Settings → Secrets and variables → Actions → New repository secret :
+#      - SUPABASE_ACCESS_TOKEN      (Personal Access Token Supabase — supabase.com/dashboard/account/tokens)
+#      - SUPABASE_DB_PASSWORD_PROD  (mot de passe DB du projet phil-prod)
+# Le ref du projet prod n'est pas secret (il est dans l'URL) → en clair ci-dessous.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "supabase/migrations/**"
+  workflow_dispatch: # permet de relancer à la main depuis l'onglet Actions
+
+# Jamais deux migrations prod en parallèle ; on ne coupe pas une migration en cours.
+concurrency:
+  group: migrate-prod
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    # Le gate manuel : le run s'arrête ici tant que tu n'as pas approuvé
+    # (si l'environnement « production » a des « Required reviewers »).
+    environment: production
+    env:
+      SUPABASE_PROJECT_REF: xinbuahgscaydpkcamsl # phil-prod
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD_PROD }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Link au projet phil-prod
+        run: supabase link --project-ref "$SUPABASE_PROJECT_REF"
+
+      - name: Applique les migrations en attente (db push)
+        run: supabase db push

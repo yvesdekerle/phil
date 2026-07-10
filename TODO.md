@@ -989,6 +989,13 @@ Découvert en PHIL-T01 Phase 4a. La table `user_master_key_wraps` n'a que des po
 Non-atomicité assumée : si l'INSERT échoue après le DELETE, l'utilisateur perd son ancien code de secours (qu'il remplaçait de toute façon) mais garde l'accès **appareil** (biométrie) → pas de perte de données ; l'erreur est remontée à l'UI.
 **Test manuel** : Profil → Coffre → « Générer un code de secours » (1er → OK, code affiché), puis « Régénérer un code de secours » (2ᵉ) → doit **réussir** et afficher un nouveau code (avant : échec silencieux). Pas de migration, pas de `verify:rls` à relancer (aucune policy modifiée).
 
+### [x] PHIL-R22 — 🟠 Migrations prod automatisées en CI *(code fait le 2026-07-10 ; activation = secrets + environnement côté Yves)*
+Découvert pendant la mise en place de R11 (séparation dev/prod). Objectif : ne plus jamais faire de `supabase link <prod>` + `db:push` **à la main** (opération dangereuse — un mauvais lien tape la mauvaise base). **Décision (avec Yves) : le dev reste manuel** (`pnpm db:push` local sur phil-dev, boucle rapide) ; **seule la promotion vers la PROD est automatisée** en CI.
+- **Workflow** `.github/workflows/migrate-prod.yml` : déclenché sur `main` **uniquement quand une migration change** (`paths: supabase/migrations/**`) + `workflow_dispatch`. Job `migrate` → `supabase link --project-ref xinbuahgscaydpkcamsl` (phil-prod, ref en clair) puis `supabase db push`, **non-interactif** via `SUPABASE_ACCESS_TOKEN` + `SUPABASE_DB_PASSWORD`. `concurrency` (jamais 2 migrations prod en //, pas d'annulation en cours).
+- **Garde-fou** : `environment: production` → si l'environnement GitHub a des *Required reviewers*, chaque run **attend une approbation manuelle** avant de toucher la prod.
+- **Écart vs option A** (intégration Supabase native / *Branching*) : écartée car sa vraie valeur (bases éphémères par PR) est **payante** ; l'option CI est gratuite, dans le repo, contrôlable, et réutilise les secrets de R17.
+- ⚠️ **Activation côté Yves** (2 secrets + 1 environnement, cf. `yves-todo-list.md`) : `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD_PROD`, et l'environnement `production` avec Required reviewers. Tant que non fait, le workflow attend au gate / échoue sans risque (ne se déclenche que sur push de migration vers `main`). Flux cible : migration écrite → `db:push` local (dev) → merge `main` → CI migre la prod après approbation.
+
 ---
 
 ## Catégorie S — Évolutions produit (demandées pendant l'audit, à traiter après)
