@@ -1,0 +1,127 @@
+{
+  "_note": "Jeu de données FICTIF et cohérent pour peupler les maquettes de la refonte design de Phil. Version lisible : donnees-exemple-maurice.md",
+  "trip": {
+    "name": "Maurice 2026",
+    "destination": "Île Maurice",
+    "start_date": "2026-11-05",
+    "end_date": "2026-11-21",
+    "timezone": "Indian/Mauritius",
+    "currency": "EUR",
+    "currency_secondary": "MUR",
+    "status": "upcoming"
+  },
+  "participants": [
+    { "name": "Yves", "role": "OWNER" },
+    { "name": "Amélie", "role": "EDITOR" },
+    { "name": "Karim", "role": "EDITOR" },
+    { "name": "Léa", "role": "EDITOR" },
+    { "name": "Sarah", "role": "EDITOR" },
+    { "name": "Nadia", "role": "EDITOR" },
+    { "name": "Thomas", "role": "VIEWER" },
+    { "name": "Julien", "role": "VIEWER" },
+    { "name": "Marc", "role": "VIEWER" }
+  ],
+  "events": [
+    { "type": "TRANSPORT", "title": "Vol Paris → Maurice", "starts_at_local": "2026-11-05T22:10", "ends_at_local": "2026-11-06T12:35", "from": "Paris CDG", "to": "Maurice SSR", "carrier": "Air Mauritius MK015", "booking_ref": "T7K2QP" },
+    { "type": "TRANSPORT", "title": "Transfert aéroport → villa", "starts_at_local": "2026-11-06T13:15", "ends_at_local": "2026-11-06T14:00" },
+    { "type": "LODGING", "title": "Villa Tamarin", "check_in_local": "2026-11-06T15:00", "check_out_local": "2026-11-20T11:00", "guests": 9, "platform": "booking", "booking_ref": "BK-88213" },
+    { "type": "ACTIVITY", "title": "Plongée au Morne", "starts_at_local": "2026-11-08T09:00", "ends_at_local": "2026-11-08T12:00", "location": "Le Morne", "cost": 60, "cost_per": "person" },
+    { "type": "ACTIVITY", "title": "Marché de Port-Louis", "starts_at_local": "2026-11-10T10:00", "ends_at_local": "2026-11-10T13:00", "location": "Port-Louis" },
+    { "type": "ACTIVITY", "title": "Catamaran île aux Cerfs", "starts_at_local": "2026-11-12T08:30", "ends_at_local": "2026-11-12T17:00", "location": "Trou d'Eau Douce", "cost": 450, "cost_per": "group" },
+    { "type": "ACTIVITY", "title": "Rando Black River Gorges", "starts_at_local": "2026-11-15T08:00", "ends_at_local": "2026-11-15T14:00", "location": "Black River" },
+    { "type": "ACTIVITY", "title": "Dégustation rhum Chamarel", "starts_at_local": "2026-11-17T15:00", "ends_at_local": "2026-11-17T17:00", "location": "Chamarel" },
+    { "type": "TRANSPORT", "title": "Vol Maurice → Paris", "starts_at_local": "2026-11-20T21:40", "ends_at_local": "2026-11-21T06:15", "from": "Maurice SSR", "to": "Paris CDG", "carrier": "Air Mauritius MK014", "booking_ref": "T7K2QP" }
+  ],
+  "map_stops": [
+    { "order": 1, "label": "Aéroport SSR", "lat": -20.430, "lng": 57.683, "icon": "plane" },
+    { "order": 2, "label": "Villa Tamarin", "lat": -20.325, "lng": 57.371, "icon": "house" },
+    { "order": 3, "label": "Le Morne", "lat": -20.456, "lng": 57.311, "icon": "diving" },
+    { "order": 4, "label": "Port-Louis", "lat": -20.161, "lng": 57.498, "icon": "market" },
+    { "order": 5, "label": "Île aux Cerfs", "lat": -20.273, "lng": 57.803, "icon": "boat" },
+    { "order": 6, "label": "Black River Gorges", "lat": -20.418, "lng": 57.443, "icon": "hike" },
+    { "order": 7, "label": "Chamarel", "lat": -20.446, "lng": 57.376, "icon": "drink" }
+  ],
+  "places_poi": [
+    { "name": "Super U Tamarin", "category": "SUPERMARKET", "lat": -20.331, "lng": 57.376, "note": "ouvert 8h-20h" },
+    { "name": "Pharmacie Flic en Flac", "category": "PHARMACY", "lat": -20.274, "lng": 57.365 }
+  ],
+  "budget": {
+    "share_per_person": 556.67,
+    "expenses": [
+      { "label": "Acompte villa", "paid_by": "Yves", "amount": 3600, "split": 9 },
+      { "label": "Location voiture (2 sem.)", "paid_by": "Karim", "amount": 720, "split": 9 },
+      { "label": "Courses (1ère semaine)", "paid_by": "Amélie", "amount": 240, "split": 9 },
+      { "label": "Catamaran île aux Cerfs", "paid_by": "Léa", "amount": 450, "split": 9 }
+    ],
+    "balances": [
+      { "name": "Yves", "paid": 3600, "net": 3043.33 },
+      { "name": "Karim", "paid": 720, "net": 163.33 },
+      { "name": "Léa", "paid": 450, "net": -106.67 },
+      { "name": "Amélie", "paid": 240, "net": -316.67 },
+      { "name": "Sarah", "paid": 0, "net": -556.67 },
+      { "name": "Nadia", "paid": 0, "net": -556.67 },
+      { "name": "Thomas", "paid": 0, "net": -556.67 },
+      { "name": "Julien", "paid": 0, "net": -556.67 },
+      { "name": "Marc", "paid": 0, "net": -556.67 }
+    ]
+  },
+  "ideas": [
+    { "title": "Cascade de Chamarel", "location": "Chamarel", "cost": 0, "votes": { "super": 6, "like": 2, "no": 0 }, "status": "MATCH" },
+    { "title": "Kitesurf à Le Morne", "location": "Le Morne", "cost": 80, "votes": { "super": 3, "like": 2, "no": 3 }, "status": "POOL" },
+    { "title": "Observation des dauphins", "location": "Tamarin", "cost": 45, "votes": { "super": 5, "like": 3, "no": 0 }, "status": "POOL" },
+    { "title": "Jardin de Pamplemousses", "location": "Pamplemousses", "cost": 10, "votes": { "super": 2, "like": 4, "no": 1 }, "status": "POOL" }
+  ],
+  "lodging_candidates": [
+    { "title": "Villa Tamarin", "price": "3600 € / 14 nuits", "check_in": "2026-11-06", "check_out": "2026-11-20", "score": 9, "status": "CHOSEN" },
+    { "title": "Résidence Flic en Flac", "price": "4100 €", "check_in": "2026-11-06", "check_out": "2026-11-20", "score": 2, "status": "REJECTED" },
+    { "title": "Hôtel Belle Mare (demi-pension)", "price": "6800 €", "check_in": "2026-11-06", "check_out": "2026-11-20", "score": -3, "status": "REJECTED" }
+  ],
+  "checklist": [
+    { "section": "Documents", "title": "Passeport", "done": true },
+    { "section": "Documents", "title": "e-billet d'avion", "done": true },
+    { "section": "Documents", "title": "Attestation d'assurance", "done": false },
+    { "section": "Documents", "title": "Permis international", "done": false },
+    { "section": "Vêtements", "title": "Maillots", "quantity": "2", "done": false },
+    { "section": "Vêtements", "title": "Crème solaire SPF50", "done": true },
+    { "section": "Santé", "title": "Anti-moustique", "done": false },
+    { "section": "Santé", "title": "Trousse à pharmacie", "done": true },
+    { "section": "Divers", "title": "Adaptateur type G (UK)", "done": false },
+    { "section": "Divers", "title": "Masque + tuba", "done": false }
+  ],
+  "meals": [
+    { "day": "2026-11-06", "slot": "dinner", "dish": "BBQ d'arrivée", "cook": "Karim" },
+    { "day": "2026-11-08", "slot": "dinner", "dish": "Curry mauricien", "cook": "Léa" },
+    { "day": "2026-11-11", "slot": "lunch", "dish": "Salades + fruits", "cook": "Amélie" }
+  ],
+  "shopping_list": [
+    { "item": "Riz (5 kg)", "checked": false },
+    { "item": "Poulet", "checked": false },
+    { "item": "Légumes", "checked": true },
+    { "item": "Rhum arrangé", "checked": false },
+    { "item": "Eau (pack ×6)", "checked": true },
+    { "item": "Épices curry", "checked": false },
+    { "item": "Charbon BBQ", "checked": false }
+  ],
+  "poll": {
+    "question": "Quelle activité le mercredi 12 ?",
+    "closes_at": "2026-11-11",
+    "allow_multiple": false,
+    "options": [
+      { "label": "Catamaran île aux Cerfs", "voters": ["Yves", "Amélie", "Karim", "Léa", "Sarah", "Nadia"] },
+      { "label": "Rando Black River", "voters": ["Thomas", "Julien"] },
+      { "label": "Journée plage farniente", "voters": ["Marc"] }
+    ]
+  },
+  "photos": [
+    { "caption": "Coucher de soleil au Morne", "author": "Léa", "lat": -20.456, "lng": 57.311 },
+    { "caption": "Plage de Flic en Flac", "author": "Sarah", "lat": -20.274, "lng": 57.365 },
+    { "caption": "Marché de Port-Louis", "author": "Amélie", "lat": -20.161, "lng": 57.498 },
+    { "caption": "Le catamaran", "author": "Yves", "lat": null, "lng": null }
+  ],
+  "vault_documents": [
+    { "label": "Passeport", "category": "passport", "expires_at": "2029-03-14", "number_masked": "19FG4••••", "shared": "private" },
+    { "label": "Carte d'identité", "category": "id_card", "expires_at": "2031-08-01", "number_masked": "••••", "shared": "private" },
+    { "label": "Permis de conduire", "category": "driving_license", "expires_at": "2033-12-20", "number_masked": "••••", "shared": "trip:Maurice 2026 (Karim seul)" },
+    { "label": "Attestation assurance voyage", "category": "insurance", "expires_at": "2026-11-30", "shared": "trip:Maurice 2026" }
+  ]
+}
