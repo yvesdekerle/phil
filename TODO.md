@@ -996,6 +996,13 @@ Découvert pendant la mise en place de R11 (séparation dev/prod). Objectif : ne
 - **Écart vs option A** (intégration Supabase native / *Branching*) : écartée car sa vraie valeur (bases éphémères par PR) est **payante** ; l'option CI est gratuite, dans le repo, contrôlable, et réutilise les secrets de R17.
 - ⚠️ **Activation côté Yves** (2 secrets + 1 environnement, cf. `yves-todo-list.md`) : `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD_PROD`, et l'environnement `production` avec Required reviewers. Tant que non fait, le workflow attend au gate / échoue sans risque (ne se déclenche que sur push de migration vers `main`). Flux cible : migration écrite → `db:push` local (dev) → merge `main` → CI migre la prod après approbation.
 
+### [ ] PHIL-R23 — 🟡 Migrer les clés API Supabase legacy → nouvelles (publishable/secret)
+Découvert pendant R11. Aujourd'hui **prod et dev utilisent les clés legacy** (JWT `anon` / `service_role`). Supabase **déprécie** ces clés au profit des nouvelles (`sb_publishable_…` / `sb_secret_…` : rotation, scoping, plusieurs clés). À migrer **volontairement, un jour**, quand la séparation dev/prod (R11) est stable — **pas en même temps** que le split (une seule variable à la fois).
+- **Migrer prod ET dev ensemble** pour rester cohérents (un `.env`/Vercel par projet).
+- **Vérifs préalables** : `@supabase/ssr`/`supabase-js` v2 acceptent bien les nouvelles clés ; **confirmer que la clé `secret` contourne la RLS** comme `service_role` (indispensable pour `lib/supabase/admin.ts` + `verify:rls`).
+- **Portée** : valeurs des env vars dans Vercel (prod → phil-prod, preview/dev → phil-dev) + `.env.local` + `.env.example`. Décider si on **garde les noms** `NEXT_PUBLIC_SUPABASE_ANON_KEY` / `SUPABASE_SERVICE_ROLE_KEY` (valeurs changées, zéro code) ou si on **renomme** en `…PUBLISHABLE_KEY` / `…SECRET_KEY` (plus clair sémantiquement, mais touche `lib/supabase/*` + CLAUDE.md). Tester sur **dev d'abord** (login, RLS, admin, `verify:rls`), puis prod, puis **désactiver les clés legacy**.
+- Non urgent : les clés legacy fonctionnent encore. À faire avant qu'elles soient réellement coupées par Supabase.
+
 ---
 
 ## Catégorie S — Évolutions produit (demandées pendant l'audit, à traiter après)
