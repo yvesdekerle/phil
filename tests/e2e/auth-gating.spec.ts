@@ -12,8 +12,10 @@ test.describe("visiteur non connecté", () => {
 
   test("la page de connexion invite à embarquer avec Google", async ({ page }) => {
     await page.goto("/login");
-    await expect(page.getByText("Bienvenue à bord")).toBeVisible();
-    await expect(page.getByRole("button", { name: /Continuer avec Google/i })).toBeVisible();
+    // Indépendant de la langue (app anglais-first depuis R19) : le bouton
+    // d'embarquement contient toujours « Google » (FR « Continuer avec Google »,
+    // EN « Continue with Google »).
+    await expect(page.getByRole("button", { name: /Google/i })).toBeVisible();
   });
 
   test("les voyages sont protégés (redirection login)", async ({ page }) => {
@@ -40,6 +42,9 @@ test.describe("visiteur non connecté", () => {
 
   test("la politique de confidentialité est publique", async ({ page }) => {
     await page.goto("/privacy");
-    await expect(page.getByText("Politique de confidentialité")).toBeVisible();
+    // Publique = pas de redirection vers /login. On vérifie qu'on reste sur
+    // /privacy et qu'un titre s'affiche (texte localisé, non testé mot pour mot).
+    await expect(page).toHaveURL(/\/privacy/);
+    await expect(page.getByRole("heading").first()).toBeVisible();
   });
 });

@@ -12,13 +12,18 @@
  * et avant tout déploiement d'une évolution du modèle documents/partage.
  */
 
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
-for (const line of readFileSync(join(process.cwd(), ".env.local"), "utf8").split("\n")) {
-  const i = line.indexOf("=");
-  if (i > 0 && !process.env[line.slice(0, i)]) {
-    process.env[line.slice(0, i)] = line.slice(i + 1);
+// En local, `.env.local` fournit les variables ; en CI elles viennent des
+// secrets GitHub (déjà dans process.env). Le fichier est donc optionnel.
+const envPath = join(process.cwd(), ".env.local");
+if (existsSync(envPath)) {
+  for (const line of readFileSync(envPath, "utf8").split("\n")) {
+    const i = line.indexOf("=");
+    if (i > 0 && !process.env[line.slice(0, i)]) {
+      process.env[line.slice(0, i)] = line.slice(i + 1);
+    }
   }
 }
 
