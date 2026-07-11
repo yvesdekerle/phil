@@ -30,7 +30,7 @@ export const fr = {
     checklist: "Valise",
     miam: "Miam",
     photos: "Photos",
-    budget: "Bourse",
+    budget: "Dépenses",
     participants: "Équipage",
     activities: "À swiper",
     guide: "Guide",

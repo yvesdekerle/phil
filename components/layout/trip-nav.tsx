@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 
 /**
  * Navigation du voyage « Lagune vive » (prototypes + déclinaison L2d) :
- * `TripTabBar` (mobile) — barre basse Programme · Carte · Bourse · Plus,
+ * `TripTabBar` (mobile) — barre basse Programme · Carte · Dépenses · Plus,
  * soulignement citron sous le label, point berry sans compteur ;
  * `TripSidebar` (desktop ≥ 1024) — **sidebar sombre 220 pleine hauteur** :
  * marque Phil (clic → Mes voyages), carte du voyage courant, rubriques à plat
@@ -25,16 +25,19 @@ const TAB_BAR = [
   { segment: "budget", key: "budget" },
 ] as const;
 
-/** Sidebar desktop — 3 blocs à plat (canon L2d). */
+/**
+ * Sidebar desktop — 3 blocs à plat (canon L2d, réordonnés retour v2 PHIL-V06a) :
+ * bloc 1 = Programme · Carte · Documents · Idées, les Dépenses ouvrent le bloc 2.
+ */
 const SIDEBAR_BLOCKS: { segment: string; key: string }[][] = [
   [
     { segment: "", key: "calendar" },
     { segment: "map", key: "map" },
-    { segment: "budget", key: "budget" },
     { segment: "documents", key: "documents" },
+    { segment: "ideas", key: "ideas" },
   ],
   [
-    { segment: "ideas", key: "ideas" },
+    { segment: "budget", key: "budget" },
     { segment: "polls", key: "polls" },
     { segment: "lodging", key: "lodging" },
     { segment: "miam", key: "miam" },
@@ -83,7 +86,7 @@ function pendingDot(key: string, pending?: Pending): boolean {
   return false;
 }
 
-/** B9 — barre d'onglets basse (mobile) : Programme · Carte · Bourse · Plus. */
+/** B9 — barre d'onglets basse (mobile) : Programme · Carte · Dépenses · Plus. */
 export function TripTabBar({ tripId, pending }: { tripId: string; pending?: Pending }) {
   const t = useT();
   const { base, head, activeSegment } = useTripNav(tripId);

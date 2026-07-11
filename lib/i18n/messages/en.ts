@@ -31,7 +31,7 @@ export const en = {
     checklist: "Packing",
     miam: "Yummy",
     photos: "Photos",
-    budget: "Budget",
+    budget: "Expenses",
     participants: "Crew",
     activities: "Swipe",
     guide: "Guide",

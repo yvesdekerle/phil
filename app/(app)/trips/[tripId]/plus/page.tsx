@@ -16,7 +16,7 @@ import { getT } from "@/lib/i18n/server";
 
 /**
  * Grille « Plus » (prototype : Plus → Idées → vote) — tout ce qui n'est pas
- * dans la barre d'onglets mobile (Programme · Carte · Bourse · Plus), Idées
+ * dans la barre d'onglets mobile (Programme · Carte · Dépenses · Plus), Idées
  * en tête. Sur desktop, la sidebar liste déjà ces entrées à plat ; cette page
  * reste accessible mais sert surtout le mobile.
  */

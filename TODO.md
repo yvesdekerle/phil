@@ -1193,13 +1193,24 @@ Remplacer intégralement le design v1 « Phileas » (bordeaux/parchemin, Bodoni 
 Le handoff (§5 Idées, B12) remplace le vote simple par un **vote pondéré top-3** : chaque participant distribue 3/2/1 points via des tuiles ①②③ (rang posé = `citron`), scores en points, détail des votants par option. Nécessite une évolution du modèle (`idea_votes` : colonne rang ou table dédiée), des actions serveur et de la RLS → hors périmètre de la refonte présentation (PHIL-V01). À articuler avec le verdict Match U07 (YES/NO/MAYBE/SUPER) : le pondéré classe, le Match filtre.
 
 ### [ ] PHIL-V03 — Logements : vote pondéré top-3 en points
-Même mécanique que V02 appliquée aux hébergements candidats (L01/L02) : attribuer ses points (écran de notation), score affiché en `29 PTS` mono sur la carte de chaque option (maquettes « Logements »). Évolution modèle + actions + RLS → hors périmètre refonte.
+Même mécanique que V02 appliquée aux hébergements candidats (L01/L02) : attribuer ses points (écran de notation), score affiché en `29 PTS` mono sur la carte de chaque option (maquettes « Logements »). Évolution modèle + actions + RLS → hors périmètre refonte. **Retour Yves (Retour_Phil_1.pdf, 2026-07-11)** : « le choix [logement] n'est pas très UX, à creuser » — repenser le parcours de sélection en même temps que ce ticket.
 
 ### [ ] PHIL-V04 — Centre de notifications in-app (cloche header + page + non-lus)
 Le design place une **cloche dans le header** (point `berry` 8 px cerclé, sans compteur) ouvrant une page/panneau de notifications : non-lu cerclé + fond `berry-wash`, actions inline (« Reçu ✓ », « Planifier »), désktop = panneau ancré sous la cloche. Nécessite un modèle de notifications persistées (table + RLS + producteurs d'événements) — aujourd'hui seules existent les pastilles « à voter » et les push web. Le shell V01c réserve l'emplacement de la cloche.
 
 ### [ ] PHIL-V05 — Page Archive (contenus tranchés)
 Décision de nav du handoff (§4) : les contenus non retenus (vieux sondages clos, idées écartées…) partent dans une page **Archive** au lieu d'encombrer les pages vives. À spécifier (quelles entités, quel accès) puis implémenter — hors périmètre refonte.
+
+### [~] PHIL-V06 — Épopée : retours desktop v2 (Retour_Phil_1.pdf, 2026-07-11)
+Premier passage d'Yves sur le redesign en desktop (`tmp/design_phil_v2/retour_phli_v2/Retour_Phil_1.pdf`). Ajustements de présentation uniquement, un commit par sous-ticket.
+- [x] V06a — Nav voyage : sidebar bloc 1 = **Programme · Carte · Documents · Idées** ; « Bourse » renommée **« Dépenses »** (fr/en/es : Dépenses/Expenses/Gastos) et déplacée en tête du bloc 2. La barre mobile garde Programme · Carte · Dépenses · Plus. *(fait le 2026-07-11)*
+- [ ] V06b — Mes voyages : la carte sombre « Ton coffre » disparaît en desktop (« que fait ton coffre ici ? » — le header a déjà le lien Coffre) ; conservée en mobile.
+- [ ] V06c — Timeline desktop « vraiment moins jolie qu'avant, jours trop courts » : retour au **Gantt horizontal scrollable** d'avant-refonte (155 px/jour, colonne des noms fixe 220 px, une ligne par événement, en-tête de jours figé) en livrée Lagune vive (colonne d'aujourd'hui citron, vols encre sombre mono, logements lavis lagune). Timeline et Carte s'élargissent à 104 rem (le gabarit 1200 px les étouffait).
+- [ ] V06d — Carte : vue entière par défaut (re-fit des bounds après le premier layout — l'île était coupée) + **fix des marqueurs éparpillés** au clic sur un lieu ou en vue jour (course d'animations : le re-render refaisait fitBounds animé pendant le setView du focus ; effets séparés + fit sans animation + liste des marqueurs mémoïsée).
+- [ ] V06e — Documents : afficher **l'événement rattaché** sur chaque ligne (jointure `event_documents`) ; « ajouté par » réduit au prénom.
+- [ ] V06f — Miam : **Repas avant Courses** (ordre des onglets + vue par défaut).
+- [ ] V06g — Valise : l'item coché passe en **lavis lagune** (fond `lagoon-wash`, texte `lagoon-ink`) — plus de texte barré (« barrer fait penser "je prends plus" »).
+- [ ] V06h — À spécifier avec Yves : le bloc « Avant le départ » n'a pas sa place seule sur le Programme (« sûrement à mettre ailleurs ») ; idée d'une vraie **checklist pré-départ** (« vérifier que tout est ok avant le départ »). À articuler avec l'onglet « Avant le départ » qui existe déjà dans la Valise. Rien de codé tant que le où/quoi n'est pas tranché.
 
 ---
 

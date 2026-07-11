@@ -33,7 +33,7 @@ export const es: PartialMessages = {
     checklist: "Maleta",
     miam: "Ñam",
     photos: "Fotos",
-    budget: "Presupuesto",
+    budget: "Gastos",
     participants: "Tripulación",
     activities: "Descubrir",
     guide: "Guía",
