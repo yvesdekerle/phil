@@ -142,7 +142,7 @@ export function ImportClient({
           hidden
           onChange={(e) => setFiles(Array.from(e.target.files ?? []).slice(0, 5))}
         />
-        {error ? <p className="text-sm text-lagoon-ink">{error}</p> : null}
+        {error ? <p className="text-caption text-berry-ink">{error}</p> : null}
         <Button
           type="button"
           disabled={files.length === 0 || phase === "analyzing"}
@@ -298,7 +298,7 @@ export function ImportClient({
         <Input id="notes" name="notes" defaultValue={e?.notes ?? ""} maxLength={2000} />
       </div>
 
-      {error ? <p className="text-sm text-lagoon-ink">{error}</p> : null}
+      {error ? <p className="text-caption text-berry-ink">{error}</p> : null}
       <div className="flex items-center gap-3">
         <Button type="submit" disabled={phase === "saving"}>
           {phase === "saving" ? t("events.import.saving") : t("events.import.create")}

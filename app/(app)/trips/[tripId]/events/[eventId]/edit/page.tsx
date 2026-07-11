@@ -42,7 +42,7 @@ export default async function EditEventPage({
       >
         {t("events.backToEvent")}
       </Link>
-      <h1 className="text-center font-sans text-2xl text-ink">{t("events.edit.title")}</h1>
+      <h1 className="text-center text-title text-ink">{t("events.edit.title")}</h1>
       <p className="text-center text-xs text-slate">{t("events.edit.hint")}</p>
       <Card>
         <CardContent>

@@ -93,13 +93,13 @@ export function EventParticipants({
               </span>
             )}
             {option.name}
-            <span className={cn("text-xs", option.isIn ? "text-lagoon-ink" : "text-line")}>
+            <span className={cn("text-caption", option.isIn ? "text-lagoon-ink" : "text-mist")}>
               {option.isIn ? "✓" : "+"}
             </span>
           </button>
         ))}
       </div>
-      {error ? <p className="text-xs text-lagoon-ink">{error}</p> : null}
+      {error ? <p className="text-caption text-berry-ink">{error}</p> : null}
     </section>
   );
 }

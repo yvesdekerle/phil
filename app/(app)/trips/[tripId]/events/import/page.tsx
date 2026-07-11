@@ -50,7 +50,7 @@ export default async function ImportReservationPage({
         {t("events.import.backManual")}
       </Link>
       <div>
-        <h1 className="font-sans text-2xl text-ink">{t("events.import.title")}</h1>
+        <h1 className="text-title text-ink">{t("events.import.title")}</h1>
         <p className="mt-1 text-sm text-slate">{t("events.import.intro")}</p>
       </div>
       {(drafts ?? []).length > 0 && !activeDraft ? (

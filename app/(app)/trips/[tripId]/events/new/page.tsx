@@ -76,7 +76,7 @@ export default async function NewEventPage({
       >
         {t("calendar.backToCalendar")}
       </Link>
-      <h1 className="mt-3 mb-2 text-center font-sans text-3xl text-ink">{t("events.new.title")}</h1>
+      <h1 className="mt-3 mb-2 text-center text-title text-ink">{t("events.new.title")}</h1>
       <div className="mb-6 flex flex-col items-center gap-2">
         <p className="text-center text-sm text-slate">{t("events.new.importPrompt")}</p>
         <Link

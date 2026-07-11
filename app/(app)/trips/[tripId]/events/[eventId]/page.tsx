@@ -136,8 +136,15 @@ export default async function EventDetailPage({
       <div className="flex items-start gap-4">
         <EventTypeIcon type={event.type} />
         <div className="min-w-0 flex-1">
-          <h1 className="font-sans text-2xl text-ink">{event.title}</h1>
-          <p className="mt-0.5 text-sm text-slate">{t(`events.type.${event.type}`)}</p>
+          <h1 className="text-title text-ink">{event.title}</h1>
+          <p className="mt-0.5 flex flex-wrap items-center gap-2 text-caption text-slate">
+            {t(`events.type.${event.type}`)}
+            {event.type === "TRANSPORT" ? (
+              <span className="rounded-md bg-ink-deep px-2 py-0.5 font-mono text-label text-white tabular-nums">
+                ✈ {formatInTimezone(event.starts_at, event.timezone, "HH:mm")}
+              </span>
+            ) : null}
+          </p>
         </div>
       </div>
 

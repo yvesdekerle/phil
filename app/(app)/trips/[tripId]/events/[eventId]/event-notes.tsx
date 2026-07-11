@@ -101,7 +101,7 @@ export function EventNotes({
         </Button>
       </form>
       {state.status === "error" ? (
-        <p className="mt-1 text-xs text-lagoon-ink">{state.message}</p>
+        <p className="mt-1 text-caption text-berry-ink">{state.message}</p>
       ) : null}
     </section>
   );

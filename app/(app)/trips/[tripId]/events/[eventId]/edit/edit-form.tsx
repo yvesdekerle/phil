@@ -106,7 +106,7 @@ export function EditEventForm({
           {pending ? t("events.edit.saving") : t("events.edit.save")}
         </Button>
         {state.status === "error" ? (
-          <p className="text-sm text-lagoon-ink">{state.message}</p>
+          <p className="text-caption text-berry-ink">{state.message}</p>
         ) : null}
       </div>
     </form>

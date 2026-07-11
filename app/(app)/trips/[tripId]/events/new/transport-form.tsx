@@ -157,7 +157,7 @@ export function TransportForm({
           {pending ? t("events.transport.submitting") : t("events.transport.submit")}
         </Button>
         {state.status === "error" ? (
-          <p className="text-sm text-lagoon-ink">{state.message}</p>
+          <p className="text-caption text-berry-ink">{state.message}</p>
         ) : null}
       </div>
     </form>
