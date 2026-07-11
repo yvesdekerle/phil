@@ -91,7 +91,7 @@ export function IdeaMatchDeck({ tripId, ideas }: { tripId: string; ideas: SwipeI
 
   if (!top && !exit) {
     return (
-      <p className="rounded-lg border border-dashed border-line bg-card/60 px-4 py-10 text-center text-sm text-slate">
+      <p className="rounded-lg border border-dashed border-line bg-card/60 px-4 py-10 text-center text-body text-slate">
         {t("ideas.match.deckEmpty")}
       </p>
     );
@@ -154,12 +154,12 @@ export function IdeaMatchDeck({ tripId, ideas }: { tripId: string; ideas: SwipeI
         type="button"
         onClick={undo}
         disabled={history.length === 0}
-        className="flex items-center gap-1.5 text-xs text-slate underline-offset-4 hover:text-ink disabled:no-underline disabled:opacity-40"
+        className="flex items-center gap-1.5 text-caption text-slate underline-offset-4 hover:text-ink disabled:no-underline disabled:opacity-40"
       >
         <RotateCcw className="size-3.5" aria-hidden="true" />
         {t("ideas.match.undo")}
       </button>
-      <p className="text-center text-xs text-slate">{t("ideas.match.hint")}</p>
+      <p className="text-center text-caption text-slate">{t("ideas.match.hint")}</p>
     </div>
   );
 }
@@ -236,16 +236,18 @@ function IdeaCardFace({ idea, behind }: { idea: SwipeIdea; behind?: boolean }) {
     >
       <h3 className="font-sans text-2xl text-ink">{idea.title}</h3>
       {idea.locationName ? (
-        <p className="mt-0.5 text-sm text-slate">📍 {idea.locationName}</p>
+        <p className="mt-0.5 text-body text-slate">📍 {idea.locationName}</p>
       ) : null}
       {idea.description ? (
-        <p className="mt-2 line-clamp-3 text-sm text-slate">{idea.description}</p>
+        <p className="mt-2 line-clamp-3 text-body text-slate">{idea.description}</p>
       ) : null}
-      {meta.length > 0 ? <p className="mt-2 text-xs text-slate">{meta.join("  ·  ")}</p> : null}
+      {meta.length > 0 ? (
+        <p className="mt-2 text-caption text-slate">{meta.join("  ·  ")}</p>
+      ) : null}
       {idea.tags.length > 0 ? (
         <div className="mt-3 flex flex-wrap gap-1.5">
           {idea.tags.map((tag) => (
-            <span key={tag} className="rounded-full bg-citron/15 px-2 py-0.5 text-xs text-mist">
+            <span key={tag} className="rounded-md bg-wash px-2 py-0.5 text-caption text-slate">
               #{tag}
             </span>
           ))}

@@ -1,4 +1,4 @@
-import { Sparkles } from "lucide-react";
+import { ChevronRight, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { IdeaCard } from "@/components/ideas/idea-card";
@@ -240,24 +240,25 @@ export default async function TripIdeasPage({
       {/* PHIL-U07 : lance le swipe façon Tinder/Bumble sur les idées du voyage. */}
       <Link
         href={`/trips/${tripId}/ideas/match`}
-        className="group flex items-center justify-between gap-3 rounded-xl border border-lagoon-ink/30 bg-gradient-to-br from-lagoon-ink/10 to-mist/10 px-4 py-3.5 transition-colors hover:border-lagoon-ink/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mist"
+        className="flex items-center gap-3.5 rounded-lg bg-gradient-to-br from-lagoon-ink to-ink p-4 shadow-float transition-all outline-none hover:-translate-y-px focus-visible:ring-2 focus-visible:ring-citron focus-visible:ring-offset-2 focus-visible:ring-offset-sand"
       >
-        <span className="flex items-center gap-3">
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-lagoon-ink text-card">
-            <Sparkles className="size-5" aria-hidden="true" />
+        <span
+          aria-hidden="true"
+          className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-white/15 text-white"
+        >
+          <Sparkles className="size-5" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-subhead font-extrabold text-white">
+            {t("ideas.match.cta")}
           </span>
-          <span className="flex flex-col">
-            <span className="font-sans text-lg text-ink">{t("ideas.match.cta")}</span>
-            <span className="text-xs text-slate">
-              {toSwipeCount > 0
-                ? t("ideas.match.ctaCount").replace("{n}", String(toSwipeCount))
-                : t("ideas.match.ctaDone")}
-            </span>
+          <span className="mt-0.5 block text-caption text-lagoon-soft">
+            {toSwipeCount > 0
+              ? t("ideas.match.ctaCount").replace("{n}", String(toSwipeCount))
+              : t("ideas.match.ctaDone")}
           </span>
         </span>
-        <span className="shrink-0 font-sans text-2xl text-lagoon-ink transition-transform group-hover:translate-x-0.5">
-          →
-        </span>
+        <ChevronRight aria-hidden="true" className="size-5 shrink-0 text-lagoon-soft" />
       </Link>
 
       <SearchForm
@@ -271,10 +272,10 @@ export default async function TripIdeasPage({
         <Link
           href={filterHref(null, tag ?? null)}
           className={cn(
-            "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+            "inline-flex h-8 items-center rounded-full border px-3 text-ui transition-colors outline-none focus-visible:ring-2 focus-visible:ring-citron focus-visible:ring-offset-2 focus-visible:ring-offset-sand",
             sortBy === "votes"
-              ? "border-lagoon-ink bg-lagoon-ink text-card"
-              : "border-line bg-card text-slate hover:text-ink",
+              ? "border-ink bg-ink text-white"
+              : "border-line bg-card text-slate hover:bg-wash hover:text-ink",
           )}
         >
           {t("ideas.sortVotes")}
@@ -282,10 +283,10 @@ export default async function TripIdeasPage({
         <Link
           href={filterHref("recent", tag ?? null)}
           className={cn(
-            "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+            "inline-flex h-8 items-center rounded-full border px-3 text-ui transition-colors outline-none focus-visible:ring-2 focus-visible:ring-citron focus-visible:ring-offset-2 focus-visible:ring-offset-sand",
             sortBy === "recent"
-              ? "border-lagoon-ink bg-lagoon-ink text-card"
-              : "border-line bg-card text-slate hover:text-ink",
+              ? "border-ink bg-ink text-white"
+              : "border-line bg-card text-slate hover:bg-wash hover:text-ink",
           )}
         >
           {t("ideas.sortRecent")}
@@ -296,10 +297,10 @@ export default async function TripIdeasPage({
             key={t}
             href={filterHref(sortBy === "recent" ? "recent" : null, tag === t ? null : t)}
             className={cn(
-              "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+              "inline-flex h-8 items-center rounded-full border px-3 text-ui transition-colors outline-none focus-visible:ring-2 focus-visible:ring-citron focus-visible:ring-offset-2 focus-visible:ring-offset-sand",
               tag === t
                 ? "border-line bg-citron text-card"
-                : "border-line bg-card text-slate hover:text-ink",
+                : "border-line bg-card text-slate hover:bg-wash hover:text-ink",
             )}
           >
             #{t}
@@ -309,10 +310,10 @@ export default async function TripIdeasPage({
         <Link
           href={filterHref(sortBy === "recent" ? "recent" : null, tag ?? null, !showDismissed)}
           className={cn(
-            "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+            "inline-flex h-8 items-center rounded-full border px-3 text-ui transition-colors outline-none focus-visible:ring-2 focus-visible:ring-citron focus-visible:ring-offset-2 focus-visible:ring-offset-sand",
             showDismissed
               ? "border-ink bg-ink text-card"
-              : "border-line bg-card text-slate hover:text-ink",
+              : "border-line bg-card text-slate hover:bg-wash hover:text-ink",
           )}
         >
           {showDismissed ? t("ideas.backToIdeas") : t("ideas.seeDismissed")}
