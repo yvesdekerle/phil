@@ -90,9 +90,10 @@ export default async function TripsPage() {
             </div>
           ) : null}
 
+          {/* Accès Coffre mobile seulement (V06b) — le header desktop a déjà le lien. */}
           <Link
             href="/vault"
-            className="mt-4 flex items-center gap-3.5 rounded-lg bg-ink p-4 transition-all outline-none hover:-translate-y-px hover:shadow-float focus-visible:ring-2 focus-visible:ring-citron focus-visible:ring-offset-2 focus-visible:ring-offset-sand"
+            className="mt-4 flex items-center gap-3.5 rounded-lg bg-ink p-4 transition-all outline-none hover:-translate-y-px hover:shadow-float focus-visible:ring-2 focus-visible:ring-citron focus-visible:ring-offset-2 focus-visible:ring-offset-sand lg:hidden"
           >
             <span
               aria-hidden="true"
