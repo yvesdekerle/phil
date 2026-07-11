@@ -2,7 +2,7 @@ import { ChevronRight, Compass, Lock } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ImportTripButton } from "@/components/trips/import-trip-button";
-import { TripCard, TripPastRow } from "@/components/trips/trip-card";
+import { TripCard } from "@/components/trips/trip-card";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
@@ -117,11 +117,14 @@ export default async function TripsPage() {
               <p className="mt-8 mb-2.5 font-mono text-label text-mist uppercase">
                 {t("trips.past")}
               </p>
-              <div className="flex flex-col gap-2.5">
+              {/* V07c : même format que les actifs, en grisé — la rangée pleine
+                  largeur détonnait. */}
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                 {past.map((trip) => (
-                  <TripPastRow
+                  <TripCard
                     key={trip.id}
                     trip={trip}
+                    past
                     participantCount={counts.get(trip.id) ?? 1}
                     pendingCount={pending.get(trip.id)?.total ?? 0}
                   />
