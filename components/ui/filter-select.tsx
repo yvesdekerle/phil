@@ -33,7 +33,7 @@ export function FilterSelect({
           if (href) startTransition(() => router.push(href));
         }}
         aria-label={ariaLabel}
-        className="h-9 w-full cursor-pointer appearance-none rounded-full border border-line bg-card pr-9 pl-3 text-sm text-ink transition-colors hover:border-line focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mist disabled:opacity-60"
+        className="h-11 w-full cursor-pointer appearance-none rounded-full border border-line bg-card pr-9 pl-3 text-body text-ink transition-colors hover:bg-wash focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-citron disabled:opacity-40 md:h-9"
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>

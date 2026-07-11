@@ -141,6 +141,28 @@
   --shadow-modal: 0 22px 50px rgba(15, 47, 56, 0.28);
   --shadow-sheet: 0 -10px 30px rgba(15, 47, 56, 0.25);
   --shadow-glow: 0 10px 26px rgba(0, 167, 181, 0.35);
+
+  /* Sheets mobiles — montent du bas en ~0.28s ease (handoff §6) */
+  --animate-sheet-up: sheet-up 0.28s ease both;
+  --animate-sheet-down: sheet-down 0.28s ease both;
+}
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes sheet-down {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(100%);
+  }
 }
 
 @keyframes rise {
@@ -223,5 +245,9 @@
   }
   html {
     @apply font-sans;
+  }
+  /* Icônes Lucide : stroke 1.75 partout (handoff §8a) */
+  svg.lucide {
+    stroke-width: 1.75;
   }
 }
