@@ -1,6 +1,6 @@
 "use client";
 
-import { Compass, LogOut, User } from "lucide-react";
+import { Clock3, Compass, Lightbulb, LogOut, User, Users } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState, useTransition } from "react";
@@ -9,8 +9,9 @@ import { useT } from "@/components/i18n/provider";
 import { clearOfflineData } from "@/lib/offline/clear";
 
 /**
- * Menu du profil (PHIL-Q31) — l'avatar ouvre un menu déroulant :
- * Profil / Exploration / Déconnexion. Ferme au clic extérieur et à Échap.
+ * Menu du profil (PHIL-Q31, hub Profil du handoff §4) — l'avatar ouvre un menu
+ * déroulant : Profil / Amis / Horloges / Conseils / Exploration / Déconnexion.
+ * Ferme au clic extérieur et à Échap.
  */
 export function ProfileMenu({ avatarUrl, initial }: { avatarUrl: string | null; initial: string }) {
   const [open, setOpen] = useState(false);
@@ -48,7 +49,7 @@ export function ProfileMenu({ avatarUrl, initial }: { avatarUrl: string | null; 
   }, [open]);
 
   const itemClass =
-    "flex items-center gap-2.5 px-3 py-2 text-sm text-ink transition-colors hover:bg-citron/10";
+    "flex min-h-11 w-full items-center gap-2.5 px-3 py-2 text-body text-ink transition-colors outline-none hover:bg-wash focus-visible:bg-wash";
 
   return (
     <div className="relative" ref={rootRef}>
@@ -58,7 +59,7 @@ export function ProfileMenu({ avatarUrl, initial }: { avatarUrl: string | null; 
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label={t("nav.profileAria")}
-        className="rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mist"
+        className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-citron focus-visible:ring-offset-2 focus-visible:ring-offset-sand"
       >
         {avatarUrl ? (
           <Image
@@ -78,7 +79,7 @@ export function ProfileMenu({ avatarUrl, initial }: { avatarUrl: string | null; 
       {open ? (
         <div
           role="menu"
-          className="absolute right-0 z-50 mt-2 w-48 overflow-hidden rounded-lg border border-line bg-card py-1 shadow-[0_8px_24px_rgba(15,47,56,0.15)]"
+          className="absolute right-0 z-50 mt-2 w-52 overflow-hidden rounded-lg bg-card py-1 shadow-float"
         >
           <Link
             href="/profile"
@@ -87,6 +88,30 @@ export function ProfileMenu({ avatarUrl, initial }: { avatarUrl: string | null; 
             onClick={() => setOpen(false)}
           >
             <User className="size-4 text-slate" aria-hidden="true" /> {t("profileMenu.profile")}
+          </Link>
+          <Link
+            href="/friends"
+            role="menuitem"
+            className={itemClass}
+            onClick={() => setOpen(false)}
+          >
+            <Users className="size-4 text-slate" aria-hidden="true" /> {t("nav.friends")}
+          </Link>
+          <Link
+            href="/horloges"
+            role="menuitem"
+            className={itemClass}
+            onClick={() => setOpen(false)}
+          >
+            <Clock3 className="size-4 text-slate" aria-hidden="true" /> {t("nav.clocks")}
+          </Link>
+          <Link
+            href="/conseils"
+            role="menuitem"
+            className={itemClass}
+            onClick={() => setOpen(false)}
+          >
+            <Lightbulb className="size-4 text-slate" aria-hidden="true" /> {t("nav.tips")}
           </Link>
           <Link
             href="/explorer"

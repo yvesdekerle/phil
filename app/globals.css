@@ -127,6 +127,9 @@
   --text-label--letter-spacing: 0.06em;
   --text-label--font-weight: 600;
 
+  /* Conteneurs — contenu max 1200 (desktop ≥ 1024 : sidebar 220 fixe) */
+  --container-content: 75rem;
+
   /* Rayons — 5 tokens : rounded-sm=r-4 · rounded-md=r-8 (chip/champ) ·
      rounded-lg=r-12 (carte) · rounded-xl=r-20 (sheet/modale) · rounded-full=pill */
   --radius-sm: 0.25rem;

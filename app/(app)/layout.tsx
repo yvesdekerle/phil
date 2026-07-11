@@ -5,6 +5,12 @@ import { getT } from "@/lib/i18n/server";
 import { getOwnProfile } from "@/lib/supabase/profiles";
 import { createClient } from "@/lib/supabase/server";
 
+/**
+ * Header d'app « Lagune vive » (handoff §4) — wordmark Schibsted 800 + nav
+ * transverse (Mes voyages · Coffre) sur desktop ; Amis / Horloges / Conseils
+ * vivent dans le hub Profil (menu avatar, puis page Profil). L'emplacement à
+ * droite du wordmark accueillera la cloche de notifications (PHIL-V04).
+ */
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
   const profile = await getOwnProfile(supabase);
@@ -14,28 +20,25 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const navLinks = [
     { href: "/trips", label: t("nav.trips") },
     { href: "/vault", label: t("nav.vault") },
-    { href: "/friends", label: t("nav.friends") },
-    { href: "/horloges", label: t("nav.clocks") },
-    { href: "/conseils", label: t("nav.tips") },
   ];
 
   return (
     <>
-      <header className="border-b border-line/60 print:hidden">
-        <div className="mx-auto flex h-14 w-full max-w-5xl items-center justify-between px-4">
+      <header className="border-b border-line print:hidden">
+        <div className="mx-auto flex h-14 w-full max-w-content items-center justify-between px-4 lg:px-6">
           <div className="flex items-center gap-6">
             <Link
               href="/trips"
-              className="font-sans text-2xl text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mist"
+              className="rounded-sm text-xl font-extrabold tracking-tight text-ink outline-none focus-visible:ring-2 focus-visible:ring-citron focus-visible:ring-offset-2 focus-visible:ring-offset-sand"
             >
               Phil
             </Link>
-            <nav className="flex items-center gap-4 text-sm">
+            <nav className="hidden items-center gap-4 md:flex">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="text-slate transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mist"
+                  className="rounded-sm text-ui text-slate transition-colors outline-none hover:text-ink focus-visible:ring-2 focus-visible:ring-citron focus-visible:ring-offset-2 focus-visible:ring-offset-sand"
                 >
                   {link.label}
                 </Link>

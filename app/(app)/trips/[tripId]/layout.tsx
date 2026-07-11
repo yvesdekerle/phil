@@ -1,20 +1,20 @@
 import { notFound } from "next/navigation";
+import { TripSidebar, TripTabBar } from "@/components/layout/trip-nav";
 import { TripOfflineSync } from "@/components/offline/trip-sync";
 import { CoverImage } from "@/components/trips/cover-image";
-import { TripTabs } from "@/components/trips/trip-tabs";
+import { Badge } from "@/components/ui/badge";
 import { getSessionUser } from "@/lib/auth/session";
 import { getDateFnsLocale, getIntlLocale, getT } from "@/lib/i18n/server";
 import { getPendingByTrip } from "@/lib/notifications/pending-server";
 import { createClient } from "@/lib/supabase/server";
 import { formatDateRange } from "@/lib/trips/format";
 import { tripStatus } from "@/lib/trips/status";
-import { cn } from "@/lib/utils";
 
-const STATUS_STYLES: Record<string, string> = {
-  en_cours: "bg-lagoon-ink text-card",
-  a_venir: "bg-citron text-card",
-  passe: "bg-slate/15 text-slate",
-  archive: "bg-slate/15 text-slate",
+const STATUS_VARIANTS: Record<string, "lagoon" | "citron" | "neutral"> = {
+  en_cours: "lagoon",
+  a_venir: "citron",
+  passe: "neutral",
+  archive: "neutral",
 };
 
 export default async function TripLayout({
@@ -52,6 +52,7 @@ export default async function TripLayout({
       .limit(1),
   ]);
   const pending = pendingMap?.get(tripId) ?? null;
+  const pendingProps = pending ? { ideas: pending.ideas, polls: pending.polls } : undefined;
   const t = await getT();
   const dfLocale = await getDateFnsLocale();
   const il = await getIntlLocale();
@@ -76,60 +77,56 @@ export default async function TripLayout({
   }
 
   return (
-    <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6">
+    <main className="mx-auto w-full max-w-content flex-1 px-4 py-6 pb-24 lg:px-6 lg:pb-6">
       <TripOfflineSync tripId={trip.id} />
-      {passportWarning ? (
-        <div
-          className={
-            passportWarning.level === "danger"
-              ? "mb-4 rounded-lg border border-lagoon-ink/40 bg-lagoon-ink/10 px-4 py-2.5 text-sm text-lagoon-ink"
-              : "mb-4 rounded-lg border border-line bg-citron/10 px-4 py-2.5 text-sm text-ink"
-          }
-        >
-          {passportWarning.text}
-        </div>
-      ) : null}
-      <header className="overflow-hidden rounded-lg border border-line bg-card print:hidden">
-        <div className="relative h-40 bg-ink sm:h-52">
-          {trip.cover_image_url ? (
-            <CoverImage
-              src={trip.cover_image_url}
-              sizes="(max-width: 1024px) 100vw, 1024px"
-              className="object-cover"
-              priority
-              fallbackChar={trip.destination.charAt(0).toUpperCase()}
-              fallbackClassName="font-sans text-6xl text-mist italic"
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center">
-              <span className="font-sans text-6xl text-mist italic">
-                {trip.destination.charAt(0).toUpperCase()}
-              </span>
+      <div className="lg:flex lg:gap-6">
+        <TripSidebar tripId={trip.id} pending={pendingProps} />
+        <div className="min-w-0 flex-1">
+          {passportWarning ? (
+            <div
+              className={
+                passportWarning.level === "danger"
+                  ? "mb-4 rounded-lg border border-berry-ink/30 bg-berry-wash px-4 py-2.5 text-body text-berry-ink"
+                  : "mb-4 rounded-lg border border-line bg-citron-wash px-4 py-2.5 text-body text-ink"
+              }
+            >
+              {passportWarning.text}
             </div>
-          )}
-        </div>
-        <div className="flex flex-wrap items-end justify-between gap-3 px-5 py-4">
-          <div>
-            <h1 className="font-sans text-3xl text-ink">{trip.name}</h1>
-            <p className="mt-1 text-sm text-slate">
-              {trip.destination} · {formatDateRange(trip.start_date, trip.end_date, dfLocale)}
-            </p>
-          </div>
-          <span className={cn("rounded-full px-3 py-1 text-xs font-medium", STATUS_STYLES[status])}>
-            {t(`trips.status.${status}`)}
-          </span>
-        </div>
-      </header>
+          ) : null}
+          <header className="overflow-hidden rounded-lg border border-line bg-card print:hidden">
+            <div className="relative h-40 bg-ink-deep sm:h-52">
+              {trip.cover_image_url ? (
+                <CoverImage
+                  src={trip.cover_image_url}
+                  sizes="(max-width: 1024px) 100vw, 980px"
+                  className="object-cover"
+                  priority
+                  fallbackChar={trip.destination.charAt(0).toUpperCase()}
+                  fallbackClassName="text-6xl font-extrabold text-lagoon-soft"
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center">
+                  <span className="text-6xl font-extrabold text-lagoon-soft">
+                    {trip.destination.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+              )}
+            </div>
+            <div className="flex flex-wrap items-end justify-between gap-3 px-4 py-4">
+              <div className="min-w-0">
+                <h1 className="text-title text-ink">{trip.name}</h1>
+                <p className="mt-1 font-mono text-data font-normal text-slate">
+                  {trip.destination} · {formatDateRange(trip.start_date, trip.end_date, dfLocale)}
+                </p>
+              </div>
+              <Badge variant={STATUS_VARIANTS[status]}>{t(`trips.status.${status}`)}</Badge>
+            </div>
+          </header>
 
-      {/* PHIL-Q37c : le menu du voyage reste collé en haut au défilement */}
-      <nav className="sticky top-2 z-[1001] mt-2 rounded-lg border border-line bg-card px-5 shadow-[0_2px_10px_rgba(15,47,56,0.05)] print:hidden">
-        <TripTabs
-          tripId={trip.id}
-          pending={pending ? { ideas: pending.ideas, polls: pending.polls } : undefined}
-        />
-      </nav>
-
-      <div className="py-6">{children}</div>
+          <div className="py-6">{children}</div>
+        </div>
+      </div>
+      <TripTabBar tripId={trip.id} pending={pendingProps} />
     </main>
   );
 }
