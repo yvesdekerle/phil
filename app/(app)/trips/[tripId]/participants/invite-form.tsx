@@ -92,7 +92,9 @@ export function InviteSection({
       {state.status !== "idle" ? (
         <div className="flex flex-wrap items-center gap-3">
           <p
-            className={state.status === "error" ? "text-sm text-lagoon-ink" : "text-sm text-slate"}
+            className={
+              state.status === "error" ? "text-caption text-berry-ink" : "text-body text-slate"
+            }
           >
             {state.message}
           </p>

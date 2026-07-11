@@ -72,7 +72,7 @@ export default async function EmergencyPage({ params }: { params: Promise<{ trip
       </section>
 
       <section>
-        <h2 className="mb-3 font-sans text-xl text-ink">
+        <h2 className="mb-3 text-heading text-ink">
           {t("emergency.crewSheets")}{" "}
           <span className="text-sm text-slate">
             ({(sheets ?? []).length}/{members?.length ?? 0} {t("emergency.filled")})

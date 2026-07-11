@@ -103,7 +103,7 @@ export function FriendSuggestions({
                       }
                     })
                   }
-                  className="shrink-0 rounded-full border border-line px-3 py-1 text-xs font-medium text-slate transition-colors hover:border-lagoon-ink hover:text-lagoon-ink disabled:opacity-60"
+                  className="shrink-0 rounded-full border border-line px-3 py-1 text-xs font-medium text-slate transition-colors hover:bg-wash hover:text-ink disabled:opacity-60"
                 >
                   {done ? t("participants.suggestions.invited") : t("participants.suggestions.add")}
                 </button>
@@ -140,9 +140,7 @@ export function FriendSuggestions({
       ) : null}
 
       {state.status !== "idle" && state.message ? (
-        <p
-          className={`mt-2 text-xs ${state.status === "error" ? "text-lagoon-ink" : "text-slate"}`}
-        >
+        <p className={`mt-2 text-xs ${state.status === "error" ? "text-berry-ink" : "text-slate"}`}>
           {state.message}
         </p>
       ) : null}

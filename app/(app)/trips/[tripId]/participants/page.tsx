@@ -2,6 +2,7 @@ import { MessageCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
@@ -116,7 +117,7 @@ export default async function TripParticipantsPage({
                   {name.charAt(0).toUpperCase()}
                 </span>
               )}
-              <span className="min-w-0 flex-1 text-sm font-medium text-ink">
+              <span className="min-w-0 flex-1 text-subhead text-ink">
                 {name}
                 {isMe ? <span className="text-slate">{t("participants.you")}</span> : null}
                 {profile?.whatsapp ? (
@@ -145,8 +146,13 @@ export default async function TripParticipantsPage({
                   userName={name}
                   role={p.role}
                 />
+              ) : p.role === "OWNER" ? (
+                // B5 — badge capitaine (ink/citron), unique par équipage
+                <Badge variant="captain">{roleLabels[p.role]}</Badge>
               ) : (
-                <span className="text-xs text-slate">{roleLabels[p.role] ?? p.role}</span>
+                <span className="font-mono text-label text-slate uppercase">
+                  {roleLabels[p.role] ?? p.role}
+                </span>
               )}
             </li>
           );

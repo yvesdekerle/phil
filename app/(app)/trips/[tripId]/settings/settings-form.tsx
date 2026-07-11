@@ -112,14 +112,16 @@ export function TripSettingsForm({
         <div className="flex flex-col gap-2">
           <Label htmlFor="name">{t("settings.form.name")}</Label>
           <Input id="name" disabled={!canEdit} {...register("name")} />
-          {errors.name ? <p className="text-sm text-lagoon-ink">{errors.name.message}</p> : null}
+          {errors.name ? (
+            <p className="text-caption text-berry-ink">{errors.name.message}</p>
+          ) : null}
         </div>
 
         <div className="flex flex-col gap-2">
           <Label htmlFor="destination">{t("settings.form.destination")}</Label>
           <Input id="destination" disabled={!canEdit} {...register("destination")} />
           {errors.destination ? (
-            <p className="text-sm text-lagoon-ink">{errors.destination.message}</p>
+            <p className="text-caption text-berry-ink">{errors.destination.message}</p>
           ) : null}
         </div>
 
@@ -132,7 +134,7 @@ export function TripSettingsForm({
             <Label htmlFor="endDate">{t("settings.form.endDate")}</Label>
             <Input id="endDate" type="date" disabled={!canEdit} {...register("endDate")} />
             {errors.endDate ? (
-              <p className="text-sm text-lagoon-ink">{errors.endDate.message}</p>
+              <p className="text-caption text-berry-ink">{errors.endDate.message}</p>
             ) : null}
           </div>
         </div>
@@ -147,7 +149,7 @@ export function TripSettingsForm({
               {...register("currencyPrimary")}
             />
             {errors.currencyPrimary ? (
-              <p className="text-sm text-lagoon-ink">{errors.currencyPrimary.message}</p>
+              <p className="text-caption text-berry-ink">{errors.currencyPrimary.message}</p>
             ) : null}
           </div>
           <div className="flex flex-col gap-2">
@@ -159,7 +161,7 @@ export function TripSettingsForm({
               {...register("currencySecondary")}
             />
             {errors.currencySecondary ? (
-              <p className="text-sm text-lagoon-ink">{errors.currencySecondary.message}</p>
+              <p className="text-caption text-berry-ink">{errors.currencySecondary.message}</p>
             ) : null}
           </div>
         </div>
@@ -174,7 +176,7 @@ export function TripSettingsForm({
             {...register("whatsappGroupUrl")}
           />
           {errors.whatsappGroupUrl ? (
-            <p className="text-sm text-lagoon-ink">{errors.whatsappGroupUrl.message}</p>
+            <p className="text-caption text-berry-ink">{errors.whatsappGroupUrl.message}</p>
           ) : null}
         </div>
 
@@ -199,7 +201,7 @@ export function TripSettingsForm({
           {state.status !== "idle" ? (
             <p
               className={
-                state.status === "error" ? "text-sm text-lagoon-ink" : "text-sm text-slate"
+                state.status === "error" ? "text-caption text-berry-ink" : "text-body text-slate"
               }
             >
               {state.message}

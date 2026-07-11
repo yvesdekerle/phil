@@ -118,7 +118,7 @@ export function CoverUpload({ tripId }: { tripId: string }) {
       </div>
 
       {message ? <p className="text-xs text-slate">{message}</p> : null}
-      {error ? <p className="text-xs text-lagoon-ink">{error}</p> : null}
+      {error ? <p className="text-caption text-berry-ink">{error}</p> : null}
     </div>
   );
 }

@@ -118,7 +118,9 @@ export function ParticipantRowActions({
         </AlertDialogContent>
       </AlertDialog>
 
-      {state.status === "error" ? <p className="text-xs text-lagoon-ink">{state.message}</p> : null}
+      {state.status === "error" ? (
+        <p className="text-caption text-berry-ink">{state.message}</p>
+      ) : null}
     </div>
   );
 }
@@ -151,7 +153,9 @@ export function LeaveTripButton({ tripId }: { tripId: string }) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      {state.status === "error" ? <p className="text-sm text-lagoon-ink">{state.message}</p> : null}
+      {state.status === "error" ? (
+        <p className="text-caption text-berry-ink">{state.message}</p>
+      ) : null}
     </div>
   );
 }

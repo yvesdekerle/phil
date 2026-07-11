@@ -75,7 +75,9 @@ export function SheetForm({ tripId, defaults }: { tripId: string; defaults: Valu
         </Button>
         {state.status !== "idle" ? (
           <p
-            className={state.status === "error" ? "text-sm text-lagoon-ink" : "text-sm text-slate"}
+            className={
+              state.status === "error" ? "text-caption text-berry-ink" : "text-body text-slate"
+            }
           >
             {state.message}
           </p>
