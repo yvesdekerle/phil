@@ -1,16 +1,17 @@
 "use client";
 
+import { ScanFace } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useT } from "@/components/i18n/provider";
-import { Button } from "@/components/ui/button";
+import { VaultLockScreen } from "@/components/vault/vault-lock-screen";
 import { getCoffreMaster, isCoffreUnlocked } from "@/lib/crypto/coffre-session";
 
 /**
  * Entrée du coffre E2EE (PHIL-T01). Le contenu reste CACHÉ tant que la biométrie
  * (Face ID / empreinte) n'a pas réussi — elle se déclenche automatiquement à
- * l'arrivée. Écran minimal pendant la vérification (pas de porte). La clé reste
- * ensuite en mémoire pour la session (onglet) : revenir au coffre ne redemande
- * rien tant qu'on ne recharge pas. Si le prompt auto est bloqué, un bouton reste.
+ * l'arrivée, sur la surface sombre de scan du prototype. La clé reste ensuite
+ * en mémoire pour la session (onglet). Si le prompt auto est bloqué, un bouton
+ * reste.
  */
 export function CoffreGate({ children }: { children: React.ReactNode }) {
   const t = useT();
@@ -51,17 +52,22 @@ export function CoffreGate({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <main className="flex flex-1 flex-col items-center justify-center gap-4 px-4 py-24 text-center">
+    <VaultLockScreen
+      title={t("vault.unlock.lockedTitle")}
+      body={failed ? t("vault.unlock.lockedBody") : undefined}
+      scanning={!failed}
+      scanningLabel={t("vault.unlock.verifying")}
+    >
       {failed ? (
-        <>
-          <p className="max-w-xs text-sm text-slate">{t("vault.unlock.lockedBody")}</p>
-          <Button type="button" onClick={() => void unlock()}>
-            {t("vault.unlock.button")}
-          </Button>
-        </>
-      ) : (
-        <p className="text-sm text-slate">{t("vault.unlock.verifying")}</p>
-      )}
-    </main>
+        <button
+          type="button"
+          onClick={() => void unlock()}
+          className="inline-flex h-13 items-center gap-2.5 rounded-full bg-lagoon-ink px-6 text-subhead text-white shadow-glow transition-all outline-none hover:bg-lagoon-hover focus-visible:ring-2 focus-visible:ring-citron active:scale-[.98]"
+        >
+          <ScanFace aria-hidden="true" className="size-5" />
+          {t("vault.unlock.button")}
+        </button>
+      ) : null}
+    </VaultLockScreen>
   );
 }

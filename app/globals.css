@@ -168,6 +168,57 @@
   }
 }
 
+/* Coffre — cadre de scan Face ID (prototype : verrouillé → scan → ouvert) */
+@keyframes ring-pulse {
+  0%,
+  100% {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(1.04);
+  }
+}
+
+@keyframes scan-move {
+  0%,
+  100% {
+    top: 18%;
+  }
+  50% {
+    top: 78%;
+  }
+}
+
+@keyframes dot-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.animate-ring-pulse {
+  animation: ring-pulse 1.8s ease-in-out infinite;
+}
+.animate-scan-move {
+  animation: scan-move 1.5s ease-in-out infinite;
+}
+.animate-dot-blink {
+  animation: dot-blink 1s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-ring-pulse,
+  .animate-scan-move,
+  .animate-dot-blink {
+    animation: none;
+  }
+}
+
 @keyframes rise {
   from {
     opacity: 0;
