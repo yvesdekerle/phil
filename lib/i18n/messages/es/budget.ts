@@ -81,6 +81,8 @@ export const budgetEs = {
     },
     balance: {
       owedToYou: "Te deben",
+      toReceive: "Por recibir",
+      toPay: "Por pagar",
       youOwe: "Debes",
       settled: "Estás en equilibrio — las cuentas están saldadas.",
       nextPayerPrefix: "El próximo gasto debería pagarlo",

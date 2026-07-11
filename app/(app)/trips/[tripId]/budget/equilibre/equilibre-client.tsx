@@ -58,15 +58,15 @@ export function EquilibreClient({
       {/* Mon solde, façon "On te doit X €" */}
       <div
         className={cn(
-          "rounded-lg border px-5 py-4",
+          "rounded-lg px-5 py-4",
           myNet > 0.01
-            ? "border-line bg-citron/10"
+            ? "bg-citron-wash"
             : myNet < -0.01
-              ? "border-lagoon-ink/40 bg-lagoon-ink/5"
-              : "border-line bg-card",
+              ? "bg-lagoon-wash"
+              : "border border-line bg-card",
         )}
       >
-        <p className="font-sans text-xl text-ink">
+        <p className="text-heading text-ink">
           {myNet > 0.01
             ? `🤑 ${t("budget.balance.owedToYou")} ${fmt(myNet)}`
             : myNet < -0.01
@@ -74,81 +74,113 @@ export function EquilibreClient({
               : t("budget.balance.settled")}
         </p>
         {nextPayerId ? (
-          <p className="mt-1 text-sm text-slate">
+          <p className="mt-1 text-body text-slate">
             {t("budget.balance.nextPayerPrefix")}{" "}
-            <span className="font-medium text-ink">{nameOf(nextPayerId)}</span>{" "}
+            <span className="font-semibold text-ink">{nameOf(nextPayerId)}</span>{" "}
             {t("budget.balance.nextPayerSuffix")}
           </p>
         ) : null}
       </div>
 
-      {/* Équilibres */}
-      <section className="rounded-lg border border-line bg-card px-4 py-3">
-        <h2 className="mb-2 text-sm font-medium text-ink">
+      {/* Équilibres — rangées aérées par équipier (L3c) */}
+      <section className="rounded-lg border border-line bg-card px-4 py-2">
+        <h2 className="pt-2 pb-1 text-subhead text-ink">
           {t("budget.balance.balancesTitle")} ({currency})
         </h2>
-        <div className="flex flex-col gap-1">
-          {balances.map((b) => (
-            <p key={b.userId} className="flex items-baseline justify-between gap-2 text-sm">
-              <span className="text-ink">{nameOf(b.userId)}</span>
-              <span
-                className={cn(
-                  "font-medium tabular-nums",
-                  b.net > 0.01 ? "text-lagoon" : b.net < -0.01 ? "text-lagoon-ink" : "text-slate",
-                )}
-              >
-                {b.net > 0 ? "+" : ""}
-                {fmt(b.net)}
-              </span>
-            </p>
-          ))}
+        <div className="divide-y divide-wash">
+          {balances.map((b) => {
+            const maxAbs = Math.max(...balances.map((x) => Math.abs(x.net)), 0.01);
+            const positive = b.net > 0.01;
+            const negative = b.net < -0.01;
+            return (
+              <div key={b.userId} className="flex items-center gap-3 py-2.5">
+                <span
+                  aria-hidden="true"
+                  className="flex size-7 shrink-0 items-center justify-center rounded-full bg-wash text-caption font-bold text-ink"
+                >
+                  {nameOf(b.userId).charAt(0).toUpperCase()}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-body text-ink">{nameOf(b.userId)}</span>
+                  <span className="mt-1 block h-1.5 overflow-hidden rounded-full bg-wash">
+                    <span
+                      className={cn(
+                        "block h-full rounded-full",
+                        positive ? "bg-lagoon" : negative ? "bg-berry" : "bg-wash",
+                      )}
+                      style={{ width: `${Math.min((Math.abs(b.net) / maxAbs) * 100, 100)}%` }}
+                    />
+                  </span>
+                </span>
+                <span className="shrink-0 text-right">
+                  <span
+                    className={cn(
+                      "block font-mono text-body font-bold tabular-nums",
+                      positive ? "text-lagoon-ink" : negative ? "text-berry-ink" : "text-slate",
+                    )}
+                  >
+                    {b.net > 0 ? "+" : ""}
+                    {fmt(b.net)}
+                  </span>
+                  {positive || negative ? (
+                    <span className="block font-mono text-label text-mist uppercase">
+                      {positive ? t("budget.balance.toReceive") : t("budget.balance.toPay")}
+                    </span>
+                  ) : null}
+                </span>
+              </div>
+            );
+          })}
         </div>
       </section>
 
       {/* Règlements */}
       {settlements.length > 0 ? (
-        <section className="rounded-lg border border-line bg-card px-4 py-3">
-          <h2 className="mb-2 text-xs font-medium text-mist uppercase">
+        <section className="rounded-lg border border-line bg-card px-4 py-2">
+          <h2 className="pt-2 pb-1 font-mono text-label text-mist uppercase">
             {t("budget.balance.toSettle")}
           </h2>
-          {settlements.map((s) => (
-            <p
-              key={`${s.from}-${s.to}`}
-              className="flex flex-wrap items-center justify-between gap-2 py-1 text-sm text-ink"
-            >
-              <span className="flex flex-wrap items-baseline gap-x-1">
-                {nameOf(s.from)} {t("budget.balance.owes")}{" "}
-                <Money
-                  amount={s.amount}
-                  currency={currency}
-                  secondaryAmount={sub(s.amount)}
-                  secondaryCurrency={secondaryCurrency}
-                  align="start"
-                  className="font-medium"
-                />{" "}
-                {t("budget.balance.to")} {nameOf(s.to)}
-              </span>
-              <button
-                type="button"
-                disabled={pending}
-                onClick={() =>
-                  startTransition(async () => {
-                    const r = await markSettled(tripId, s.from, s.to, s.amount, currency);
-                    if (!r.ok) {
-                      toast.error(r.message ?? t("budget.toast.actionFailed"));
-                    }
-                  })
-                }
-                className="shrink-0 rounded-full border border-line px-2.5 py-0.5 text-xs text-slate transition-colors hover:border-lagoon-ink hover:text-lagoon-ink"
-                title={t("budget.balance.markSettledTitle")}
+          <div className="divide-y divide-wash">
+            {settlements.map((s) => (
+              <p
+                key={`${s.from}-${s.to}`}
+                className="flex min-h-11 flex-wrap items-center justify-between gap-2 py-1.5 text-body text-ink"
               >
-                {t("budget.balance.markSettled")}
-              </button>
-            </p>
-          ))}
+                <span className="flex flex-wrap items-baseline gap-x-1">
+                  {nameOf(s.from)} {t("budget.balance.owes")}{" "}
+                  <Money
+                    amount={s.amount}
+                    currency={currency}
+                    secondaryAmount={sub(s.amount)}
+                    secondaryCurrency={secondaryCurrency}
+                    align="start"
+                    className="font-mono font-bold tabular-nums"
+                  />{" "}
+                  {t("budget.balance.to")} {nameOf(s.to)}
+                </span>
+                <Button
+                  type="button"
+                  size="xs"
+                  variant="outline"
+                  disabled={pending}
+                  onClick={() =>
+                    startTransition(async () => {
+                      const r = await markSettled(tripId, s.from, s.to, s.amount, currency);
+                      if (!r.ok) {
+                        toast.error(r.message ?? t("budget.toast.actionFailed"));
+                      }
+                    })
+                  }
+                  title={t("budget.balance.markSettledTitle")}
+                >
+                  {t("budget.balance.markSettled")}
+                </Button>
+              </p>
+            ))}
+          </div>
         </section>
       ) : (
-        <p className="text-sm text-slate">{t("budget.balance.nothingToSettle")}</p>
+        <p className="text-body text-slate">{t("budget.balance.nothingToSettle")}</p>
       )}
 
       {/* Clore / rouvrir la Bourse */}

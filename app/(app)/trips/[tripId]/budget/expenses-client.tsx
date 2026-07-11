@@ -8,7 +8,9 @@ import { CurrencyInput } from "@/components/budget/currency-input";
 import { Money } from "@/components/budget/money";
 import { useLocale, useT } from "@/components/i18n/provider";
 import { Button } from "@/components/ui/button";
+import { Fab } from "@/components/ui/fab";
 import { Input } from "@/components/ui/input";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import {
   categoryForEventType,
   EXPENSE_CATEGORIES,
@@ -172,27 +174,31 @@ export function ExpensesClient({
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-lg border border-line bg-card px-4 py-2.5 text-center">
-          <p className="text-xs text-slate">{t("budget.summary.myExpenses")}</p>
+      <div className="grid grid-cols-2 gap-2.5">
+        <div className="rounded-lg border border-line bg-card px-3 py-2.5">
+          <p className="font-mono text-label text-slate uppercase">
+            {t("budget.summary.myExpenses")}
+          </p>
           <Money
             amount={myTotal}
             currency={primaryCurrency}
             secondaryAmount={sub(myTotal)}
             secondaryCurrency={secondaryCurrency}
             align="start"
-            className="items-center font-sans text-lg text-ink"
+            className="mt-0.5 font-mono text-base font-bold text-ink tabular-nums"
           />
         </div>
-        <div className="rounded-lg border border-line bg-card px-4 py-2.5 text-center">
-          <p className="text-xs text-slate">{t("budget.summary.totalExpenses")}</p>
+        <div className="rounded-lg bg-ink-deep px-3 py-2.5">
+          <p className="font-mono text-label text-lagoon-soft uppercase">
+            {t("budget.summary.totalExpenses")}
+          </p>
           <Money
             amount={total}
             currency={primaryCurrency}
             secondaryAmount={sub(total)}
             secondaryCurrency={secondaryCurrency}
             align="start"
-            className="items-center font-sans text-lg text-ink"
+            className="mt-0.5 font-mono text-base font-bold text-white tabular-nums"
           />
         </div>
       </div>
@@ -212,190 +218,198 @@ export function ExpensesClient({
             {t("budget.form.csv")}
           </Button>
         ) : null}
-        {closed ? null : (
-          <Button type="button" onClick={() => setShowForm(!showForm)}>
-            {showForm ? t("budget.common.cancel") : t("budget.form.addExpense")}
-          </Button>
-        )}
       </div>
 
-      {showForm && !closed ? (
-        <form
-          action={formAction}
-          className="flex flex-col gap-3 rounded-lg border border-line bg-card px-4 py-3"
-        >
-          <input type="hidden" name="tripId" value={tripId} />
-          <div className="grid grid-cols-2 gap-3">
-            <Input
-              name="title"
-              placeholder={t("budget.form.titlePlaceholder")}
-              required
-              maxLength={200}
-            />
-            <div className="flex gap-2">
-              <Input
-                name="amount"
-                type="number"
-                step="0.01"
-                min="0.01"
-                placeholder={t("budget.form.amountPlaceholder")}
-                required
-                onChange={(e) => setAmount(Number(e.target.value) || 0)}
-              />
-              <CurrencyInput
-                name="currency"
-                defaultValue={primaryCurrency}
-                className="w-24"
-                aria-label={t("budget.form.currencyAria")}
-              />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <label className="flex flex-col gap-1 text-sm text-ink">
-              {t("budget.form.category")}
-              <select
-                name="category"
-                value={category}
-                onChange={(e) => setCategory(e.target.value as ExpenseCategory)}
-                className="rounded border border-line bg-card px-2 py-1.5 text-sm"
-              >
-                {EXPENSE_CATEGORIES.map((c) => (
-                  <option key={c} value={c}>
-                    {t(`budget.categories.${c}`)}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <div className="flex flex-col gap-1 text-sm text-ink">
-              <label htmlFor="spentOn">{t("budget.form.when")}</label>
-              <Input
-                id="spentOn"
-                name="spentOn"
-                type="date"
-                defaultValue={new Date().toISOString().slice(0, 10)}
-                required
-              />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <label className="flex flex-col gap-1 text-sm text-ink">
-              {t("budget.form.paidBy")}
-              <select
-                name="paidBy"
-                defaultValue={myId}
-                className="rounded border border-line bg-card px-2 py-1.5 text-sm"
-              >
-                {members.map((m) => (
-                  <option key={m.userId} value={m.userId}>
-                    {nameOf(m.userId)}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="flex flex-col gap-1 text-sm text-ink">
-              {t("budget.form.linkedEvent")}
-              <select
-                name="eventId"
-                defaultValue=""
-                onChange={(e) => {
-                  const ev = events.find((x) => x.id === e.target.value);
-                  if (ev) {
-                    setCategory(categoryForEventType(ev.type));
-                  }
-                }}
-                className="rounded border border-line bg-card px-2 py-1.5 text-sm"
-              >
-                <option value="">{t("budget.form.none")}</option>
-                {events.map((ev) => (
-                  <option key={ev.id} value={ev.id}>
-                    {ev.title}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-
-          <label className="flex items-center gap-2 text-sm text-ink">
-            {t("budget.form.split")}
-            <select
-              name="splitMode"
-              value={splitMode}
-              onChange={(e) => setSplitMode(e.target.value as typeof splitMode)}
-              className="rounded border border-line bg-card px-2 py-1.5 text-sm"
-            >
-              {SPLIT_MODES.map((m) => (
-                <option key={m} value={m}>
-                  {splitLabels[m]}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <fieldset className="flex flex-col gap-1">
-            <legend className="mb-1 text-sm text-ink">{t("budget.form.forWhom")}</legend>
-            {members.map((m) => {
-              const isIn = checked.has(m.userId);
-              return (
-                <div
-                  key={m.userId}
-                  className="flex items-center gap-2 rounded-md border border-line/50 px-2.5 py-1.5 text-sm"
-                >
-                  <input
-                    type="checkbox"
-                    name="beneficiaries"
-                    value={m.userId}
-                    checked={isIn}
-                    onChange={(e) =>
-                      setChecked((prev) => {
-                        const next = new Set(prev);
-                        if (e.target.checked) {
-                          next.add(m.userId);
-                        } else {
-                          next.delete(m.userId);
-                        }
-                        return next;
-                      })
-                    }
-                    className="accent-lagoon-ink"
-                    aria-label={`${t("budget.form.beneficiaryAria")} ${nameOf(m.userId)}`}
-                  />
-                  <span className="min-w-0 flex-1 text-ink">{nameOf(m.userId)}</span>
-                  {splitMode !== "equal" && isIn ? (
-                    <input
-                      type="number"
-                      name={`share-${m.userId}`}
-                      min={0}
-                      step={splitMode === "shares" ? 0.5 : 0.01}
-                      value={shares[m.userId] ?? (splitMode === "shares" ? 1 : 0)}
-                      onChange={(e) =>
-                        setShares((prev) => ({ ...prev, [m.userId]: Number(e.target.value) || 0 }))
-                      }
-                      className="w-20 rounded border border-line bg-card px-1.5 py-0.5 text-right text-xs"
-                      aria-label={
-                        splitMode === "shares"
-                          ? t("budget.form.sharesAria")
-                          : t("budget.form.exactAria")
-                      }
-                    />
-                  ) : null}
-                  <span className="w-20 shrink-0 text-right text-xs text-slate tabular-nums">
-                    {isIn ? fmt(shareOf(m.userId), "") : "—"}
-                  </span>
-                </div>
-              );
-            })}
-          </fieldset>
-
-          <div className="flex items-center gap-3">
-            <Button type="submit" size="sm" disabled={formPending}>
-              {formPending ? t("budget.form.saving") : t("budget.common.save")}
-            </Button>
-            {state.status === "error" ? (
-              <p className="text-xs text-lagoon-ink">{state.message}</p>
-            ) : null}
-          </div>
-        </form>
+      {!closed ? (
+        <Fab
+          onClick={() => setShowForm(true)}
+          aria-label={t("budget.form.addExpense")}
+          className="fixed right-4 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-40 lg:right-8 lg:bottom-6 print:hidden"
+        />
       ) : null}
+
+      <Sheet open={showForm && !closed} onOpenChange={setShowForm}>
+        <SheetContent>
+          <SheetHeader>
+            <SheetTitle>{t("budget.form.addExpense")}</SheetTitle>
+          </SheetHeader>
+          <form action={formAction} className="flex flex-col gap-3">
+            <input type="hidden" name="tripId" value={tripId} />
+            <div className="grid grid-cols-2 gap-3">
+              <Input
+                name="title"
+                placeholder={t("budget.form.titlePlaceholder")}
+                required
+                maxLength={200}
+              />
+              <div className="flex gap-2">
+                <Input
+                  name="amount"
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                  placeholder={t("budget.form.amountPlaceholder")}
+                  required
+                  onChange={(e) => setAmount(Number(e.target.value) || 0)}
+                />
+                <CurrencyInput
+                  name="currency"
+                  defaultValue={primaryCurrency}
+                  className="w-24"
+                  aria-label={t("budget.form.currencyAria")}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <label className="flex flex-col gap-1 text-sm text-ink">
+                {t("budget.form.category")}
+                <select
+                  name="category"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value as ExpenseCategory)}
+                  className="rounded border border-line bg-card px-2 py-1.5 text-sm"
+                >
+                  {EXPENSE_CATEGORIES.map((c) => (
+                    <option key={c} value={c}>
+                      {t(`budget.categories.${c}`)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <div className="flex flex-col gap-1 text-sm text-ink">
+                <label htmlFor="spentOn">{t("budget.form.when")}</label>
+                <Input
+                  id="spentOn"
+                  name="spentOn"
+                  type="date"
+                  defaultValue={new Date().toISOString().slice(0, 10)}
+                  required
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <label className="flex flex-col gap-1 text-sm text-ink">
+                {t("budget.form.paidBy")}
+                <select
+                  name="paidBy"
+                  defaultValue={myId}
+                  className="rounded border border-line bg-card px-2 py-1.5 text-sm"
+                >
+                  {members.map((m) => (
+                    <option key={m.userId} value={m.userId}>
+                      {nameOf(m.userId)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="flex flex-col gap-1 text-sm text-ink">
+                {t("budget.form.linkedEvent")}
+                <select
+                  name="eventId"
+                  defaultValue=""
+                  onChange={(e) => {
+                    const ev = events.find((x) => x.id === e.target.value);
+                    if (ev) {
+                      setCategory(categoryForEventType(ev.type));
+                    }
+                  }}
+                  className="rounded border border-line bg-card px-2 py-1.5 text-sm"
+                >
+                  <option value="">{t("budget.form.none")}</option>
+                  {events.map((ev) => (
+                    <option key={ev.id} value={ev.id}>
+                      {ev.title}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+
+            <label className="flex items-center gap-2 text-sm text-ink">
+              {t("budget.form.split")}
+              <select
+                name="splitMode"
+                value={splitMode}
+                onChange={(e) => setSplitMode(e.target.value as typeof splitMode)}
+                className="rounded border border-line bg-card px-2 py-1.5 text-sm"
+              >
+                {SPLIT_MODES.map((m) => (
+                  <option key={m} value={m}>
+                    {splitLabels[m]}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <fieldset className="flex flex-col gap-1">
+              <legend className="mb-1 text-sm text-ink">{t("budget.form.forWhom")}</legend>
+              {members.map((m) => {
+                const isIn = checked.has(m.userId);
+                return (
+                  <div
+                    key={m.userId}
+                    className="flex items-center gap-2 rounded-md border border-line/50 px-2.5 py-1.5 text-sm"
+                  >
+                    <input
+                      type="checkbox"
+                      name="beneficiaries"
+                      value={m.userId}
+                      checked={isIn}
+                      onChange={(e) =>
+                        setChecked((prev) => {
+                          const next = new Set(prev);
+                          if (e.target.checked) {
+                            next.add(m.userId);
+                          } else {
+                            next.delete(m.userId);
+                          }
+                          return next;
+                        })
+                      }
+                      className="accent-lagoon-ink"
+                      aria-label={`${t("budget.form.beneficiaryAria")} ${nameOf(m.userId)}`}
+                    />
+                    <span className="min-w-0 flex-1 text-ink">{nameOf(m.userId)}</span>
+                    {splitMode !== "equal" && isIn ? (
+                      <input
+                        type="number"
+                        name={`share-${m.userId}`}
+                        min={0}
+                        step={splitMode === "shares" ? 0.5 : 0.01}
+                        value={shares[m.userId] ?? (splitMode === "shares" ? 1 : 0)}
+                        onChange={(e) =>
+                          setShares((prev) => ({
+                            ...prev,
+                            [m.userId]: Number(e.target.value) || 0,
+                          }))
+                        }
+                        className="w-20 rounded border border-line bg-card px-1.5 py-0.5 text-right text-xs"
+                        aria-label={
+                          splitMode === "shares"
+                            ? t("budget.form.sharesAria")
+                            : t("budget.form.exactAria")
+                        }
+                      />
+                    ) : null}
+                    <span className="w-20 shrink-0 text-right text-xs text-slate tabular-nums">
+                      {isIn ? fmt(shareOf(m.userId), "") : "—"}
+                    </span>
+                  </div>
+                );
+              })}
+            </fieldset>
+
+            <div className="flex items-center gap-3">
+              <Button type="submit" size="sm" disabled={formPending}>
+                {formPending ? t("budget.form.saving") : t("budget.common.save")}
+              </Button>
+              {state.status === "error" ? (
+                <p className="text-caption text-berry-ink">{state.message}</p>
+              ) : null}
+            </div>
+          </form>
+        </SheetContent>
+      </Sheet>
 
       {byDate.length === 0 ? (
         <p className="rounded-lg border border-dashed border-line bg-card/60 px-4 py-8 text-center text-sm text-slate">
@@ -404,31 +418,32 @@ export function ExpensesClient({
       ) : (
         byDate.map(([date, rows]) => (
           <section key={date}>
-            <h2 className="mb-1.5 text-sm font-medium text-slate capitalize">
+            <h2 className="mb-1.5 font-mono text-label text-mist uppercase tabular-nums">
               {format(new Date(`${date}T12:00:00`), "d MMMM yyyy", { locale: dfLocale })}
             </h2>
-            <div className="flex flex-col gap-1.5">
+            {/* B7 — registre : rangées 44 dans une carte, séparateurs wash, pas de zébrage */}
+            <div className="divide-y divide-wash rounded-lg border border-line bg-card">
               {rows.map((e) => (
                 <div
                   key={e.id}
-                  className="flex items-center gap-3 rounded-md border border-line/60 bg-card px-3 py-2 text-sm"
+                  className="flex min-h-11 items-center gap-3 px-3 py-1.5 text-body transition-colors hover:bg-wash"
                 >
                   <span className="min-w-0 flex-1 truncate text-ink">
                     {e.isSettlement ? "↩ " : ""}
                     {e.title}
                     {e.isSettlement ? (
-                      <span className="ml-1.5 rounded-full bg-ink/10 px-2 py-0.5 text-[0.65rem] text-slate">
+                      <span className="ml-1.5 rounded-sm bg-wash px-1.5 py-0.5 font-mono text-label text-slate uppercase">
                         {t("budget.list.betweenTravelers")}
                       </span>
                     ) : (
-                      <span className="ml-1.5 rounded-full bg-citron/15 px-2 py-0.5 text-[0.65rem] text-mist">
+                      <span className="ml-1.5 rounded-sm bg-wash px-1.5 py-0.5 font-mono text-label text-slate uppercase">
                         {EXPENSE_CATEGORIES.includes(e.category as ExpenseCategory)
                           ? t(`budget.categories.${e.category}`)
                           : e.category}
                       </span>
                     )}
                   </span>
-                  <span className="shrink-0 text-xs text-slate">
+                  <span className="shrink-0 text-caption text-slate">
                     {e.isSettlement
                       ? `${nameOf(e.paid_by)} → ${nameOf(e.beneficiaries[0]?.userId ?? "")}`
                       : `${nameOf(e.paid_by)} · ${t("budget.list.for")} ${e.beneficiaries.length}${e.splitMode !== "equal" ? ` (${splitLabels[e.splitMode].toLowerCase()})` : ""}`}
@@ -438,7 +453,7 @@ export function ExpensesClient({
                     currency={e.amountPrimary !== null ? primaryCurrency : e.currency}
                     secondaryAmount={e.amountPrimary !== null ? sub(e.amountPrimary) : null}
                     secondaryCurrency={secondaryCurrency}
-                    className="shrink-0 font-medium text-ink"
+                    className="shrink-0 font-mono font-bold text-ink tabular-nums"
                     title={
                       e.currency !== primaryCurrency
                         ? `${t("budget.list.entered")} ${fmt(e.amount, e.currency)}`
@@ -457,7 +472,7 @@ export function ExpensesClient({
                           }
                         })
                       }
-                      className="text-slate hover:text-lagoon-ink"
+                      className="rounded-sm text-slate transition-colors outline-none hover:text-berry-ink focus-visible:ring-2 focus-visible:ring-citron"
                       aria-label={`${t("budget.common.delete")} ${e.title}`}
                     >
                       <Trash2 className="size-4" aria-hidden="true" />

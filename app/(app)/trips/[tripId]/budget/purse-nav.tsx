@@ -1,9 +1,13 @@
 import { Lock } from "lucide-react";
 import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
 import { getT } from "@/lib/i18n/server";
 import { cn } from "@/lib/utils";
 
-/** Navigation de la Bourse (PHIL-Q21) : Dépenses | Équilibre | Suivi. */
+/**
+ * Navigation de la Bourse (PHIL-Q21, canon L3a) — onglets texte soulignés
+ * citron SOUS le mot : Dépenses · Équilibre · Suivi. Bourse close = badge mono.
+ */
 export async function PurseNav({
   tripId,
   active,
@@ -14,14 +18,15 @@ export async function PurseNav({
   closed: boolean;
 }) {
   const t = await getT();
-  const pill = (href: string, label: string, isActive: boolean) => (
+  const tab = (href: string, label: string, isActive: boolean) => (
     <Link
       href={href}
+      aria-current={isActive ? "page" : undefined}
       className={cn(
-        "rounded-full px-3 py-1",
+        "relative pb-2 transition-colors outline-none after:absolute after:inset-x-0 after:bottom-0 after:h-[2.5px] after:rounded-[3px] after:bg-citron after:opacity-0 after:transition-opacity focus-visible:ring-2 focus-visible:ring-citron focus-visible:ring-offset-2 focus-visible:ring-offset-sand",
         isActive
-          ? "bg-lagoon-ink font-medium text-card"
-          : "text-slate hover:bg-citron/10 hover:text-ink",
+          ? "text-body font-bold text-ink after:opacity-100"
+          : "text-ui font-normal text-mist hover:text-ink",
       )}
     >
       {label}
@@ -29,20 +34,16 @@ export async function PurseNav({
   );
   return (
     <nav
-      className="flex flex-wrap items-center gap-1 text-sm"
+      className="flex items-end gap-4 border-b border-line"
       aria-label={t("budget.nav.ariaLabel")}
     >
-      {pill(
-        `/trips/${tripId}/budget?tab=depenses`,
-        t("budget.nav.expenses"),
-        active === "depenses",
-      )}
-      {pill(`/trips/${tripId}/budget/equilibre`, t("budget.nav.balance"), active === "equilibre")}
-      {pill(`/trips/${tripId}/budget/depenses`, t("budget.nav.tracking"), active === "suivi")}
+      {tab(`/trips/${tripId}/budget?tab=depenses`, t("budget.nav.expenses"), active === "depenses")}
+      {tab(`/trips/${tripId}/budget/equilibre`, t("budget.nav.balance"), active === "equilibre")}
+      {tab(`/trips/${tripId}/budget/depenses`, t("budget.nav.tracking"), active === "suivi")}
       {closed ? (
-        <span className="ml-1 flex items-center gap-1 rounded-full bg-ink/10 px-2.5 py-1 text-xs text-slate">
-          <Lock className="size-3" aria-hidden="true" /> {t("budget.nav.closed")}
-        </span>
+        <Badge variant="neutral" className="mb-1.5 ml-auto">
+          <Lock className="size-2.5" aria-hidden="true" /> {t("budget.nav.closed")}
+        </Badge>
       ) : null}
     </nav>
   );
