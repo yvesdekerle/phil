@@ -3,9 +3,11 @@ import { TripSidebar, TripTabBar } from "@/components/layout/trip-nav";
 import { TripPageHeader } from "@/components/layout/trip-page-header";
 import { TripOfflineSync } from "@/components/offline/trip-sync";
 import { getSessionUser } from "@/lib/auth/session";
-import { getIntlLocale, getT } from "@/lib/i18n/server";
+import { getDateFnsLocale, getIntlLocale, getT } from "@/lib/i18n/server";
 import { getPendingByTrip } from "@/lib/notifications/pending-server";
+import { getOwnProfile } from "@/lib/supabase/profiles";
 import { createClient } from "@/lib/supabase/server";
+import { formatDateRange } from "@/lib/trips/format";
 
 export default async function TripLayout({
   children,
@@ -24,25 +26,33 @@ export default async function TripLayout({
     notFound();
   }
 
-  // PHIL-R19 : les deux lots de requêtes ne dépendent que de user+trip → en
-  // parallèle plutôt qu'en série (la base distante rend chaque aller-retour cher).
-  // PHIL-U02 : pastilles « à voter » sur les onglets. PHIL-N04 : validité passeport.
-  const [pendingMap, { data: passports }] = await Promise.all([
-    user ? getPendingByTrip(supabase, user.id, [tripId]) : Promise.resolve(null),
-    supabase
-      .from("documents")
-      .select("expires_at")
-      .eq("owner_id", user?.id ?? "")
-      .eq("category", "passport")
-      .is("deleted_at", null)
-      .not("expires_at", "is", null)
-      .order("expires_at", { ascending: false })
-      .limit(1),
-  ]);
+  // PHIL-R19 : requêtes indépendantes en parallèle (la base distante rend
+  // chaque aller-retour cher). PHIL-U02 : pastilles « à voter ».
+  // PHIL-N04 : validité passeport.
+  const [pendingMap, { data: passports }, profile, { count: participantCount }] = await Promise.all(
+    [
+      user ? getPendingByTrip(supabase, user.id, [tripId]) : Promise.resolve(null),
+      supabase
+        .from("documents")
+        .select("expires_at")
+        .eq("owner_id", user?.id ?? "")
+        .eq("category", "passport")
+        .is("deleted_at", null)
+        .not("expires_at", "is", null)
+        .order("expires_at", { ascending: false })
+        .limit(1),
+      getOwnProfile(supabase),
+      supabase
+        .from("trip_participants")
+        .select("user_id", { count: "exact", head: true })
+        .eq("trip_id", tripId),
+    ],
+  );
   const pending = pendingMap?.get(tripId) ?? null;
   const pendingProps = pending ? { ideas: pending.ideas, polls: pending.polls } : undefined;
   const t = await getT();
   const il = await getIntlLocale();
+  const dfLocale = await getDateFnsLocale();
   const passportExpiry = passports?.[0]?.expires_at ?? null;
   let passportWarning: { level: "danger" | "warn"; text: string } | null = null;
   if (passportExpiry) {
@@ -63,12 +73,31 @@ export default async function TripLayout({
     }
   }
 
+  const initial = (profile?.display_name ?? "?").charAt(0).toUpperCase();
+  const tripMeta = `${formatDateRange(trip.start_date, trip.end_date, dfLocale)} · ${t(
+    "trips.onboard",
+  ).replace("{n}", String(participantCount ?? 1))}`;
+
   return (
-    <main className="mx-auto w-full max-w-content flex-1 px-4 py-6 pb-24 lg:px-6 lg:pb-6">
+    <div className="flex w-full flex-1 flex-col lg:flex-row">
       <TripOfflineSync tripId={trip.id} />
-      <div className="lg:flex lg:gap-6">
-        <TripSidebar tripId={trip.id} pending={pendingProps} />
-        <div className="min-w-0 flex-1">
+      <TripSidebar
+        tripId={trip.id}
+        tripName={trip.name}
+        tripMeta={tripMeta}
+        pending={pendingProps}
+        avatarUrl={profile?.avatar_url ?? null}
+        initial={initial}
+        userName={profile?.display_name ?? initial}
+      />
+      <div className="flex min-w-0 flex-1 flex-col">
+        <TripPageHeader
+          tripId={trip.id}
+          tripName={trip.name}
+          avatarUrl={profile?.avatar_url ?? null}
+          initial={initial}
+        />
+        <main className="mx-auto w-full max-w-content flex-1 px-4 pb-24 lg:px-8 lg:py-6 lg:pb-8">
           {passportWarning ? (
             <div
               className={
@@ -80,11 +109,10 @@ export default async function TripLayout({
               {passportWarning.text}
             </div>
           ) : null}
-          <TripPageHeader tripId={trip.id} tripName={trip.name} />
-          <div className="pb-6">{children}</div>
-        </div>
+          {children}
+        </main>
       </div>
       <TripTabBar tripId={trip.id} pending={pendingProps} />
-    </main>
+    </div>
   );
 }

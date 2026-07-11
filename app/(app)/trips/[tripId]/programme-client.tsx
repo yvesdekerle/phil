@@ -67,7 +67,6 @@ export function ProgrammeClient({
   const [selected, setSelected] = useState(inRange ? (todayKey as string) : tripStart);
   const selectedRef = useRef<HTMLButtonElement>(null);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: centrage initial uniquement
   useEffect(() => {
     selectedRef.current?.scrollIntoView({ inline: "center", block: "nearest" });
   }, []);
