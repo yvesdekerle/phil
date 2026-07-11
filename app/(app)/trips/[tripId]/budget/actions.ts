@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { EXPENSE_CATEGORIES } from "@/lib/budget/categories";
-import type { ActionState } from "@/lib/forms/action-state";
+import type { ActionStateWithSuccess } from "@/lib/forms/action-state";
 import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
 import { areUuids } from "@/lib/validation";
@@ -24,15 +24,14 @@ const expenseSchema = z.object({
   splitMode: z.enum(["equal", "shares", "exact"]).default("equal"),
 });
 
-export type ExpenseState = ActionState;
+export type ExpenseState = ActionStateWithSuccess;
 
 /** Résultat d'une mutation directe (PHIL-Q58) — remonté à l'UI pour un toast. */
 export type ActionResult = { ok: boolean; message?: string };
 
-/** Enregistre une dépense partagée (PHIL-N09, division PHIL-Q21). */
-export async function addExpense(_prev: ExpenseState, formData: FormData): Promise<ExpenseState> {
-  const t = await getT();
-  const parsed = expenseSchema.safeParse({
+/** Champs communs à l'ajout et à la modification d'une dépense. */
+function readExpenseFields(formData: FormData) {
+  return {
     tripId: formData.get("tripId"),
     title: formData.get("title"),
     amount: formData.get("amount"),
@@ -43,32 +42,51 @@ export async function addExpense(_prev: ExpenseState, formData: FormData): Promi
     eventId: formData.get("eventId") ?? "",
     spentOn: formData.get("spentOn"),
     splitMode: formData.get("splitMode") ?? "equal",
-  });
+  };
+}
+
+/** Parts / montants exacts par bénéficiaire (champs share-<userId>). */
+async function readShares(
+  formData: FormData,
+  d: { splitMode: "equal" | "shares" | "exact"; beneficiaries: string[]; amount: number },
+): Promise<{ shares: Map<string, number> } | { message: string }> {
+  const t = await getT();
+  const shares = new Map<string, number>();
+  if (d.splitMode === "equal") {
+    return { shares };
+  }
+  for (const userId of d.beneficiaries) {
+    const raw = Number(formData.get(`share-${userId}`));
+    if (!Number.isFinite(raw) || raw < 0) {
+      return { message: t("budget.errors.invalidShares") };
+    }
+    shares.set(userId, raw);
+  }
+  const total = [...shares.values()].reduce((s, v) => s + v, 0);
+  if (d.splitMode === "exact" && Math.abs(total - d.amount) > 0.01) {
+    return {
+      message: `${t("budget.errors.sumPrefix")}${total.toFixed(2)}${t("budget.errors.sumMiddle")}${d.amount.toFixed(2)}.`,
+    };
+  }
+  if (d.splitMode === "shares" && total <= 0) {
+    return { message: t("budget.errors.atLeastOneShare") };
+  }
+  return { shares };
+}
+
+/** Enregistre une dépense partagée (PHIL-N09, division PHIL-Q21). */
+export async function addExpense(_prev: ExpenseState, formData: FormData): Promise<ExpenseState> {
+  const t = await getT();
+  const parsed = expenseSchema.safeParse(readExpenseFields(formData));
   if (!parsed.success) {
     return { status: "error", message: t("budget.errors.invalidExpense") };
   }
 
-  // Parts / montants exacts par bénéficiaire (champs share-<userId>)
-  const shares = new Map<string, number>();
-  if (parsed.data.splitMode !== "equal") {
-    for (const userId of parsed.data.beneficiaries) {
-      const raw = Number(formData.get(`share-${userId}`));
-      if (!Number.isFinite(raw) || raw < 0) {
-        return { status: "error", message: t("budget.errors.invalidShares") };
-      }
-      shares.set(userId, raw);
-    }
-    const total = [...shares.values()].reduce((s, v) => s + v, 0);
-    if (parsed.data.splitMode === "exact" && Math.abs(total - parsed.data.amount) > 0.01) {
-      return {
-        status: "error",
-        message: `${t("budget.errors.sumPrefix")}${total.toFixed(2)}${t("budget.errors.sumMiddle")}${parsed.data.amount.toFixed(2)}.`,
-      };
-    }
-    if (parsed.data.splitMode === "shares" && total <= 0) {
-      return { status: "error", message: t("budget.errors.atLeastOneShare") };
-    }
+  const sharesResult = await readShares(formData, parsed.data);
+  if ("message" in sharesResult) {
+    return { status: "error", message: sharesResult.message };
   }
+  const { shares } = sharesResult;
 
   const supabase = await createClient();
   const {
@@ -114,7 +132,77 @@ export async function addExpense(_prev: ExpenseState, formData: FormData): Promi
   revalidatePath(`/trips/${d.tripId}/budget`);
   revalidatePath(`/trips/${d.tripId}/budget/equilibre`);
   revalidatePath(`/trips/${d.tripId}/budget/depenses`);
-  return { status: "idle" };
+  return { status: "success" };
+}
+
+const expenseUpdateSchema = expenseSchema.extend({ expenseId: z.string().uuid() });
+
+/** Modifie une dépense et sa répartition (PHIL-V07e) — créateur, payeur ou
+ * capitaine (le cercle exact est tenu par la RLS), Bourse ouverte. */
+export async function updateExpense(
+  _prev: ExpenseState,
+  formData: FormData,
+): Promise<ExpenseState> {
+  const t = await getT();
+  const parsed = expenseUpdateSchema.safeParse({
+    ...readExpenseFields(formData),
+    expenseId: formData.get("expenseId"),
+  });
+  if (!parsed.success) {
+    return { status: "error", message: t("budget.errors.invalidExpense") };
+  }
+
+  const sharesResult = await readShares(formData, parsed.data);
+  if ("message" in sharesResult) {
+    return { status: "error", message: sharesResult.message };
+  }
+  const { shares } = sharesResult;
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    redirect("/login");
+  }
+
+  const d = parsed.data;
+
+  // PHIL-Q21 : Bourse close = plus de modification
+  const { data: trip } = await supabase
+    .from("trips")
+    .select("purse_closed_at")
+    .eq("id", d.tripId)
+    .single();
+  if (trip?.purse_closed_at) {
+    return { status: "error", message: t("budget.errors.purseClosed") };
+  }
+
+  // Mise à jour atomique (dépense + répartition) via RPC transactionnelle,
+  // security invoker : la RLS décide qui peut modifier quoi.
+  const { error } = await supabase.rpc("update_expense_with_beneficiaries", {
+    p_expense_id: d.expenseId,
+    p_title: d.title,
+    p_amount: d.amount,
+    p_currency: d.currency,
+    p_paid_by: d.paidBy,
+    p_category: d.category,
+    p_event_id: d.eventId || undefined,
+    p_spent_on: d.spentOn,
+    p_split_mode: d.splitMode,
+    p_beneficiaries: d.beneficiaries.map((userId) => ({
+      user_id: userId,
+      share: d.splitMode === "equal" ? null : (shares.get(userId) ?? 0),
+    })),
+  });
+  if (error) {
+    return { status: "error", message: t("budget.errors.saveFailed") };
+  }
+
+  revalidatePath(`/trips/${d.tripId}/budget`);
+  revalidatePath(`/trips/${d.tripId}/budget/equilibre`);
+  revalidatePath(`/trips/${d.tripId}/budget/depenses`);
+  return { status: "success" };
 }
 
 /** Clore / rouvrir la Bourse (PHIL-Q21) — Capitaine uniquement. */

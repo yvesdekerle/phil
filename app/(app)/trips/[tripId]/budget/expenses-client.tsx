@@ -2,7 +2,7 @@
 
 import { format } from "date-fns";
 import { Search, Trash2 } from "lucide-react";
-import { useActionState, useMemo, useState, useTransition } from "react";
+import { useActionState, useEffect, useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { CurrencyInput } from "@/components/budget/currency-input";
 import { Money } from "@/components/budget/money";
@@ -18,7 +18,7 @@ import {
 } from "@/lib/budget/categories";
 import { dateFnsLocale, intlLocale } from "@/lib/i18n/dates";
 import { fuzzyMatch } from "@/lib/search/fuzzy";
-import { addExpense, deleteExpense, type ExpenseState } from "./actions";
+import { addExpense, deleteExpense, type ExpenseState, updateExpense } from "./actions";
 
 export type ExpenseRow = {
   id: string;
@@ -33,12 +33,30 @@ export type ExpenseRow = {
   isSettlement: boolean;
   splitMode: "equal" | "shares" | "exact";
   beneficiaries: { userId: string; share: number | null }[];
+  /** V07e : événement lié — préservé à l'édition. */
+  eventId: string | null;
 };
 type Member = { userId: string; name: string };
 type EventOption = { id: string; title: string; type: "TRANSPORT" | "LODGING" | "ACTIVITY" };
 type SplitMode = "equal" | "shares" | "exact";
 
 const SPLIT_MODES: readonly SplitMode[] = ["equal", "shares", "exact"];
+
+/** Part d'un bénéficiaire selon la répartition enregistrée (V07e). */
+function storedShareOf(e: ExpenseRow, userId: string): number {
+  const b = e.beneficiaries.find((x) => x.userId === userId);
+  if (!b) {
+    return 0;
+  }
+  if (e.splitMode === "exact") {
+    return b.share ?? 0;
+  }
+  if (e.splitMode === "shares") {
+    const total = e.beneficiaries.reduce((s, x) => s + (x.share ?? 1), 0);
+    return total > 0 ? (e.amount * (b.share ?? 1)) / total : 0;
+  }
+  return e.beneficiaries.length > 0 ? e.amount / e.beneficiaries.length : 0;
+}
 
 /** La Bourse — onglet Dépenses (PHIL-Q21, à la Tricount). */
 export function ExpensesClient({
@@ -64,16 +82,9 @@ export function ExpensesClient({
   isOwner: boolean;
   closed: boolean;
 }) {
-  const [showForm, setShowForm] = useState(false);
-  const [category, setCategory] = useState<ExpenseCategory>("autre");
-  const [splitMode, setSplitMode] = useState<"equal" | "shares" | "exact">("equal");
-  const [amount, setAmount] = useState<number>(0);
-  const [checked, setChecked] = useState<Set<string>>(new Set(members.map((m) => m.userId)));
-  const [shares, setShares] = useState<Record<string, number>>({});
+  // V07e : la feuille sert à l'ajout ("new"), au détail et à l'édition (ligne).
+  const [sheet, setSheet] = useState<"new" | ExpenseRow | null>(null);
   const [query, setQuery] = useState("");
-  const [state, formAction, formPending] = useActionState<ExpenseState, FormData>(addExpense, {
-    status: "idle",
-  });
   const [pending, startTransition] = useTransition();
   const t = useT();
   const locale = useLocale();
@@ -97,21 +108,7 @@ export function ExpensesClient({
   const sub = (amountInPrimary: number) =>
     secondaryCurrency && secondaryRate ? amountInPrimary * secondaryRate : null;
 
-  // Aperçu de la part de chacun selon le mode (façon Tricount)
-  const shareOf = (userId: string): number => {
-    const list = [...checked];
-    if (list.length === 0 || !checked.has(userId)) {
-      return 0;
-    }
-    if (splitMode === "exact") {
-      return shares[userId] ?? 0;
-    }
-    if (splitMode === "shares") {
-      const total = list.reduce((s, id) => s + (shares[id] ?? 1), 0);
-      return total > 0 ? (amount * (shares[userId] ?? 1)) / total : 0;
-    }
-    return amount / list.length;
-  };
+  const canManage = (e: ExpenseRow) => e.created_by === myId || e.paid_by === myId || isOwner;
 
   const myTotal = expenses
     .filter((e) => e.paid_by === myId && !e.isSettlement)
@@ -172,6 +169,8 @@ export function ExpensesClient({
     URL.revokeObjectURL(url);
   }
 
+  const editing = sheet !== null && sheet !== "new" ? sheet : null;
+
   return (
     <div className="flex flex-col gap-5">
       <div className="grid grid-cols-2 gap-2.5">
@@ -222,23 +221,268 @@ export function ExpensesClient({
 
       {!closed ? (
         <Fab
-          onClick={() => setShowForm(true)}
+          onClick={() => setSheet("new")}
           aria-label={t("budget.form.addExpense")}
           className="fixed right-4 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-40 lg:right-8 lg:bottom-6 print:hidden"
         />
       ) : null}
 
-      <Sheet open={showForm && !closed} onOpenChange={setShowForm}>
-        <SheetContent>
-          <SheetHeader>
-            <SheetTitle>{t("budget.form.addExpense")}</SheetTitle>
-          </SheetHeader>
+      <ExpenseSheet
+        key={editing?.id ?? (sheet === "new" ? "new" : "none")}
+        tripId={tripId}
+        members={members}
+        events={events}
+        myId={myId}
+        primaryCurrency={primaryCurrency}
+        expense={editing}
+        canEdit={editing ? canManage(editing) && !closed && !editing.isSettlement : !closed}
+        splitLabels={splitLabels}
+        nameOf={nameOf}
+        fmt={fmt}
+        open={sheet !== null && !(sheet === "new" && closed)}
+        onClose={() => setSheet(null)}
+      />
+
+      {byDate.length === 0 ? (
+        <p className="rounded-lg border border-dashed border-line bg-card/60 px-4 py-8 text-center text-sm text-slate">
+          {query ? t("budget.empty.noMatch") : t("budget.empty.noExpenses")}
+        </p>
+      ) : (
+        byDate.map(([date, rows]) => (
+          <section key={date}>
+            <h2 className="mb-1.5 font-mono text-label text-mist uppercase tabular-nums">
+              {format(new Date(`${date}T12:00:00`), "d MMMM yyyy", { locale: dfLocale })}
+            </h2>
+            {/* B7 — registre : rangées 44 dans une carte, séparateurs wash, pas de zébrage */}
+            <div className="divide-y divide-wash rounded-lg border border-line bg-card">
+              {rows.map((e) => (
+                <div
+                  key={e.id}
+                  className="flex min-h-11 items-center gap-3 px-3 py-1.5 text-body transition-colors hover:bg-wash"
+                >
+                  {/* V07e : la ligne s'ouvre en détail (répartition) / édition */}
+                  <button
+                    type="button"
+                    onClick={() => (e.isSettlement ? undefined : setSheet(e))}
+                    disabled={e.isSettlement}
+                    aria-label={`${t("budget.detail.openAria")} ${e.title}`}
+                    className="flex min-w-0 flex-1 items-center gap-3 rounded-sm text-left outline-none focus-visible:ring-2 focus-visible:ring-citron disabled:cursor-default"
+                  >
+                    <span className="min-w-0 flex-1 truncate text-ink">
+                      {e.isSettlement ? "↩ " : ""}
+                      {e.title}
+                      {e.isSettlement ? (
+                        <span className="ml-1.5 rounded-sm bg-wash px-1.5 py-0.5 font-mono text-label text-slate uppercase">
+                          {t("budget.list.betweenTravelers")}
+                        </span>
+                      ) : (
+                        <span className="ml-1.5 rounded-sm bg-wash px-1.5 py-0.5 font-mono text-label text-slate uppercase">
+                          {EXPENSE_CATEGORIES.includes(e.category as ExpenseCategory)
+                            ? t(`budget.categories.${e.category}`)
+                            : e.category}
+                        </span>
+                      )}
+                    </span>
+                    <span className="shrink-0 text-caption text-slate">
+                      {e.isSettlement
+                        ? `${nameOf(e.paid_by)} → ${nameOf(e.beneficiaries[0]?.userId ?? "")}`
+                        : `${nameOf(e.paid_by)} · ${t("budget.list.for")} ${e.beneficiaries.length}${e.splitMode !== "equal" ? ` (${splitLabels[e.splitMode].toLowerCase()})` : ""}`}
+                    </span>
+                    <Money
+                      amount={e.amountPrimary ?? e.amount}
+                      currency={e.amountPrimary !== null ? primaryCurrency : e.currency}
+                      secondaryAmount={e.amountPrimary !== null ? sub(e.amountPrimary) : null}
+                      secondaryCurrency={secondaryCurrency}
+                      className="shrink-0 font-mono font-bold text-ink tabular-nums"
+                      title={
+                        e.currency !== primaryCurrency
+                          ? `${t("budget.list.entered")} ${fmt(e.amount, e.currency)}`
+                          : undefined
+                      }
+                    />
+                  </button>
+                  {(e.created_by === myId || e.paid_by === myId || isOwner) && !closed ? (
+                    <button
+                      type="button"
+                      disabled={pending}
+                      onClick={() =>
+                        startTransition(async () => {
+                          const r = await deleteExpense(tripId, e.id);
+                          if (!r.ok) {
+                            toast.error(r.message ?? t("budget.toast.deleteFailed"));
+                          }
+                        })
+                      }
+                      className="rounded-sm text-slate transition-colors outline-none hover:text-berry-ink focus-visible:ring-2 focus-visible:ring-citron"
+                      aria-label={`${t("budget.common.delete")} ${e.title}`}
+                    >
+                      <Trash2 className="size-4" aria-hidden="true" />
+                    </button>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          </section>
+        ))
+      )}
+    </div>
+  );
+}
+
+/**
+ * V07e — feuille unique pour ajouter, voir (répartition) et modifier une
+ * dépense. `expense === null` = création ; `canEdit` faux = détail en lecture
+ * (VIEWER, Bourse close ou règlement). Remontée avec une `key` par dépense :
+ * chaque ouverture repart d'un état propre.
+ */
+function ExpenseSheet({
+  tripId,
+  members,
+  events,
+  myId,
+  primaryCurrency,
+  expense,
+  canEdit,
+  splitLabels,
+  nameOf,
+  fmt,
+  open,
+  onClose,
+}: {
+  tripId: string;
+  members: Member[];
+  events: EventOption[];
+  myId: string;
+  primaryCurrency: string;
+  expense: ExpenseRow | null;
+  canEdit: boolean;
+  splitLabels: Record<SplitMode, string>;
+  nameOf: (id: string) => string;
+  fmt: (n: number, c: string) => string;
+  open: boolean;
+  onClose: () => void;
+}) {
+  const t = useT();
+  const locale = useLocale();
+  const dfLocale = dateFnsLocale(locale);
+  const isEdit = expense !== null;
+
+  const [category, setCategory] = useState<ExpenseCategory>(
+    expense && EXPENSE_CATEGORIES.includes(expense.category as ExpenseCategory)
+      ? (expense.category as ExpenseCategory)
+      : "autre",
+  );
+  const [splitMode, setSplitMode] = useState<SplitMode>(expense?.splitMode ?? "equal");
+  const [amount, setAmount] = useState<number>(expense?.amount ?? 0);
+  const [checked, setChecked] = useState<Set<string>>(
+    new Set(expense ? expense.beneficiaries.map((b) => b.userId) : members.map((m) => m.userId)),
+  );
+  const [shares, setShares] = useState<Record<string, number>>(() => {
+    const init: Record<string, number> = {};
+    for (const b of expense?.beneficiaries ?? []) {
+      if (b.share !== null) {
+        init[b.userId] = b.share;
+      }
+    }
+    return init;
+  });
+  const [state, formAction, formPending] = useActionState<ExpenseState, FormData>(
+    isEdit ? updateExpense : addExpense,
+    { status: "idle" },
+  );
+
+  // Succès → la feuille se referme (la liste est revalidée côté serveur).
+  useEffect(() => {
+    if (state.status === "success") {
+      onClose();
+    }
+  }, [state, onClose]);
+
+  // Aperçu de la part de chacun selon le mode (façon Tricount)
+  const shareOf = (userId: string): number => {
+    const list = [...checked];
+    if (list.length === 0 || !checked.has(userId)) {
+      return 0;
+    }
+    if (splitMode === "exact") {
+      return shares[userId] ?? 0;
+    }
+    if (splitMode === "shares") {
+      const total = list.reduce((s, id) => s + (shares[id] ?? 1), 0);
+      return total > 0 ? (amount * (shares[userId] ?? 1)) / total : 0;
+    }
+    return amount / list.length;
+  };
+
+  return (
+    <Sheet
+      open={open}
+      onOpenChange={(v) => {
+        if (!v) {
+          onClose();
+        }
+      }}
+    >
+      <SheetContent>
+        <SheetHeader>
+          <SheetTitle>
+            {isEdit
+              ? canEdit
+                ? t("budget.form.editExpense")
+                : t("budget.detail.title")
+              : t("budget.form.addExpense")}
+          </SheetTitle>
+        </SheetHeader>
+
+        {!canEdit && expense ? (
+          /* Détail en lecture : montant, payeur et répartition enregistrée */
+          <div className="flex flex-col gap-4">
+            <div>
+              <p className="text-subhead text-ink">{expense.title}</p>
+              <p className="mt-0.5 text-caption text-slate">
+                {EXPENSE_CATEGORIES.includes(expense.category as ExpenseCategory)
+                  ? t(`budget.categories.${expense.category}`)
+                  : expense.category}
+                {" · "}
+                {format(new Date(`${expense.spentOn}T12:00:00`), "d MMMM yyyy", {
+                  locale: dfLocale,
+                })}
+              </p>
+            </div>
+            <p className="font-mono text-heading font-bold text-ink tabular-nums">
+              {fmt(expense.amount, expense.currency)}
+            </p>
+            <p className="text-body text-slate">
+              {t("budget.form.paidBy")} : {nameOf(expense.paid_by)}
+            </p>
+            <div>
+              <p className="mb-1.5 font-mono text-label text-mist uppercase">
+                {t("budget.detail.split")} — {splitLabels[expense.splitMode]}
+              </p>
+              <ul className="divide-y divide-wash rounded-lg border border-line">
+                {expense.beneficiaries.map((b) => (
+                  <li
+                    key={b.userId}
+                    className="flex items-center justify-between px-3 py-2 text-body"
+                  >
+                    <span className="text-ink">{nameOf(b.userId)}</span>
+                    <span className="font-mono text-data text-slate tabular-nums">
+                      {fmt(storedShareOf(expense, b.userId), expense.currency)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        ) : (
           <form action={formAction} className="flex flex-col gap-3">
             <input type="hidden" name="tripId" value={tripId} />
+            {expense ? <input type="hidden" name="expenseId" value={expense.id} /> : null}
             <div className="grid grid-cols-2 gap-3">
               <Input
                 name="title"
                 placeholder={t("budget.form.titlePlaceholder")}
+                defaultValue={expense?.title}
                 required
                 maxLength={200}
               />
@@ -249,12 +493,13 @@ export function ExpensesClient({
                   step="0.01"
                   min="0.01"
                   placeholder={t("budget.form.amountPlaceholder")}
+                  defaultValue={expense?.amount}
                   required
                   onChange={(e) => setAmount(Number(e.target.value) || 0)}
                 />
                 <CurrencyInput
                   name="currency"
-                  defaultValue={primaryCurrency}
+                  defaultValue={expense?.currency ?? primaryCurrency}
                   className="w-24"
                   aria-label={t("budget.form.currencyAria")}
                 />
@@ -282,7 +527,7 @@ export function ExpensesClient({
                   id="spentOn"
                   name="spentOn"
                   type="date"
-                  defaultValue={new Date().toISOString().slice(0, 10)}
+                  defaultValue={expense?.spentOn ?? new Date().toISOString().slice(0, 10)}
                   required
                 />
               </div>
@@ -292,7 +537,7 @@ export function ExpensesClient({
                 {t("budget.form.paidBy")}
                 <select
                   name="paidBy"
-                  defaultValue={myId}
+                  defaultValue={expense?.paid_by ?? myId}
                   className="rounded border border-line bg-card px-2 py-1.5 text-sm"
                 >
                   {members.map((m) => (
@@ -306,7 +551,7 @@ export function ExpensesClient({
                 {t("budget.form.linkedEvent")}
                 <select
                   name="eventId"
-                  defaultValue=""
+                  defaultValue={expense?.eventId ?? ""}
                   onChange={(e) => {
                     const ev = events.find((x) => x.id === e.target.value);
                     if (ev) {
@@ -330,7 +575,7 @@ export function ExpensesClient({
               <select
                 name="splitMode"
                 value={splitMode}
-                onChange={(e) => setSplitMode(e.target.value as typeof splitMode)}
+                onChange={(e) => setSplitMode(e.target.value as SplitMode)}
                 className="rounded border border-line bg-card px-2 py-1.5 text-sm"
               >
                 {SPLIT_MODES.map((m) => (
@@ -408,82 +653,8 @@ export function ExpensesClient({
               ) : null}
             </div>
           </form>
-        </SheetContent>
-      </Sheet>
-
-      {byDate.length === 0 ? (
-        <p className="rounded-lg border border-dashed border-line bg-card/60 px-4 py-8 text-center text-sm text-slate">
-          {query ? t("budget.empty.noMatch") : t("budget.empty.noExpenses")}
-        </p>
-      ) : (
-        byDate.map(([date, rows]) => (
-          <section key={date}>
-            <h2 className="mb-1.5 font-mono text-label text-mist uppercase tabular-nums">
-              {format(new Date(`${date}T12:00:00`), "d MMMM yyyy", { locale: dfLocale })}
-            </h2>
-            {/* B7 — registre : rangées 44 dans une carte, séparateurs wash, pas de zébrage */}
-            <div className="divide-y divide-wash rounded-lg border border-line bg-card">
-              {rows.map((e) => (
-                <div
-                  key={e.id}
-                  className="flex min-h-11 items-center gap-3 px-3 py-1.5 text-body transition-colors hover:bg-wash"
-                >
-                  <span className="min-w-0 flex-1 truncate text-ink">
-                    {e.isSettlement ? "↩ " : ""}
-                    {e.title}
-                    {e.isSettlement ? (
-                      <span className="ml-1.5 rounded-sm bg-wash px-1.5 py-0.5 font-mono text-label text-slate uppercase">
-                        {t("budget.list.betweenTravelers")}
-                      </span>
-                    ) : (
-                      <span className="ml-1.5 rounded-sm bg-wash px-1.5 py-0.5 font-mono text-label text-slate uppercase">
-                        {EXPENSE_CATEGORIES.includes(e.category as ExpenseCategory)
-                          ? t(`budget.categories.${e.category}`)
-                          : e.category}
-                      </span>
-                    )}
-                  </span>
-                  <span className="shrink-0 text-caption text-slate">
-                    {e.isSettlement
-                      ? `${nameOf(e.paid_by)} → ${nameOf(e.beneficiaries[0]?.userId ?? "")}`
-                      : `${nameOf(e.paid_by)} · ${t("budget.list.for")} ${e.beneficiaries.length}${e.splitMode !== "equal" ? ` (${splitLabels[e.splitMode].toLowerCase()})` : ""}`}
-                  </span>
-                  <Money
-                    amount={e.amountPrimary ?? e.amount}
-                    currency={e.amountPrimary !== null ? primaryCurrency : e.currency}
-                    secondaryAmount={e.amountPrimary !== null ? sub(e.amountPrimary) : null}
-                    secondaryCurrency={secondaryCurrency}
-                    className="shrink-0 font-mono font-bold text-ink tabular-nums"
-                    title={
-                      e.currency !== primaryCurrency
-                        ? `${t("budget.list.entered")} ${fmt(e.amount, e.currency)}`
-                        : undefined
-                    }
-                  />
-                  {(e.created_by === myId || e.paid_by === myId || isOwner) && !closed ? (
-                    <button
-                      type="button"
-                      disabled={pending}
-                      onClick={() =>
-                        startTransition(async () => {
-                          const r = await deleteExpense(tripId, e.id);
-                          if (!r.ok) {
-                            toast.error(r.message ?? t("budget.toast.deleteFailed"));
-                          }
-                        })
-                      }
-                      className="rounded-sm text-slate transition-colors outline-none hover:text-berry-ink focus-visible:ring-2 focus-visible:ring-citron"
-                      aria-label={`${t("budget.common.delete")} ${e.title}`}
-                    >
-                      <Trash2 className="size-4" aria-hidden="true" />
-                    </button>
-                  ) : null}
-                </div>
-              ))}
-            </div>
-          </section>
-        ))
-      )}
-    </div>
+        )}
+      </SheetContent>
+    </Sheet>
   );
 }

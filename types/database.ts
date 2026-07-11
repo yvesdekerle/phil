@@ -1905,6 +1905,21 @@ export type Database = {
         }
         Returns: string
       }
+      update_expense_with_beneficiaries: {
+        Args: {
+          p_amount: number
+          p_beneficiaries: Json
+          p_category: string
+          p_currency: string
+          p_event_id?: string
+          p_expense_id: string
+          p_paid_by: string
+          p_spent_on: string
+          p_split_mode?: string
+          p_title: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       document_category:

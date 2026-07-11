@@ -82,6 +82,7 @@ export default async function PurseExpensesPage({
       category: e.category,
       spentOn: e.spent_on,
       isSettlement: e.is_settlement,
+      eventId: e.event_id,
       splitMode: e.split_mode as ExpenseRow["splitMode"],
       beneficiaries: (e.expense_beneficiaries ?? []).map((b) => ({
         userId: b.user_id,

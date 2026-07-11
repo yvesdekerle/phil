@@ -50,6 +50,12 @@ export const budgetEs = {
       sharesAria: "Partes",
       exactAria: "Importe exacto",
       saving: "Guardando…",
+      editExpense: "Editar el gasto",
+    },
+    detail: {
+      title: "Detalle del gasto",
+      split: "Reparto",
+      openAria: "Ver el gasto",
     },
     csv: {
       date: "Fecha",

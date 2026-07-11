@@ -50,6 +50,12 @@ export const budgetFr = {
       sharesAria: "Parts",
       exactAria: "Montant exact",
       saving: "Enregistrement…",
+      editExpense: "Modifier la dépense",
+    },
+    detail: {
+      title: "Détail de la dépense",
+      split: "Répartition",
+      openAria: "Voir la dépense",
     },
     csv: {
       date: "Date",
