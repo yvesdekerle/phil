@@ -244,7 +244,7 @@ export function PhotosClient({
 
       {photos.length === 0 ? (
         <div className="rounded-lg border border-dashed border-line bg-card/60 px-6 py-14 text-center">
-          <p className="font-sans text-xl text-ink italic">{t("photos.emptyTitle")}</p>
+          <p className="text-subhead text-ink">{t("photos.emptyTitle")}</p>
           <p className="mt-2 text-sm text-slate">
             {t("photos.emptyBody").replace("{quota}", String(quota))}
           </p>
@@ -279,7 +279,7 @@ export function PhotosClient({
                   type="button"
                   disabled={pending}
                   onClick={() => startTransition(() => deletePhoto(tripId, p.id))}
-                  className="absolute top-1.5 right-1.5 rounded-full bg-ink/60 p-1.5 text-card opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+                  className="absolute top-1.5 right-1.5 rounded-full bg-ink-deep/60 p-1.5 text-white opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
                   aria-label={t("photos.deleteAria")}
                 >
                   <Trash2 className="size-3.5" aria-hidden="true" />
@@ -297,7 +297,7 @@ export function PhotosClient({
           aria-modal="true"
           aria-label={t("photos.viewerAria")}
         >
-          <div className="flex items-center justify-between px-4 py-3 text-card">
+          <div className="flex items-center justify-between px-4 py-3 text-white">
             <span className="text-sm opacity-80">
               {lightbox + 1}/{photos.length} · {photos[lightbox].uploaderName}
             </span>
@@ -328,7 +328,7 @@ export function PhotosClient({
                   type="button"
                   onClick={() => step(-1)}
                   aria-label={t("photos.prev")}
-                  className="absolute left-2 rounded-full bg-card/10 p-2 text-card hover:bg-card/20"
+                  className="absolute left-2 rounded-full bg-white/10 p-2 text-white hover:bg-card/20"
                 >
                   <ChevronLeft className="size-6" aria-hidden="true" />
                 </button>
@@ -336,7 +336,7 @@ export function PhotosClient({
                   type="button"
                   onClick={() => step(1)}
                   aria-label={t("photos.next")}
-                  className="absolute right-2 rounded-full bg-card/10 p-2 text-card hover:bg-card/20"
+                  className="absolute right-2 rounded-full bg-white/10 p-2 text-white hover:bg-card/20"
                 >
                   <ChevronRight className="size-6" aria-hidden="true" />
                 </button>
@@ -344,7 +344,9 @@ export function PhotosClient({
             ) : null}
           </div>
           {photos[lightbox].caption ? (
-            <p className="px-4 py-3 text-center text-sm text-card/90">{photos[lightbox].caption}</p>
+            <p className="px-4 py-3 text-center text-sm text-white/90">
+              {photos[lightbox].caption}
+            </p>
           ) : (
             <div className="py-3" />
           )}

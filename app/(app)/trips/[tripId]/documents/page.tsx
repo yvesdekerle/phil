@@ -164,10 +164,10 @@ export default async function TripDocumentsPage({
           <Link
             href={filterHref(activeCategory, null)}
             className={cn(
-              "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+              "inline-flex h-8 items-center rounded-full border px-3 text-ui transition-colors outline-none focus-visible:ring-2 focus-visible:ring-citron focus-visible:ring-offset-2 focus-visible:ring-offset-sand",
               !owner
-                ? "border-line bg-citron text-card"
-                : "border-line bg-card text-slate hover:text-ink",
+                ? "border-ink bg-ink text-white"
+                : "border-line bg-card text-slate hover:bg-wash hover:text-ink",
             )}
           >
             {t("tripDocs.allTravelers")}
@@ -177,10 +177,10 @@ export default async function TripDocumentsPage({
               key={o}
               href={filterHref(activeCategory, o)}
               className={cn(
-                "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                "inline-flex h-8 items-center rounded-full border px-3 text-ui transition-colors outline-none focus-visible:ring-2 focus-visible:ring-citron focus-visible:ring-offset-2 focus-visible:ring-offset-sand",
                 owner === o
-                  ? "border-line bg-citron text-card"
-                  : "border-line bg-card text-slate hover:text-ink",
+                  ? "border-ink bg-ink text-white"
+                  : "border-line bg-card text-slate hover:bg-wash hover:text-ink",
               )}
             >
               {o}
@@ -191,15 +191,19 @@ export default async function TripDocumentsPage({
 
       {documents.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-line bg-card/60 px-6 py-14 text-center">
-          <p className="font-sans text-xl text-ink italic">{t("tripDocs.emptyTitle")}</p>
-          <p className="max-w-sm text-sm text-slate">{t("tripDocs.emptyBody")}</p>
+          <p className="text-subhead text-ink">{t("tripDocs.emptyTitle")}</p>
+          <p className="max-w-sm text-body text-slate">{t("tripDocs.emptyBody")}</p>
         </div>
       ) : (
         <ul className="flex flex-col gap-2">
           {documents.map((doc) => (
             <li
               key={doc.id}
-              className="flex items-center gap-3 rounded-lg border border-line bg-card px-4 py-3"
+              className={cn(
+                "flex min-h-14 items-center gap-3 rounded-lg px-4 py-2.5",
+                // L6a : un document venu du coffre garde sa livrée sombre
+                doc.scope === "VAULT" ? "bg-ink-deep" : "border border-line bg-card",
+              )}
             >
               <a
                 href={
@@ -209,14 +213,31 @@ export default async function TripDocumentsPage({
                 }
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex min-w-0 flex-1 items-center gap-4"
+                className="flex min-w-0 flex-1 items-center gap-4 rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-citron"
               >
-                <CategoryIcon category={doc.category} />
+                <CategoryIcon
+                  category={doc.category}
+                  className={
+                    doc.scope === "VAULT"
+                      ? "border-white/15 bg-white/10 text-lagoon-soft"
+                      : undefined
+                  }
+                />
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm font-medium text-ink">
+                  <span
+                    className={cn(
+                      "block truncate text-subhead",
+                      doc.scope === "VAULT" ? "text-white" : "text-ink",
+                    )}
+                  >
                     {doc.file_name}
                   </span>
-                  <span className="block text-xs text-slate">
+                  <span
+                    className={cn(
+                      "block text-caption",
+                      doc.scope === "VAULT" ? "text-lagoon-soft" : "text-slate",
+                    )}
+                  >
                     {doc.label ?? CATEGORY_LABELS[doc.category]} ·{" "}
                     {format(parseISO(doc.uploaded_at), "d MMM yyyy", { locale: dfLocale })}
                   </span>
@@ -224,8 +245,8 @@ export default async function TripDocumentsPage({
               </a>
               <span
                 className={cn(
-                  "shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium",
-                  doc.scope === "VAULT" ? "bg-citron/15 text-mist" : "bg-slate/10 text-slate",
+                  "shrink-0 rounded-sm px-2 py-0.5 font-mono text-label uppercase",
+                  doc.scope === "VAULT" ? "bg-white/10 text-lagoon-soft" : "bg-wash text-slate",
                 )}
               >
                 {doc.scope === "VAULT"
