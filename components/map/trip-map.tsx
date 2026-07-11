@@ -26,6 +26,10 @@ export type MapMarker = {
   noPath?: boolean;
 };
 
+/** Cadrage commun : tout le voyage visible, sans animation (V06d — animer le
+ * fit pendant qu'un setView de focus court éparpillait les marqueurs). */
+const FIT_OPTIONS: L.FitBoundsOptions = { padding: [36, 36], maxZoom: 13, animate: false };
+
 /** Carte Leaflet + OSM (PHIL-N01, style Polarsteps PHIL-Q15). */
 export function TripMap({
   markers,
@@ -47,13 +51,19 @@ export function TripMap({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
+  const markersRef = useRef(new Map<string, L.Marker>());
+  const boundsRef = useRef<L.LatLngBounds | null>(null);
+  // Vrai dès que l'utilisateur (geste ou focus) a choisi son cadrage : les
+  // re-fit automatiques déclenchés par un resize ne doivent plus le lui voler.
+  const userAdjustedRef = useRef(false);
   const t = useT();
 
   useEffect(() => {
-    if (!containerRef.current) {
+    const el = containerRef.current;
+    if (!el) {
       return;
     }
-    const map = L.map(containerRef.current, { scrollWheelZoom: true });
+    const map = L.map(el, { scrollWheelZoom: true });
     mapRef.current = map;
     // Fond CARTO Voyager (PHIL-Q37c) : lisible et épuré, sans le fouillis des
     // frontières administratives d'OSM.
@@ -63,24 +73,37 @@ export function TripMap({
       subdomains: "abcd",
       maxZoom: 20,
     }).addTo(map);
+    const markInteraction = () => {
+      userAdjustedRef.current = true;
+    };
+    el.addEventListener("pointerdown", markInteraction);
+    el.addEventListener("wheel", markInteraction);
     // La colonne carte est haute/responsive/sticky : recalcule la taille des
     // tuiles quand le conteneur change de dimensions (évite les tuiles grises),
     // et une fois après le premier paint (init en grille/flex à largeur tardive).
+    // V06d : re-cadre au passage — le fitBounds initial part sur une taille
+    // provisoire et coupait l'île en vue par défaut.
     // `removed` : la carte peut être démontée (navigation) avant que le rAF ou
     // le ResizeObserver ne s'exécute — invalidateSize planterait alors.
     let removed = false;
     const resize = () => {
-      if (!removed) {
-        map.invalidateSize();
+      if (removed) {
+        return;
+      }
+      map.invalidateSize();
+      if (!userAdjustedRef.current && boundsRef.current) {
+        map.fitBounds(boundsRef.current, FIT_OPTIONS);
       }
     };
     const raf = requestAnimationFrame(resize);
     const observer = new ResizeObserver(resize);
-    observer.observe(containerRef.current);
+    observer.observe(el);
     return () => {
       removed = true;
       cancelAnimationFrame(raf);
       observer.disconnect();
+      el.removeEventListener("pointerdown", markInteraction);
+      el.removeEventListener("wheel", markInteraction);
       map.remove();
       mapRef.current = null;
     };
@@ -93,6 +116,7 @@ export function TripMap({
     }
     const layer = L.layerGroup().addTo(map);
     const byId = new Map<string, L.Marker>();
+    markersRef.current = byId;
 
     const sorted = [...markers].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
@@ -160,29 +184,37 @@ export function TripMap({
     }
 
     if (sorted.length > 0) {
-      map.fitBounds(L.latLngBounds(sorted.map((m) => [m.lat, m.lng])), {
-        padding: [36, 36],
-        maxZoom: 13,
-      });
+      boundsRef.current = L.latLngBounds(sorted.map((m) => [m.lat, m.lng]));
+      userAdjustedRef.current = false;
+      map.fitBounds(boundsRef.current, FIT_OPTIONS);
     } else {
+      boundsRef.current = null;
       map.setView([0, 0], 2);
-    }
-
-    // PHIL-Q14/Q37c : focus depuis la grille photos ou un clic dans la liste
-    void focusNonce; // dépendance : force le re-zoom même sur le même lieu
-    if (focusId) {
-      const target = byId.get(focusId);
-      const m = markers.find((x) => x.id === focusId);
-      if (target && m) {
-        map.setView([m.lat, m.lng], Math.max(map.getZoom(), 12));
-        target.openPopup();
-      }
     }
 
     return () => {
       layer.remove();
     };
-  }, [markers, drawPath, distanceFrom, focusId, focusNonce, t]);
+  }, [markers, drawPath, distanceFrom, t]);
+
+  // PHIL-Q14/Q37c : focus depuis la grille photos ou un clic dans la liste.
+  // Effet séparé du rendu des marqueurs (V06d) : reconstruire le layer et
+  // relancer un fitBounds animé pendant le setView du focus éparpillait les
+  // pastilles n'importe où sur la carte.
+  useEffect(() => {
+    void focusNonce; // dépendance : force le re-zoom même sur le même lieu
+    const map = mapRef.current;
+    if (!map || !focusId) {
+      return;
+    }
+    const target = markersRef.current.get(focusId);
+    const m = markers.find((x) => x.id === focusId);
+    if (target && m) {
+      userAdjustedRef.current = true;
+      map.setView([m.lat, m.lng], Math.max(map.getZoom(), 12));
+      target.openPopup();
+    }
+  }, [focusId, focusNonce, markers]);
 
   return (
     <div

@@ -1,7 +1,7 @@
 "use client";
 
 import { Home } from "lucide-react";
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useMemo, useState } from "react";
 import { EventTypeIcon } from "@/components/calendar/event-type-icon";
 import { useT } from "@/components/i18n/provider";
 import type { MapMarker } from "@/components/map/trip-map";
@@ -55,8 +55,13 @@ export function TripMapExplorer({
     setFocusNonce((n) => n + 1);
   };
 
-  const shownMarkers =
-    showDeparture || !departureId ? markers : markers.filter((m) => m.id !== departureId);
+  // Identité stable (V06d) : un clic de focus re-rend le composant, et une
+  // liste recréée forcerait TripMap à reconstruire tous ses marqueurs en
+  // pleine animation de zoom — c'est ce qui les éparpillait.
+  const shownMarkers = useMemo(
+    () => (showDeparture || !departureId ? markers : markers.filter((m) => m.id !== departureId)),
+    [markers, showDeparture, departureId],
+  );
   const count = shownMarkers.length;
 
   const pin = (m: MapMarker) => (
