@@ -54,7 +54,7 @@ export function TripOfflineSync({ tripId }: { tripId: string }) {
   return (
     <div
       role="status"
-      className="fixed right-4 bottom-4 z-50 rounded-lg border border-laiton-clair bg-papier px-4 py-2.5 text-sm text-encre shadow-[0_4px_20px_rgba(31,42,68,0.15)]"
+      className="fixed right-4 bottom-4 z-50 rounded-lg border border-line bg-card px-4 py-2.5 text-sm text-ink shadow-[0_4px_20px_rgba(15,47,56,0.15)]"
     >
       {t("offline.synced")}
     </div>

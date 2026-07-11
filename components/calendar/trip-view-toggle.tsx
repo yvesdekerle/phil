@@ -40,9 +40,7 @@ export function TripViewToggle({ tripId, active }: { tripId: string; active: Tri
       aria-pressed={active === view}
       className={cn(
         "rounded-full px-3 py-1 text-sm transition-colors",
-        active === view
-          ? "bg-bordeaux font-medium text-papier"
-          : "text-encre-douce hover:text-encre",
+        active === view ? "bg-lagoon-ink font-medium text-card" : "text-slate hover:text-ink",
       )}
     >
       {label}
@@ -50,7 +48,7 @@ export function TripViewToggle({ tripId, active }: { tripId: string; active: Tri
   );
 
   return (
-    <div className="inline-flex w-fit items-center gap-0.5 rounded-full border border-laiton-clair bg-papier p-0.5">
+    <div className="inline-flex w-fit items-center gap-0.5 rounded-full border border-line bg-card p-0.5">
       {seg("calendar", t("calendar.viewToggle.calendar"))}
       {seg("timeline", t("calendar.viewToggle.timeline"))}
       {seg("carte", t("calendar.viewToggle.map"))}

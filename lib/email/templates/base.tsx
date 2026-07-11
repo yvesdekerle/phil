@@ -4,33 +4,33 @@ import { messages, translator } from "@/lib/i18n/messages";
 import { palette } from "@/lib/ui/colors";
 
 const styles = {
-  body: { backgroundColor: palette.parchemin, fontFamily: "Georgia, 'Times New Roman', serif" },
+  body: { backgroundColor: palette.sand, fontFamily: "Georgia, 'Times New Roman', serif" },
   container: {
-    backgroundColor: palette.papier,
-    border: `1px solid ${palette.laitonClair}`,
+    backgroundColor: palette.card,
+    border: `1px solid ${palette.line}`,
     borderRadius: "8px",
     margin: "24px auto",
     maxWidth: "520px",
     padding: "32px",
   },
   wordmark: {
-    color: palette.encre,
+    color: palette.ink,
     fontSize: "28px",
     fontWeight: 700 as const,
     margin: "0 0 4px",
     textAlign: "center" as const,
   },
   tagline: {
-    color: palette.laiton,
+    color: palette.mist,
     fontSize: "11px",
     letterSpacing: "2px",
     margin: "0 0 24px",
     textAlign: "center" as const,
     textTransform: "uppercase" as const,
   },
-  hr: { borderColor: palette.laitonClair, margin: "24px 0" },
+  hr: { borderColor: palette.line, margin: "24px 0" },
   signature: {
-    color: palette.encreDouce,
+    color: palette.slate,
     fontSize: "13px",
     margin: 0,
     textAlign: "center" as const,
@@ -66,17 +66,17 @@ export function EmailShell({
 
 export const emailStyles = {
   heading: {
-    color: palette.encre,
+    color: palette.ink,
     fontSize: "20px",
     fontWeight: 700 as const,
     margin: "0 0 12px",
   },
-  text: { color: palette.encre, fontSize: "14px", lineHeight: "22px", margin: "0 0 12px" },
-  muted: { color: palette.encreDouce, fontSize: "13px", lineHeight: "20px", margin: "0 0 12px" },
+  text: { color: palette.ink, fontSize: "14px", lineHeight: "22px", margin: "0 0 12px" },
+  muted: { color: palette.slate, fontSize: "13px", lineHeight: "20px", margin: "0 0 12px" },
   button: {
-    backgroundColor: palette.bordeaux,
+    backgroundColor: palette.lagoonInk,
     borderRadius: "6px",
-    color: palette.papier,
+    color: palette.card,
     display: "inline-block",
     fontSize: "14px",
     fontWeight: 600 as const,
@@ -84,5 +84,5 @@ export const emailStyles = {
     textDecoration: "none",
   },
   buttonWrap: { margin: "20px 0", textAlign: "center" as const },
-  fallbackLink: { color: palette.bordeaux, fontSize: "12px", wordBreak: "break-all" as const },
+  fallbackLink: { color: palette.lagoonInk, fontSize: "12px", wordBreak: "break-all" as const },
 };

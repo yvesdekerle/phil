@@ -45,12 +45,12 @@ export function VaultUnlock() {
 
   return (
     <main className="flex flex-1 flex-col items-center justify-center px-4 py-12">
-      <div className="w-full max-w-sm rounded-lg border border-laiton-clair bg-papier px-8 py-10 text-center shadow-[0_2px_16px_rgba(31,42,68,0.08)]">
+      <div className="w-full max-w-sm rounded-lg border border-line bg-card px-8 py-10 text-center shadow-[0_2px_16px_rgba(15,47,56,0.08)]">
         <VaultDoor state={doorState} />
-        <h1 className="mt-5 font-display text-2xl text-encre italic">
+        <h1 className="mt-5 font-sans text-2xl text-ink italic">
           {opening ? t("vault.unlock.openTitle") : t("vault.unlock.lockedTitle")}
         </h1>
-        <p className="mt-2 mb-6 text-sm text-encre-douce">
+        <p className="mt-2 mb-6 text-sm text-slate">
           {opening ? t("vault.unlock.openingBody") : t("vault.unlock.lockedBody")}
         </p>
         {!opening ? (
@@ -59,11 +59,11 @@ export function VaultUnlock() {
               {pending ? t("vault.unlock.verifying") : t("vault.unlock.button")}
             </Button>
             {state.status === "error" ? (
-              <p role="alert" className="mt-3 text-sm text-bordeaux">
+              <p role="alert" className="mt-3 text-sm text-lagoon-ink">
                 {state.message}
               </p>
             ) : null}
-            <p className="mt-4 text-xs text-encre-douce">{t("vault.unlock.duration")}</p>
+            <p className="mt-4 text-xs text-slate">{t("vault.unlock.duration")}</p>
           </>
         ) : null}
       </div>

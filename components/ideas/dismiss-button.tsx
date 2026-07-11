@@ -23,7 +23,7 @@ export function DismissButton({
       type="button"
       disabled={pending}
       onClick={() => startTransition(() => setIdeaDismissed(tripId, ideaId, !dismissed))}
-      className="flex items-center gap-1.5 rounded-full border border-laiton-clair bg-papier px-3 py-1.5 text-sm font-medium text-encre-douce transition-colors hover:text-encre focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-laiton disabled:opacity-60"
+      className="flex items-center gap-1.5 rounded-full border border-line bg-card px-3 py-1.5 text-sm font-medium text-slate transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mist disabled:opacity-60"
     >
       {dismissed ? (
         <>

@@ -21,12 +21,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <>
-      <header className="border-b border-laiton-clair/60 print:hidden">
+      <header className="border-b border-line/60 print:hidden">
         <div className="mx-auto flex h-14 w-full max-w-5xl items-center justify-between px-4">
           <div className="flex items-center gap-6">
             <Link
               href="/trips"
-              className="font-display text-2xl text-encre focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-laiton"
+              className="font-sans text-2xl text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mist"
             >
               Phil
             </Link>
@@ -35,7 +35,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="text-encre-douce transition-colors hover:text-encre focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-laiton"
+                  className="text-slate transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mist"
                 >
                   {link.label}
                 </Link>

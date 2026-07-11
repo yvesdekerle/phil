@@ -75,9 +75,9 @@ export function CoverUpload({ tripId }: { tripId: string }) {
   }
 
   return (
-    <div className="flex flex-col gap-2 rounded-lg border border-laiton-clair bg-papier px-5 py-4">
-      <p className="text-sm font-medium text-encre">{t("settings.cover.title")}</p>
-      <p className="text-xs text-encre-douce">{t("settings.cover.desc")}</p>
+    <div className="flex flex-col gap-2 rounded-lg border border-line bg-card px-5 py-4">
+      <p className="text-sm font-medium text-ink">{t("settings.cover.title")}</p>
+      <p className="text-xs text-slate">{t("settings.cover.desc")}</p>
       <div className="flex flex-wrap items-center gap-3">
         <input
           ref={inputRef}
@@ -117,8 +117,8 @@ export function CoverUpload({ tripId }: { tripId: string }) {
         </Button>
       </div>
 
-      {message ? <p className="text-xs text-encre-douce">{message}</p> : null}
-      {error ? <p className="text-xs text-bordeaux">{error}</p> : null}
+      {message ? <p className="text-xs text-slate">{message}</p> : null}
+      {error ? <p className="text-xs text-lagoon-ink">{error}</p> : null}
     </div>
   );
 }

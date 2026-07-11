@@ -20,8 +20,8 @@ export async function PurseNav({
       className={cn(
         "rounded-full px-3 py-1",
         isActive
-          ? "bg-bordeaux font-medium text-papier"
-          : "text-encre-douce hover:bg-laiton/10 hover:text-encre",
+          ? "bg-lagoon-ink font-medium text-card"
+          : "text-slate hover:bg-citron/10 hover:text-ink",
       )}
     >
       {label}
@@ -40,7 +40,7 @@ export async function PurseNav({
       {pill(`/trips/${tripId}/budget/equilibre`, t("budget.nav.balance"), active === "equilibre")}
       {pill(`/trips/${tripId}/budget/depenses`, t("budget.nav.tracking"), active === "suivi")}
       {closed ? (
-        <span className="ml-1 flex items-center gap-1 rounded-full bg-encre/10 px-2.5 py-1 text-xs text-encre-douce">
+        <span className="ml-1 flex items-center gap-1 rounded-full bg-ink/10 px-2.5 py-1 text-xs text-slate">
           <Lock className="size-3" aria-hidden="true" /> {t("budget.nav.closed")}
         </span>
       ) : null}

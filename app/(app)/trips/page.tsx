@@ -34,7 +34,7 @@ export default async function TripsPage() {
   return (
     <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">
       <div className="mb-6 flex items-center justify-between gap-3">
-        <h1 className="font-display text-3xl text-encre">{t("trips.title")}</h1>
+        <h1 className="font-sans text-3xl text-ink">{t("trips.title")}</h1>
         <div className="flex items-center gap-2">
           <ImportTripButton />
           <Button asChild>
@@ -44,9 +44,9 @@ export default async function TripsPage() {
       </div>
 
       {trips.length === 0 ? (
-        <div className="flex flex-col items-center gap-4 rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-6 py-16 text-center">
-          <p className="font-display text-2xl text-encre italic">{t("trips.emptyTitle")}</p>
-          <p className="max-w-sm text-sm text-encre-douce">{t("trips.emptyBody")}</p>
+        <div className="flex flex-col items-center gap-4 rounded-lg border border-dashed border-line bg-card/60 px-6 py-16 text-center">
+          <p className="font-sans text-2xl text-ink italic">{t("trips.emptyTitle")}</p>
+          <p className="max-w-sm text-sm text-slate">{t("trips.emptyBody")}</p>
           <Button asChild className="mt-2">
             <Link href="/trips/new">{t("trips.create")}</Link>
           </Button>

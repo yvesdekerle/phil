@@ -51,8 +51,8 @@ export function ServiceWorkerRegister() {
   }
 
   return (
-    <div className="fixed right-4 bottom-4 z-50 flex items-center gap-3 rounded-lg border border-laiton-clair bg-papier px-4 py-3 shadow-[0_4px_20px_rgba(31,42,68,0.15)]">
-      <p className="text-sm text-encre">Nouvelle version disponible.</p>
+    <div className="fixed right-4 bottom-4 z-50 flex items-center gap-3 rounded-lg border border-line bg-card px-4 py-3 shadow-[0_4px_20px_rgba(15,47,56,0.15)]">
+      <p className="text-sm text-ink">Nouvelle version disponible.</p>
       <Button type="button" size="sm" onClick={() => waiting.postMessage({ type: "SKIP_WAITING" })}>
         Mettre à jour
       </Button>

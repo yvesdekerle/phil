@@ -128,7 +128,7 @@ export function ImportClient({
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          className="rounded-lg border-2 border-dashed border-laiton-clair bg-papier/60 px-6 py-12 text-center text-sm text-encre-douce transition-colors hover:border-laiton hover:text-encre"
+          className="rounded-lg border-2 border-dashed border-line bg-card/60 px-6 py-12 text-center text-sm text-slate transition-colors hover:border-line hover:text-ink"
         >
           {files.length > 0
             ? files.map((f) => f.name).join(", ")
@@ -142,7 +142,7 @@ export function ImportClient({
           hidden
           onChange={(e) => setFiles(Array.from(e.target.files ?? []).slice(0, 5))}
         />
-        {error ? <p className="text-sm text-bordeaux">{error}</p> : null}
+        {error ? <p className="text-sm text-lagoon-ink">{error}</p> : null}
         <Button
           type="button"
           disabled={files.length === 0 || phase === "analyzing"}
@@ -157,7 +157,7 @@ export function ImportClient({
   const e = extracted;
   return (
     <form action={save} className="flex flex-col gap-4">
-      <p className="rounded-md bg-laiton/10 px-3 py-2 text-xs text-encre-douce">
+      <p className="rounded-md bg-citron/10 px-3 py-2 text-xs text-slate">
         {t("events.import.reviewNote")}
       </p>
 
@@ -167,7 +167,7 @@ export function ImportClient({
           id="kind"
           value={kind}
           onChange={(ev) => setKind(ev.target.value as typeof kind)}
-          className="rounded border border-laiton-clair bg-papier px-2 py-1.5 text-sm"
+          className="rounded border border-line bg-card px-2 py-1.5 text-sm"
         >
           {KINDS.map((k) => (
             <option key={k} value={k}>
@@ -216,7 +216,7 @@ export function ImportClient({
           defaultValue={
             e?.timezone && timezones.includes(e.timezone) ? e.timezone : defaultTimezone
           }
-          className="rounded border border-laiton-clair bg-papier px-2 py-1.5 text-sm"
+          className="rounded border border-line bg-card px-2 py-1.5 text-sm"
         >
           {timezones.map((tz) => (
             <option key={tz} value={tz}>
@@ -244,7 +244,7 @@ export function ImportClient({
               id="transportMode"
               name="transportMode"
               defaultValue={e?.transportMode ?? "other"}
-              className="rounded border border-laiton-clair bg-papier px-2 py-1.5 text-sm"
+              className="rounded border border-line bg-card px-2 py-1.5 text-sm"
             >
               {TRANSPORT_MODES.map((m) => (
                 <option key={m} value={m}>
@@ -298,7 +298,7 @@ export function ImportClient({
         <Input id="notes" name="notes" defaultValue={e?.notes ?? ""} maxLength={2000} />
       </div>
 
-      {error ? <p className="text-sm text-bordeaux">{error}</p> : null}
+      {error ? <p className="text-sm text-lagoon-ink">{error}</p> : null}
       <div className="flex items-center gap-3">
         <Button type="submit" disabled={phase === "saving"}>
           {phase === "saving" ? t("events.import.saving") : t("events.import.create")}
@@ -309,7 +309,7 @@ export function ImportClient({
           </Button>
         ) : null}
       </div>
-      <p className="text-xs text-encre-douce">
+      <p className="text-xs text-slate">
         {draft
           ? draft.fileName
             ? `${t("events.import.footnoteDraftFilePrefix")}${draft.fileName}${t("events.import.footnoteDraftFileSuffix")}`

@@ -11,10 +11,10 @@ import { tripStatus } from "@/lib/trips/status";
 import { cn } from "@/lib/utils";
 
 const STATUS_STYLES: Record<string, string> = {
-  en_cours: "bg-bordeaux text-papier",
-  a_venir: "bg-laiton text-papier",
-  passe: "bg-encre-douce/15 text-encre-douce",
-  archive: "bg-encre-douce/15 text-encre-douce",
+  en_cours: "bg-lagoon-ink text-card",
+  a_venir: "bg-citron text-card",
+  passe: "bg-slate/15 text-slate",
+  archive: "bg-slate/15 text-slate",
 };
 
 export default async function TripLayout({
@@ -82,15 +82,15 @@ export default async function TripLayout({
         <div
           className={
             passportWarning.level === "danger"
-              ? "mb-4 rounded-lg border border-bordeaux/40 bg-bordeaux/10 px-4 py-2.5 text-sm text-bordeaux"
-              : "mb-4 rounded-lg border border-laiton bg-laiton/10 px-4 py-2.5 text-sm text-encre"
+              ? "mb-4 rounded-lg border border-lagoon-ink/40 bg-lagoon-ink/10 px-4 py-2.5 text-sm text-lagoon-ink"
+              : "mb-4 rounded-lg border border-line bg-citron/10 px-4 py-2.5 text-sm text-ink"
           }
         >
           {passportWarning.text}
         </div>
       ) : null}
-      <header className="overflow-hidden rounded-lg border border-laiton-clair bg-papier print:hidden">
-        <div className="relative h-40 bg-encre sm:h-52">
+      <header className="overflow-hidden rounded-lg border border-line bg-card print:hidden">
+        <div className="relative h-40 bg-ink sm:h-52">
           {trip.cover_image_url ? (
             <CoverImage
               src={trip.cover_image_url}
@@ -98,11 +98,11 @@ export default async function TripLayout({
               className="object-cover"
               priority
               fallbackChar={trip.destination.charAt(0).toUpperCase()}
-              fallbackClassName="font-display text-6xl text-laiton italic"
+              fallbackClassName="font-sans text-6xl text-mist italic"
             />
           ) : (
             <div className="flex h-full items-center justify-center">
-              <span className="font-display text-6xl text-laiton italic">
+              <span className="font-sans text-6xl text-mist italic">
                 {trip.destination.charAt(0).toUpperCase()}
               </span>
             </div>
@@ -110,8 +110,8 @@ export default async function TripLayout({
         </div>
         <div className="flex flex-wrap items-end justify-between gap-3 px-5 py-4">
           <div>
-            <h1 className="font-display text-3xl text-encre">{trip.name}</h1>
-            <p className="mt-1 text-sm text-encre-douce">
+            <h1 className="font-sans text-3xl text-ink">{trip.name}</h1>
+            <p className="mt-1 text-sm text-slate">
               {trip.destination} · {formatDateRange(trip.start_date, trip.end_date, dfLocale)}
             </p>
           </div>
@@ -122,7 +122,7 @@ export default async function TripLayout({
       </header>
 
       {/* PHIL-Q37c : le menu du voyage reste collé en haut au défilement */}
-      <nav className="sticky top-2 z-[1001] mt-2 rounded-lg border border-laiton-clair bg-papier px-5 shadow-[0_2px_10px_rgba(31,42,68,0.05)] print:hidden">
+      <nav className="sticky top-2 z-[1001] mt-2 rounded-lg border border-line bg-card px-5 shadow-[0_2px_10px_rgba(15,47,56,0.05)] print:hidden">
         <TripTabs
           tripId={trip.id}
           pending={pending ? { ideas: pending.ideas, polls: pending.polls } : undefined}

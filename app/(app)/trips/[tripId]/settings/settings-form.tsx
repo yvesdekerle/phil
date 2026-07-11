@@ -112,14 +112,14 @@ export function TripSettingsForm({
         <div className="flex flex-col gap-2">
           <Label htmlFor="name">{t("settings.form.name")}</Label>
           <Input id="name" disabled={!canEdit} {...register("name")} />
-          {errors.name ? <p className="text-sm text-bordeaux">{errors.name.message}</p> : null}
+          {errors.name ? <p className="text-sm text-lagoon-ink">{errors.name.message}</p> : null}
         </div>
 
         <div className="flex flex-col gap-2">
           <Label htmlFor="destination">{t("settings.form.destination")}</Label>
           <Input id="destination" disabled={!canEdit} {...register("destination")} />
           {errors.destination ? (
-            <p className="text-sm text-bordeaux">{errors.destination.message}</p>
+            <p className="text-sm text-lagoon-ink">{errors.destination.message}</p>
           ) : null}
         </div>
 
@@ -132,7 +132,7 @@ export function TripSettingsForm({
             <Label htmlFor="endDate">{t("settings.form.endDate")}</Label>
             <Input id="endDate" type="date" disabled={!canEdit} {...register("endDate")} />
             {errors.endDate ? (
-              <p className="text-sm text-bordeaux">{errors.endDate.message}</p>
+              <p className="text-sm text-lagoon-ink">{errors.endDate.message}</p>
             ) : null}
           </div>
         </div>
@@ -147,7 +147,7 @@ export function TripSettingsForm({
               {...register("currencyPrimary")}
             />
             {errors.currencyPrimary ? (
-              <p className="text-sm text-bordeaux">{errors.currencyPrimary.message}</p>
+              <p className="text-sm text-lagoon-ink">{errors.currencyPrimary.message}</p>
             ) : null}
           </div>
           <div className="flex flex-col gap-2">
@@ -159,7 +159,7 @@ export function TripSettingsForm({
               {...register("currencySecondary")}
             />
             {errors.currencySecondary ? (
-              <p className="text-sm text-bordeaux">{errors.currencySecondary.message}</p>
+              <p className="text-sm text-lagoon-ink">{errors.currencySecondary.message}</p>
             ) : null}
           </div>
         </div>
@@ -174,7 +174,7 @@ export function TripSettingsForm({
             {...register("whatsappGroupUrl")}
           />
           {errors.whatsappGroupUrl ? (
-            <p className="text-sm text-bordeaux">{errors.whatsappGroupUrl.message}</p>
+            <p className="text-sm text-lagoon-ink">{errors.whatsappGroupUrl.message}</p>
           ) : null}
         </div>
 
@@ -199,7 +199,7 @@ export function TripSettingsForm({
           {state.status !== "idle" ? (
             <p
               className={
-                state.status === "error" ? "text-sm text-bordeaux" : "text-sm text-encre-douce"
+                state.status === "error" ? "text-sm text-lagoon-ink" : "text-sm text-slate"
               }
             >
               {state.message}
@@ -207,12 +207,12 @@ export function TripSettingsForm({
           ) : null}
         </div>
       ) : (
-        <p className="text-sm text-encre-douce">{t("settings.form.viewerNote")}</p>
+        <p className="text-sm text-slate">{t("settings.form.viewerNote")}</p>
       )}
 
       {isOwner ? (
-        <div className="flex flex-col gap-3 rounded-lg border border-laiton-clair bg-papier px-5 py-4">
-          <p className="text-sm font-medium text-encre">{t("settings.danger.title")}</p>
+        <div className="flex flex-col gap-3 rounded-lg border border-line bg-card px-5 py-4">
+          <p className="text-sm font-medium text-ink">{t("settings.danger.title")}</p>
           <div className="flex flex-wrap items-center gap-3">
             <Button
               type="button"
@@ -255,7 +255,7 @@ export function TripSettingsForm({
               </AlertDialogContent>
             </AlertDialog>
           </div>
-          <p className="text-xs text-encre-douce">{t("settings.danger.note")}</p>
+          <p className="text-xs text-slate">{t("settings.danger.note")}</p>
         </div>
       ) : null}
     </div>

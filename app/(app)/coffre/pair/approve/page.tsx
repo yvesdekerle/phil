@@ -22,11 +22,11 @@ export default async function PairApprovePage({
 
   return (
     <main className="mx-auto w-full max-w-md flex-1 px-4 py-12">
-      <h1 className="mb-4 text-center font-display text-2xl text-encre">Ajouter un appareil</h1>
+      <h1 className="mb-4 text-center font-sans text-2xl text-ink">Ajouter un appareil</h1>
       {pid ? (
         <PairApprove pairingId={pid} />
       ) : (
-        <p className="text-center text-sm text-bordeaux">Lien d'appariement invalide.</p>
+        <p className="text-center text-sm text-lagoon-ink">Lien d'appariement invalide.</p>
       )}
     </main>
   );

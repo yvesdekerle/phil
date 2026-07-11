@@ -48,23 +48,20 @@ export function EventNotes({
 
   return (
     <section>
-      <h2 className="mb-2 text-sm font-medium text-encre-douce">{t("events.notes.heading")}</h2>
+      <h2 className="mb-2 text-sm font-medium text-slate">{t("events.notes.heading")}</h2>
       {notes.length === 0 ? (
-        <p className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-4 py-4 text-center text-sm text-encre-douce">
+        <p className="rounded-lg border border-dashed border-line bg-card/60 px-4 py-4 text-center text-sm text-slate">
           {t("events.notes.empty")}
         </p>
       ) : (
         <ul className="flex flex-col gap-2">
           {notes.map((note) => (
-            <li
-              key={note.id}
-              className="rounded-lg border border-laiton-clair/60 bg-papier px-4 py-2.5"
-            >
+            <li key={note.id} className="rounded-lg border border-line/60 bg-card px-4 py-2.5">
               <div className="flex items-baseline justify-between gap-2">
-                <span className="text-xs font-medium text-laiton">
+                <span className="text-xs font-medium text-mist">
                   {note.author_id === myId ? t("events.you") : note.authorName}
                 </span>
-                <span className="flex items-center gap-2 text-xs text-encre-douce">
+                <span className="flex items-center gap-2 text-xs text-slate">
                   {format(new Date(note.created_at), "d MMM, HH'h'mm", { locale: dfLocale })}
                   {note.author_id === myId || isOwner ? (
                     <button
@@ -73,7 +70,7 @@ export function EventNotes({
                       onClick={() =>
                         startTransition(() => deleteEventNote(tripId, eventId, note.id))
                       }
-                      className="text-encre-douce hover:text-bordeaux"
+                      className="text-slate hover:text-lagoon-ink"
                       aria-label={t("events.notes.deleteAria")}
                     >
                       <Trash2 className="size-3.5" aria-hidden="true" />
@@ -81,7 +78,7 @@ export function EventNotes({
                   ) : null}
                 </span>
               </div>
-              <p className="mt-1 whitespace-pre-wrap text-sm text-encre">
+              <p className="mt-1 whitespace-pre-wrap text-sm text-ink">
                 <Linkify text={note.body} />
               </p>
             </li>
@@ -97,14 +94,14 @@ export function EventNotes({
           maxLength={1000}
           rows={2}
           placeholder={t("events.notes.placeholder")}
-          className="flex-1 rounded-md border border-laiton-clair bg-papier px-3 py-2 text-sm text-encre placeholder:text-encre-douce/70 focus:outline-none focus:ring-1 focus:ring-laiton"
+          className="flex-1 rounded-md border border-line bg-card px-3 py-2 text-sm text-ink placeholder:text-slate/70 focus:outline-none focus:ring-1 focus:ring-citron"
         />
         <Button type="submit" size="sm" variant="outline">
           {t("events.notes.publish")}
         </Button>
       </form>
       {state.status === "error" ? (
-        <p className="mt-1 text-xs text-bordeaux">{state.message}</p>
+        <p className="mt-1 text-xs text-lagoon-ink">{state.message}</p>
       ) : null}
     </section>
   );

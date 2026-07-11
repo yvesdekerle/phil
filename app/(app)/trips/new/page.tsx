@@ -20,8 +20,8 @@ export default async function NewTripPage() {
 
   return (
     <main className="mx-auto w-full max-w-lg flex-1 px-4 py-8">
-      <h1 className="mb-2 text-center font-display text-3xl text-encre">{t("newTrip.title")}</h1>
-      <p className="mb-6 text-center text-sm text-encre-douce">{t("newTrip.subtitle")}</p>
+      <h1 className="mb-2 text-center font-sans text-3xl text-ink">{t("newTrip.title")}</h1>
+      <p className="mb-6 text-center text-sm text-slate">{t("newTrip.subtitle")}</p>
       <Card>
         <CardContent>
           <TripForm defaultTimezone={profile?.timezone ?? "Europe/Paris"} />

@@ -83,11 +83,7 @@ export function PasskeyManager({
       ) : null}
 
       {state.status !== "idle" ? (
-        <p
-          className={
-            state.status === "error" ? "text-sm text-bordeaux" : "text-sm text-encre-douce"
-          }
-        >
+        <p className={state.status === "error" ? "text-sm text-lagoon-ink" : "text-sm text-slate"}>
           {state.message}
         </p>
       ) : null}
@@ -97,11 +93,11 @@ export function PasskeyManager({
           {passkeys.map((p) => (
             <li
               key={p.id}
-              className="flex items-center gap-3 rounded-md border border-laiton-clair bg-parchemin/50 px-3 py-2 text-sm"
+              className="flex items-center gap-3 rounded-md border border-line bg-sand/50 px-3 py-2 text-sm"
             >
-              <span className="min-w-0 flex-1 truncate text-encre">
+              <span className="min-w-0 flex-1 truncate text-ink">
                 {p.device_name ?? t("security.device")}
-                <span className="text-xs text-encre-douce">
+                <span className="text-xs text-slate">
                   {" "}
                   · {t("security.addedOn")} {new Date(p.created_at).toLocaleDateString(il)}
                   {p.last_used_at
@@ -122,7 +118,7 @@ export function PasskeyManager({
           ))}
         </ul>
       ) : (
-        <p className="text-sm text-encre-douce">{t("security.empty")}</p>
+        <p className="text-sm text-slate">{t("security.empty")}</p>
       )}
     </div>
   );

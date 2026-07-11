@@ -260,9 +260,9 @@ export function ShareManager({
   const crewShareTripIds = shares.filter((s) => !s.recipientName).map((s) => s.tripId);
 
   return (
-    <section className="rounded-lg border border-laiton-clair bg-papier px-5 py-4">
+    <section className="rounded-lg border border-line bg-card px-5 py-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-medium text-encre">{t("documents.share.heading")}</h2>
+        <h2 className="text-sm font-medium text-ink">{t("documents.share.heading")}</h2>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button variant="outline" size="sm">
@@ -286,7 +286,7 @@ export function ShareManager({
             {!selectedTrip ? (
               <div className="flex max-h-72 flex-col gap-2 overflow-y-auto py-1">
                 {trips.length === 0 ? (
-                  <p className="px-2 py-6 text-center text-sm text-encre-douce">
+                  <p className="px-2 py-6 text-center text-sm text-slate">
                     {loaded ? t("documents.share.noActiveTrip") : t("documents.share.loading")}
                   </p>
                 ) : (
@@ -296,13 +296,13 @@ export function ShareManager({
                       type="button"
                       disabled={pending}
                       onClick={() => pickTrip(trip)}
-                      className="flex items-center justify-between gap-3 rounded-md border border-laiton-clair bg-papier px-3 py-2.5 text-left text-sm transition-colors hover:bg-parchemin disabled:opacity-50"
+                      className="flex items-center justify-between gap-3 rounded-md border border-line bg-card px-3 py-2.5 text-left text-sm transition-colors hover:bg-sand disabled:opacity-50"
                     >
                       <span className="min-w-0">
-                        <span className="block truncate font-medium text-encre">{trip.name}</span>
-                        <span className="text-xs text-encre-douce">{trip.destination}</span>
+                        <span className="block truncate font-medium text-ink">{trip.name}</span>
+                        <span className="text-xs text-slate">{trip.destination}</span>
                       </span>
-                      <span className="shrink-0 text-xs text-encre-douce">
+                      <span className="shrink-0 text-xs text-slate">
                         {t("documents.share.choose")}
                       </span>
                     </button>
@@ -311,12 +311,12 @@ export function ShareManager({
               </div>
             ) : (
               <div className="flex max-h-72 flex-col gap-2 overflow-y-auto py-1">
-                <label className="flex items-center justify-between gap-3 rounded-md border border-laiton-clair/60 bg-parchemin/40 px-3 py-2 text-xs text-encre-douce">
+                <label className="flex items-center justify-between gap-3 rounded-md border border-line/60 bg-sand/40 px-3 py-2 text-xs text-slate">
                   <span>{t("documents.share.until")}</span>
                   <select
                     value={shareDuration}
                     onChange={(e) => setShareDuration(e.target.value as typeof shareDuration)}
-                    className="rounded border border-laiton-clair bg-papier px-2 py-1 text-xs text-encre"
+                    className="rounded border border-line bg-card px-2 py-1 text-xs text-ink"
                   >
                     <option value="1h">1 heure</option>
                     <option value="24h">24 heures</option>
@@ -329,21 +329,21 @@ export function ShareManager({
                   type="button"
                   disabled={pending || crewShareTripIds.includes(selectedTrip.id) || encrypted}
                   onClick={() => share(selectedTrip.id, null)}
-                  className="flex items-center justify-between gap-3 rounded-md border border-bordeaux/40 bg-bordeaux/5 px-3 py-2.5 text-left text-sm transition-colors hover:bg-bordeaux/10 disabled:opacity-50"
+                  className="flex items-center justify-between gap-3 rounded-md border border-lagoon-ink/40 bg-lagoon-ink/5 px-3 py-2.5 text-left text-sm transition-colors hover:bg-lagoon-ink/10 disabled:opacity-50"
                 >
-                  <span className="font-medium text-encre">{t("documents.share.wholeCrew")}</span>
-                  <span className="shrink-0 text-xs text-encre-douce">
+                  <span className="font-medium text-ink">{t("documents.share.wholeCrew")}</span>
+                  <span className="shrink-0 text-xs text-slate">
                     {crewShareTripIds.includes(selectedTrip.id)
                       ? t("documents.share.alreadyShared")
                       : t("documents.share.share")}
                   </span>
                 </button>
                 {members === null ? (
-                  <p className="px-2 py-4 text-center text-sm text-encre-douce">
+                  <p className="px-2 py-4 text-center text-sm text-slate">
                     {t("documents.share.loading")}
                   </p>
                 ) : members.length === 0 ? (
-                  <p className="px-2 py-4 text-center text-sm text-encre-douce">
+                  <p className="px-2 py-4 text-center text-sm text-slate">
                     {t("documents.share.noOneAboard")}
                   </p>
                 ) : (
@@ -357,13 +357,13 @@ export function ShareManager({
                         type="button"
                         disabled={pending || already}
                         onClick={() => share(selectedTrip.id, m.userId)}
-                        className="flex items-center justify-between gap-3 rounded-md border border-laiton-clair bg-papier px-3 py-2.5 text-left text-sm transition-colors hover:bg-parchemin disabled:opacity-50"
+                        className="flex items-center justify-between gap-3 rounded-md border border-line bg-card px-3 py-2.5 text-left text-sm transition-colors hover:bg-sand disabled:opacity-50"
                       >
-                        <span className="font-medium text-encre">
+                        <span className="font-medium text-ink">
                           {t("documents.share.onlyPrefix")}
                           {m.name}
                         </span>
-                        <span className="shrink-0 text-xs text-encre-douce">
+                        <span className="shrink-0 text-xs text-slate">
                           {already
                             ? t("documents.share.alreadyShared")
                             : t("documents.share.share")}
@@ -375,22 +375,20 @@ export function ShareManager({
                 <button
                   type="button"
                   onClick={() => setSelectedTrip(null)}
-                  className="mt-1 text-left text-xs text-encre-douce underline underline-offset-4"
+                  className="mt-1 text-left text-xs text-slate underline underline-offset-4"
                 >
                   {t("documents.share.changeTrip")}
                 </button>
               </div>
             )}
             {pending ? (
-              <p className="mt-2 text-center text-sm text-encre-douce">
-                {t("documents.share.loading")}
-              </p>
+              <p className="mt-2 text-center text-sm text-slate">{t("documents.share.loading")}</p>
             ) : state.status !== "idle" ? (
               <p
                 className={
                   state.status === "error"
-                    ? "mt-2 text-center text-sm text-bordeaux"
-                    : "mt-2 text-center text-sm text-encre"
+                    ? "mt-2 text-center text-sm text-lagoon-ink"
+                    : "mt-2 text-center text-sm text-ink"
                 }
               >
                 {state.message}
@@ -401,17 +399,17 @@ export function ShareManager({
       </div>
 
       {shares.length === 0 ? (
-        <p className="mt-3 text-sm text-encre-douce">{t("documents.share.private")}</p>
+        <p className="mt-3 text-sm text-slate">{t("documents.share.private")}</p>
       ) : (
         <ul className="mt-3 flex flex-col gap-2">
           {shares.map((s) => (
             <li
               key={s.shareId}
-              className="flex items-center justify-between gap-3 rounded-md border border-laiton-clair/60 bg-parchemin/50 px-3 py-2 text-sm"
+              className="flex items-center justify-between gap-3 rounded-md border border-line/60 bg-sand/50 px-3 py-2 text-sm"
             >
-              <span className="min-w-0 truncate text-encre">
+              <span className="min-w-0 truncate text-ink">
                 <span className="font-medium">{s.tripName}</span>
-                <span className="text-encre-douce">
+                <span className="text-slate">
                   {" — "}
                   {s.recipientName
                     ? `${t("documents.share.onlyRecipientPrefix")}${s.recipientName}`
@@ -438,9 +436,7 @@ export function ShareManager({
       {state.status !== "idle" ? (
         <p
           className={
-            state.status === "error"
-              ? "mt-2 text-sm text-bordeaux"
-              : "mt-2 text-sm text-encre-douce"
+            state.status === "error" ? "mt-2 text-sm text-lagoon-ink" : "mt-2 text-sm text-slate"
           }
         >
           {state.message}

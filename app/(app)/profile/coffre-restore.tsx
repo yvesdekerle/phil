@@ -70,7 +70,7 @@ export function CoffreRestore({ userId, userName }: { userId: string; userName: 
 
   if (done) {
     return (
-      <p className="text-sm text-encre">
+      <p className="text-sm text-ink">
         ✓ Coffre restauré sur cet appareil. Ta biométrie le déverrouille désormais ici.
       </p>
     );
@@ -81,7 +81,7 @@ export function CoffreRestore({ userId, userName }: { userId: string; userName: 
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="text-left text-sm text-encre-douce underline underline-offset-4 hover:text-encre"
+        className="text-left text-sm text-slate underline underline-offset-4 hover:text-ink"
       >
         Nouvel appareil ? Restaurer avec ton code de secours
       </button>
@@ -90,7 +90,7 @@ export function CoffreRestore({ userId, userName }: { userId: string; userName: 
 
   return (
     <div className="flex flex-col gap-2">
-      <p className="text-sm text-encre-douce">
+      <p className="text-sm text-slate">
         Saisis ton code de secours pour redonner accès au coffre sur cet appareil. Un Face ID /
         empreinte suivra pour l'enrôler.
       </p>
@@ -102,7 +102,7 @@ export function CoffreRestore({ userId, userName }: { userId: string; userName: 
         autoComplete="off"
         autoCapitalize="characters"
         spellCheck={false}
-        className="rounded border border-laiton-clair bg-papier px-3 py-2 text-center font-mono tracking-widest text-encre uppercase placeholder:text-encre-douce/50"
+        className="rounded border border-line bg-card px-3 py-2 text-center font-mono tracking-widest text-ink uppercase placeholder:text-slate/50"
       />
       <div className="flex items-center gap-2">
         <Button type="button" onClick={restore} disabled={pending || code.trim().length === 0}>
@@ -112,7 +112,7 @@ export function CoffreRestore({ userId, userName }: { userId: string; userName: 
           Annuler
         </Button>
       </div>
-      {error ? <p className="text-sm text-bordeaux">{error}</p> : null}
+      {error ? <p className="text-sm text-lagoon-ink">{error}</p> : null}
     </div>
   );
 }

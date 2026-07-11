@@ -96,12 +96,12 @@ export function PlaceInput({
       <input type="hidden" name={latName} value={coords ? String(coords.lat) : ""} />
       <input type="hidden" name={lngName} value={coords ? String(coords.lng) : ""} />
       {open ? (
-        <ul className="absolute top-full right-0 left-0 z-20 mt-1 overflow-hidden rounded-md border border-laiton-clair bg-papier shadow-[0_4px_16px_rgba(31,42,68,0.15)]">
+        <ul className="absolute top-full right-0 left-0 z-20 mt-1 overflow-hidden rounded-md border border-line bg-card shadow-[0_4px_16px_rgba(15,47,56,0.15)]">
           {results.map((r) => (
             <li key={`${r.lat}-${r.lng}`}>
               <button
                 type="button"
-                className="flex w-full items-start gap-2 px-3 py-2 text-left text-sm hover:bg-laiton/10"
+                className="flex w-full items-start gap-2 px-3 py-2 text-left text-sm hover:bg-citron/10"
                 onClick={() => {
                   setValue(r.name);
                   setCoords({ lat: r.lat, lng: r.lng });
@@ -111,11 +111,11 @@ export function PlaceInput({
                   setOpen(false);
                 }}
               >
-                <MapPin className="mt-0.5 size-3.5 shrink-0 text-laiton" aria-hidden="true" />
+                <MapPin className="mt-0.5 size-3.5 shrink-0 text-mist" aria-hidden="true" />
                 <span className="min-w-0">
-                  <span className="block truncate text-encre">{r.name}</span>
+                  <span className="block truncate text-ink">{r.name}</span>
                   {r.detail ? (
-                    <span className="block truncate text-xs text-encre-douce">{r.detail}</span>
+                    <span className="block truncate text-xs text-slate">{r.detail}</span>
                   ) : null}
                 </span>
               </button>

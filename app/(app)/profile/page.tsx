@@ -48,12 +48,9 @@ export default async function ProfilePage() {
   return (
     <main className="flex flex-1 flex-col items-center px-4 py-12">
       <div className="w-full max-w-lg">
-        <h1 className="mb-2 text-center font-display text-3xl text-encre">{t("profile.title")}</h1>
+        <h1 className="mb-2 text-center font-sans text-3xl text-ink">{t("profile.title")}</h1>
         <p className="mb-6 text-center text-sm">
-          <Link
-            href="/explorer"
-            className="text-encre-douce underline underline-offset-4 hover:text-encre"
-          >
+          <Link href="/explorer" className="text-slate underline underline-offset-4 hover:text-ink">
             {t("profile.explorerLink")}
           </Link>
         </p>
@@ -66,17 +63,17 @@ export default async function ProfilePage() {
                 alt=""
                 width={56}
                 height={56}
-                className="rounded-full border border-laiton-clair"
+                className="rounded-full border border-line"
               />
             ) : (
-              <span className="flex size-14 items-center justify-center rounded-full border border-laiton-clair bg-parchemin font-display text-xl text-laiton">
+              <span className="flex size-14 items-center justify-center rounded-full border border-line bg-sand font-sans text-xl text-mist">
                 {(displayName || user.email || "?").charAt(0).toUpperCase()}
               </span>
             )}
             <div>
-              <p className="font-medium text-encre">{displayName || t("profile.anonymous")}</p>
-              <p className="text-sm text-encre-douce">{user.email}</p>
-              <p className="mt-0.5 text-xs text-encre-douce">{t("profile.emailLinked")}</p>
+              <p className="font-medium text-ink">{displayName || t("profile.anonymous")}</p>
+              <p className="text-sm text-slate">{user.email}</p>
+              <p className="mt-0.5 text-xs text-slate">{t("profile.emailLinked")}</p>
             </div>
           </CardHeader>
           <CardContent>
@@ -93,13 +90,13 @@ export default async function ProfilePage() {
 
         <Card className="mt-6">
           <CardHeader>
-            <p className="text-sm font-medium text-encre">{t("profile.emailNotifs")}</p>
+            <p className="text-sm font-medium text-ink">{t("profile.emailNotifs")}</p>
           </CardHeader>
           <CardContent>
             <NotificationPreferencesForm
               initial={parsePreferences(profile?.notification_preferences)}
             />
-            <div className="mt-4 border-t border-laiton-clair/50 pt-4">
+            <div className="mt-4 border-t border-line/50 pt-4">
               <PushToggle />
             </div>
           </CardContent>
@@ -107,10 +104,10 @@ export default async function ProfilePage() {
 
         <Card className="mt-6">
           <CardHeader>
-            <p className="text-sm font-medium text-encre">Coffre chiffré</p>
+            <p className="text-sm font-medium text-ink">Coffre chiffré</p>
           </CardHeader>
           <CardContent>
-            <p className="mb-3 text-sm text-encre-douce">
+            <p className="mb-3 text-sm text-slate">
               Chiffre tes documents d'identité de bout en bout : le serveur ne peut jamais les lire.
               Déverrouillage par Face ID / empreinte sur cet appareil.
             </p>
@@ -120,12 +117,12 @@ export default async function ProfilePage() {
               activated={Boolean(coffreKey)}
             />
             {coffreKey ? (
-              <div className="mt-4 border-t border-laiton-clair/50 pt-4">
+              <div className="mt-4 border-t border-line/50 pt-4">
                 <CoffreRecovery hasRecovery={Boolean(recoveryWrap)} />
               </div>
             ) : null}
             {coffreKey && recoveryWrap ? (
-              <div className="mt-4 border-t border-laiton-clair/50 pt-4">
+              <div className="mt-4 border-t border-line/50 pt-4">
                 <CoffreRestore
                   userId={user.id}
                   userName={displayName || user.email || "Voyageur"}
@@ -133,7 +130,7 @@ export default async function ProfilePage() {
               </div>
             ) : null}
             {coffreKey ? (
-              <div className="mt-4 border-t border-laiton-clair/50 pt-4">
+              <div className="mt-4 border-t border-line/50 pt-4">
                 <CoffreAddDevice
                   userId={user.id}
                   userName={displayName || user.email || "Voyageur"}

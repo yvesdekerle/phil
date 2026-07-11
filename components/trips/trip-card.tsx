@@ -6,10 +6,10 @@ import { type Trip, tripStatus } from "@/lib/trips/status";
 import { cn } from "@/lib/utils";
 
 const STATUS_STYLES: Record<string, string> = {
-  en_cours: "bg-bordeaux text-papier",
-  a_venir: "bg-laiton text-papier",
-  passe: "bg-encre-douce/15 text-encre-douce",
-  archive: "bg-encre-douce/15 text-encre-douce",
+  en_cours: "bg-lagoon-ink text-card",
+  a_venir: "bg-citron text-card",
+  passe: "bg-slate/15 text-slate",
+  archive: "bg-slate/15 text-slate",
 };
 
 export async function TripCard({
@@ -30,11 +30,11 @@ export async function TripCard({
     <Link
       href={`/trips/${trip.id}`}
       className={cn(
-        "group block overflow-hidden rounded-lg border border-laiton-clair bg-papier shadow-[0_2px_12px_rgba(31,42,68,0.06)] transition-shadow hover:shadow-[0_4px_20px_rgba(31,42,68,0.12)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-laiton",
+        "group block overflow-hidden rounded-lg border border-line bg-card shadow-[0_2px_12px_rgba(15,47,56,0.06)] transition-shadow hover:shadow-[0_4px_20px_rgba(15,47,56,0.12)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mist",
         isPast && "opacity-75",
       )}
     >
-      <div className="relative h-36 overflow-hidden bg-encre">
+      <div className="relative h-36 overflow-hidden bg-ink">
         {trip.cover_image_url ? (
           <CoverImage
             src={trip.cover_image_url}
@@ -44,7 +44,7 @@ export async function TripCard({
           />
         ) : (
           <div className="flex h-full items-center justify-center">
-            <span className="font-display text-4xl text-laiton italic">
+            <span className="font-sans text-4xl text-mist italic">
               {trip.destination.charAt(0).toUpperCase()}
             </span>
           </div>
@@ -60,7 +60,7 @@ export async function TripCard({
         {pendingCount > 0 ? (
           <span
             role="img"
-            className="absolute top-3 left-3 flex min-w-5 items-center justify-center rounded-full bg-bordeaux px-1.5 py-0.5 text-xs font-semibold text-papier shadow-sm"
+            className="absolute top-3 left-3 flex min-w-5 items-center justify-center rounded-full bg-lagoon-ink px-1.5 py-0.5 text-xs font-semibold text-card shadow-sm"
             aria-label={t("pending.tripAria").replace("{n}", String(pendingCount))}
             title={t("pending.tripAria").replace("{n}", String(pendingCount))}
           >
@@ -70,9 +70,9 @@ export async function TripCard({
       </div>
 
       <div className="px-4 py-3.5">
-        <h2 className="font-display text-xl text-encre">{trip.name}</h2>
-        <p className="mt-0.5 text-sm text-encre-douce">{trip.destination}</p>
-        <div className="mt-2.5 flex items-center justify-between text-xs text-encre-douce">
+        <h2 className="font-sans text-xl text-ink">{trip.name}</h2>
+        <p className="mt-0.5 text-sm text-slate">{trip.destination}</p>
+        <div className="mt-2.5 flex items-center justify-between text-xs text-slate">
           <span>{formatDateRange(trip.start_date, trip.end_date, dfLocale)}</span>
           <span>
             {participantCount} {participantCount > 1 ? t("trips.travelers") : t("trips.traveler")}

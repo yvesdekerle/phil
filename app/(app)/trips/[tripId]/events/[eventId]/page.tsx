@@ -21,8 +21,8 @@ import { EventParticipants } from "./event-participants";
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex justify-between gap-4 py-1.5 text-sm">
-      <span className="shrink-0 text-encre-douce">{label}</span>
-      <span className="text-right text-encre">{value}</span>
+      <span className="shrink-0 text-slate">{label}</span>
+      <span className="text-right text-ink">{value}</span>
     </div>
   );
 }
@@ -128,7 +128,7 @@ export default async function EventDetailPage({
     <div className="mx-auto flex max-w-lg flex-col gap-5">
       <Link
         href={`/trips/${tripId}`}
-        className="text-sm text-encre-douce underline underline-offset-4 hover:text-encre"
+        className="text-sm text-slate underline underline-offset-4 hover:text-ink"
       >
         {t("calendar.backToCalendar")}
       </Link>
@@ -136,13 +136,13 @@ export default async function EventDetailPage({
       <div className="flex items-start gap-4">
         <EventTypeIcon type={event.type} />
         <div className="min-w-0 flex-1">
-          <h1 className="font-display text-2xl text-encre">{event.title}</h1>
-          <p className="mt-0.5 text-sm text-encre-douce">{t(`events.type.${event.type}`)}</p>
+          <h1 className="font-sans text-2xl text-ink">{event.title}</h1>
+          <p className="mt-0.5 text-sm text-slate">{t(`events.type.${event.type}`)}</p>
         </div>
       </div>
 
       <Card>
-        <CardContent className="divide-y divide-laiton-clair/50">
+        <CardContent className="divide-y divide-line/50">
           <Row
             label={event.type === "LODGING" ? t("events.form.checkIn") : t("events.detail.start")}
             value={`${start} (${t("events.detail.localTime")} ${event.timezone})`}
@@ -241,9 +241,7 @@ export default async function EventDetailPage({
 
       <section>
         <div className="mb-2 flex items-center justify-between">
-          <h2 className="text-sm font-medium text-encre-douce">
-            {t("events.detail.documentsHeading")}
-          </h2>
+          <h2 className="text-sm font-medium text-slate">{t("events.detail.documentsHeading")}</h2>
           {canEdit ? (
             <DocumentPicker
               tripId={tripId}
@@ -253,7 +251,7 @@ export default async function EventDetailPage({
           ) : null}
         </div>
         {documents.length === 0 ? (
-          <p className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-4 py-6 text-center text-sm text-encre-douce">
+          <p className="rounded-lg border border-dashed border-line bg-card/60 px-4 py-6 text-center text-sm text-slate">
             {t("events.detail.noDocuments")}
           </p>
         ) : (
@@ -261,13 +259,13 @@ export default async function EventDetailPage({
             {documents.map((doc) => (
               <li
                 key={doc.id}
-                className="flex items-center gap-2 rounded-lg border border-laiton-clair bg-papier px-4 py-2.5"
+                className="flex items-center gap-2 rounded-lg border border-line bg-card px-4 py-2.5"
               >
                 <a
                   href={`/api/documents/${doc.id}/view`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="min-w-0 flex-1 truncate text-sm font-medium text-encre hover:underline"
+                  className="min-w-0 flex-1 truncate text-sm font-medium text-ink hover:underline"
                 >
                   {doc.file_name}
                 </a>

@@ -73,15 +73,15 @@ export function TodayHero({
   }
 
   return (
-    <section className="rounded-lg border border-bordeaux/30 bg-gradient-to-br from-papier to-parchemin px-5 py-4">
+    <section className="rounded-lg border border-lagoon-ink/30 bg-gradient-to-br from-card to-sand px-5 py-4">
       <div className="mb-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
         <span className="flex items-center gap-3">
-          <h2 className="font-display text-lg text-encre italic">{t("calendar.today")}</h2>
+          <h2 className="font-sans text-lg text-ink italic">{t("calendar.today")}</h2>
           {weather}
         </span>
         <Link
           href={`/trips/${tripId}/day/${dayKey}`}
-          className="text-xs text-encre-douce underline underline-offset-4 hover:text-encre"
+          className="text-xs text-slate underline underline-offset-4 hover:text-ink"
         >
           {t("calendar.todayHero.hourByHour")}
         </Link>
@@ -90,42 +90,42 @@ export function TodayHero({
         {current ? (
           <Link
             href={`/trips/${tripId}/events/${current.id}`}
-            className="flex items-center gap-3 rounded-md border border-bordeaux/40 bg-bordeaux/5 px-3 py-2.5"
+            className="flex items-center gap-3 rounded-md border border-lagoon-ink/40 bg-lagoon-ink/5 px-3 py-2.5"
           >
             <EventTypeIcon type={current.type} className="size-8" />
             <span className="min-w-0 flex-1">
-              <span className="block text-xs font-medium text-bordeaux uppercase">
+              <span className="block text-xs font-medium text-lagoon-ink uppercase">
                 {t("calendar.todayHero.now")}
               </span>
-              <span className="block truncate text-sm font-medium text-encre">{current.title}</span>
+              <span className="block truncate text-sm font-medium text-ink">{current.title}</span>
               {current.location ? (
-                <span className="block truncate text-xs text-encre-douce">{current.location}</span>
+                <span className="block truncate text-xs text-slate">{current.location}</span>
               ) : null}
             </span>
           </Link>
         ) : null}
         {next ? (
-          <div className="flex items-center gap-3 rounded-md border border-laiton-clair bg-papier px-3 py-2.5">
+          <div className="flex items-center gap-3 rounded-md border border-line bg-card px-3 py-2.5">
             <Link
               href={`/trips/${tripId}/events/${next.id}`}
               className="flex min-w-0 flex-1 items-center gap-3"
             >
               <EventTypeIcon type={next.type} className="size-8" />
               <span className="min-w-0 flex-1">
-                <span className="block text-xs font-medium text-laiton uppercase">
+                <span className="block text-xs font-medium text-mist uppercase">
                   {t("calendar.todayHero.nextDeparture")} {countdown ? `— ${countdown}` : ""}
                 </span>
-                <span className="block truncate text-sm font-medium text-encre">
+                <span className="block truncate text-sm font-medium text-ink">
                   {next.time} · {next.title}
                 </span>
                 {next.location ? (
-                  <span className="block truncate text-xs text-encre-douce">
+                  <span className="block truncate text-xs text-slate">
                     {t("calendar.todayHero.meetPrefix")}
                     {next.location}
                     {travelToNext ? ` · ${travelToNext}` : ""}
                   </span>
                 ) : travelToNext ? (
-                  <span className="block text-xs text-encre-douce">{travelToNext}</span>
+                  <span className="block text-xs text-slate">{travelToNext}</span>
                 ) : null}
               </span>
             </Link>
@@ -134,7 +134,7 @@ export function TodayHero({
                 href={navigateToNext}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex shrink-0 items-center gap-1.5 rounded-full border border-bordeaux/40 bg-bordeaux/5 px-3 py-1.5 text-xs font-medium text-bordeaux transition-colors hover:bg-bordeaux hover:text-papier"
+                className="flex shrink-0 items-center gap-1.5 rounded-full border border-lagoon-ink/40 bg-lagoon-ink/5 px-3 py-1.5 text-xs font-medium text-lagoon-ink transition-colors hover:bg-lagoon-ink hover:text-card"
                 aria-label={t("calendar.todayHero.goAria")}
               >
                 <Navigation className="size-3.5" aria-hidden="true" /> {t("calendar.todayHero.go")}

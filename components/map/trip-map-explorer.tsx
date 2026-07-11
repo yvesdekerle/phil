@@ -61,7 +61,7 @@ export function TripMapExplorer({
 
   const pin = (m: MapMarker) => (
     <span
-      className="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-papier"
+      className="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-card"
       style={{ backgroundColor: m.color }}
     >
       {m.house ? <Home className="size-3.5" aria-hidden="true" /> : (m.label ?? "")}
@@ -79,7 +79,7 @@ export function TripMapExplorer({
               htmlFor="map-show-departure"
               className="ml-auto flex cursor-pointer items-center gap-2.5"
             >
-              <span className="text-sm text-encre-douce">{t("map.departureLabel")}</span>
+              <span className="text-sm text-slate">{t("map.departureLabel")}</span>
               <Switch
                 id="map-show-departure"
                 checked={showDeparture}
@@ -95,14 +95,14 @@ export function TripMapExplorer({
 
       <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[minmax(0,24rem)_1fr] lg:items-start">
         <div className="order-2 flex flex-col gap-3 lg:order-1 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:pr-1">
-          <section className="rounded-lg border border-laiton-clair bg-papier px-4 py-3">
-            <h2 className="mb-2 text-sm font-medium text-encre">{heading}</h2>
+          <section className="rounded-lg border border-line bg-card px-4 py-3">
+            <h2 className="mb-2 text-sm font-medium text-ink">{heading}</h2>
             {dayRows ? (
               <ol className="flex flex-col">
                 {dayRows.map((r, i) => (
                   <li key={r.id}>
                     {r.legText ? (
-                      <p className="my-1 ml-3.5 border-l-2 border-dashed border-laiton-clair py-0.5 pl-4 text-xs text-encre-douce">
+                      <p className="my-1 ml-3.5 border-l-2 border-dashed border-line py-0.5 pl-4 text-xs text-slate">
                         {r.legText}
                       </p>
                     ) : null}
@@ -110,18 +110,16 @@ export function TripMapExplorer({
                       type="button"
                       onClick={() => focus(r.id)}
                       className={cn(
-                        "flex w-full items-center gap-2.5 rounded-md px-1 py-1 text-left transition-colors hover:bg-laiton/10",
-                        focusId === r.id && "bg-laiton/15",
+                        "flex w-full items-center gap-2.5 rounded-md px-1 py-1 text-left transition-colors hover:bg-citron/10",
+                        focusId === r.id && "bg-citron/15",
                       )}
                     >
-                      <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-bordeaux text-xs font-bold text-papier">
+                      <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-lagoon-ink text-xs font-bold text-card">
                         {i + 1}
                       </span>
                       <EventTypeIcon type={r.type} className="size-6 shrink-0" />
-                      <span className="min-w-0 flex-1 truncate text-sm text-encre">{r.title}</span>
-                      <span className="shrink-0 text-xs text-encre-douce tabular-nums">
-                        {r.time}
-                      </span>
+                      <span className="min-w-0 flex-1 truncate text-sm text-ink">{r.title}</span>
+                      <span className="shrink-0 text-xs text-slate tabular-nums">{r.time}</span>
                     </button>
                   </li>
                 ))}
@@ -134,17 +132,15 @@ export function TripMapExplorer({
                       type="button"
                       onClick={() => focus(m.id)}
                       className={cn(
-                        "flex w-full items-center gap-2.5 rounded-md px-1 py-1.5 text-left transition-colors hover:bg-laiton/10",
-                        focusId === m.id && "bg-laiton/15",
+                        "flex w-full items-center gap-2.5 rounded-md px-1 py-1.5 text-left transition-colors hover:bg-citron/10",
+                        focusId === m.id && "bg-citron/15",
                       )}
                     >
                       {pin(m)}
                       <span className="min-w-0 flex-1">
-                        <span className="block truncate text-sm text-encre">{m.title}</span>
+                        <span className="block truncate text-sm text-ink">{m.title}</span>
                         {m.subtitle ? (
-                          <span className="block truncate text-xs text-encre-douce">
-                            {m.subtitle}
-                          </span>
+                          <span className="block truncate text-xs text-slate">{m.subtitle}</span>
                         ) : null}
                       </span>
                     </button>
@@ -152,11 +148,11 @@ export function TripMapExplorer({
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-encre-douce">{t("map.noPlaces")}</p>
+              <p className="text-sm text-slate">{t("map.noPlaces")}</p>
             )}
           </section>
 
-          <p className="px-1 text-xs text-encre-douce">
+          <p className="px-1 text-xs text-slate">
             {count} {count > 1 ? t("map.places") : t("map.place")} {t("map.onMap")}
             {missing > 0 ? ` · ${missing} ${t("map.missingNote")}` : ""}
             {distanceLabel ? ` · ${t("map.distancesFrom")} ${distanceLabel}` : ""}

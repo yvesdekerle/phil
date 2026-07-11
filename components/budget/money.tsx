@@ -41,7 +41,7 @@ export function Money({
     >
       <span>{fmtMoney(amount, currency, il)}</span>
       {secondaryAmount !== null && secondaryAmount !== undefined && secondaryCurrency ? (
-        <span className="text-[0.7em] font-normal text-encre-douce">
+        <span className="text-[0.7em] font-normal text-slate">
           ≈ {fmtMoney(secondaryAmount, secondaryCurrency, il)}
         </span>
       ) : null}

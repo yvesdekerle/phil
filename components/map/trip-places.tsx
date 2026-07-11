@@ -39,10 +39,10 @@ export function TripPlaces({
   const [busy, startTransition] = useTransition();
 
   return (
-    <section className="flex flex-col gap-3 rounded-lg border border-laiton-clair bg-papier px-4 py-3">
+    <section className="flex flex-col gap-3 rounded-lg border border-line bg-card px-4 py-3">
       <div>
-        <h2 className="text-sm font-medium text-encre">{t("places.title")}</h2>
-        <p className="text-xs text-encre-douce">{t("places.intro")}</p>
+        <h2 className="text-sm font-medium text-ink">{t("places.title")}</h2>
+        <p className="text-xs text-slate">{t("places.intro")}</p>
       </div>
 
       <form action={formAction} className="flex flex-wrap items-center gap-2">
@@ -57,7 +57,7 @@ export function TripPlaces({
         <select
           name="category"
           defaultValue="SUPERMARKET"
-          className="h-8 rounded border border-laiton-clair bg-papier px-2 text-sm text-encre"
+          className="h-8 rounded border border-line bg-card px-2 text-sm text-ink"
           aria-label={t("places.categoryAria")}
         >
           {PLACE_CATEGORIES.map((c) => (
@@ -83,30 +83,30 @@ export function TripPlaces({
           {pending ? t("places.adding") : t("places.add")}
         </Button>
       </form>
-      {state.status === "error" ? <p className="text-xs text-bordeaux">{state.message}</p> : null}
+      {state.status === "error" ? <p className="text-xs text-lagoon-ink">{state.message}</p> : null}
 
       {places.length === 0 ? (
-        <p className="text-xs text-encre-douce">{t("places.empty")}</p>
+        <p className="text-xs text-slate">{t("places.empty")}</p>
       ) : (
         <ul className="flex flex-col gap-1">
           {places.map((p) => (
             <li
               key={p.id}
-              className="flex items-center gap-2 rounded-md border border-laiton-clair/60 px-3 py-1.5 text-sm"
+              className="flex items-center gap-2 rounded-md border border-line/60 px-3 py-1.5 text-sm"
             >
               <span className="min-w-0 flex-1">
-                <span className="text-encre">{p.name}</span>
-                <span className="ml-1.5 rounded-full bg-laiton/15 px-1.5 py-0.5 text-[0.65rem] text-laiton">
+                <span className="text-ink">{p.name}</span>
+                <span className="ml-1.5 rounded-full bg-citron/15 px-1.5 py-0.5 text-[0.65rem] text-mist">
                   {t(`places.cat.${p.category}`)}
                 </span>
-                {p.note ? <span className="ml-1.5 text-xs text-encre-douce">{p.note}</span> : null}
+                {p.note ? <span className="ml-1.5 text-xs text-slate">{p.note}</span> : null}
               </span>
               {p.created_by === myId || isOwner ? (
                 <button
                   type="button"
                   disabled={busy}
                   onClick={() => startTransition(() => deleteTripPlace(tripId, p.id))}
-                  className="text-encre-douce hover:text-bordeaux"
+                  className="text-slate hover:text-lagoon-ink"
                   aria-label={t("places.delete")}
                 >
                   <Trash2 className="size-4" aria-hidden="true" />

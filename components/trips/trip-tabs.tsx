@@ -48,17 +48,17 @@ export function TripTabs({ tripId, pending }: { tripId: string; pending?: Pendin
             href={href}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "flex items-center gap-1.5 whitespace-nowrap border-b-2 px-3 py-2.5 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-laiton",
+              "flex items-center gap-1.5 whitespace-nowrap border-b-2 px-3 py-2.5 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mist",
               active
-                ? "border-bordeaux font-medium text-bordeaux"
-                : "border-transparent text-encre-douce hover:border-laiton-clair hover:text-encre",
+                ? "border-lagoon-ink font-medium text-lagoon-ink"
+                : "border-transparent text-slate hover:border-line hover:text-ink",
             )}
           >
             {t(`tripTabs.${tab.key}`)}
             {badge > 0 ? (
               <span
                 role="img"
-                className="flex min-w-4 items-center justify-center rounded-full bg-bordeaux px-1 text-[0.65rem] font-semibold text-papier"
+                className="flex min-w-4 items-center justify-center rounded-full bg-lagoon-ink px-1 text-[0.65rem] font-semibold text-card"
                 aria-label={t("pending.tabAria").replace("{n}", String(badge))}
               >
                 {badge}

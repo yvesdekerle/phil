@@ -49,7 +49,7 @@ export function PhilLoader(_props: { scene?: PhilLoaderScene }) {
         ))}
       </div>
 
-      <p role="status" className="font-display text-lg text-encre-douce italic">
+      <p role="status" className="font-sans text-lg text-slate italic">
         {t("misc.loaderMessage")}
       </p>
 

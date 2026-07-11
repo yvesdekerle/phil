@@ -22,17 +22,14 @@ export function PublicShareCard({
   const url = token ? `${baseUrl}/p/${token}` : null;
 
   return (
-    <section className="rounded-lg border border-laiton-clair bg-papier px-4 py-3">
-      <h2 className="mb-1 flex items-center gap-2 text-sm font-medium text-encre">
-        <Globe className="size-4 text-laiton" aria-hidden="true" />{" "}
-        {t("settings.publicShare.title")}
+    <section className="rounded-lg border border-line bg-card px-4 py-3">
+      <h2 className="mb-1 flex items-center gap-2 text-sm font-medium text-ink">
+        <Globe className="size-4 text-mist" aria-hidden="true" /> {t("settings.publicShare.title")}
       </h2>
-      <p className="text-xs text-encre-douce">{t("settings.publicShare.desc")}</p>
+      <p className="text-xs text-slate">{t("settings.publicShare.desc")}</p>
       {url ? (
         <div className="mt-2 flex flex-wrap items-center gap-2">
-          <code className="min-w-0 flex-1 truncate rounded bg-parchemin px-2 py-1 text-xs">
-            {url}
-          </code>
+          <code className="min-w-0 flex-1 truncate rounded bg-sand px-2 py-1 text-xs">{url}</code>
           <Button
             type="button"
             size="sm"

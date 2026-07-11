@@ -81,7 +81,7 @@ export default async function VaultPage({
   return (
     <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="font-display text-3xl text-encre">{t("vault.title")}</h1>
+        <h1 className="font-sans text-3xl text-ink">{t("vault.title")}</h1>
         <div className="flex items-center gap-3">
           <Button asChild variant="outline">
             <Link href="/vault/activity">{t("vault.activityLink")}</Link>
@@ -93,9 +93,9 @@ export default async function VaultPage({
       </div>
 
       {!coffreKey ? (
-        <div className="mb-6 rounded-lg border border-laiton-clair bg-papier px-5 py-4">
-          <p className="text-sm font-medium text-encre">Sécurise ton coffre</p>
-          <p className="mt-1 mb-3 text-sm text-encre-douce">
+        <div className="mb-6 rounded-lg border border-line bg-card px-5 py-4">
+          <p className="text-sm font-medium text-ink">Sécurise ton coffre</p>
+          <p className="mt-1 mb-3 text-sm text-slate">
             Active le chiffrement de bout en bout : tes documents ne seront lisibles que par toi (et
             ceux à qui tu les partages), déverrouillés par Face ID / empreinte.
           </p>
@@ -113,8 +113,8 @@ export default async function VaultPage({
           className={cn(
             "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
             activeCategory === null
-              ? "border-bordeaux bg-bordeaux text-papier"
-              : "border-laiton-clair bg-papier text-encre-douce hover:text-encre",
+              ? "border-lagoon-ink bg-lagoon-ink text-card"
+              : "border-line bg-card text-slate hover:text-ink",
           )}
         >
           {t("vault.filterAll")}
@@ -126,8 +126,8 @@ export default async function VaultPage({
             className={cn(
               "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
               activeCategory === c
-                ? "border-bordeaux bg-bordeaux text-papier"
-                : "border-laiton-clair bg-papier text-encre-douce hover:text-encre",
+                ? "border-lagoon-ink bg-lagoon-ink text-card"
+                : "border-line bg-card text-slate hover:text-ink",
             )}
           >
             {categoryLabel(t, c)}
@@ -135,13 +135,13 @@ export default async function VaultPage({
         ))}
       </div>
 
-      <h2 className="mb-3 text-sm font-medium text-encre">Mes documents</h2>
+      <h2 className="mb-3 text-sm font-medium text-ink">Mes documents</h2>
       {documents.length === 0 ? (
-        <div className="flex flex-col items-center gap-4 rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-6 py-16 text-center">
-          <p className="font-display text-2xl text-encre italic">
+        <div className="flex flex-col items-center gap-4 rounded-lg border border-dashed border-line bg-card/60 px-6 py-16 text-center">
+          <p className="font-sans text-2xl text-ink italic">
             {activeCategory ? t("vault.emptyCategoryTitle") : t("vault.emptyTitle")}
           </p>
-          <p className="max-w-sm text-sm text-encre-douce">{t("vault.emptyBody")}</p>
+          <p className="max-w-sm text-sm text-slate">{t("vault.emptyBody")}</p>
           <Button asChild className="mt-2">
             <Link href="/vault/new">{t("vault.add")}</Link>
           </Button>
@@ -152,30 +152,30 @@ export default async function VaultPage({
             <li key={doc.id}>
               <Link
                 href={`/vault/${doc.id}`}
-                className="flex items-center gap-4 rounded-lg border border-laiton-clair bg-papier px-4 py-3 transition-shadow hover:shadow-[0_2px_12px_rgba(31,42,68,0.1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-laiton"
+                className="flex items-center gap-4 rounded-lg border border-line bg-card px-4 py-3 transition-shadow hover:shadow-[0_2px_12px_rgba(15,47,56,0.1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mist"
               >
                 <CategoryIcon category={doc.category} />
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm font-medium text-encre">
+                  <span className="block truncate text-sm font-medium text-ink">
                     {doc.file_name}
                   </span>
-                  <span className="block text-xs text-encre-douce">
+                  <span className="block text-xs text-slate">
                     {doc.label ?? categoryLabel(t, doc.category)} · {t("vault.addedOn")}{" "}
                     {format(parseISO(doc.uploaded_at), "d MMM yyyy", { locale: dfLocale })}
                   </span>
                 </span>
                 {doc.expires_at ? (
                   parseISO(doc.expires_at) < new Date() ? (
-                    <span className="shrink-0 rounded-full bg-bordeaux/10 px-2.5 py-0.5 text-xs font-medium text-bordeaux">
+                    <span className="shrink-0 rounded-full bg-lagoon-ink/10 px-2.5 py-0.5 text-xs font-medium text-lagoon-ink">
                       {t("vault.expired")}
                     </span>
                   ) : parseISO(doc.expires_at) < addDays(new Date(), 90) ? (
-                    <span className="shrink-0 rounded-full bg-laiton/20 px-2.5 py-0.5 text-xs font-medium text-laiton">
+                    <span className="shrink-0 rounded-full bg-citron/20 px-2.5 py-0.5 text-xs font-medium text-mist">
                       {t("vault.expiresSoon")}{" "}
                       {format(parseISO(doc.expires_at), "d MMM yyyy", { locale: dfLocale })}
                     </span>
                   ) : (
-                    <span className="shrink-0 text-xs text-encre-douce">
+                    <span className="shrink-0 text-xs text-slate">
                       {t("vault.expiresOnPrefix")}{" "}
                       {format(parseISO(doc.expires_at), "d MMM yyyy", { locale: dfLocale })}
                     </span>
@@ -189,20 +189,20 @@ export default async function VaultPage({
 
       {sharedWithMe.length > 0 ? (
         <>
-          <h2 className="mt-8 mb-3 text-sm font-medium text-encre">Documents partagés avec moi</h2>
+          <h2 className="mt-8 mb-3 text-sm font-medium text-ink">Documents partagés avec moi</h2>
           <ul className="flex flex-col gap-2">
             {sharedWithMe.map((s) => (
               <li key={s.id}>
                 <Link
                   href={`/vault/${s.id}`}
-                  className="flex items-center gap-4 rounded-lg border border-laiton-clair bg-papier px-4 py-3 transition-shadow hover:shadow-[0_2px_12px_rgba(31,42,68,0.1)]"
+                  className="flex items-center gap-4 rounded-lg border border-line bg-card px-4 py-3 transition-shadow hover:shadow-[0_2px_12px_rgba(15,47,56,0.1)]"
                 >
                   <CategoryIcon category={s.category} />
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-medium text-encre">
+                    <span className="block truncate text-sm font-medium text-ink">
                       {s.fileName}
                     </span>
-                    <span className="block text-xs text-encre-douce">
+                    <span className="block text-xs text-slate">
                       {t("documents.share.sharedBy")} {s.sharedBy}
                       {s.expiresAt
                         ? ` · valide jusqu'au ${format(parseISO(s.expiresAt), "d MMM yyyy", { locale: dfLocale })}`

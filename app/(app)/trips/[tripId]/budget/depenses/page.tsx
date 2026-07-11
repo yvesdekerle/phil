@@ -25,20 +25,20 @@ async function Bars({
   const il = await getIntlLocale();
   const visible = slices.filter((s) => s.amount > 0);
   if (visible.length === 0) {
-    return <p className="text-sm text-encre-douce">{t("budget.tracking.nothingYet")}</p>;
+    return <p className="text-sm text-slate">{t("budget.tracking.nothingYet")}</p>;
   }
   return (
     <div className="flex flex-col gap-1.5">
       {visible.map((s) => (
         <div key={s.label} className="flex items-center gap-2 text-sm">
-          <span className="w-24 shrink-0 text-encre">{s.label}</span>
-          <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-laiton-clair/30">
+          <span className="w-24 shrink-0 text-ink">{s.label}</span>
+          <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-line/30">
             <div
-              className="h-full rounded-full bg-bordeaux/80"
+              className="h-full rounded-full bg-lagoon-ink/80"
               style={{ width: `${total > 0 ? Math.max((s.amount / total) * 100, 2) : 0}%` }}
             />
           </div>
-          <span className="w-28 shrink-0 text-right text-encre-douce tabular-nums">
+          <span className="w-28 shrink-0 text-right text-slate tabular-nums">
             {fmt(s.amount, currency, il)}
           </span>
         </div>
@@ -133,7 +133,7 @@ export default async function ExpenseTrackingPage({
       <PurseNav tripId={tripId} active="suivi" closed={Boolean(trip?.purse_closed_at)} />
 
       {expenses.length === 0 ? (
-        <p className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-4 py-10 text-center text-sm text-encre-douce">
+        <p className="rounded-lg border border-dashed border-line bg-card/60 px-4 py-10 text-center text-sm text-slate">
           {t("budget.tracking.empty")}
         </p>
       ) : (
@@ -161,34 +161,34 @@ export default async function ExpenseTrackingPage({
 
           return (
             <section key={currency} className="flex flex-col gap-5">
-              <div className="rounded-lg border border-laiton-clair bg-papier px-4 py-3">
-                <h2 className="mb-3 flex items-baseline justify-between text-sm font-medium text-encre">
+              <div className="rounded-lg border border-line bg-card px-4 py-3">
+                <h2 className="mb-3 flex items-baseline justify-between text-sm font-medium text-ink">
                   <span>
                     {t("budget.tracking.tripTitle")} ({currency})
                   </span>
-                  <span className="text-encre-douce">
+                  <span className="text-slate">
                     {t("budget.tracking.total")} {fmt(total, currency, il)}
                   </span>
                 </h2>
                 <Bars slices={byCategory((e) => e.amount)} total={total} currency={currency} />
-                <h3 className="mt-4 mb-2 text-xs font-medium text-laiton uppercase tracking-wide">
+                <h3 className="mt-4 mb-2 text-xs font-medium text-mist uppercase tracking-wide">
                   {t("budget.tracking.phases")}
                 </h3>
                 <Bars slices={byPhase((e) => e.amount)} total={total} currency={currency} />
               </div>
 
-              <div className="rounded-lg border border-laiton-clair bg-papier px-4 py-3">
-                <h2 className="mb-3 flex items-baseline justify-between text-sm font-medium text-encre">
+              <div className="rounded-lg border border-line bg-card px-4 py-3">
+                <h2 className="mb-3 flex items-baseline justify-between text-sm font-medium text-ink">
                   <span>
                     {t("budget.tracking.myExpenses")} ({currency})
                   </span>
-                  <span className="text-encre-douce">
+                  <span className="text-slate">
                     {t("budget.tracking.myShare")} {fmt(myTotal, currency, il)}{" "}
                     {t("budget.tracking.advanced")} {fmt(myPaid, currency, il)}
                   </span>
                 </h2>
                 <Bars slices={byCategory((e) => e.myShare)} total={myTotal} currency={currency} />
-                <h3 className="mt-4 mb-2 text-xs font-medium text-laiton uppercase tracking-wide">
+                <h3 className="mt-4 mb-2 text-xs font-medium text-mist uppercase tracking-wide">
                   {t("budget.tracking.phases")}
                 </h3>
                 <Bars slices={byPhase((e) => e.myShare)} total={myTotal} currency={currency} />

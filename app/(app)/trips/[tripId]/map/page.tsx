@@ -14,9 +14,9 @@ import { createClient } from "@/lib/supabase/server";
 import { palette } from "@/lib/ui/colors";
 
 const TYPE_COLORS: Record<string, string> = {
-  TRANSPORT: palette.encre,
-  LODGING: palette.vert, // vert wagon : les hébergements se repèrent au premier coup d'œil
-  ACTIVITY: palette.bordeaux,
+  TRANSPORT: palette.ink,
+  LODGING: palette.lagoon, // vert wagon : les hébergements se repèrent au premier coup d'œil
+  ACTIVITY: palette.lagoonInk,
 };
 
 /** Cartes du voyage (PHIL-N01) : programme jour par jour, ou idées. */
@@ -87,7 +87,7 @@ export default async function TripMapPage({
       lng: i.location_lng as number,
       title: i.title,
       subtitle: i.location_name ?? undefined,
-      color: palette.bordeaux,
+      color: palette.lagoonInk,
     }));
     // L'hébergement en repère sur la carte des idées
     if (lodgingOfDay) {
@@ -97,7 +97,7 @@ export default async function TripMapPage({
         lng: lodgingOfDay.location_lng as number,
         title: lodgingOfDay.title,
         subtitle: t("map.lodging"),
-        color: palette.vert,
+        color: palette.lagoon,
         house: true,
       });
     }
@@ -116,7 +116,7 @@ export default async function TripMapPage({
       title: e.title,
       subtitle: `${eventTime(e.starts_at, e.timezone)}${e.location_name ? ` · ${e.location_name}` : ""}`,
       href: `/trips/${tripId}/events/${e.id}`,
-      color: TYPE_COLORS[e.type] ?? palette.bordeaux,
+      color: TYPE_COLORS[e.type] ?? palette.lagoonInk,
       order: idx,
       house: e.type === "LODGING",
       label: e.type === "LODGING" ? undefined : String(++step),
@@ -137,7 +137,7 @@ export default async function TripMapPage({
             lng: homeCoords.lng,
             title: `${t("map.departure")} : ${from}`,
             subtitle: t("map.departureSubtitle"),
-            color: palette.encre,
+            color: palette.ink,
             order: -1,
             house: true,
           });

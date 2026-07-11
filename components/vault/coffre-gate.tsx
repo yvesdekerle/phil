@@ -54,13 +54,13 @@ export function CoffreGate({ children }: { children: React.ReactNode }) {
     <main className="flex flex-1 flex-col items-center justify-center gap-4 px-4 py-24 text-center">
       {failed ? (
         <>
-          <p className="max-w-xs text-sm text-encre-douce">{t("vault.unlock.lockedBody")}</p>
+          <p className="max-w-xs text-sm text-slate">{t("vault.unlock.lockedBody")}</p>
           <Button type="button" onClick={() => void unlock()}>
             {t("vault.unlock.button")}
           </Button>
         </>
       ) : (
-        <p className="text-sm text-encre-douce">{t("vault.unlock.verifying")}</p>
+        <p className="text-sm text-slate">{t("vault.unlock.verifying")}</p>
       )}
     </main>
   );

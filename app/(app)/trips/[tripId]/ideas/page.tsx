@@ -128,7 +128,7 @@ export default async function TripIdeasPage({
         lng: l.location_lng as number,
         title: l.title,
         subtitle: t("map.lodging"),
-        color: palette.vert,
+        color: palette.lagoon,
         house: true,
       }),
     ),
@@ -139,7 +139,7 @@ export default async function TripIdeasPage({
         lng: i.location_lng as number,
         title: i.title,
         subtitle: i.location_name ?? undefined,
-        color: palette.bordeaux,
+        color: palette.lagoonInk,
       }),
     ),
   ];
@@ -211,7 +211,7 @@ export default async function TripIdeasPage({
 
       {(lodgings ?? []).length > 1 && selectedLodging ? (
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs text-encre-douce">{t("ideas.distancesLabel")}</span>
+          <span className="text-xs text-slate">{t("ideas.distancesLabel")}</span>
           <FilterSelect
             value={selectedLodging.id}
             ariaLabel={t("ideas.lodgingFilter")}
@@ -229,7 +229,7 @@ export default async function TripIdeasPage({
       ) : null}
 
       <div className="flex items-center justify-between">
-        <p className="text-sm text-encre-douce">{t("ideas.intro")}</p>
+        <p className="text-sm text-slate">{t("ideas.intro")}</p>
         {canPropose ? (
           <Button asChild>
             <Link href={`/trips/${tripId}/ideas/new`}>{t("ideas.propose")}</Link>
@@ -240,22 +240,22 @@ export default async function TripIdeasPage({
       {/* PHIL-U07 : lance le swipe façon Tinder/Bumble sur les idées du voyage. */}
       <Link
         href={`/trips/${tripId}/ideas/match`}
-        className="group flex items-center justify-between gap-3 rounded-xl border border-bordeaux/30 bg-gradient-to-br from-bordeaux/10 to-laiton/10 px-4 py-3.5 transition-colors hover:border-bordeaux/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-laiton"
+        className="group flex items-center justify-between gap-3 rounded-xl border border-lagoon-ink/30 bg-gradient-to-br from-lagoon-ink/10 to-mist/10 px-4 py-3.5 transition-colors hover:border-lagoon-ink/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mist"
       >
         <span className="flex items-center gap-3">
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-bordeaux text-papier">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-lagoon-ink text-card">
             <Sparkles className="size-5" aria-hidden="true" />
           </span>
           <span className="flex flex-col">
-            <span className="font-display text-lg text-encre">{t("ideas.match.cta")}</span>
-            <span className="text-xs text-encre-douce">
+            <span className="font-sans text-lg text-ink">{t("ideas.match.cta")}</span>
+            <span className="text-xs text-slate">
               {toSwipeCount > 0
                 ? t("ideas.match.ctaCount").replace("{n}", String(toSwipeCount))
                 : t("ideas.match.ctaDone")}
             </span>
           </span>
         </span>
-        <span className="shrink-0 font-display text-2xl text-bordeaux transition-transform group-hover:translate-x-0.5">
+        <span className="shrink-0 font-sans text-2xl text-lagoon-ink transition-transform group-hover:translate-x-0.5">
           →
         </span>
       </Link>
@@ -273,8 +273,8 @@ export default async function TripIdeasPage({
           className={cn(
             "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
             sortBy === "votes"
-              ? "border-bordeaux bg-bordeaux text-papier"
-              : "border-laiton-clair bg-papier text-encre-douce hover:text-encre",
+              ? "border-lagoon-ink bg-lagoon-ink text-card"
+              : "border-line bg-card text-slate hover:text-ink",
           )}
         >
           {t("ideas.sortVotes")}
@@ -284,13 +284,13 @@ export default async function TripIdeasPage({
           className={cn(
             "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
             sortBy === "recent"
-              ? "border-bordeaux bg-bordeaux text-papier"
-              : "border-laiton-clair bg-papier text-encre-douce hover:text-encre",
+              ? "border-lagoon-ink bg-lagoon-ink text-card"
+              : "border-line bg-card text-slate hover:text-ink",
           )}
         >
           {t("ideas.sortRecent")}
         </Link>
-        {allTags.length > 0 ? <span className="mx-1 text-laiton-clair">·</span> : null}
+        {allTags.length > 0 ? <span className="mx-1 text-line">·</span> : null}
         {allTags.map((t) => (
           <Link
             key={t}
@@ -298,8 +298,8 @@ export default async function TripIdeasPage({
             className={cn(
               "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
               tag === t
-                ? "border-laiton bg-laiton text-papier"
-                : "border-laiton-clair bg-papier text-encre-douce hover:text-encre",
+                ? "border-line bg-citron text-card"
+                : "border-line bg-card text-slate hover:text-ink",
             )}
           >
             #{t}
@@ -311,8 +311,8 @@ export default async function TripIdeasPage({
           className={cn(
             "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
             showDismissed
-              ? "border-encre bg-encre text-papier"
-              : "border-laiton-clair bg-papier text-encre-douce hover:text-encre",
+              ? "border-ink bg-ink text-card"
+              : "border-line bg-card text-slate hover:text-ink",
           )}
         >
           {showDismissed ? t("ideas.backToIdeas") : t("ideas.seeDismissed")}
@@ -320,9 +320,9 @@ export default async function TripIdeasPage({
       </div>
 
       {ideas.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-6 py-14 text-center">
-          <p className="font-display text-xl text-encre italic">{t("ideas.emptyTitle")}</p>
-          <p className="max-w-sm text-sm text-encre-douce">{t("ideas.emptyBody")}</p>
+        <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-line bg-card/60 px-6 py-14 text-center">
+          <p className="font-sans text-xl text-ink italic">{t("ideas.emptyTitle")}</p>
+          <p className="max-w-sm text-sm text-slate">{t("ideas.emptyBody")}</p>
           {canPropose ? (
             <Button asChild className="mt-1">
               <Link href={`/trips/${tripId}/ideas/new`}>{t("ideas.propose")}</Link>

@@ -173,36 +173,33 @@ export function ExpensesClient({
   return (
     <div className="flex flex-col gap-5">
       <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-lg border border-laiton-clair bg-papier px-4 py-2.5 text-center">
-          <p className="text-xs text-encre-douce">{t("budget.summary.myExpenses")}</p>
+        <div className="rounded-lg border border-line bg-card px-4 py-2.5 text-center">
+          <p className="text-xs text-slate">{t("budget.summary.myExpenses")}</p>
           <Money
             amount={myTotal}
             currency={primaryCurrency}
             secondaryAmount={sub(myTotal)}
             secondaryCurrency={secondaryCurrency}
             align="start"
-            className="items-center font-display text-lg text-encre"
+            className="items-center font-sans text-lg text-ink"
           />
         </div>
-        <div className="rounded-lg border border-laiton-clair bg-papier px-4 py-2.5 text-center">
-          <p className="text-xs text-encre-douce">{t("budget.summary.totalExpenses")}</p>
+        <div className="rounded-lg border border-line bg-card px-4 py-2.5 text-center">
+          <p className="text-xs text-slate">{t("budget.summary.totalExpenses")}</p>
           <Money
             amount={total}
             currency={primaryCurrency}
             secondaryAmount={sub(total)}
             secondaryCurrency={secondaryCurrency}
             align="start"
-            className="items-center font-display text-lg text-encre"
+            className="items-center font-sans text-lg text-ink"
           />
         </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative min-w-40 flex-1">
-          <Search
-            className="absolute top-2.5 left-2.5 size-4 text-encre-douce"
-            aria-hidden="true"
-          />
+          <Search className="absolute top-2.5 left-2.5 size-4 text-slate" aria-hidden="true" />
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -225,7 +222,7 @@ export function ExpensesClient({
       {showForm && !closed ? (
         <form
           action={formAction}
-          className="flex flex-col gap-3 rounded-lg border border-laiton-clair bg-papier px-4 py-3"
+          className="flex flex-col gap-3 rounded-lg border border-line bg-card px-4 py-3"
         >
           <input type="hidden" name="tripId" value={tripId} />
           <div className="grid grid-cols-2 gap-3">
@@ -254,13 +251,13 @@ export function ExpensesClient({
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <label className="flex flex-col gap-1 text-sm text-encre">
+            <label className="flex flex-col gap-1 text-sm text-ink">
               {t("budget.form.category")}
               <select
                 name="category"
                 value={category}
                 onChange={(e) => setCategory(e.target.value as ExpenseCategory)}
-                className="rounded border border-laiton-clair bg-papier px-2 py-1.5 text-sm"
+                className="rounded border border-line bg-card px-2 py-1.5 text-sm"
               >
                 {EXPENSE_CATEGORIES.map((c) => (
                   <option key={c} value={c}>
@@ -269,7 +266,7 @@ export function ExpensesClient({
                 ))}
               </select>
             </label>
-            <div className="flex flex-col gap-1 text-sm text-encre">
+            <div className="flex flex-col gap-1 text-sm text-ink">
               <label htmlFor="spentOn">{t("budget.form.when")}</label>
               <Input
                 id="spentOn"
@@ -281,12 +278,12 @@ export function ExpensesClient({
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <label className="flex flex-col gap-1 text-sm text-encre">
+            <label className="flex flex-col gap-1 text-sm text-ink">
               {t("budget.form.paidBy")}
               <select
                 name="paidBy"
                 defaultValue={myId}
-                className="rounded border border-laiton-clair bg-papier px-2 py-1.5 text-sm"
+                className="rounded border border-line bg-card px-2 py-1.5 text-sm"
               >
                 {members.map((m) => (
                   <option key={m.userId} value={m.userId}>
@@ -295,7 +292,7 @@ export function ExpensesClient({
                 ))}
               </select>
             </label>
-            <label className="flex flex-col gap-1 text-sm text-encre">
+            <label className="flex flex-col gap-1 text-sm text-ink">
               {t("budget.form.linkedEvent")}
               <select
                 name="eventId"
@@ -306,7 +303,7 @@ export function ExpensesClient({
                     setCategory(categoryForEventType(ev.type));
                   }
                 }}
-                className="rounded border border-laiton-clair bg-papier px-2 py-1.5 text-sm"
+                className="rounded border border-line bg-card px-2 py-1.5 text-sm"
               >
                 <option value="">{t("budget.form.none")}</option>
                 {events.map((ev) => (
@@ -318,13 +315,13 @@ export function ExpensesClient({
             </label>
           </div>
 
-          <label className="flex items-center gap-2 text-sm text-encre">
+          <label className="flex items-center gap-2 text-sm text-ink">
             {t("budget.form.split")}
             <select
               name="splitMode"
               value={splitMode}
               onChange={(e) => setSplitMode(e.target.value as typeof splitMode)}
-              className="rounded border border-laiton-clair bg-papier px-2 py-1.5 text-sm"
+              className="rounded border border-line bg-card px-2 py-1.5 text-sm"
             >
               {SPLIT_MODES.map((m) => (
                 <option key={m} value={m}>
@@ -335,13 +332,13 @@ export function ExpensesClient({
           </label>
 
           <fieldset className="flex flex-col gap-1">
-            <legend className="mb-1 text-sm text-encre">{t("budget.form.forWhom")}</legend>
+            <legend className="mb-1 text-sm text-ink">{t("budget.form.forWhom")}</legend>
             {members.map((m) => {
               const isIn = checked.has(m.userId);
               return (
                 <div
                   key={m.userId}
-                  className="flex items-center gap-2 rounded-md border border-laiton-clair/50 px-2.5 py-1.5 text-sm"
+                  className="flex items-center gap-2 rounded-md border border-line/50 px-2.5 py-1.5 text-sm"
                 >
                   <input
                     type="checkbox"
@@ -359,10 +356,10 @@ export function ExpensesClient({
                         return next;
                       })
                     }
-                    className="accent-bordeaux"
+                    className="accent-lagoon-ink"
                     aria-label={`${t("budget.form.beneficiaryAria")} ${nameOf(m.userId)}`}
                   />
-                  <span className="min-w-0 flex-1 text-encre">{nameOf(m.userId)}</span>
+                  <span className="min-w-0 flex-1 text-ink">{nameOf(m.userId)}</span>
                   {splitMode !== "equal" && isIn ? (
                     <input
                       type="number"
@@ -373,7 +370,7 @@ export function ExpensesClient({
                       onChange={(e) =>
                         setShares((prev) => ({ ...prev, [m.userId]: Number(e.target.value) || 0 }))
                       }
-                      className="w-20 rounded border border-laiton-clair bg-papier px-1.5 py-0.5 text-right text-xs"
+                      className="w-20 rounded border border-line bg-card px-1.5 py-0.5 text-right text-xs"
                       aria-label={
                         splitMode === "shares"
                           ? t("budget.form.sharesAria")
@@ -381,7 +378,7 @@ export function ExpensesClient({
                       }
                     />
                   ) : null}
-                  <span className="w-20 shrink-0 text-right text-xs text-encre-douce tabular-nums">
+                  <span className="w-20 shrink-0 text-right text-xs text-slate tabular-nums">
                     {isIn ? fmt(shareOf(m.userId), "") : "—"}
                   </span>
                 </div>
@@ -394,44 +391,44 @@ export function ExpensesClient({
               {formPending ? t("budget.form.saving") : t("budget.common.save")}
             </Button>
             {state.status === "error" ? (
-              <p className="text-xs text-bordeaux">{state.message}</p>
+              <p className="text-xs text-lagoon-ink">{state.message}</p>
             ) : null}
           </div>
         </form>
       ) : null}
 
       {byDate.length === 0 ? (
-        <p className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-4 py-8 text-center text-sm text-encre-douce">
+        <p className="rounded-lg border border-dashed border-line bg-card/60 px-4 py-8 text-center text-sm text-slate">
           {query ? t("budget.empty.noMatch") : t("budget.empty.noExpenses")}
         </p>
       ) : (
         byDate.map(([date, rows]) => (
           <section key={date}>
-            <h2 className="mb-1.5 text-sm font-medium text-encre-douce capitalize">
+            <h2 className="mb-1.5 text-sm font-medium text-slate capitalize">
               {format(new Date(`${date}T12:00:00`), "d MMMM yyyy", { locale: dfLocale })}
             </h2>
             <div className="flex flex-col gap-1.5">
               {rows.map((e) => (
                 <div
                   key={e.id}
-                  className="flex items-center gap-3 rounded-md border border-laiton-clair/60 bg-papier px-3 py-2 text-sm"
+                  className="flex items-center gap-3 rounded-md border border-line/60 bg-card px-3 py-2 text-sm"
                 >
-                  <span className="min-w-0 flex-1 truncate text-encre">
+                  <span className="min-w-0 flex-1 truncate text-ink">
                     {e.isSettlement ? "↩ " : ""}
                     {e.title}
                     {e.isSettlement ? (
-                      <span className="ml-1.5 rounded-full bg-encre/10 px-2 py-0.5 text-[0.65rem] text-encre-douce">
+                      <span className="ml-1.5 rounded-full bg-ink/10 px-2 py-0.5 text-[0.65rem] text-slate">
                         {t("budget.list.betweenTravelers")}
                       </span>
                     ) : (
-                      <span className="ml-1.5 rounded-full bg-laiton/15 px-2 py-0.5 text-[0.65rem] text-laiton">
+                      <span className="ml-1.5 rounded-full bg-citron/15 px-2 py-0.5 text-[0.65rem] text-mist">
                         {EXPENSE_CATEGORIES.includes(e.category as ExpenseCategory)
                           ? t(`budget.categories.${e.category}`)
                           : e.category}
                       </span>
                     )}
                   </span>
-                  <span className="shrink-0 text-xs text-encre-douce">
+                  <span className="shrink-0 text-xs text-slate">
                     {e.isSettlement
                       ? `${nameOf(e.paid_by)} → ${nameOf(e.beneficiaries[0]?.userId ?? "")}`
                       : `${nameOf(e.paid_by)} · ${t("budget.list.for")} ${e.beneficiaries.length}${e.splitMode !== "equal" ? ` (${splitLabels[e.splitMode].toLowerCase()})` : ""}`}
@@ -441,7 +438,7 @@ export function ExpensesClient({
                     currency={e.amountPrimary !== null ? primaryCurrency : e.currency}
                     secondaryAmount={e.amountPrimary !== null ? sub(e.amountPrimary) : null}
                     secondaryCurrency={secondaryCurrency}
-                    className="shrink-0 font-medium text-encre"
+                    className="shrink-0 font-medium text-ink"
                     title={
                       e.currency !== primaryCurrency
                         ? `${t("budget.list.entered")} ${fmt(e.amount, e.currency)}`
@@ -460,7 +457,7 @@ export function ExpensesClient({
                           }
                         })
                       }
-                      className="text-encre-douce hover:text-bordeaux"
+                      className="text-slate hover:text-lagoon-ink"
                       aria-label={`${t("budget.common.delete")} ${e.title}`}
                     >
                       <Trash2 className="size-4" aria-hidden="true" />

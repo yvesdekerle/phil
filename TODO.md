@@ -1163,6 +1163,44 @@ Chrome de l'app masqué à l'impression (`print:hidden` sur header app + couvert
 
 ---
 
+## Catégorie V — Refonte design « Lagune vive » (handoff `tmp/design_phil_v2/`, plan validé avec Yves le 2026-07-11)
+
+### [~] PHIL-V01 — Épopée : intégrer le design « Lagune vive » v1 (couche présentation uniquement)
+Remplacer intégralement le design v1 « Phileas » (bordeaux/parchemin, Bodoni Moda + Figtree) par le design system « Lagune vive » du handoff `tmp/design_phil_v2/README.md` : 18 rôles de couleur, Schibsted Grotesk + Spline Sans Mono (9 styles typo), grille 4 px, 5 rayons, 4 ombres, composants B1-B12, nav voyage 5 onglets max + grille « Plus », sidebar desktop 220 / barre d'onglets basse mobile. **Principes actés** : (1) « Lagune vive » est traité comme le design d'origine de l'app — **zéro artefact v1** (montgolfière, porte du coffre, billet d'embarquement du login, icônes PWA inclus) ; la microcopy Jules Verne, elle, est conservée (ton produit). (2) Big-bang sans alias — l'app n'est pas en production, renommage global mécanique dès la phase 0. (3) Jamais de logique métier touchée (server actions, RLS, data, offline). Branche `feature/PHIL-V01-lagune-vive`, checkpoint de validation visuelle avec Yves après la phase 2 (V01c). Les nouveautés **fonctionnelles** du design partent en tickets séparés V02-V05.
+- [x] V01a — Phase 0 : tokens & polices + renommage global *(fait le 2026-07-11)*
+- [ ] V01b — Phase 1 : primitives UI B1-B12 (`components/ui/*` + chip, badge, FAB, sheet, segmented, skeleton, empty-state)
+- [ ] V01c — Phase 2 : app shell responsive (header, sidebar 220, barre d'onglets B9, grille « Plus », header voyage, renommages nav i18n)
+- [ ] V01d — Mes voyages + création de voyage
+- [ ] V01e — Journal : Aperçu + Calendrier + vue jour (segmented control)
+- [ ] V01f — Journal : Timeline (ruban mono `ME 05`) + Carte (marqueurs recolorés)
+- [ ] V01g — Bourse : Suivi (héro sombre + barres) / Dépenses (registre B7, FAB + sheet) / Équilibre
+- [ ] V01h — Idées + Match (vote simple restylé B12 ; pondéré → V02)
+- [ ] V01i — Sondages (rond 50 % réservé au vote simple) + Logements (pondéré → V03)
+- [ ] V01j — Miam (Repas / Courses, quantités mono) + Valise (3 onglets, chips)
+- [ ] V01k — Photos + Documents (maître-détail, `OFFLINE ✓`, livrée sombre coffre) + Guide (print préservé)
+- [ ] V01l — Événements : détail / création / édition / import (chips vol `ink-deep`)
+- [ ] V01m — Participants (badge capitaine citron) + Réglages voyage + Fiche d'urgence
+- [ ] V01n — Coffre : verrouillé sombre / ouvert / activité / appairage (porte v1 → animation de scan du handoff)
+- [ ] V01o — Transverse : Profil (rangées B6), Sécurité, Amis, Horloges, Conseils, Explorer
+- [ ] V01p — Auth, pages publiques & états système (login, invitation, `/p`, offline, erreurs ; PhilLoader → squelettes `wash` ; suppression `demo-animations`)
+- [ ] V01q — Emails (police système + rôles Lagune vive) + PWA/manifest + icônes régénérées (mot-symbole Schibsted 800)
+- [ ] V01r — Phase 4 : nettoyage final (grep 0 reliquat + valeurs magiques), QA a11y (focus, 44 px, AA) + responsive (390/1024), CLAUDE.md § identité visuelle
+> Note V01a (2026-07-11) : tokens « Lagune vive » posés dans `globals.css` (:root + `@theme inline` : couleurs, échelle typo `text-display…text-label`, rayons `rounded-sm/md/lg/xl`, ombres `shadow-card/float/modal/sheet/glow`) ; shadcn remappé (`--primary`→lagoon-ink, `--ring`→citron, `--destructive`→berry-ink) ; suppression du dark mode générique inutilisé et des tokens `--sidebar*`/`--chart*` morts ; polices Schibsted Grotesk + Spline Sans Mono via next/font (Bodoni/Figtree retirées) ; `lib/ui/colors.ts` + test de synchro réécrits. Renommage mécanique global (147 fichiers) par préfixe d'utilité : encre→ink, encre-douce→slate, parchemin→sand, papier→card, laiton-clair→line, text-laiton→mist / bg-laiton→citron / ring-laiton→citron, bordeaux→lagoon-ink, bordeaux-fonce→lagoon-hover, vert→lagoon, bleu-nuit→ink-deep, font-display/heading→font-sans, ombres `rgba(31,42,68,…)`→base ink `rgba(15,47,56,…)`, clés `palette.*` alignées. Filigrane coffre → `berry-ink` (helper `paletteRgb`), carte du monde « à visiter » → `wash`. Reste assumé pour les passes par page : tri contextuel bordeaux-destructif→berry-ink, graisses des ex-`font-display`, tokenisation des ombres arbitraires ; `#953c32` vit encore dans `phil-loader.tsx` (supprimé en V01p).
+
+### [ ] PHIL-V02 — Idées : vote pondéré top-3 (tuiles ①②③ = 3/2/1 points)
+Le handoff (§5 Idées, B12) remplace le vote simple par un **vote pondéré top-3** : chaque participant distribue 3/2/1 points via des tuiles ①②③ (rang posé = `citron`), scores en points, détail des votants par option. Nécessite une évolution du modèle (`idea_votes` : colonne rang ou table dédiée), des actions serveur et de la RLS → hors périmètre de la refonte présentation (PHIL-V01). À articuler avec le verdict Match U07 (YES/NO/MAYBE/SUPER) : le pondéré classe, le Match filtre.
+
+### [ ] PHIL-V03 — Logements : vote pondéré top-3 en points
+Même mécanique que V02 appliquée aux hébergements candidats (L01/L02) : attribuer ses points (écran de notation), score affiché en `29 PTS` mono sur la carte de chaque option (maquettes « Logements »). Évolution modèle + actions + RLS → hors périmètre refonte.
+
+### [ ] PHIL-V04 — Centre de notifications in-app (cloche header + page + non-lus)
+Le design place une **cloche dans le header** (point `berry` 8 px cerclé, sans compteur) ouvrant une page/panneau de notifications : non-lu cerclé + fond `berry-wash`, actions inline (« Reçu ✓ », « Planifier »), désktop = panneau ancré sous la cloche. Nécessite un modèle de notifications persistées (table + RLS + producteurs d'événements) — aujourd'hui seules existent les pastilles « à voter » et les push web. Le shell V01c réserve l'emplacement de la cloche.
+
+### [ ] PHIL-V05 — Page Archive (contenus tranchés)
+Décision de nav du handoff (§4) : les contenus non retenus (vieux sondages clos, idées écartées…) partent dans une page **Archive** au lieu d'encombrer les pages vives. À spécifier (quelles entités, quel accès) puis implémenter — hors périmètre refonte.
+
+---
+
 ## Backlog — différé volontairement (ne pas traiter sans demande explicite)
 
 **Outillage retiré du P0** (à réintroduire quand un second contributeur arrive ou que le projet grossit) :

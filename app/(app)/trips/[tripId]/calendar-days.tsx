@@ -47,7 +47,7 @@ export function CalendarDays({
       {events.length > 0 ? (
         <div className="relative max-w-xs">
           <Search
-            className="pointer-events-none absolute top-2 left-2.5 size-4 text-encre-douce"
+            className="pointer-events-none absolute top-2 left-2.5 size-4 text-slate"
             aria-hidden="true"
           />
           <input
@@ -55,23 +55,21 @@ export function CalendarDays({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t("calendar.searchPlaceholder")}
-            className="h-8 w-full rounded-full border border-laiton-clair bg-papier pr-3 pl-8 text-sm text-encre placeholder:text-encre-douce/70 focus:outline-none focus:ring-1 focus:ring-laiton"
+            className="h-8 w-full rounded-full border border-line bg-card pr-3 pl-8 text-sm text-ink placeholder:text-slate/70 focus:outline-none focus:ring-1 focus:ring-citron"
           />
         </div>
       ) : null}
 
       {days.length > 0 ? (
-        <p className="-mt-3 -mb-3 text-right text-xs text-encre-douce">
-          {t("calendar.localTimeNote")}
-        </p>
+        <p className="-mt-3 -mb-3 text-right text-xs text-slate">{t("calendar.localTimeNote")}</p>
       ) : null}
 
       {days.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-6 py-14 text-center">
-          <p className="font-display text-xl text-encre italic">
+        <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-line bg-card/60 px-6 py-14 text-center">
+          <p className="font-sans text-xl text-ink italic">
             {deferredQuery ? t("calendar.searchEmptyTitle") : t("calendar.emptyTitle")}
           </p>
-          <p className="max-w-sm text-sm text-encre-douce">
+          <p className="max-w-sm text-sm text-slate">
             {deferredQuery ? t("calendar.searchEmptyBody") : t("calendar.emptyBody")}
           </p>
           {canEdit && !deferredQuery ? (
@@ -87,7 +85,7 @@ export function CalendarDays({
               <h2
                 className={cn(
                   "mb-2 flex items-center gap-2 text-sm font-medium capitalize",
-                  day.dayKey === todayKey ? "text-bordeaux" : "text-encre-douce",
+                  day.dayKey === todayKey ? "text-lagoon-ink" : "text-slate",
                 )}
               >
                 <Link
@@ -98,7 +96,7 @@ export function CalendarDays({
                   {day.label}
                 </Link>
                 {day.dayKey === todayKey ? (
-                  <span className="rounded-full bg-bordeaux px-2 py-0.5 text-[0.65rem] font-medium text-papier uppercase">
+                  <span className="rounded-full bg-lagoon-ink px-2 py-0.5 text-[0.65rem] font-medium text-card uppercase">
                     {t("calendar.today")}
                   </span>
                 ) : null}
@@ -108,18 +106,18 @@ export function CalendarDays({
                   <li key={event.id}>
                     <Link
                       href={`/trips/${tripId}/events/${event.id}`}
-                      className="flex items-center gap-3 rounded-lg border border-laiton-clair bg-papier px-4 py-3 transition-shadow hover:shadow-[0_2px_12px_rgba(31,42,68,0.1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-laiton"
+                      className="flex items-center gap-3 rounded-lg border border-line bg-card px-4 py-3 transition-shadow hover:shadow-[0_2px_12px_rgba(15,47,56,0.1)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mist"
                     >
-                      <span className="w-14 shrink-0 text-sm font-medium text-encre tabular-nums">
+                      <span className="w-14 shrink-0 text-sm font-medium text-ink tabular-nums">
                         {eventTime(event.starts_at, event.timezone)}
                       </span>
                       <EventTypeIcon type={event.type} />
                       <span className="min-w-0 flex-1">
-                        <span className="block truncate text-sm font-medium text-encre">
+                        <span className="block truncate text-sm font-medium text-ink">
                           {event.title}
                         </span>
                         {event.location_name ? (
-                          <span className="block truncate text-xs text-encre-douce">
+                          <span className="block truncate text-xs text-slate">
                             {event.location_name}
                           </span>
                         ) : null}

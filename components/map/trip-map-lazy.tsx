@@ -6,7 +6,7 @@ import { useT } from "@/components/i18n/provider";
 function MapLoading() {
   const t = useT();
   return (
-    <div className="flex h-[28rem] w-full items-center justify-center rounded-lg border border-laiton-clair bg-papier text-sm text-encre-douce">
+    <div className="flex h-[28rem] w-full items-center justify-center rounded-lg border border-line bg-card text-sm text-slate">
       {t("map.loading")}
     </div>
   );

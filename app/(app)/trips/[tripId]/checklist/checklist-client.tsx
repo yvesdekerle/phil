@@ -181,8 +181,8 @@ export function ChecklistClient({
             className={cn(
               "rounded-full px-3 py-1",
               tab === key
-                ? "bg-bordeaux font-medium text-papier"
-                : "text-encre-douce hover:bg-laiton/10 hover:text-encre",
+                ? "bg-lagoon-ink font-medium text-card"
+                : "text-slate hover:bg-citron/10 hover:text-ink",
             )}
           >
             {t(`checklist.tabs.${key}`)}
@@ -192,13 +192,13 @@ export function ChecklistClient({
 
       {localItems.length > 0 ? (
         <div className="flex items-center gap-3">
-          <div className="h-2 flex-1 overflow-hidden rounded-full bg-laiton-clair/40">
+          <div className="h-2 flex-1 overflow-hidden rounded-full bg-line/40">
             <div
-              className="h-full rounded-full bg-bordeaux transition-all"
+              className="h-full rounded-full bg-lagoon-ink transition-all"
               style={{ width: `${localItems.length ? (doneCount / localItems.length) * 100 : 0}%` }}
             />
           </div>
-          <span className="shrink-0 text-xs text-encre-douce">
+          <span className="shrink-0 text-xs text-slate">
             {doneCount}/{localItems.length}
           </span>
         </div>
@@ -206,7 +206,7 @@ export function ChecklistClient({
 
       {/* La liste : les éléments sélectionnés, par catégorie */}
       {sectionItems.length === 0 ? (
-        <p className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-4 py-6 text-center text-sm text-encre-douce">
+        <p className="rounded-lg border border-dashed border-line bg-card/60 px-4 py-6 text-center text-sm text-slate">
           {t("checklist.emptyList")}
         </p>
       ) : (
@@ -215,7 +215,7 @@ export function ChecklistClient({
           return (
             <section key={category}>
               <div className="mb-1.5 flex items-center gap-1">
-                <h2 className="text-xs font-medium text-laiton uppercase tracking-wide">
+                <h2 className="text-xs font-medium text-mist uppercase tracking-wide">
                   {category}
                 </h2>
                 {oi >= 0 && orderableCats.length > 1 ? (
@@ -225,7 +225,7 @@ export function ChecklistClient({
                       onClick={() => moveCategory(category, -1)}
                       disabled={oi === 0}
                       aria-label={t("checklist.moveCategoryUp")}
-                      className="rounded p-0.5 text-encre-douce hover:text-encre disabled:opacity-30"
+                      className="rounded p-0.5 text-slate hover:text-ink disabled:opacity-30"
                     >
                       <ChevronUp className="size-3.5" aria-hidden="true" />
                     </button>
@@ -234,7 +234,7 @@ export function ChecklistClient({
                       onClick={() => moveCategory(category, 1)}
                       disabled={oi === orderableCats.length - 1}
                       aria-label={t("checklist.moveCategoryDown")}
-                      className="rounded p-0.5 text-encre-douce hover:text-encre disabled:opacity-30"
+                      className="rounded p-0.5 text-slate hover:text-ink disabled:opacity-30"
                     >
                       <ChevronDown className="size-3.5" aria-hidden="true" />
                     </button>
@@ -248,7 +248,7 @@ export function ChecklistClient({
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={() => handleDrop(item)}
                     className={cn(
-                      "flex flex-wrap items-center gap-2 rounded-md border border-laiton-clair/60 bg-papier px-2 py-2",
+                      "flex flex-wrap items-center gap-2 rounded-md border border-line/60 bg-card px-2 py-2",
                       dragId === item.id && "opacity-40",
                     )}
                   >
@@ -257,7 +257,7 @@ export function ChecklistClient({
                       draggable
                       onDragStart={() => setDragId(item.id)}
                       onDragEnd={() => setDragId(null)}
-                      className="shrink-0 cursor-grab text-laiton-clair hover:text-laiton"
+                      className="shrink-0 cursor-grab text-line hover:text-mist"
                       aria-label={t("checklist.reorderAria")}
                     >
                       <GripVertical className="size-4" aria-hidden="true" />
@@ -276,23 +276,23 @@ export function ChecklistClient({
                           ),
                         )
                       }
-                      className="size-4 accent-bordeaux"
+                      className="size-4 accent-lagoon-ink"
                       aria-label={`${t("checklist.doneAria")} ${item.title}`}
                     />
                     <span
                       className={cn(
                         "min-w-0 flex-1 text-sm",
-                        item.done ? "text-encre-douce line-through" : "text-encre",
+                        item.done ? "text-slate line-through" : "text-ink",
                       )}
                     >
                       {item.title}
                       {item.quantity ? (
-                        <span className="ml-1.5 rounded-full bg-laiton/15 px-1.5 py-0.5 text-[0.65rem] font-medium text-laiton">
+                        <span className="ml-1.5 rounded-full bg-citron/15 px-1.5 py-0.5 text-[0.65rem] font-medium text-mist">
                           × {item.quantity}
                         </span>
                       ) : null}
                       {item.eventTitle ? (
-                        <span className="ml-1.5 rounded-full bg-laiton/15 px-2 py-0.5 text-[0.65rem] text-laiton">
+                        <span className="ml-1.5 rounded-full bg-citron/15 px-2 py-0.5 text-[0.65rem] text-mist">
                           {item.eventTitle}
                         </span>
                       ) : null}
@@ -305,7 +305,7 @@ export function ChecklistClient({
                           assignChecklistItem(tripId, item.id, e.target.value || null),
                         )
                       }
-                      className="rounded border border-laiton-clair bg-papier px-1.5 py-1 text-xs text-encre-douce"
+                      className="rounded border border-line bg-card px-1.5 py-1 text-xs text-slate"
                       aria-label={t("checklist.assignAria")}
                     >
                       <option value="">{t("checklist.assignNobody")}</option>
@@ -324,7 +324,7 @@ export function ChecklistClient({
                             deleteChecklistItem(tripId, item.id, item.event_id ?? undefined),
                           )
                         }
-                        className="text-encre-douce hover:text-bordeaux"
+                        className="text-slate hover:text-lagoon-ink"
                         aria-label={`${t("checklist.removePrefix")} ${item.title} ${t("checklist.removeSuffix")}`}
                       >
                         <Trash2 className="size-4" aria-hidden="true" />
@@ -341,11 +341,11 @@ export function ChecklistClient({
       {/* Ajouter ses propres éléments : titre, quantité (optionnel), catégorie */}
       <form
         action={formAction}
-        className="flex flex-col gap-2 rounded-lg border border-laiton-clair bg-papier px-4 py-3"
+        className="flex flex-col gap-2 rounded-lg border border-line bg-card px-4 py-3"
       >
-        <p className="text-xs font-medium text-encre">
+        <p className="text-xs font-medium text-ink">
           {t("checklist.addOwnTitle")}{" "}
-          <span className="font-normal text-encre-douce">{t("checklist.addOwnHint")}</span>
+          <span className="font-normal text-slate">{t("checklist.addOwnHint")}</span>
         </p>
         <input type="hidden" name="tripId" value={tripId} />
         <input type="hidden" name="section" value={tab} />
@@ -385,13 +385,13 @@ export function ChecklistClient({
 
       {/* Encore à sélectionner : le catalogue, ligne à ligne */}
       {pendingGroups.length > 0 ? (
-        <div className="flex flex-col gap-4 rounded-lg border border-dashed border-laiton-clair/80 bg-papier/50 px-4 py-3">
-          <p className="text-xs text-encre-douce">
+        <div className="flex flex-col gap-4 rounded-lg border border-dashed border-line/80 bg-card/50 px-4 py-3">
+          <p className="text-xs text-slate">
             {t("checklist.stillToSelectPrefix")} {nights} {t("checklist.stillToSelectSuffix")}
           </p>
           {pendingGroups.map((group) => (
             <div key={group.categoryKey}>
-              <h3 className="mb-1 text-xs font-medium text-laiton uppercase tracking-wide">
+              <h3 className="mb-1 text-xs font-medium text-mist uppercase tracking-wide">
                 {t(`checklist.catalogCat.${group.categoryKey}`)}
               </h3>
               <ul className="flex flex-col gap-1">
@@ -401,7 +401,7 @@ export function ChecklistClient({
                   return (
                     <li
                       key={item.key}
-                      className="flex items-center gap-2 rounded-md px-1 py-1 text-sm text-encre-douce"
+                      className="flex items-center gap-2 rounded-md px-1 py-1 text-sm text-slate"
                     >
                       <span className="min-w-0 flex-1">{name}</span>
                       {item.qty(nights) > 1 || qty > 1 ? (
@@ -416,7 +416,7 @@ export function ChecklistClient({
                               [item.key]: Math.max(1, Number(e.target.value) || 1),
                             }))
                           }
-                          className="w-14 rounded border border-laiton-clair bg-papier px-1.5 py-0.5 text-right text-xs"
+                          className="w-14 rounded border border-line bg-card px-1.5 py-0.5 text-right text-xs"
                           aria-label={`${t("checklist.qtyPrefix")} ${name}`}
                         />
                       ) : null}
@@ -424,7 +424,7 @@ export function ChecklistClient({
                         type="button"
                         disabled={pending}
                         onClick={() => addFromCatalog(item.key, qty, group.categoryKey)}
-                        className="flex items-center gap-1 rounded-full border border-laiton-clair px-2.5 py-0.5 text-xs transition-colors hover:border-bordeaux hover:text-bordeaux"
+                        className="flex items-center gap-1 rounded-full border border-line px-2.5 py-0.5 text-xs transition-colors hover:border-lagoon-ink hover:text-lagoon-ink"
                         aria-label={`${t("checklist.addItemPrefix")} ${name} ${t("checklist.addItemSuffix")}`}
                       >
                         <Plus className="size-3.5" aria-hidden="true" /> {t("checklist.add")}

@@ -26,9 +26,9 @@ export function QuickAdd({ tripId, defaultDate }: { tripId: string; defaultDate:
     <form
       ref={formRef}
       action={formAction}
-      className="flex flex-wrap items-center gap-2 rounded-lg border border-laiton-clair/60 bg-papier px-3 py-2"
+      className="flex flex-wrap items-center gap-2 rounded-lg border border-line/60 bg-card px-3 py-2"
     >
-      <Zap className="size-4 shrink-0 text-laiton" aria-hidden="true" />
+      <Zap className="size-4 shrink-0 text-mist" aria-hidden="true" />
       <input type="hidden" name="tripId" value={tripId} />
       <Input
         name="title"
@@ -56,7 +56,7 @@ export function QuickAdd({ tripId, defaultDate }: { tripId: string; defaultDate:
         {t("calendar.quickAdd.add")}
       </Button>
       {state.status === "error" ? (
-        <p className="w-full text-xs text-bordeaux">{state.message}</p>
+        <p className="w-full text-xs text-lagoon-ink">{state.message}</p>
       ) : null}
     </form>
   );

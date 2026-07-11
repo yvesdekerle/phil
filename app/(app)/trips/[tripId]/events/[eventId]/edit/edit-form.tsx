@@ -105,7 +105,9 @@ export function EditEventForm({
         <Button type="submit" disabled={pending}>
           {pending ? t("events.edit.saving") : t("events.edit.save")}
         </Button>
-        {state.status === "error" ? <p className="text-sm text-bordeaux">{state.message}</p> : null}
+        {state.status === "error" ? (
+          <p className="text-sm text-lagoon-ink">{state.message}</p>
+        ) : null}
       </div>
     </form>
   );

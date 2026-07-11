@@ -13,10 +13,10 @@ const WORLD_TOUR_KM = 40_075;
 
 function Stat({ value, label, hint }: { value: string; label: string; hint?: string }) {
   return (
-    <div className="rounded-lg border border-laiton-clair bg-papier px-4 py-3 text-center">
-      <p className="font-display text-2xl text-bordeaux">{value}</p>
-      <p className="text-xs text-encre-douce">{label}</p>
-      {hint ? <p className="mt-0.5 text-[0.65rem] text-encre-douce/70">{hint}</p> : null}
+    <div className="rounded-lg border border-line bg-card px-4 py-3 text-center">
+      <p className="font-sans text-2xl text-lagoon-ink">{value}</p>
+      <p className="text-xs text-slate">{label}</p>
+      {hint ? <p className="mt-0.5 text-[0.65rem] text-slate/70">{hint}</p> : null}
     </div>
   );
 }
@@ -160,8 +160,8 @@ export default async function ExplorerPage() {
 
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-8">
-      <h1 className="font-display text-3xl text-encre">{t("explorer.title")}</h1>
-      <p className="mt-1 mb-6 text-sm text-encre-douce">
+      <h1 className="font-sans text-3xl text-ink">{t("explorer.title")}</h1>
+      <p className="mt-1 mb-6 text-sm text-slate">
         {km > 0
           ? t("explorer.introWithKm").replace(
               "{share}",
@@ -199,16 +199,16 @@ export default async function ExplorerPage() {
       </div>
 
       <section className="mt-8">
-        <h2 className="mb-1 font-display text-xl text-encre">{t("explorer.mapTitle")}</h2>
-        <p className="mb-3 text-sm text-encre-douce">{t("explorer.mapIntro")}</p>
+        <h2 className="mb-1 font-sans text-xl text-ink">{t("explorer.mapTitle")}</h2>
+        <p className="mb-3 text-sm text-slate">{t("explorer.mapIntro")}</p>
         <CountrySuggestions suggestions={suggestions} />
         <WorldMapLazy visited={visited} />
       </section>
 
       <BadgesGrid badges={badges} />
 
-      <p className="mt-6 text-sm text-encre-douce">
-        <Link href="/trips" className="underline underline-offset-4 hover:text-encre">
+      <p className="mt-6 text-sm text-slate">
+        <Link href="/trips" className="underline underline-offset-4 hover:text-ink">
           {t("explorer.backToTrips")}
         </Link>
       </p>

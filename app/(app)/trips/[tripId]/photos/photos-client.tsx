@@ -169,14 +169,14 @@ export function PhotosClient({
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="text-sm text-encre-douce">
-        <span className="font-medium text-encre">
+      <div className="text-sm text-slate">
+        <span className="font-medium text-ink">
           {photos.length}/{quota} {t("photos.photos")}
         </span>{" "}
         · {formatBytes(usedBytes)} {t("photos.qualityNote")}
       </div>
 
-      <div className="flex flex-col gap-2 rounded-lg border border-laiton-clair bg-papier px-4 py-3">
+      <div className="flex flex-col gap-2 rounded-lg border border-line bg-card px-4 py-3">
         <div className="flex flex-wrap items-center gap-2">
           <Button
             type="button"
@@ -194,7 +194,7 @@ export function PhotosClient({
           <select
             ref={eventRef}
             defaultValue=""
-            className="h-9 rounded border border-laiton-clair bg-papier px-2 text-sm text-encre-douce"
+            className="h-9 rounded border border-line bg-card px-2 text-sm text-slate"
             aria-label={t("photos.attachEventAria")}
           >
             <option value="">{t("photos.attachEventOption")}</option>
@@ -205,7 +205,7 @@ export function PhotosClient({
             ))}
           </select>
         </div>
-        <p className="text-xs text-encre-douce">{t("photos.nextUploadNote")}</p>
+        <p className="text-xs text-slate">{t("photos.nextUploadNote")}</p>
       </div>
 
       <input
@@ -217,7 +217,7 @@ export function PhotosClient({
         onChange={(e) => e.target.files && uploadFiles(e.target.files)}
       />
 
-      {error ? <p className="text-sm text-bordeaux">{error}</p> : null}
+      {error ? <p className="text-sm text-lagoon-ink">{error}</p> : null}
 
       {located.length > 0 ? (
         <div>
@@ -229,12 +229,12 @@ export function PhotosClient({
                 lng: p.lng as number,
                 title: p.caption ?? t("photos.markerTitle"),
                 subtitle: p.uploaderName,
-                color: palette.bordeaux,
+                color: palette.lagoonInk,
                 thumbUrl: `/api/photos/${p.id}/view${p.hasThumb ? "?thumb=1" : ""}`,
               }),
             )}
           />
-          <p className="mt-1 text-xs text-encre-douce">
+          <p className="mt-1 text-xs text-slate">
             {located.length}/{photos.length}{" "}
             {located.length > 1 ? t("photos.geolocatedCountMany") : t("photos.geolocatedCountOne")}{" "}
             {t("photos.gpsNote")}
@@ -243,9 +243,9 @@ export function PhotosClient({
       ) : null}
 
       {photos.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-6 py-14 text-center">
-          <p className="font-display text-xl text-encre italic">{t("photos.emptyTitle")}</p>
-          <p className="mt-2 text-sm text-encre-douce">
+        <div className="rounded-lg border border-dashed border-line bg-card/60 px-6 py-14 text-center">
+          <p className="font-sans text-xl text-ink italic">{t("photos.emptyTitle")}</p>
+          <p className="mt-2 text-sm text-slate">
             {t("photos.emptyBody").replace("{quota}", String(quota))}
           </p>
         </div>
@@ -256,7 +256,7 @@ export function PhotosClient({
               <button
                 type="button"
                 onClick={() => setLightbox(index)}
-                className="block w-full overflow-hidden rounded-lg border border-laiton-clair bg-parchemin"
+                className="block w-full overflow-hidden rounded-lg border border-line bg-sand"
                 aria-label={t("photos.open").replace("{name}", p.caption ?? t("photos.thePhoto"))}
               >
                 {/* Vignette générée côté client ; l'original ne charge que dans la visionneuse */}
@@ -269,17 +269,17 @@ export function PhotosClient({
                 />
               </button>
               {p.caption ? (
-                <p className="mt-1 truncate text-xs text-encre-douce" title={p.caption}>
+                <p className="mt-1 truncate text-xs text-slate" title={p.caption}>
                   {p.caption}
                 </p>
               ) : null}
-              <p className="text-[0.65rem] text-encre-douce/70">{p.uploaderName}</p>
+              <p className="text-[0.65rem] text-slate/70">{p.uploaderName}</p>
               {p.uploadedBy === myId || isOwner ? (
                 <button
                   type="button"
                   disabled={pending}
                   onClick={() => startTransition(() => deletePhoto(tripId, p.id))}
-                  className="absolute top-1.5 right-1.5 rounded-full bg-encre/60 p-1.5 text-papier opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+                  className="absolute top-1.5 right-1.5 rounded-full bg-ink/60 p-1.5 text-card opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
                   aria-label={t("photos.deleteAria")}
                 >
                   <Trash2 className="size-3.5" aria-hidden="true" />
@@ -292,12 +292,12 @@ export function PhotosClient({
 
       {lightbox !== null && photos[lightbox] ? (
         <div
-          className="fixed inset-0 z-50 flex flex-col bg-encre/95"
+          className="fixed inset-0 z-50 flex flex-col bg-ink/95"
           role="dialog"
           aria-modal="true"
           aria-label={t("photos.viewerAria")}
         >
-          <div className="flex items-center justify-between px-4 py-3 text-papier">
+          <div className="flex items-center justify-between px-4 py-3 text-card">
             <span className="text-sm opacity-80">
               {lightbox + 1}/{photos.length} · {photos[lightbox].uploaderName}
             </span>
@@ -305,7 +305,7 @@ export function PhotosClient({
               type="button"
               onClick={() => setLightbox(null)}
               aria-label={t("photos.close")}
-              className="rounded-full p-2 hover:bg-papier/10"
+              className="rounded-full p-2 hover:bg-card/10"
             >
               <X className="size-5" aria-hidden="true" />
             </button>
@@ -328,7 +328,7 @@ export function PhotosClient({
                   type="button"
                   onClick={() => step(-1)}
                   aria-label={t("photos.prev")}
-                  className="absolute left-2 rounded-full bg-papier/10 p-2 text-papier hover:bg-papier/20"
+                  className="absolute left-2 rounded-full bg-card/10 p-2 text-card hover:bg-card/20"
                 >
                   <ChevronLeft className="size-6" aria-hidden="true" />
                 </button>
@@ -336,7 +336,7 @@ export function PhotosClient({
                   type="button"
                   onClick={() => step(1)}
                   aria-label={t("photos.next")}
-                  className="absolute right-2 rounded-full bg-papier/10 p-2 text-papier hover:bg-papier/20"
+                  className="absolute right-2 rounded-full bg-card/10 p-2 text-card hover:bg-card/20"
                 >
                   <ChevronRight className="size-6" aria-hidden="true" />
                 </button>
@@ -344,9 +344,7 @@ export function PhotosClient({
             ) : null}
           </div>
           {photos[lightbox].caption ? (
-            <p className="px-4 py-3 text-center text-sm text-papier/90">
-              {photos[lightbox].caption}
-            </p>
+            <p className="px-4 py-3 text-center text-sm text-card/90">{photos[lightbox].caption}</p>
           ) : (
             <div className="py-3" />
           )}

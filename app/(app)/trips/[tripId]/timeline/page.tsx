@@ -80,31 +80,29 @@ export default async function TimelinePage({ params }: { params: Promise<{ tripI
         </div>
 
         {bars.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-6 py-14 text-center">
-            <p className="font-display text-xl text-encre italic">
-              {t("calendar.timeline.emptyTitle")}
-            </p>
-            <p className="mt-2 text-sm text-encre-douce">{t("calendar.timeline.emptyBody")}</p>
+          <div className="rounded-lg border border-dashed border-line bg-card/60 px-6 py-14 text-center">
+            <p className="font-sans text-xl text-ink italic">{t("calendar.timeline.emptyTitle")}</p>
+            <p className="mt-2 text-sm text-slate">{t("calendar.timeline.emptyBody")}</p>
           </div>
         ) : (
-          <div className="sticky top-16 z-0 max-h-[calc(100dvh-3.5rem)] overflow-auto rounded-lg border border-laiton-clair bg-papier">
+          <div className="sticky top-16 z-0 max-h-[calc(100dvh-3.5rem)] overflow-auto rounded-lg border border-line bg-card">
             <div style={{ width: dayCount * DAY_WIDTH + LABEL_W }}>
               {/* En-tête des jours — figé en haut, colonne des noms figée à gauche */}
               <div
-                className="sticky top-0 z-30 flex border-b border-laiton-clair/60 bg-papier"
+                className="sticky top-0 z-30 flex border-b border-line/60 bg-card"
                 style={dayGridBackground}
               >
-                <div className="sticky left-0 z-40 shrink-0 bg-papier" style={{ width: LABEL_W }} />
+                <div className="sticky left-0 z-40 shrink-0 bg-card" style={{ width: LABEL_W }} />
                 {days.map((d) => (
                   <div
                     key={d.toISOString()}
-                    className="shrink-0 border-l border-laiton-clair/40 px-2 py-2 text-center"
+                    className="shrink-0 border-l border-line/40 px-2 py-2 text-center"
                     style={{ width: DAY_WIDTH }}
                   >
-                    <p className="text-[0.65rem] text-encre-douce uppercase">
+                    <p className="text-[0.65rem] text-slate uppercase">
                       {format(d, "EEE", { locale: dfLocale })}
                     </p>
-                    <p className="text-sm font-medium text-encre">
+                    <p className="text-sm font-medium text-ink">
                       {format(d, "d MMM", { locale: dfLocale })}
                     </p>
                   </div>
@@ -118,8 +116,8 @@ export default async function TimelinePage({ params }: { params: Promise<{ tripI
                   return null;
                 }
                 return (
-                  <div key={lane} className="border-b border-laiton-clair/40 last:border-b-0">
-                    <p className="sticky left-0 z-20 bg-papier px-3 pt-2.5 pb-1 text-[0.65rem] font-medium tracking-wide text-laiton uppercase">
+                  <div key={lane} className="border-b border-line/40 last:border-b-0">
+                    <p className="sticky left-0 z-20 bg-card px-3 pt-2.5 pb-1 text-[0.65rem] font-medium tracking-wide text-mist uppercase">
                       {t(`events.type.${lane}`)}
                     </p>
                     {laneBars.map(({ event, startIdx, span }) => (
@@ -129,25 +127,25 @@ export default async function TimelinePage({ params }: { params: Promise<{ tripI
                         style={dayGridBackground}
                       >
                         <div
-                          className="sticky left-0 z-20 flex shrink-0 items-center self-stretch border-r border-laiton-clair/40 bg-papier px-3"
+                          className="sticky left-0 z-20 flex shrink-0 items-center self-stretch border-r border-line/40 bg-card px-3"
                           style={{ width: LABEL_W }}
                           title={event.title}
                         >
-                          <span className="truncate text-xs text-encre-douce">{event.title}</span>
+                          <span className="truncate text-xs text-slate">{event.title}</span>
                         </div>
                         <div className="relative h-8" style={{ width: dayCount * DAY_WIDTH }}>
                           <Link
                             href={`/trips/${tripId}/events/${event.id}`}
                             className={cn(
-                              "absolute top-0.5 bottom-0.5 flex items-center gap-1.5 overflow-hidden rounded-full border px-2.5 transition-shadow hover:shadow-[0_2px_10px_rgba(31,42,68,0.2)]",
-                              event.type === "TRANSPORT" && "border-encre/40 bg-encre/10",
-                              event.type === "LODGING" && "border-laiton bg-laiton/20",
-                              event.type === "ACTIVITY" && "border-bordeaux/40 bg-bordeaux/10",
+                              "absolute top-0.5 bottom-0.5 flex items-center gap-1.5 overflow-hidden rounded-full border px-2.5 transition-shadow hover:shadow-[0_2px_10px_rgba(15,47,56,0.2)]",
+                              event.type === "TRANSPORT" && "border-ink/40 bg-ink/10",
+                              event.type === "LODGING" && "border-line bg-citron/20",
+                              event.type === "ACTIVITY" && "border-lagoon-ink/40 bg-lagoon-ink/10",
                             )}
                             style={{ left: startIdx * DAY_WIDTH + 2, width: span * DAY_WIDTH - 4 }}
                           >
                             <EventTypeIcon type={event.type} className="size-5 shrink-0" />
-                            <span className="truncate text-xs font-medium text-encre">
+                            <span className="truncate text-xs font-medium text-ink">
                               {event.title}
                             </span>
                           </Link>

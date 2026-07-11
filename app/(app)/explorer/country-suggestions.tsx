@@ -16,7 +16,7 @@ export function CountrySuggestions({
     return null;
   }
   return (
-    <div className="mb-3 flex flex-wrap items-center gap-1.5 text-sm text-encre-douce">
+    <div className="mb-3 flex flex-wrap items-center gap-1.5 text-sm text-slate">
       {t("explorer.suggestionsPrefix")}
       {suggestions.map((s) => (
         <button
@@ -28,7 +28,7 @@ export function CountrySuggestions({
               await toggleVisitedCountry(s.code, true);
             })
           }
-          className="rounded-full border border-laiton-clair bg-papier px-3 py-1 text-xs text-encre transition-colors hover:border-bordeaux hover:text-bordeaux"
+          className="rounded-full border border-line bg-card px-3 py-1 text-xs text-ink transition-colors hover:border-lagoon-ink hover:text-lagoon-ink"
         >
           + {s.name}
         </button>

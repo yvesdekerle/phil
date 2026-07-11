@@ -48,7 +48,7 @@ export function ProfileMenu({ avatarUrl, initial }: { avatarUrl: string | null; 
   }, [open]);
 
   const itemClass =
-    "flex items-center gap-2.5 px-3 py-2 text-sm text-encre transition-colors hover:bg-laiton/10";
+    "flex items-center gap-2.5 px-3 py-2 text-sm text-ink transition-colors hover:bg-citron/10";
 
   return (
     <div className="relative" ref={rootRef}>
@@ -58,7 +58,7 @@ export function ProfileMenu({ avatarUrl, initial }: { avatarUrl: string | null; 
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label={t("nav.profileAria")}
-        className="rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-laiton"
+        className="rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mist"
       >
         {avatarUrl ? (
           <Image
@@ -66,10 +66,10 @@ export function ProfileMenu({ avatarUrl, initial }: { avatarUrl: string | null; 
             alt=""
             width={34}
             height={34}
-            className="rounded-full border border-laiton-clair"
+            className="rounded-full border border-line"
           />
         ) : (
-          <span className="flex size-[34px] items-center justify-center rounded-full border border-laiton-clair bg-papier text-sm text-laiton">
+          <span className="flex size-[34px] items-center justify-center rounded-full border border-line bg-card text-sm text-mist">
             {initial}
           </span>
         )}
@@ -78,7 +78,7 @@ export function ProfileMenu({ avatarUrl, initial }: { avatarUrl: string | null; 
       {open ? (
         <div
           role="menu"
-          className="absolute right-0 z-50 mt-2 w-48 overflow-hidden rounded-lg border border-laiton-clair bg-papier py-1 shadow-[0_8px_24px_rgba(31,42,68,0.15)]"
+          className="absolute right-0 z-50 mt-2 w-48 overflow-hidden rounded-lg border border-line bg-card py-1 shadow-[0_8px_24px_rgba(15,47,56,0.15)]"
         >
           <Link
             href="/profile"
@@ -86,8 +86,7 @@ export function ProfileMenu({ avatarUrl, initial }: { avatarUrl: string | null; 
             className={itemClass}
             onClick={() => setOpen(false)}
           >
-            <User className="size-4 text-encre-douce" aria-hidden="true" />{" "}
-            {t("profileMenu.profile")}
+            <User className="size-4 text-slate" aria-hidden="true" /> {t("profileMenu.profile")}
           </Link>
           <Link
             href="/explorer"
@@ -95,10 +94,10 @@ export function ProfileMenu({ avatarUrl, initial }: { avatarUrl: string | null; 
             className={itemClass}
             onClick={() => setOpen(false)}
           >
-            <Compass className="size-4 text-encre-douce" aria-hidden="true" />{" "}
+            <Compass className="size-4 text-slate" aria-hidden="true" />{" "}
             {t("profileMenu.exploration")}
           </Link>
-          <div className="my-1 border-t border-laiton-clair/60" />
+          <div className="my-1 border-t border-line/60" />
           <button
             type="button"
             role="menuitem"
@@ -106,7 +105,7 @@ export function ProfileMenu({ avatarUrl, initial }: { avatarUrl: string | null; 
             onClick={handleSignOut}
             className={`${itemClass} w-full text-left`}
           >
-            <LogOut className="size-4 text-encre-douce" aria-hidden="true" />
+            <LogOut className="size-4 text-slate" aria-hidden="true" />
             {signingOut ? t("profileMenu.signingOut") : t("profileMenu.signOut")}
           </button>
         </div>

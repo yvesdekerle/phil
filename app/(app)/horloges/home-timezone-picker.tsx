@@ -14,8 +14,8 @@ export function HomeTimezonePicker({ value }: { value: string }) {
   const [pending, startTransition] = useTransition();
 
   return (
-    <label className="flex flex-wrap items-center gap-2 text-sm text-encre">
-      <span className="flex items-center gap-1.5 text-encre-douce">
+    <label className="flex flex-wrap items-center gap-2 text-sm text-ink">
+      <span className="flex items-center gap-1.5 text-slate">
         <Home className="size-4" aria-hidden="true" /> {t("clocks.home")}
       </span>
       <select
@@ -30,7 +30,7 @@ export function HomeTimezonePicker({ value }: { value: string }) {
             setSaved(true);
           });
         }}
-        className="min-w-0 flex-1 rounded-md border border-laiton-clair bg-papier px-2 py-1.5 text-sm"
+        className="min-w-0 flex-1 rounded-md border border-line bg-card px-2 py-1.5 text-sm"
       >
         {timezones.map((z) => (
           <option key={z} value={z}>
@@ -39,9 +39,9 @@ export function HomeTimezonePicker({ value }: { value: string }) {
         ))}
       </select>
       {pending ? (
-        <span className="text-xs text-encre-douce">…</span>
+        <span className="text-xs text-slate">…</span>
       ) : saved ? (
-        <span className="text-xs text-vert">{t("clocks.saved")}</span>
+        <span className="text-xs text-lagoon">{t("clocks.saved")}</span>
       ) : null}
     </label>
   );

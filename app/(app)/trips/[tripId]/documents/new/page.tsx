@@ -36,12 +36,12 @@ export default async function NewTripDocumentPage({
     <div className="mx-auto flex max-w-lg flex-col gap-5">
       <Link
         href={`/trips/${tripId}/documents`}
-        className="text-sm text-encre-douce underline underline-offset-4 hover:text-encre"
+        className="text-sm text-slate underline underline-offset-4 hover:text-ink"
       >
         {t("tripDocs.backToDocs")}
       </Link>
-      <h1 className="text-center font-display text-2xl text-encre">{t("tripDocs.newTitle")}</h1>
-      <p className="text-center text-sm text-encre-douce">{t("tripDocs.newSubtitle")}</p>
+      <h1 className="text-center font-sans text-2xl text-ink">{t("tripDocs.newTitle")}</h1>
+      <p className="text-center text-sm text-slate">{t("tripDocs.newSubtitle")}</p>
       <Card>
         <CardContent>
           <UploadForm

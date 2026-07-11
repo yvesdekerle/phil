@@ -6,7 +6,7 @@ import { useT } from "@/components/i18n/provider";
 function WorldMapLoading() {
   const t = useT();
   return (
-    <div className="flex h-[420px] w-full items-center justify-center rounded-lg border border-laiton-clair bg-parchemin text-sm text-encre-douce">
+    <div className="flex h-[420px] w-full items-center justify-center rounded-lg border border-line bg-sand text-sm text-slate">
       {t("map.worldLoading")}
     </div>
   );

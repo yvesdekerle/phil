@@ -131,7 +131,7 @@ export function CoffreAddDevice({ userId, userName }: { userId: string; userName
 
   if (phase === "done") {
     return (
-      <p className="text-sm text-encre">
+      <p className="text-sm text-ink">
         ✓ Appareil ajouté au coffre. Ta biométrie le déverrouille désormais ici.
       </p>
     );
@@ -140,13 +140,13 @@ export function CoffreAddDevice({ userId, userName }: { userId: string; userName
   if (phase === "idle") {
     return (
       <div className="flex flex-col items-start gap-2">
-        <p className="text-sm text-encre-douce">
+        <p className="text-sm text-slate">
           Nouvel appareil sans code de secours ? Ajoute-le depuis un appareil déjà configuré.
         </p>
         <Button type="button" variant="outline" onClick={() => void start()}>
           Ajouter cet appareil via un autre appareil
         </Button>
-        {error ? <p className="text-sm text-bordeaux">{error}</p> : null}
+        {error ? <p className="text-sm text-lagoon-ink">{error}</p> : null}
       </div>
     );
   }
@@ -155,14 +155,14 @@ export function CoffreAddDevice({ userId, userName }: { userId: string; userName
     <div className="flex flex-col items-center gap-3 text-center">
       {qr ? (
         // biome-ignore lint/performance/noImgElement: data URL générée en mémoire, pas un endpoint optimisable
-        <img src={qr} alt="QR d'appariement" className="rounded border border-laiton-clair" />
+        <img src={qr} alt="QR d'appariement" className="rounded border border-line" />
       ) : null}
-      <p className="text-sm text-encre-douce">
+      <p className="text-sm text-slate">
         {phase === "enrolling"
           ? "Appareil approuvé — enrôlement de ta biométrie…"
           : "Scanne ce QR avec un appareil où ton coffre est déjà déverrouillé, puis approuve."}
       </p>
-      {error ? <p className="text-sm text-bordeaux">{error}</p> : null}
+      {error ? <p className="text-sm text-lagoon-ink">{error}</p> : null}
     </div>
   );
 }

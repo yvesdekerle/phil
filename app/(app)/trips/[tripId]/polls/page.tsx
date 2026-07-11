@@ -56,7 +56,7 @@ export default async function TripPollsPage({ params }: { params: Promise<{ trip
   return (
     <div className="flex flex-col gap-5">
       <RealtimeRefresh tables={["polls", "poll_votes"]} />
-      <p className="text-sm text-encre-douce">{t("ideas.pollsIntro")}</p>
+      <p className="text-sm text-slate">{t("ideas.pollsIntro")}</p>
       <PollsSection
         tripId={tripId}
         polls={polls}

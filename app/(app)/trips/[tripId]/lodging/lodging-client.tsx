@@ -71,12 +71,12 @@ function CandidateVotes({
   const score = votes.reduce((s, v) => s + v.rating, 0);
 
   return (
-    <div className="mt-2 border-t border-laiton-clair/40 pt-2">
+    <div className="mt-2 border-t border-line/40 pt-2">
       <div className="flex flex-wrap items-center gap-2">
         <span
           className={cn(
             "rounded-full px-2 py-0.5 text-xs font-medium tabular-nums",
-            score > 0 ? "bg-bordeaux/10 text-bordeaux" : "bg-encre/10 text-encre-douce",
+            score > 0 ? "bg-lagoon-ink/10 text-lagoon-ink" : "bg-ink/10 text-slate",
           )}
           title={`${votes.length} ${t("lodging.reviews")}`}
         >
@@ -96,8 +96,8 @@ function CandidateVotes({
               className={cn(
                 "rounded-full border px-2.5 py-0.5 text-xs transition-colors",
                 myVote?.rating === rating
-                  ? "border-bordeaux bg-bordeaux text-papier"
-                  : "border-laiton-clair text-encre-douce hover:text-encre",
+                  ? "border-lagoon-ink bg-lagoon-ink text-card"
+                  : "border-line text-slate hover:text-ink",
               )}
             >
               {labels[rating]}
@@ -115,7 +115,7 @@ function CandidateVotes({
               type="button"
               disabled={pending}
               onClick={() => startTransition(() => clearCandidateVote(tripId, candidateId))}
-              className="text-xs text-encre-douce underline underline-offset-2 hover:text-encre"
+              className="text-xs text-slate underline underline-offset-2 hover:text-ink"
             >
               {t("lodging.removeVote")}
             </button>
@@ -125,8 +125,8 @@ function CandidateVotes({
       {votes.some((v) => v.comment || v.userId !== myId) ? (
         <ul className="mt-1.5 flex flex-col gap-0.5">
           {votes.map((v) => (
-            <li key={v.userId} className="text-xs text-encre-douce">
-              <span className="font-medium text-encre">
+            <li key={v.userId} className="text-xs text-slate">
+              <span className="font-medium text-ink">
                 {v.userId === myId ? t("lodging.you") : v.name}
               </span>{" "}
               — {labels[v.rating] ?? v.rating}
@@ -193,16 +193,16 @@ export function LodgingClient({
         <form
           ref={formRef}
           action={formAction}
-          className="flex flex-col gap-3 rounded-lg border border-laiton-clair bg-papier px-4 py-3"
+          className="flex flex-col gap-3 rounded-lg border border-line bg-card px-4 py-3"
         >
           <input type="hidden" name="tripId" value={tripId} />
           <Input name="title" placeholder={t("lodging.namePlaceholder")} required maxLength={150} />
           <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1 text-xs text-encre-douce">
+            <div className="flex flex-col gap-1 text-xs text-slate">
               <label htmlFor="candidate-check-in">{t("lodging.checkIn")}</label>
               <Input id="candidate-check-in" name="checkIn" type="date" required />
             </div>
-            <div className="flex flex-col gap-1 text-xs text-encre-douce">
+            <div className="flex flex-col gap-1 text-xs text-slate">
               <label htmlFor="candidate-check-out">{t("lodging.checkOut")}</label>
               <Input id="candidate-check-out" name="checkOut" type="date" required />
             </div>
@@ -217,16 +217,16 @@ export function LodgingClient({
               {t("lodging.addToCompare")}
             </Button>
             {state.status === "error" ? (
-              <p className="text-xs text-bordeaux">{state.message}</p>
+              <p className="text-xs text-lagoon-ink">{state.message}</p>
             ) : null}
           </div>
         </form>
       ) : null}
 
       {candidates.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-6 py-14 text-center">
-          <p className="font-display text-xl text-encre italic">{t("lodging.emptyTitle")}</p>
-          <p className="mt-2 text-sm text-encre-douce">{t("lodging.emptyBody")}</p>
+        <div className="rounded-lg border border-dashed border-line bg-card/60 px-6 py-14 text-center">
+          <p className="font-sans text-xl text-ink italic">{t("lodging.emptyTitle")}</p>
+          <p className="mt-2 text-sm text-slate">{t("lodging.emptyBody")}</p>
         </div>
       ) : (
         slots.map((slot) => {
@@ -236,7 +236,7 @@ export function LodgingClient({
           );
           return (
             <section key={slot}>
-              <h2 className="mb-2 text-sm font-medium text-laiton uppercase tracking-wide">
+              <h2 className="mb-2 text-sm font-medium text-mist uppercase tracking-wide">
                 {slotLabel(checkIn, checkOut, t, dfLocale)}
               </h2>
               <ul className="flex flex-col gap-2">
@@ -244,45 +244,45 @@ export function LodgingClient({
                   <li
                     key={c.id}
                     className={cn(
-                      "rounded-lg border bg-papier px-4 py-3",
+                      "rounded-lg border bg-card px-4 py-3",
                       c.status === "CHOSEN"
-                        ? "border-bordeaux/50 bg-bordeaux/5"
+                        ? "border-lagoon-ink/50 bg-lagoon-ink/5"
                         : c.status === "REJECTED"
-                          ? "border-laiton-clair/50 opacity-60"
-                          : "border-laiton-clair",
+                          ? "border-line/50 opacity-60"
+                          : "border-line",
                     )}
                   >
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="min-w-0 flex-1 text-sm font-medium text-encre">
+                      <span className="min-w-0 flex-1 text-sm font-medium text-ink">
                         {c.title}
                         {c.status === "CHOSEN" ? (
-                          <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-bordeaux px-2 py-0.5 text-[0.65rem] text-papier">
+                          <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-lagoon-ink px-2 py-0.5 text-[0.65rem] text-card">
                             <CheckCircle2 className="size-3" aria-hidden="true" />{" "}
                             {t("lodging.chosen")}
                           </span>
                         ) : null}
                         {c.status === "REJECTED" ? (
-                          <span className="ml-2 rounded-full bg-encre/10 px-2 py-0.5 text-[0.65rem] text-encre-douce">
+                          <span className="ml-2 rounded-full bg-ink/10 px-2 py-0.5 text-[0.65rem] text-slate">
                             {t("lodging.rejected")}
                           </span>
                         ) : null}
                       </span>
                       {c.price ? (
-                        <span className="shrink-0 text-sm text-encre tabular-nums">{c.price}</span>
+                        <span className="shrink-0 text-sm text-ink tabular-nums">{c.price}</span>
                       ) : null}
                       {c.url ? (
                         <a
                           href={c.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="shrink-0 text-encre-douce hover:text-encre"
+                          className="shrink-0 text-slate hover:text-ink"
                           aria-label={`${t("lodging.openLinkPrefix")} ${c.title}`}
                         >
                           <ExternalLink className="size-4" aria-hidden="true" />
                         </a>
                       ) : null}
                     </div>
-                    {c.notes ? <p className="mt-1 text-xs text-encre-douce">{c.notes}</p> : null}
+                    {c.notes ? <p className="mt-1 text-xs text-slate">{c.notes}</p> : null}
                     <CandidateVotes
                       tripId={tripId}
                       candidateId={c.id}
@@ -290,7 +290,7 @@ export function LodgingClient({
                       myId={myId}
                     />
                     <div className="mt-2 flex flex-wrap items-center gap-2">
-                      <span className="text-[0.65rem] text-encre-douce/70">
+                      <span className="text-[0.65rem] text-slate/70">
                         {t("lodging.proposedBy")}{" "}
                         {c.createdBy === myId ? t("lodging.youLower") : c.authorName}
                       </span>
@@ -336,7 +336,7 @@ export function LodgingClient({
                           type="button"
                           disabled={pending}
                           onClick={() => startTransition(() => deleteCandidate(tripId, c.id))}
-                          className="text-encre-douce hover:text-bordeaux"
+                          className="text-slate hover:text-lagoon-ink"
                           aria-label={`${t("lodging.deletePrefix")} ${c.title}`}
                         >
                           <Trash2 className="size-4" aria-hidden="true" />

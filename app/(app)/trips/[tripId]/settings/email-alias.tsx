@@ -21,24 +21,24 @@ export function EmailAliasCard({
   const address = alias ? `${alias}@${domain ?? "…"}` : null;
 
   return (
-    <section className="rounded-lg border border-laiton-clair bg-papier px-4 py-3">
-      <h2 className="mb-1 flex items-center gap-2 text-sm font-medium text-encre">
-        <Mail className="size-4 text-laiton" aria-hidden="true" /> {t("settings.email.title")}
+    <section className="rounded-lg border border-line bg-card px-4 py-3">
+      <h2 className="mb-1 flex items-center gap-2 text-sm font-medium text-ink">
+        <Mail className="size-4 text-mist" aria-hidden="true" /> {t("settings.email.title")}
       </h2>
       {alias ? (
         <>
-          <p className="text-sm text-encre">
+          <p className="text-sm text-ink">
             {t("settings.email.forward")}{" "}
-            <code className="rounded bg-parchemin px-1.5 py-0.5 text-xs">{address}</code>
+            <code className="rounded bg-sand px-1.5 py-0.5 text-xs">{address}</code>
           </p>
-          <p className="mt-1 text-xs text-encre-douce">
+          <p className="mt-1 text-xs text-slate">
             {t("settings.email.note")}
             {domain ? "" : t("settings.email.noteDomain")}
           </p>
         </>
       ) : (
         <div className="flex items-center justify-between gap-3">
-          <p className="text-xs text-encre-douce">{t("settings.email.create")}</p>
+          <p className="text-xs text-slate">{t("settings.email.create")}</p>
           <Button
             type="button"
             size="sm"

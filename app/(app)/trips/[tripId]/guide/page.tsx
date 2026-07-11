@@ -194,10 +194,10 @@ export default async function TripGuidePage({ params }: { params: Promise<{ trip
               className="max-h-72 w-full max-w-lg rounded-2xl object-cover shadow-lg"
             />
           ) : null}
-          <p className="text-xs uppercase tracking-[0.3em] text-laiton">{t("guide.kicker")}</p>
-          <h1 className="font-display text-5xl text-encre">{trip.name}</h1>
-          <p className="text-lg text-encre-douce">{trip.destination}</p>
-          <p className="text-sm text-encre-douce">
+          <p className="text-xs uppercase tracking-[0.3em] text-mist">{t("guide.kicker")}</p>
+          <h1 className="font-sans text-5xl text-ink">{trip.name}</h1>
+          <p className="text-lg text-slate">{trip.destination}</p>
+          <p className="text-sm text-slate">
             {formatDateRange(trip.start_date, trip.end_date, dfLocale)}
           </p>
         </div>
@@ -205,9 +205,9 @@ export default async function TripGuidePage({ params }: { params: Promise<{ trip
 
       <div className="mb-6 flex items-start justify-between gap-4 print:hidden">
         <div>
-          <p className="text-xs uppercase tracking-wide text-laiton">{t("guide.kicker")}</p>
-          <h1 className="font-display text-4xl text-encre">{trip.name}</h1>
-          <p className="mt-1 text-sm text-encre-douce">
+          <p className="text-xs uppercase tracking-wide text-mist">{t("guide.kicker")}</p>
+          <h1 className="font-sans text-4xl text-ink">{trip.name}</h1>
+          <p className="mt-1 text-sm text-slate">
             {trip.destination} · {formatDateRange(trip.start_date, trip.end_date, dfLocale)}
           </p>
         </div>
@@ -229,28 +229,28 @@ export default async function TripGuidePage({ params }: { params: Promise<{ trip
         </div>
 
         <GuideBlock title={t("guide.crew")}>
-          <p className="text-sm text-encre">
+          <p className="text-sm text-ink">
             {(participants ?? []).map((p) => nameOf(p.user_id)).join(" · ") || t("guide.emptyCrew")}
           </p>
         </GuideBlock>
 
         <GuideBlock title={t("guide.toPrepare")}>
           {(checklist ?? []).length === 0 ? (
-            <p className="text-sm text-encre-douce">{t("guide.emptyChecklist")}</p>
+            <p className="text-sm text-slate">{t("guide.emptyChecklist")}</p>
           ) : (
             <div className="flex flex-col gap-3">
               {sections
                 .filter((s) => (checklistBySection.get(s) ?? []).length > 0)
                 .map((s) => (
                   <div key={s} className="break-inside-avoid">
-                    <p className="mb-1 text-xs font-medium uppercase tracking-wide text-laiton">
+                    <p className="mb-1 text-xs font-medium uppercase tracking-wide text-mist">
                       {t(`checklist.tabs.${s}`)}
                     </p>
-                    <ul className="flex flex-col gap-0.5 text-sm text-encre">
+                    <ul className="flex flex-col gap-0.5 text-sm text-ink">
                       {(checklistBySection.get(s) ?? []).map((item) => (
                         <li key={item.id} className="flex gap-2">
                           <span aria-hidden="true">{item.done ? "✓" : "○"}</span>
-                          <span className={item.done ? "text-encre-douce line-through" : ""}>
+                          <span className={item.done ? "text-slate line-through" : ""}>
                             {item.title}
                             {item.quantity ? ` · ${item.quantity}` : ""}
                           </span>
@@ -267,29 +267,29 @@ export default async function TripGuidePage({ params }: { params: Promise<{ trip
       {/* PENDANT */}
       <GuideSection title={t("guide.sectionDuring")} intro={t("guide.duringIntro")}>
         {orderedDays.length === 0 ? (
-          <p className="text-sm text-encre-douce">{t("guide.emptyProgramme")}</p>
+          <p className="text-sm text-slate">{t("guide.emptyProgramme")}</p>
         ) : (
           <div className="flex flex-col gap-4">
             {orderedDays.map((key) => (
               <div key={key} className="break-inside-avoid">
-                <p className="mb-1 font-display text-lg capitalize text-encre">{dayLabel(key)}</p>
-                <ul className="flex flex-col gap-1 border-l-2 border-laiton-clair pl-3">
+                <p className="mb-1 font-sans text-lg capitalize text-ink">{dayLabel(key)}</p>
+                <ul className="flex flex-col gap-1 border-l-2 border-line pl-3">
                   {(days.get(key) ?? []).map((e) => {
                     const notes = notesByEvent.get(e.id) ?? [];
                     return (
                       <li key={e.id} className="text-sm">
-                        <span className="font-medium text-encre">
+                        <span className="font-medium text-ink">
                           {eventTime(e.starts_at, e.timezone ?? trip.default_timezone)}
                         </span>{" "}
-                        <span className="text-encre">{e.title}</span>
+                        <span className="text-ink">{e.title}</span>
                         {e.location_name || e.location_address ? (
-                          <span className="text-encre-douce">
+                          <span className="text-slate">
                             {" "}
                             — {e.location_address ?? e.location_name}
                           </span>
                         ) : null}
                         {notes.length > 0 ? (
-                          <ul className="mt-0.5 ml-4 flex flex-col gap-0.5 text-xs text-encre-douce italic">
+                          <ul className="mt-0.5 ml-4 flex flex-col gap-0.5 text-xs text-slate italic">
                             {notes.map((note) => (
                               <li key={note.at}>— {note.body}</li>
                             ))}
@@ -309,13 +309,13 @@ export default async function TripGuidePage({ params }: { params: Promise<{ trip
       <GuideSection title={t("guide.sectionAfter")} intro={t("guide.afterIntro")}>
         <GuideBlock title={t("guide.spending")}>
           {spendByCurrency.size === 0 ? (
-            <p className="text-sm text-encre-douce">{t("guide.emptySpending")}</p>
+            <p className="text-sm text-slate">{t("guide.emptySpending")}</p>
           ) : (
-            <ul className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-encre">
+            <ul className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-ink">
               {[...spendByCurrency.entries()].map(([currency, total]) => (
                 <li key={currency}>
                   <span className="font-medium">{money(total, currency)}</span>{" "}
-                  <span className="text-encre-douce">{t("guide.totalSpent")}</span>
+                  <span className="text-slate">{t("guide.totalSpent")}</span>
                 </li>
               ))}
             </ul>
@@ -324,29 +324,29 @@ export default async function TripGuidePage({ params }: { params: Promise<{ trip
 
         <GuideBlock title={t("guide.settlements")}>
           {settlements.length === 0 ? (
-            <p className="text-sm text-encre-douce">
+            <p className="text-sm text-slate">
               {hasExpenses ? t("guide.settled") : t("guide.emptySpending")}
             </p>
           ) : (
-            <ul className="flex flex-col gap-1 text-sm text-encre">
+            <ul className="flex flex-col gap-1 text-sm text-ink">
               {settlements.map((s) => (
                 <li key={`${s.from}-${s.to}`} className="flex items-center gap-1.5">
                   <span className="font-medium">{nameOf(s.from)}</span>
-                  <span className="text-encre-douce">→</span>
+                  <span className="text-slate">→</span>
                   <span className="font-medium">{nameOf(s.to)}</span>
-                  <span className="ml-auto font-medium text-bordeaux tabular-nums">
+                  <span className="ml-auto font-medium text-lagoon-ink tabular-nums">
                     {money(s.amount, primary)}
                   </span>
                 </li>
               ))}
             </ul>
           )}
-          <p className="mt-1.5 text-xs text-encre-douce">{t("guide.balancesNote")}</p>
+          <p className="mt-1.5 text-xs text-slate">{t("guide.balancesNote")}</p>
         </GuideBlock>
 
         <GuideBlock title={t("guide.photos")}>
           {(photoCount ?? 0) === 0 ? (
-            <p className="text-sm text-encre-douce">{t("guide.photosCount").replace("{n}", "0")}</p>
+            <p className="text-sm text-slate">{t("guide.photosCount").replace("{n}", "0")}</p>
           ) : (
             <>
               <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
@@ -357,11 +357,11 @@ export default async function TripGuidePage({ params }: { params: Promise<{ trip
                     src={`/api/photos/${p.id}/view?thumb=1`}
                     alt={p.caption ?? t("guide.photos")}
                     loading="lazy"
-                    className="aspect-square w-full rounded-md border border-laiton-clair object-cover"
+                    className="aspect-square w-full rounded-md border border-line object-cover"
                   />
                 ))}
               </div>
-              <p className="mt-2 text-xs text-encre-douce">
+              <p className="mt-2 text-xs text-slate">
                 {t("guide.photosCount").replace("{n}", String(photoCount ?? 0))}
                 {(photoCount ?? 0) > (photos ?? []).length
                   ? ` · ${t("guide.photosMore").replace(
@@ -376,7 +376,7 @@ export default async function TripGuidePage({ params }: { params: Promise<{ trip
 
         <GuideBlock title={t("guide.journal")}>
           {(journal ?? []).length === 0 ? (
-            <p className="text-sm text-encre-douce">{t("guide.emptyJournal")}</p>
+            <p className="text-sm text-slate">{t("guide.emptyJournal")}</p>
           ) : (
             <div className="flex flex-col gap-2">
               {(journal ?? []).map((entry) => {
@@ -388,8 +388,8 @@ export default async function TripGuidePage({ params }: { params: Promise<{ trip
                     key={`${entry.day}-${entry.author_id}`}
                     className="break-inside-avoid text-sm"
                   >
-                    <span className="font-medium text-encre">{author ?? t("guide.someone")}</span>
-                    <span className="text-encre-douce"> — {entry.body}</span>
+                    <span className="font-medium text-ink">{author ?? t("guide.someone")}</span>
+                    <span className="text-slate"> — {entry.body}</span>
                   </div>
                 );
               })}
@@ -398,8 +398,8 @@ export default async function TripGuidePage({ params }: { params: Promise<{ trip
         </GuideBlock>
       </GuideSection>
 
-      <footer className="mt-8 border-t border-laiton-clair pt-3 text-center text-xs text-encre-douce">
-        {t("guide.brandedBy")} · <span className="font-display text-sm text-encre">Phil</span> ·{" "}
+      <footer className="mt-8 border-t border-line pt-3 text-center text-xs text-slate">
+        {t("guide.brandedBy")} · <span className="font-sans text-sm text-ink">Phil</span> ·{" "}
         {(process.env.NEXT_PUBLIC_APP_URL ?? "phil.vercel.app").replace(/^https?:\/\//, "")}
       </footer>
     </div>
@@ -417,8 +417,8 @@ function GuideSection({
 }) {
   return (
     <section className="mb-8 break-inside-avoid">
-      <h2 className="font-display text-2xl text-bordeaux">{title}</h2>
-      <p className="mb-3 text-sm text-encre-douce italic">{intro}</p>
+      <h2 className="font-sans text-2xl text-lagoon-ink">{title}</h2>
+      <p className="mb-3 text-sm text-slate italic">{intro}</p>
       <div className="flex flex-col gap-4">{children}</div>
     </section>
   );
@@ -426,8 +426,8 @@ function GuideSection({
 
 function GuideBlock({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="break-inside-avoid rounded-lg border border-laiton-clair bg-papier px-4 py-3">
-      <p className="mb-1.5 text-sm font-medium text-encre">{title}</p>
+    <div className="break-inside-avoid rounded-lg border border-line bg-card px-4 py-3">
+      <p className="mb-1.5 text-sm font-medium text-ink">{title}</p>
       {children}
     </div>
   );
@@ -435,9 +435,9 @@ function GuideBlock({ title, children }: { title: string; children: React.ReactN
 
 function Fact({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-laiton-clair bg-papier px-3 py-2">
-      <p className="text-xs text-encre-douce">{label}</p>
-      <p className="text-sm font-medium text-encre">{value}</p>
+    <div className="rounded-lg border border-line bg-card px-3 py-2">
+      <p className="text-xs text-slate">{label}</p>
+      <p className="text-sm font-medium text-ink">{value}</p>
     </div>
   );
 }

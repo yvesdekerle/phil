@@ -13,10 +13,10 @@ import { palette } from "@/lib/ui/colors";
  */
 
 const COLOR: Record<Verdict, string> = {
-  YES: palette.vert,
-  NO: palette.bordeaux,
-  MAYBE: palette.laiton,
-  SUPER: palette.bleuNuit,
+  YES: palette.lagoon,
+  NO: palette.lagoonInk,
+  MAYBE: palette.mist,
+  SUPER: palette.inkDeep,
 };
 const ROTATION: Record<Verdict, number> = { YES: -8, NO: 10, MAYBE: -4, SUPER: 0 };
 
@@ -103,7 +103,7 @@ export function Stamp({
           />
         </svg>
         <span
-          className="absolute inset-0 flex items-center justify-center font-display uppercase text-papier"
+          className="absolute inset-0 flex items-center justify-center font-sans uppercase text-card"
           style={{ paddingBottom: 22, fontSize: 26, letterSpacing: 1 }}
         >
           {label}
@@ -114,7 +114,7 @@ export function Stamp({
 
   return (
     <div
-      className="pointer-events-none absolute z-20 flex items-center gap-1.5 font-display uppercase"
+      className="pointer-events-none absolute z-20 flex items-center gap-1.5 font-sans uppercase"
       style={{
         top: "38%",
         left: "50%",
@@ -170,8 +170,8 @@ const SPARKLES: Sparkle[] = Array.from({ length: 10 }, (_, i) => {
  */
 export function SuperLikeFX({ label }: { label: string }) {
   const sparkles = useMemo(() => SPARKLES, []);
-  const gold = palette.laiton;
-  const nuit = palette.bleuNuit;
+  const gold = palette.mist;
+  const nuit = palette.inkDeep;
   return (
     <div className="pointer-events-none absolute inset-0 z-30 overflow-hidden">
       <div
@@ -213,7 +213,7 @@ export function SuperLikeFX({ label }: { label: string }) {
           />
         </svg>
         <span
-          className="absolute inset-0 flex items-center justify-center px-4 text-center font-display uppercase leading-tight text-papier"
+          className="absolute inset-0 flex items-center justify-center px-4 text-center font-sans uppercase leading-tight text-card"
           style={{ fontSize: 20, letterSpacing: 1 }}
         >
           {label}

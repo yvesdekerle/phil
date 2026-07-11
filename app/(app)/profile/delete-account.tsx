@@ -25,13 +25,17 @@ export function DeleteAccountSection() {
   });
 
   return (
-    <section className="mt-8 rounded-lg border border-bordeaux/30 bg-papier px-5 py-4">
-      <h2 className="text-sm font-medium text-bordeaux">{t("profile.delete.heading")}</h2>
-      <p className="mt-1 text-xs text-encre-douce">{t("profile.delete.body")}</p>
+    <section className="mt-8 rounded-lg border border-lagoon-ink/30 bg-card px-5 py-4">
+      <h2 className="text-sm font-medium text-lagoon-ink">{t("profile.delete.heading")}</h2>
+      <p className="mt-1 text-xs text-slate">{t("profile.delete.body")}</p>
       <div className="mt-3">
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button type="button" variant="outline" className="border-bordeaux/40 text-bordeaux">
+            <Button
+              type="button"
+              variant="outline"
+              className="border-lagoon-ink/40 text-lagoon-ink"
+            >
               {t("profile.delete.trigger")}
             </Button>
           </AlertDialogTrigger>
@@ -50,7 +54,7 @@ export function DeleteAccountSection() {
                 <Input id="confirmation" name="confirmation" autoComplete="off" required />
               </div>
               {state.status === "error" ? (
-                <p role="alert" className="text-sm text-bordeaux">
+                <p role="alert" className="text-sm text-lagoon-ink">
                   {state.message}
                 </p>
               ) : null}

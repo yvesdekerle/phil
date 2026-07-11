@@ -10,9 +10,9 @@ import { AcceptButton } from "./accept-button";
 function Shell({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <main className="flex flex-1 flex-col items-center justify-center px-4 py-12">
-      <div className="w-full max-w-sm rounded-lg border border-laiton-clair bg-papier px-8 py-10 text-center shadow-[0_2px_16px_rgba(31,42,68,0.08)]">
-        <p className="font-display text-4xl text-encre">Phil</p>
-        <p className="mt-2 mb-6 text-[0.65rem] font-medium tracking-[0.18em] text-laiton uppercase">
+      <div className="w-full max-w-sm rounded-lg border border-line bg-card px-8 py-10 text-center shadow-[0_2px_16px_rgba(15,47,56,0.08)]">
+        <p className="font-sans text-4xl text-ink">Phil</p>
+        <p className="mt-2 mb-6 text-[0.65rem] font-medium tracking-[0.18em] text-mist uppercase">
           {label}
         </p>
         {children}
@@ -29,7 +29,7 @@ export default async function InvitationPage({ params }: { params: Promise<{ tok
   if (!z.string().uuid().safeParse(token).success) {
     return (
       <Shell label={label}>
-        <p className="text-sm text-encre-douce">{t("invitations.invalidLink")}</p>
+        <p className="text-sm text-slate">{t("invitations.invalidLink")}</p>
       </Shell>
     );
   }
@@ -46,7 +46,7 @@ export default async function InvitationPage({ params }: { params: Promise<{ tok
   if (!invitation?.trips) {
     return (
       <Shell label={label}>
-        <p className="text-sm text-encre-douce">{t("invitations.notFound")}</p>
+        <p className="text-sm text-slate">{t("invitations.notFound")}</p>
       </Shell>
     );
   }
@@ -62,24 +62,24 @@ export default async function InvitationPage({ params }: { params: Promise<{ tok
 
   return (
     <Shell label={label}>
-      <h1 className="font-display text-2xl text-encre italic">{trip.name}</h1>
-      <p className="mt-2 text-sm text-encre-douce">
+      <h1 className="font-sans text-2xl text-ink italic">{trip.name}</h1>
+      <p className="mt-2 text-sm text-slate">
         {trip.destination} · {formatDateRange(trip.start_date, trip.end_date)}
       </p>
-      <p className="mt-4 mb-6 text-sm text-encre">
+      <p className="mt-4 mb-6 text-sm text-ink">
         {t("invitations.invites").replace("{name}", inviterName)}
         {invitation.role === "VIEWER" ? t("invitations.viewerSuffix") : ""}.
       </p>
 
       {invitation.accepted_at ? (
-        <p className="text-sm text-encre-douce">
+        <p className="text-sm text-slate">
           {t("invitations.alreadyUsed")}{" "}
-          <Link href="/trips" className="text-bordeaux underline underline-offset-4">
+          <Link href="/trips" className="text-lagoon-ink underline underline-offset-4">
             {t("invitations.seeMyTrips")}
           </Link>
         </p>
       ) : expired ? (
-        <p className="text-sm text-encre-douce">
+        <p className="text-sm text-slate">
           {t("invitations.expired").replace("{name}", inviterName)}
         </p>
       ) : user ? (

@@ -137,7 +137,7 @@ export default async function TripDocumentsPage({
   return (
     <div className="flex flex-col gap-5">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-encre-douce">{t("tripDocs.subtitle")}</p>
+        <p className="text-sm text-slate">{t("tripDocs.subtitle")}</p>
         {canUpload ? (
           <Button asChild>
             <Link href={`/trips/${tripId}/documents/new`}>{t("tripDocs.add")}</Link>
@@ -166,8 +166,8 @@ export default async function TripDocumentsPage({
             className={cn(
               "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
               !owner
-                ? "border-laiton bg-laiton text-papier"
-                : "border-laiton-clair bg-papier text-encre-douce hover:text-encre",
+                ? "border-line bg-citron text-card"
+                : "border-line bg-card text-slate hover:text-ink",
             )}
           >
             {t("tripDocs.allTravelers")}
@@ -179,8 +179,8 @@ export default async function TripDocumentsPage({
               className={cn(
                 "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
                 owner === o
-                  ? "border-laiton bg-laiton text-papier"
-                  : "border-laiton-clair bg-papier text-encre-douce hover:text-encre",
+                  ? "border-line bg-citron text-card"
+                  : "border-line bg-card text-slate hover:text-ink",
               )}
             >
               {o}
@@ -190,16 +190,16 @@ export default async function TripDocumentsPage({
       ) : null}
 
       {documents.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-6 py-14 text-center">
-          <p className="font-display text-xl text-encre italic">{t("tripDocs.emptyTitle")}</p>
-          <p className="max-w-sm text-sm text-encre-douce">{t("tripDocs.emptyBody")}</p>
+        <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-line bg-card/60 px-6 py-14 text-center">
+          <p className="font-sans text-xl text-ink italic">{t("tripDocs.emptyTitle")}</p>
+          <p className="max-w-sm text-sm text-slate">{t("tripDocs.emptyBody")}</p>
         </div>
       ) : (
         <ul className="flex flex-col gap-2">
           {documents.map((doc) => (
             <li
               key={doc.id}
-              className="flex items-center gap-3 rounded-lg border border-laiton-clair bg-papier px-4 py-3"
+              className="flex items-center gap-3 rounded-lg border border-line bg-card px-4 py-3"
             >
               <a
                 href={
@@ -213,10 +213,10 @@ export default async function TripDocumentsPage({
               >
                 <CategoryIcon category={doc.category} />
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm font-medium text-encre">
+                  <span className="block truncate text-sm font-medium text-ink">
                     {doc.file_name}
                   </span>
-                  <span className="block text-xs text-encre-douce">
+                  <span className="block text-xs text-slate">
                     {doc.label ?? CATEGORY_LABELS[doc.category]} ·{" "}
                     {format(parseISO(doc.uploaded_at), "d MMM yyyy", { locale: dfLocale })}
                   </span>
@@ -225,9 +225,7 @@ export default async function TripDocumentsPage({
               <span
                 className={cn(
                   "shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium",
-                  doc.scope === "VAULT"
-                    ? "bg-laiton/15 text-laiton"
-                    : "bg-encre-douce/10 text-encre-douce",
+                  doc.scope === "VAULT" ? "bg-citron/15 text-mist" : "bg-slate/10 text-slate",
                 )}
               >
                 {doc.scope === "VAULT"

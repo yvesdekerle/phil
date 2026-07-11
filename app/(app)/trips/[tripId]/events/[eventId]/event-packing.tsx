@@ -50,13 +50,13 @@ export function EventPacking({
 
   return (
     <section>
-      <h2 className="mb-2 text-sm font-medium text-encre-douce">{t("events.packing.heading")}</h2>
+      <h2 className="mb-2 text-sm font-medium text-slate">{t("events.packing.heading")}</h2>
       {items.length > 0 ? (
         <ul className="flex flex-col gap-1.5">
           {items.map((item) => (
             <li
               key={item.id}
-              className="flex items-center gap-2 rounded-md border border-laiton-clair/60 bg-papier px-3 py-2"
+              className="flex items-center gap-2 rounded-md border border-line/60 bg-card px-3 py-2"
             >
               <input
                 type="checkbox"
@@ -67,13 +67,13 @@ export function EventPacking({
                     toggleChecklistItem(tripId, item.id, e.target.checked, eventId),
                   )
                 }
-                className="size-4 accent-bordeaux"
+                className="size-4 accent-lagoon-ink"
                 aria-label={`${t("events.packing.takenAriaPrefix")}${item.title}`}
               />
               <span
                 className={cn(
                   "min-w-0 flex-1 text-sm",
-                  item.done ? "text-encre-douce line-through" : "text-encre",
+                  item.done ? "text-slate line-through" : "text-ink",
                 )}
               >
                 {item.title}
@@ -85,7 +85,7 @@ export function EventPacking({
                   onClick={() =>
                     startTransition(() => deleteChecklistItem(tripId, item.id, eventId))
                   }
-                  className="text-encre-douce hover:text-bordeaux"
+                  className="text-slate hover:text-lagoon-ink"
                   aria-label={`${t("events.packing.deleteAriaPrefix")}${item.title}`}
                 >
                   <Trash2 className="size-4" aria-hidden="true" />
@@ -95,7 +95,7 @@ export function EventPacking({
           ))}
         </ul>
       ) : (
-        <p className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-4 py-4 text-center text-sm text-encre-douce">
+        <p className="rounded-lg border border-dashed border-line bg-card/60 px-4 py-4 text-center text-sm text-slate">
           {t("events.packing.empty")}
         </p>
       )}
@@ -114,7 +114,7 @@ export function EventPacking({
           {t("events.packing.add")}
         </Button>
       </form>
-      <p className="mt-1 text-xs text-encre-douce">{t("events.packing.footnote")}</p>
+      <p className="mt-1 text-xs text-slate">{t("events.packing.footnote")}</p>
     </section>
   );
 }

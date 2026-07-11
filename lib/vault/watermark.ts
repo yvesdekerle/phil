@@ -1,4 +1,5 @@
 import { degrees, PDFDocument, rgb, StandardFonts } from "pdf-lib";
+import { palette } from "@/lib/ui/colors";
 
 /**
  * Filigrane dynamique (PHIL-E06) : diagonales répétées avec l'identité du
@@ -6,7 +7,16 @@ import { degrees, PDFDocument, rgb, StandardFonts } from "pdf-lib";
  * Cible : < 200 ms par document.
  */
 
-const WATERMARK_COLOR = rgb(0.43, 0.12, 0.18); // bordeaux Phil
+/** Convertit un hex `#rrggbb` de la palette en couleur pdf-lib (composantes 0-1). */
+function paletteRgb(hex: string) {
+  return rgb(
+    Number.parseInt(hex.slice(1, 3), 16) / 255,
+    Number.parseInt(hex.slice(3, 5), 16) / 255,
+    Number.parseInt(hex.slice(5, 7), 16) / 255,
+  );
+}
+
+const WATERMARK_COLOR = paletteRgb(palette.berryInk);
 const WATERMARK_OPACITY = 0.2;
 
 function watermarkLines(viewer: string): string {

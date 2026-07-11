@@ -66,7 +66,7 @@ export function EventActions({
         </AlertDialogContent>
       </AlertDialog>
 
-      {state.status === "error" ? <p className="text-sm text-bordeaux">{state.message}</p> : null}
+      {state.status === "error" ? <p className="text-sm text-lagoon-ink">{state.message}</p> : null}
     </div>
   );
 }

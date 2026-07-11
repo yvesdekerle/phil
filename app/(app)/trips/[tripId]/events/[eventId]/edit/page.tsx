@@ -38,12 +38,12 @@ export default async function EditEventPage({
     <div className="mx-auto flex max-w-lg flex-col gap-5">
       <Link
         href={`/trips/${tripId}/events/${eventId}`}
-        className="text-sm text-encre-douce underline underline-offset-4 hover:text-encre"
+        className="text-sm text-slate underline underline-offset-4 hover:text-ink"
       >
         {t("events.backToEvent")}
       </Link>
-      <h1 className="text-center font-display text-2xl text-encre">{t("events.edit.title")}</h1>
-      <p className="text-center text-xs text-encre-douce">{t("events.edit.hint")}</p>
+      <h1 className="text-center font-sans text-2xl text-ink">{t("events.edit.title")}</h1>
+      <p className="text-center text-xs text-slate">{t("events.edit.hint")}</p>
       <Card>
         <CardContent>
           <EditEventForm

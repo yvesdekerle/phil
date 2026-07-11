@@ -50,8 +50,8 @@ export function EventParticipants({
   return (
     <section className="flex flex-col gap-2">
       <div className="flex items-baseline justify-between">
-        <h2 className="text-sm font-medium text-encre">{t("events.participants.heading")}</h2>
-        <span className="text-xs text-encre-douce">
+        <h2 className="text-sm font-medium text-ink">{t("events.participants.heading")}</h2>
+        <span className="text-xs text-slate">
           {count === 0
             ? t("events.participants.allGroup")
             : `${count} ${count > 1 ? t("events.participants.signedUpPlural") : t("events.participants.signedUpSingular")}`}
@@ -74,9 +74,9 @@ export function EventParticipants({
             className={cn(
               "flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-colors",
               option.isIn
-                ? "border-bordeaux bg-bordeaux/10 text-encre"
-                : "border-laiton-clair bg-papier text-encre-douce",
-              option.canToggle ? "hover:border-laiton" : "cursor-default opacity-70",
+                ? "border-lagoon-ink bg-lagoon-ink/10 text-ink"
+                : "border-line bg-card text-slate",
+              option.canToggle ? "hover:border-line" : "cursor-default opacity-70",
             )}
           >
             {option.avatarUrl ? (
@@ -85,21 +85,21 @@ export function EventParticipants({
                 alt=""
                 width={20}
                 height={20}
-                className="rounded-full border border-laiton-clair"
+                className="rounded-full border border-line"
               />
             ) : (
-              <span className="flex size-5 items-center justify-center rounded-full border border-laiton-clair bg-parchemin text-[0.6rem] text-laiton">
+              <span className="flex size-5 items-center justify-center rounded-full border border-line bg-sand text-[0.6rem] text-mist">
                 {option.name.charAt(0).toUpperCase()}
               </span>
             )}
             {option.name}
-            <span className={cn("text-xs", option.isIn ? "text-bordeaux" : "text-laiton-clair")}>
+            <span className={cn("text-xs", option.isIn ? "text-lagoon-ink" : "text-line")}>
               {option.isIn ? "✓" : "+"}
             </span>
           </button>
         ))}
       </div>
-      {error ? <p className="text-xs text-bordeaux">{error}</p> : null}
+      {error ? <p className="text-xs text-lagoon-ink">{error}</p> : null}
     </section>
   );
 }

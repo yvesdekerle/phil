@@ -33,7 +33,7 @@ export function FilterSelect({
           if (href) startTransition(() => router.push(href));
         }}
         aria-label={ariaLabel}
-        className="h-9 w-full cursor-pointer appearance-none rounded-full border border-laiton-clair bg-papier pr-9 pl-3 text-sm text-encre transition-colors hover:border-laiton focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-laiton disabled:opacity-60"
+        className="h-9 w-full cursor-pointer appearance-none rounded-full border border-line bg-card pr-9 pl-3 text-sm text-ink transition-colors hover:border-line focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mist disabled:opacity-60"
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>
@@ -42,7 +42,7 @@ export function FilterSelect({
         ))}
       </select>
       <ChevronDown
-        className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-encre-douce"
+        className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-slate"
         aria-hidden="true"
       />
     </div>

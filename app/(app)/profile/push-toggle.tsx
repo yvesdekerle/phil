@@ -66,17 +66,17 @@ export function PushToggle() {
   }
 
   if (!supported) {
-    return <p className="text-xs text-encre-douce">{t("profile.push.unsupported")}</p>;
+    return <p className="text-xs text-slate">{t("profile.push.unsupported")}</p>;
   }
 
   return (
     <div className="flex flex-col gap-1.5">
       <label htmlFor="push-device" className="flex items-center justify-between gap-4">
-        <span className="text-sm text-encre">{t("profile.push.label")}</span>
+        <span className="text-sm text-ink">{t("profile.push.label")}</span>
         <Switch id="push-device" checked={enabled} disabled={pending} onCheckedChange={toggle} />
       </label>
-      <p className="text-xs text-encre-douce">{t("profile.push.hint")}</p>
-      {error ? <p className="text-xs text-bordeaux">{error}</p> : null}
+      <p className="text-xs text-slate">{t("profile.push.hint")}</p>
+      {error ? <p className="text-xs text-lagoon-ink">{error}</p> : null}
     </div>
   );
 }

@@ -61,20 +61,20 @@ export default async function FriendsPage() {
 
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-8">
-      <h1 className="font-display text-3xl text-encre">{t("friends.title")}</h1>
-      <p className="mt-1 mb-6 text-sm text-encre-douce">{t("friends.subtitle")}</p>
+      <h1 className="font-sans text-3xl text-ink">{t("friends.title")}</h1>
+      <p className="mt-1 mb-6 text-sm text-slate">{t("friends.subtitle")}</p>
 
       {friendList.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-6 py-14 text-center">
-          <p className="font-display text-xl text-encre italic">{t("friends.emptyTitle")}</p>
-          <p className="mt-2 text-sm text-encre-douce">{t("friends.emptyBody")}</p>
+        <div className="rounded-lg border border-dashed border-line bg-card/60 px-6 py-14 text-center">
+          <p className="font-sans text-xl text-ink italic">{t("friends.emptyTitle")}</p>
+          <p className="mt-2 text-sm text-slate">{t("friends.emptyBody")}</p>
         </div>
       ) : (
         <ul className="flex flex-col gap-2">
           {friendList.map((friend) => (
             <li
               key={friend.userId}
-              className="flex flex-wrap items-center gap-4 rounded-lg border border-laiton-clair bg-papier px-4 py-3"
+              className="flex flex-wrap items-center gap-4 rounded-lg border border-line bg-card px-4 py-3"
             >
               {friend.avatarUrl ? (
                 <Image
@@ -82,16 +82,16 @@ export default async function FriendsPage() {
                   alt=""
                   width={40}
                   height={40}
-                  className="rounded-full border border-laiton-clair"
+                  className="rounded-full border border-line"
                 />
               ) : (
-                <span className="flex size-10 items-center justify-center rounded-full border border-laiton-clair bg-parchemin font-display text-laiton">
+                <span className="flex size-10 items-center justify-center rounded-full border border-line bg-sand font-sans text-mist">
                   {friend.name.charAt(0).toUpperCase()}
                 </span>
               )}
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm font-medium text-encre">{friend.name}</span>
-                <span className="block truncate text-xs text-encre-douce">
+                <span className="block truncate text-sm font-medium text-ink">{friend.name}</span>
+                <span className="block truncate text-xs text-slate">
                   {friend.sharedTrips.length}{" "}
                   {friend.sharedTrips.length > 1 ? t("friends.tripsWord") : t("friends.tripWord")}{" "}
                   {t("friends.together")} · {friend.sharedTrips.slice(0, 2).join(", ")}

@@ -10,9 +10,9 @@ import { Button } from "@/components/ui/button";
 export function ExportTripCard({ tripId }: { tripId: string }) {
   const t = useT();
   return (
-    <section className="flex flex-col gap-2 rounded-lg border border-laiton-clair bg-papier px-5 py-4">
-      <h2 className="text-sm font-medium text-encre">{t("trips.export.title")}</h2>
-      <p className="text-xs text-encre-douce">{t("trips.export.description")}</p>
+    <section className="flex flex-col gap-2 rounded-lg border border-line bg-card px-5 py-4">
+      <h2 className="text-sm font-medium text-ink">{t("trips.export.title")}</h2>
+      <p className="text-xs text-slate">{t("trips.export.description")}</p>
       <Button asChild variant="outline" size="sm" className="mt-1 self-start">
         {/* Lien natif : le nom de fichier est fixé par le Content-Disposition serveur */}
         <a href={`/api/trips/${tripId}/export`} download>

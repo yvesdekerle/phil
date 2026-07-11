@@ -39,8 +39,8 @@ export default async function EmergencyPage({ params }: { params: Promise<{ trip
   const row = (label: string, value: string | null) =>
     value ? (
       <p className="text-sm">
-        <span className="text-encre-douce">{label} : </span>
-        <span className="whitespace-pre-line text-encre">{value}</span>
+        <span className="text-slate">{label} : </span>
+        <span className="whitespace-pre-line text-ink">{value}</span>
       </p>
     ) : null;
 
@@ -49,15 +49,15 @@ export default async function EmergencyPage({ params }: { params: Promise<{ trip
       <div className="flex items-center justify-between print:hidden">
         <Link
           href={`/trips/${tripId}/participants`}
-          className="text-sm text-encre-douce underline underline-offset-4 hover:text-encre"
+          className="text-sm text-slate underline underline-offset-4 hover:text-ink"
         >
           {t("emergency.backToParticipants")}
         </Link>
         <PrintButton />
       </div>
 
-      <section className="rounded-lg border border-laiton-clair bg-papier px-5 py-4 print:hidden">
-        <h2 className="mb-3 text-sm font-medium text-encre">{t("emergency.mySheet")}</h2>
+      <section className="rounded-lg border border-line bg-card px-5 py-4 print:hidden">
+        <h2 className="mb-3 text-sm font-medium text-ink">{t("emergency.mySheet")}</h2>
         <SheetForm
           tripId={tripId}
           defaults={{
@@ -72,14 +72,14 @@ export default async function EmergencyPage({ params }: { params: Promise<{ trip
       </section>
 
       <section>
-        <h2 className="mb-3 font-display text-xl text-encre">
+        <h2 className="mb-3 font-sans text-xl text-ink">
           {t("emergency.crewSheets")}{" "}
-          <span className="text-sm text-encre-douce">
+          <span className="text-sm text-slate">
             ({(sheets ?? []).length}/{members?.length ?? 0} {t("emergency.filled")})
           </span>
         </h2>
         {(sheets ?? []).length === 0 ? (
-          <p className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-4 py-8 text-center text-sm text-encre-douce">
+          <p className="rounded-lg border border-dashed border-line bg-card/60 px-4 py-8 text-center text-sm text-slate">
             {t("emergency.empty")}
           </p>
         ) : (
@@ -87,9 +87,9 @@ export default async function EmergencyPage({ params }: { params: Promise<{ trip
             {[...(mySheet ? [mySheet] : []), ...otherSheets].map((s) => (
               <article
                 key={s.user_id}
-                className="break-inside-avoid rounded-lg border border-laiton-clair bg-papier px-4 py-3"
+                className="break-inside-avoid rounded-lg border border-line bg-card px-4 py-3"
               >
-                <h3 className="mb-1.5 font-medium text-encre">
+                <h3 className="mb-1.5 font-medium text-ink">
                   {nameOf(s.user_id)}
                   {s.user_id === user.id ? t("emergency.you") : ""}
                 </h3>

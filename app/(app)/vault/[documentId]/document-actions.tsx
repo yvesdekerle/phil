@@ -160,9 +160,7 @@ export function DocumentActions({ documentId, ...defaults }: Props) {
 
         {state.status !== "idle" ? (
           <p
-            className={
-              state.status === "error" ? "text-sm text-bordeaux" : "text-sm text-encre-douce"
-            }
+            className={state.status === "error" ? "text-sm text-lagoon-ink" : "text-sm text-slate"}
           >
             {state.message}
           </p>

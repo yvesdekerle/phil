@@ -35,9 +35,9 @@ export function SignInButton({ next = "/trips" }: { next?: string }) {
         type="button"
         onClick={signInWithGoogle}
         disabled={loading}
-        className="inline-flex w-full items-center justify-center gap-3 rounded-md bg-bordeaux px-6 py-3.5 font-medium text-papier transition-colors hover:bg-bordeaux-fonce focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-laiton disabled:opacity-60"
+        className="inline-flex w-full items-center justify-center gap-3 rounded-md bg-lagoon-ink px-6 py-3.5 font-medium text-card transition-colors hover:bg-lagoon-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mist disabled:opacity-60"
       >
-        <span className="flex size-6 items-center justify-center rounded-sm bg-papier">
+        <span className="flex size-6 items-center justify-center rounded-sm bg-card">
           <svg width="16" height="16" viewBox="0 0 48 48" aria-hidden="true">
             <path
               fill="#EA4335"
@@ -60,7 +60,7 @@ export function SignInButton({ next = "/trips" }: { next?: string }) {
         {loading ? t("login.googleLoading") : t("login.google")}
       </button>
       {error ? (
-        <p role="alert" className="text-sm text-bordeaux">
+        <p role="alert" className="text-sm text-lagoon-ink">
           {error}
         </p>
       ) : null}

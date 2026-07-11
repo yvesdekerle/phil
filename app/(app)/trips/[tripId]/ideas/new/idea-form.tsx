@@ -77,7 +77,9 @@ export function IdeaForm({ tripId }: { tripId: string }) {
         <Button type="submit" disabled={pending}>
           {pending ? t("ideas.submitting") : t("ideas.submit")}
         </Button>
-        {state.status === "error" ? <p className="text-sm text-bordeaux">{state.message}</p> : null}
+        {state.status === "error" ? (
+          <p className="text-sm text-lagoon-ink">{state.message}</p>
+        ) : null}
       </div>
     </form>
   );

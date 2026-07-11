@@ -138,7 +138,9 @@ export function LodgingForm({
         <Button type="submit" disabled={pending}>
           {pending ? t("events.lodging.submitting") : t("events.lodging.submit")}
         </Button>
-        {state.status === "error" ? <p className="text-sm text-bordeaux">{state.message}</p> : null}
+        {state.status === "error" ? (
+          <p className="text-sm text-lagoon-ink">{state.message}</p>
+        ) : null}
       </div>
     </form>
   );

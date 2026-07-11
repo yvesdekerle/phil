@@ -60,13 +60,13 @@ export function EquilibreClient({
         className={cn(
           "rounded-lg border px-5 py-4",
           myNet > 0.01
-            ? "border-laiton bg-laiton/10"
+            ? "border-line bg-citron/10"
             : myNet < -0.01
-              ? "border-bordeaux/40 bg-bordeaux/5"
-              : "border-laiton-clair bg-papier",
+              ? "border-lagoon-ink/40 bg-lagoon-ink/5"
+              : "border-line bg-card",
         )}
       >
-        <p className="font-display text-xl text-encre">
+        <p className="font-sans text-xl text-ink">
           {myNet > 0.01
             ? `🤑 ${t("budget.balance.owedToYou")} ${fmt(myNet)}`
             : myNet < -0.01
@@ -74,27 +74,27 @@ export function EquilibreClient({
               : t("budget.balance.settled")}
         </p>
         {nextPayerId ? (
-          <p className="mt-1 text-sm text-encre-douce">
+          <p className="mt-1 text-sm text-slate">
             {t("budget.balance.nextPayerPrefix")}{" "}
-            <span className="font-medium text-encre">{nameOf(nextPayerId)}</span>{" "}
+            <span className="font-medium text-ink">{nameOf(nextPayerId)}</span>{" "}
             {t("budget.balance.nextPayerSuffix")}
           </p>
         ) : null}
       </div>
 
       {/* Équilibres */}
-      <section className="rounded-lg border border-laiton-clair bg-papier px-4 py-3">
-        <h2 className="mb-2 text-sm font-medium text-encre">
+      <section className="rounded-lg border border-line bg-card px-4 py-3">
+        <h2 className="mb-2 text-sm font-medium text-ink">
           {t("budget.balance.balancesTitle")} ({currency})
         </h2>
         <div className="flex flex-col gap-1">
           {balances.map((b) => (
             <p key={b.userId} className="flex items-baseline justify-between gap-2 text-sm">
-              <span className="text-encre">{nameOf(b.userId)}</span>
+              <span className="text-ink">{nameOf(b.userId)}</span>
               <span
                 className={cn(
                   "font-medium tabular-nums",
-                  b.net > 0.01 ? "text-vert" : b.net < -0.01 ? "text-bordeaux" : "text-encre-douce",
+                  b.net > 0.01 ? "text-lagoon" : b.net < -0.01 ? "text-lagoon-ink" : "text-slate",
                 )}
               >
                 {b.net > 0 ? "+" : ""}
@@ -107,14 +107,14 @@ export function EquilibreClient({
 
       {/* Règlements */}
       {settlements.length > 0 ? (
-        <section className="rounded-lg border border-laiton-clair bg-papier px-4 py-3">
-          <h2 className="mb-2 text-xs font-medium text-laiton uppercase">
+        <section className="rounded-lg border border-line bg-card px-4 py-3">
+          <h2 className="mb-2 text-xs font-medium text-mist uppercase">
             {t("budget.balance.toSettle")}
           </h2>
           {settlements.map((s) => (
             <p
               key={`${s.from}-${s.to}`}
-              className="flex flex-wrap items-center justify-between gap-2 py-1 text-sm text-encre"
+              className="flex flex-wrap items-center justify-between gap-2 py-1 text-sm text-ink"
             >
               <span className="flex flex-wrap items-baseline gap-x-1">
                 {nameOf(s.from)} {t("budget.balance.owes")}{" "}
@@ -139,7 +139,7 @@ export function EquilibreClient({
                     }
                   })
                 }
-                className="shrink-0 rounded-full border border-laiton-clair px-2.5 py-0.5 text-xs text-encre-douce transition-colors hover:border-bordeaux hover:text-bordeaux"
+                className="shrink-0 rounded-full border border-line px-2.5 py-0.5 text-xs text-slate transition-colors hover:border-lagoon-ink hover:text-lagoon-ink"
                 title={t("budget.balance.markSettledTitle")}
               >
                 {t("budget.balance.markSettled")}
@@ -148,15 +148,15 @@ export function EquilibreClient({
           ))}
         </section>
       ) : (
-        <p className="text-sm text-encre-douce">{t("budget.balance.nothingToSettle")}</p>
+        <p className="text-sm text-slate">{t("budget.balance.nothingToSettle")}</p>
       )}
 
       {/* Clore / rouvrir la Bourse */}
       {isOwner ? (
-        <div className="flex flex-wrap items-center gap-3 rounded-lg border border-laiton-clair bg-papier px-4 py-3">
+        <div className="flex flex-wrap items-center gap-3 rounded-lg border border-line bg-card px-4 py-3">
           {closedAt ? (
             <>
-              <p className="min-w-0 flex-1 text-xs text-encre-douce">
+              <p className="min-w-0 flex-1 text-xs text-slate">
                 {t("budget.close.closedOnPrefix")}{" "}
                 {new Intl.DateTimeFormat(il, { dateStyle: "long" }).format(new Date(closedAt))}
                 {t("budget.close.closedOnSuffix")}
@@ -179,9 +179,7 @@ export function EquilibreClient({
             </>
           ) : (
             <>
-              <p className="min-w-0 flex-1 text-xs text-encre-douce">
-                {t("budget.close.closeHint")}
-              </p>
+              <p className="min-w-0 flex-1 text-xs text-slate">{t("budget.close.closeHint")}</p>
               <Button
                 type="button"
                 variant="outline"
