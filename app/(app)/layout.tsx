@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AppTabBar } from "@/components/layout/app-tab-bar";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { ProfileMenu } from "@/components/layout/profile-menu";
 import { getT } from "@/lib/i18n/server";
@@ -52,6 +53,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </div>
       </header>
       {children}
+      <AppTabBar />
     </>
   );
 }

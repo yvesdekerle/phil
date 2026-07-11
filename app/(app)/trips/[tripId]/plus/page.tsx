@@ -5,6 +5,7 @@ import {
   FileText,
   Images,
   LifeBuoy,
+  Lightbulb,
   Luggage,
   Settings,
   Users,
@@ -14,11 +15,13 @@ import Link from "next/link";
 import { getT } from "@/lib/i18n/server";
 
 /**
- * Grille « Plus » (handoff §4) — les rubriques du voyage qui ne tiennent pas
- * dans la barre d'onglets (5 items max, canon B9). Sur desktop, la sidebar
- * les liste déjà ; cette page reste accessible mais sert surtout le mobile.
+ * Grille « Plus » (prototype : Plus → Idées → vote) — tout ce qui n'est pas
+ * dans la barre d'onglets mobile (Programme · Carte · Bourse · Plus), Idées
+ * en tête. Sur desktop, la sidebar liste déjà ces entrées à plat ; cette page
+ * reste accessible mais sert surtout le mobile.
  */
 const ITEMS = [
+  { segment: "ideas", key: "ideas", Icon: Lightbulb },
   { segment: "polls", key: "polls", Icon: BarChart3 },
   { segment: "lodging", key: "lodging", Icon: BedDouble },
   { segment: "miam", key: "miam", Icon: UtensilsCrossed },

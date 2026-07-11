@@ -24,7 +24,7 @@ export const es: PartialMessages = {
   },
   tripTabs: {
     aria: "Secciones del viaje",
-    calendar: "Bitácora",
+    calendar: "Programa",
     map: "Mapa",
     lodging: "Alojamientos",
     documents: "Documentos",
