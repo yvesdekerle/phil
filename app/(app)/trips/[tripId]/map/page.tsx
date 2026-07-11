@@ -213,7 +213,7 @@ export default async function TripMapPage({
 
   return (
     // Pleine largeur (PHIL-Q37b) : la carte déborde du gabarit habituel
-    <div className="relative left-1/2 right-1/2 -mx-[50vw] w-screen px-4 sm:px-6 lg:px-8">
+    <div>
       <div className="mx-auto flex max-w-[104rem] flex-col gap-4">
         <TripViewToggle tripId={tripId} active="carte" />
         {/* TREK-style : liste cliquable à gauche, grande carte à droite */}

@@ -52,6 +52,7 @@ export const calendarFr = {
     },
     timeline: {
       title: "Timeline",
+      days: "jours",
       emptyTitle: "Rien à dérouler",
       emptyBody: "Ajoute des événements au calendrier : la frise se dessinera toute seule.",
     },

@@ -52,6 +52,7 @@ export const calendarEn = {
     },
     timeline: {
       title: "Timeline",
+      days: "days",
       emptyTitle: "Nothing to unroll",
       emptyBody: "Add a few events to the calendar and the frieze will draw itself.",
     },

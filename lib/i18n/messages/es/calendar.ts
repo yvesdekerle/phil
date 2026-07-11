@@ -53,6 +53,7 @@ export const calendarEs = {
     },
     timeline: {
       title: "Cronología",
+      days: "días",
       emptyTitle: "Nada que desplegar",
       emptyBody: "Añade eventos al calendario: la línea de tiempo se dibujará sola.",
     },
