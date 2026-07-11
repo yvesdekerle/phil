@@ -4,7 +4,11 @@ import { messages, translator } from "@/lib/i18n/messages";
 import { palette } from "@/lib/ui/colors";
 
 const styles = {
-  body: { backgroundColor: palette.sand, fontFamily: "Georgia, 'Times New Roman', serif" },
+  // Schibsted Grotesk n'est pas chargeable en email → pile système sans-serif.
+  body: {
+    backgroundColor: palette.sand,
+    fontFamily: "-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+  },
   container: {
     backgroundColor: palette.card,
     border: `1px solid ${palette.line}`,
@@ -16,7 +20,8 @@ const styles = {
   wordmark: {
     color: palette.ink,
     fontSize: "28px",
-    fontWeight: 700 as const,
+    fontWeight: 800 as const,
+    letterSpacing: "-0.02em",
     margin: "0 0 4px",
     textAlign: "center" as const,
   },
@@ -75,12 +80,12 @@ export const emailStyles = {
   muted: { color: palette.slate, fontSize: "13px", lineHeight: "20px", margin: "0 0 12px" },
   button: {
     backgroundColor: palette.lagoonInk,
-    borderRadius: "6px",
+    borderRadius: "999px",
     color: palette.card,
     display: "inline-block",
     fontSize: "14px",
     fontWeight: 600 as const,
-    padding: "12px 24px",
+    padding: "13px 24px",
     textDecoration: "none",
   },
   buttonWrap: { margin: "20px 0", textAlign: "center" as const },
