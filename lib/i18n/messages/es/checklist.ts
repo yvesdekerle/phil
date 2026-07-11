@@ -131,6 +131,7 @@ export const checklistEs = {
     scheduled: "Planificado",
     plan: "Planificar",
     link: "Enlace",
+    locate: "Ver en el mapa",
     proposedBy: "propuesto por",
     // Botones votar / descartar
     removeVoteAria: "Retirar mi voto",

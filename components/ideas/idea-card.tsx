@@ -11,6 +11,7 @@ import {
   ThumbsDown,
 } from "lucide-react";
 import Link from "next/link";
+import { IdeaLocateButton } from "@/components/ideas/ideas-map";
 import { Linkify } from "@/components/ui/linkify";
 import { formatInTimezone } from "@/lib/events/datetime";
 import { getT } from "@/lib/i18n/server";
@@ -23,12 +24,15 @@ export async function IdeaCard({
   tripId,
   canPlan,
   distance,
+  mapNumber,
 }: {
   idea: IdeaWithMeta;
   tripId: string;
   canPlan: boolean;
   /** Distance/temps depuis le logement de référence (PHIL-Q37c). */
   distance?: { text: string; title: string } | null;
+  /** V07d : numéro du marqueur sur la carte (idée géolocalisée), sinon null. */
+  mapNumber?: number | null;
 }) {
   const t = await getT();
   return (
@@ -41,6 +45,9 @@ export async function IdeaCard({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <h3 className="flex flex-wrap items-center gap-2 text-subhead text-ink">
+            {mapNumber ? (
+              <IdeaLocateButton ideaId={idea.id} number={mapNumber} label={t("ideas.locate")} />
+            ) : null}
             {idea.title}
             {idea.status === "SCHEDULED" ? (
               idea.scheduledEvent ? (

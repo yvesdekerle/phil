@@ -2,8 +2,8 @@ import { ChevronRight, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { IdeaCard } from "@/components/ideas/idea-card";
+import { IdeasMap, IdeasMapFocusProvider } from "@/components/ideas/ideas-map";
 import type { MapMarker } from "@/components/map/trip-map";
-import { TripMapLazy } from "@/components/map/trip-map-lazy";
 import { RealtimeRefresh } from "@/components/realtime-refresh";
 import { SearchForm } from "@/components/search-form";
 import { Button } from "@/components/ui/button";
@@ -81,10 +81,7 @@ export default async function TripIdeasPage({
     (i) => i.status === "POOL" && !(i.idea_votes ?? []).some((v) => v.user_id === user.id),
   ).length;
 
-  // PHIL-Q37c : carte des idées géolocalisées + logements, distances depuis le logement choisi
-  const locatedIdeas = (ideasData ?? []).filter(
-    (i) => i.location_lat != null && i.location_lng != null,
-  );
+  // PHIL-Q37c : logement de référence pour les distances
   const selectedLodging =
     (lodgings ?? []).find((l) => l.id === lodging) ?? (lodgings ?? [])[0] ?? null;
   const distanceFrom = selectedLodging
@@ -94,6 +91,52 @@ export default async function TripIdeasPage({
         label: selectedLodging.title,
       }
     : null;
+
+  let ideas: IdeaWithMeta[] = (ideasData ?? []).map((row) => {
+    const votes = (row.idea_votes ?? []) as { user_id: string; verdict: string }[];
+    let supers = 0;
+    let likes = 0;
+    let maybes = 0;
+    let nos = 0;
+    for (const v of votes) {
+      if (v.verdict === "SUPER") supers += 1;
+      else if (v.verdict === "YES") likes += 1;
+      else if (v.verdict === "MAYBE") maybes += 1;
+      else nos += 1;
+    }
+    const positives = supers + likes;
+    return {
+      ...row,
+      voteCount: positives,
+      hasVoted: votes.some((v) => v.user_id === user.id),
+      supers,
+      likes,
+      maybes,
+      nos,
+      isMatch: crewSize > 0 && votes.length === crewSize && positives === crewSize,
+      creatorName: row.profiles?.display_name ?? t("ideas.travelerFallback"),
+      scheduledEvent: row.trip_events ?? null,
+    };
+  });
+
+  const allTags = [...new Set(ideas.flatMap((i) => i.tags))].sort();
+  if (tag) {
+    ideas = ideas.filter((i) => i.tags.includes(tag));
+  }
+  // PHIL-Q22 : recherche tolérante (accents, petites fautes)
+  if (q?.trim()) {
+    ideas = ideas.filter((i) =>
+      fuzzyMatch(`${i.title} ${i.description ?? ""} ${i.location_name ?? ""}`, q),
+    );
+  }
+  if (sortBy === "votes") {
+    ideas = [...ideas].sort((a, b) => b.voteCount - a.voteCount);
+  }
+
+  // V07d : idées géolocalisées numérotées dans l'ordre d'affichage — la
+  // pastille de la carte d'idée répond au marqueur du même numéro sur la carte.
+  const locatedIdeas = ideas.filter((i) => i.location_lat != null && i.location_lng != null);
+  const ideaNumbers = new Map(locatedIdeas.map((i, idx) => [i.id, idx + 1]));
 
   // Distance à vol d'oiseau + temps de trajet (OSRM) depuis le logement choisi
   const distances = new Map<string, { text: string; title: string }>();
@@ -140,50 +183,10 @@ export default async function TripIdeasPage({
         title: i.title,
         subtitle: i.location_name ?? undefined,
         color: palette.lagoonInk,
+        label: String(ideaNumbers.get(i.id)),
       }),
     ),
   ];
-
-  let ideas: IdeaWithMeta[] = (ideasData ?? []).map((row) => {
-    const votes = (row.idea_votes ?? []) as { user_id: string; verdict: string }[];
-    let supers = 0;
-    let likes = 0;
-    let maybes = 0;
-    let nos = 0;
-    for (const v of votes) {
-      if (v.verdict === "SUPER") supers += 1;
-      else if (v.verdict === "YES") likes += 1;
-      else if (v.verdict === "MAYBE") maybes += 1;
-      else nos += 1;
-    }
-    const positives = supers + likes;
-    return {
-      ...row,
-      voteCount: positives,
-      hasVoted: votes.some((v) => v.user_id === user.id),
-      supers,
-      likes,
-      maybes,
-      nos,
-      isMatch: crewSize > 0 && votes.length === crewSize && positives === crewSize,
-      creatorName: row.profiles?.display_name ?? t("ideas.travelerFallback"),
-      scheduledEvent: row.trip_events ?? null,
-    };
-  });
-
-  const allTags = [...new Set(ideas.flatMap((i) => i.tags))].sort();
-  if (tag) {
-    ideas = ideas.filter((i) => i.tags.includes(tag));
-  }
-  // PHIL-Q22 : recherche tolérante (accents, petites fautes)
-  if (q?.trim()) {
-    ideas = ideas.filter((i) =>
-      fuzzyMatch(`${i.title} ${i.description ?? ""} ${i.location_name ?? ""}`, q),
-    );
-  }
-  if (sortBy === "votes") {
-    ideas = [...ideas].sort((a, b) => b.voteCount - a.voteCount);
-  }
 
   const filterHref = (s: string | null, t: string | null, d = showDismissed) => {
     const p = new URLSearchParams();
@@ -205,144 +208,160 @@ export default async function TripIdeasPage({
   };
 
   return (
-    <div className="flex flex-col gap-5">
-      {/* PHIL-Q03 : votes en direct */}
-      <RealtimeRefresh tables={["idea_votes"]} />
+    <IdeasMapFocusProvider>
+      <div className="flex flex-col gap-5">
+        {/* PHIL-Q03 : votes en direct */}
+        <RealtimeRefresh tables={["idea_votes"]} />
 
-      {(lodgings ?? []).length > 1 && selectedLodging ? (
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs text-slate">{t("ideas.distancesLabel")}</span>
-          <FilterSelect
-            value={selectedLodging.id}
-            ariaLabel={t("ideas.lodgingFilter")}
-            options={(lodgings ?? []).map((l) => ({
-              value: l.id,
-              label: l.title,
-              href: lodgingHref(l.id),
-            }))}
-          />
-        </div>
-      ) : null}
-
-      {mapMarkers.length > 0 ? (
-        <TripMapLazy markers={mapMarkers} distanceFrom={distanceFrom} heightClass="h-[24rem]" />
-      ) : null}
-
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-slate">{t("ideas.intro")}</p>
-        {canPropose ? (
-          <Button asChild>
-            <Link href={`/trips/${tripId}/ideas/new`}>{t("ideas.propose")}</Link>
-          </Button>
+        {(lodgings ?? []).length > 1 && selectedLodging ? (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs text-slate">{t("ideas.distancesLabel")}</span>
+            <FilterSelect
+              value={selectedLodging.id}
+              ariaLabel={t("ideas.lodgingFilter")}
+              options={(lodgings ?? []).map((l) => ({
+                value: l.id,
+                label: l.title,
+                href: lodgingHref(l.id),
+              }))}
+            />
+          </div>
         ) : null}
-      </div>
 
-      {/* PHIL-U07 : lance le swipe façon Tinder/Bumble sur les idées du voyage. */}
-      <Link
-        href={`/trips/${tripId}/ideas/match`}
-        className="flex items-center gap-3.5 rounded-lg bg-gradient-to-br from-lagoon-ink to-ink p-4 shadow-float transition-all outline-none hover:-translate-y-px focus-visible:ring-2 focus-visible:ring-citron focus-visible:ring-offset-2 focus-visible:ring-offset-sand"
-      >
-        <span
-          aria-hidden="true"
-          className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-white/15 text-white"
-        >
-          <Sparkles className="size-5" />
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="block text-subhead font-extrabold text-white">
-            {t("ideas.match.cta")}
-          </span>
-          <span className="mt-0.5 block text-caption text-lagoon-soft">
-            {toSwipeCount > 0
-              ? t("ideas.match.ctaCount").replace("{n}", String(toSwipeCount))
-              : t("ideas.match.ctaDone")}
-          </span>
-        </span>
-        <ChevronRight aria-hidden="true" className="size-5 shrink-0 text-lagoon-soft" />
-      </Link>
-
-      <SearchForm
-        action={`/trips/${tripId}/ideas`}
-        q={q}
-        placeholder={t("ideas.searchPlaceholder")}
-        hidden={{ sort, tag, dismissed, lodging }}
-      />
-
-      <div className="flex flex-wrap items-center gap-2">
-        <Link
-          href={filterHref(null, tag ?? null)}
-          className={cn(
-            "inline-flex h-8 items-center rounded-full border px-3 text-ui transition-colors outline-none focus-visible:ring-2 focus-visible:ring-citron focus-visible:ring-offset-2 focus-visible:ring-offset-sand",
-            sortBy === "votes"
-              ? "border-ink bg-ink text-white"
-              : "border-line bg-card text-slate hover:bg-wash hover:text-ink",
-          )}
-        >
-          {t("ideas.sortVotes")}
-        </Link>
-        <Link
-          href={filterHref("recent", tag ?? null)}
-          className={cn(
-            "inline-flex h-8 items-center rounded-full border px-3 text-ui transition-colors outline-none focus-visible:ring-2 focus-visible:ring-citron focus-visible:ring-offset-2 focus-visible:ring-offset-sand",
-            sortBy === "recent"
-              ? "border-ink bg-ink text-white"
-              : "border-line bg-card text-slate hover:bg-wash hover:text-ink",
-          )}
-        >
-          {t("ideas.sortRecent")}
-        </Link>
-        {allTags.length > 0 ? <span className="mx-1 text-line">·</span> : null}
-        {allTags.map((t) => (
-          <Link
-            key={t}
-            href={filterHref(sortBy === "recent" ? "recent" : null, tag === t ? null : t)}
-            className={cn(
-              "inline-flex h-8 items-center rounded-full border px-3 text-ui transition-colors outline-none focus-visible:ring-2 focus-visible:ring-citron focus-visible:ring-offset-2 focus-visible:ring-offset-sand",
-              tag === t
-                ? "border-line bg-citron text-card"
-                : "border-line bg-card text-slate hover:bg-wash hover:text-ink",
-            )}
-          >
-            #{t}
-          </Link>
-        ))}
-        <span className="flex-1" />
-        <Link
-          href={filterHref(sortBy === "recent" ? "recent" : null, tag ?? null, !showDismissed)}
-          className={cn(
-            "inline-flex h-8 items-center rounded-full border px-3 text-ui transition-colors outline-none focus-visible:ring-2 focus-visible:ring-citron focus-visible:ring-offset-2 focus-visible:ring-offset-sand",
-            showDismissed
-              ? "border-ink bg-ink text-card"
-              : "border-line bg-card text-slate hover:bg-wash hover:text-ink",
-          )}
-        >
-          {showDismissed ? t("ideas.backToIdeas") : t("ideas.seeDismissed")}
-        </Link>
-      </div>
-
-      {ideas.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-line bg-card/60 px-6 py-14 text-center">
-          <p className="font-sans text-xl text-ink italic">{t("ideas.emptyTitle")}</p>
-          <p className="max-w-sm text-sm text-slate">{t("ideas.emptyBody")}</p>
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-slate">{t("ideas.intro")}</p>
           {canPropose ? (
-            <Button asChild className="mt-1">
+            <Button asChild>
               <Link href={`/trips/${tripId}/ideas/new`}>{t("ideas.propose")}</Link>
             </Button>
           ) : null}
         </div>
-      ) : (
-        <div className="flex flex-col gap-3">
-          {ideas.map((idea) => (
-            <IdeaCard
-              key={idea.id}
-              idea={idea}
-              tripId={tripId}
-              canPlan={canPropose}
-              distance={distances.get(idea.id) ?? null}
-            />
+
+        {/* PHIL-U07 : lance le swipe façon Tinder/Bumble sur les idées du voyage. */}
+        <Link
+          href={`/trips/${tripId}/ideas/match`}
+          className="flex items-center gap-3.5 rounded-lg bg-gradient-to-br from-lagoon-ink to-ink p-4 shadow-float transition-all outline-none hover:-translate-y-px focus-visible:ring-2 focus-visible:ring-citron focus-visible:ring-offset-2 focus-visible:ring-offset-sand"
+        >
+          <span
+            aria-hidden="true"
+            className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-white/15 text-white"
+          >
+            <Sparkles className="size-5" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-subhead font-extrabold text-white">
+              {t("ideas.match.cta")}
+            </span>
+            <span className="mt-0.5 block text-caption text-lagoon-soft">
+              {toSwipeCount > 0
+                ? t("ideas.match.ctaCount").replace("{n}", String(toSwipeCount))
+                : t("ideas.match.ctaDone")}
+            </span>
+          </span>
+          <ChevronRight aria-hidden="true" className="size-5 shrink-0 text-lagoon-soft" />
+        </Link>
+
+        <SearchForm
+          action={`/trips/${tripId}/ideas`}
+          q={q}
+          placeholder={t("ideas.searchPlaceholder")}
+          hidden={{ sort, tag, dismissed, lodging }}
+        />
+
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href={filterHref(null, tag ?? null)}
+            className={cn(
+              "inline-flex h-8 items-center rounded-full border px-3 text-ui transition-colors outline-none focus-visible:ring-2 focus-visible:ring-citron focus-visible:ring-offset-2 focus-visible:ring-offset-sand",
+              sortBy === "votes"
+                ? "border-ink bg-ink text-white"
+                : "border-line bg-card text-slate hover:bg-wash hover:text-ink",
+            )}
+          >
+            {t("ideas.sortVotes")}
+          </Link>
+          <Link
+            href={filterHref("recent", tag ?? null)}
+            className={cn(
+              "inline-flex h-8 items-center rounded-full border px-3 text-ui transition-colors outline-none focus-visible:ring-2 focus-visible:ring-citron focus-visible:ring-offset-2 focus-visible:ring-offset-sand",
+              sortBy === "recent"
+                ? "border-ink bg-ink text-white"
+                : "border-line bg-card text-slate hover:bg-wash hover:text-ink",
+            )}
+          >
+            {t("ideas.sortRecent")}
+          </Link>
+          {allTags.length > 0 ? <span className="mx-1 text-line">·</span> : null}
+          {allTags.map((t) => (
+            <Link
+              key={t}
+              href={filterHref(sortBy === "recent" ? "recent" : null, tag === t ? null : t)}
+              className={cn(
+                "inline-flex h-8 items-center rounded-full border px-3 text-ui transition-colors outline-none focus-visible:ring-2 focus-visible:ring-citron focus-visible:ring-offset-2 focus-visible:ring-offset-sand",
+                tag === t
+                  ? "border-line bg-citron text-card"
+                  : "border-line bg-card text-slate hover:bg-wash hover:text-ink",
+              )}
+            >
+              #{t}
+            </Link>
           ))}
+          <span className="flex-1" />
+          <Link
+            href={filterHref(sortBy === "recent" ? "recent" : null, tag ?? null, !showDismissed)}
+            className={cn(
+              "inline-flex h-8 items-center rounded-full border px-3 text-ui transition-colors outline-none focus-visible:ring-2 focus-visible:ring-citron focus-visible:ring-offset-2 focus-visible:ring-offset-sand",
+              showDismissed
+                ? "border-ink bg-ink text-card"
+                : "border-line bg-card text-slate hover:bg-wash hover:text-ink",
+            )}
+          >
+            {showDismissed ? t("ideas.backToIdeas") : t("ideas.seeDismissed")}
+          </Link>
         </div>
-      )}
-    </div>
+
+        {/* V07d : liste large à gauche, carte sticky à droite (façon Carte, mais
+          la liste garde la place des actions) ; en mobile la carte est au-dessus. */}
+        <div
+          className={
+            mapMarkers.length > 0
+              ? "flex flex-col gap-4 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:items-start xl:grid-cols-[minmax(0,1fr)_minmax(0,30rem)]"
+              : undefined
+          }
+        >
+          {mapMarkers.length > 0 ? (
+            <div className="lg:sticky lg:top-4 lg:order-2">
+              <IdeasMap markers={mapMarkers} distanceFrom={distanceFrom} />
+            </div>
+          ) : null}
+          <div className="lg:order-1">
+            {ideas.length === 0 ? (
+              <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-line bg-card/60 px-6 py-14 text-center">
+                <p className="font-sans text-xl text-ink italic">{t("ideas.emptyTitle")}</p>
+                <p className="max-w-sm text-sm text-slate">{t("ideas.emptyBody")}</p>
+                {canPropose ? (
+                  <Button asChild className="mt-1">
+                    <Link href={`/trips/${tripId}/ideas/new`}>{t("ideas.propose")}</Link>
+                  </Button>
+                ) : null}
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {ideas.map((idea) => (
+                  <IdeaCard
+                    key={idea.id}
+                    idea={idea}
+                    tripId={tripId}
+                    canPlan={canPropose}
+                    distance={distances.get(idea.id) ?? null}
+                    mapNumber={ideaNumbers.get(idea.id) ?? null}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </IdeasMapFocusProvider>
   );
 }
