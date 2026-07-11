@@ -76,7 +76,7 @@ export function PushToggle() {
         <Switch id="push-device" checked={enabled} disabled={pending} onCheckedChange={toggle} />
       </label>
       <p className="text-xs text-slate">{t("profile.push.hint")}</p>
-      {error ? <p className="text-xs text-lagoon-ink">{error}</p> : null}
+      {error ? <p className="text-caption text-berry-ink">{error}</p> : null}
     </div>
   );
 }

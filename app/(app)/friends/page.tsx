@@ -61,12 +61,12 @@ export default async function FriendsPage() {
 
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-8">
-      <h1 className="font-sans text-3xl text-ink">{t("friends.title")}</h1>
+      <h1 className="text-title text-ink">{t("friends.title")}</h1>
       <p className="mt-1 mb-6 text-sm text-slate">{t("friends.subtitle")}</p>
 
       {friendList.length === 0 ? (
         <div className="rounded-lg border border-dashed border-line bg-card/60 px-6 py-14 text-center">
-          <p className="font-sans text-xl text-ink italic">{t("friends.emptyTitle")}</p>
+          <p className="text-subhead text-ink">{t("friends.emptyTitle")}</p>
           <p className="mt-2 text-sm text-slate">{t("friends.emptyBody")}</p>
         </div>
       ) : (

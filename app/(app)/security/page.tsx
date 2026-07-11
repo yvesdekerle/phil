@@ -48,7 +48,7 @@ export default async function SecurityPage() {
       >
         {t("security.back")}
       </Link>
-      <h1 className="mt-3 mb-2 text-center font-sans text-3xl text-ink">{t("security.title")}</h1>
+      <h1 className="mt-3 mb-2 text-center text-title text-ink">{t("security.title")}</h1>
 
       {coffreKey ? (
         <Card className="mt-6">

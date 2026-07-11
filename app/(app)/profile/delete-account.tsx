@@ -25,7 +25,7 @@ export function DeleteAccountSection() {
   });
 
   return (
-    <section className="mt-8 rounded-lg border border-lagoon-ink/30 bg-card px-5 py-4">
+    <section className="mt-8 rounded-lg border border-berry-ink/30 bg-berry-wash/40 px-5 py-4">
       <h2 className="text-sm font-medium text-lagoon-ink">{t("profile.delete.heading")}</h2>
       <p className="mt-1 text-xs text-slate">{t("profile.delete.body")}</p>
       <div className="mt-3">
@@ -34,7 +34,7 @@ export function DeleteAccountSection() {
             <Button
               type="button"
               variant="outline"
-              className="border-lagoon-ink/40 text-lagoon-ink"
+              className="border-berry-ink/40 text-berry-ink hover:bg-berry-wash"
             >
               {t("profile.delete.trigger")}
             </Button>
@@ -54,7 +54,7 @@ export function DeleteAccountSection() {
                 <Input id="confirmation" name="confirmation" autoComplete="off" required />
               </div>
               {state.status === "error" ? (
-                <p role="alert" className="text-sm text-lagoon-ink">
+                <p role="alert" className="text-caption text-berry-ink">
                   {state.message}
                 </p>
               ) : null}

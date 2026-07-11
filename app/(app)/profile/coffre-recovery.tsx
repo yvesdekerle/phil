@@ -70,7 +70,7 @@ export function CoffreRecovery({ hasRecovery }: { hasRecovery: boolean }) {
             ? "Régénérer un code de secours"
             : "Générer un code de secours"}
       </Button>
-      {error ? <p className="text-sm text-lagoon-ink">{error}</p> : null}
+      {error ? <p className="text-caption text-berry-ink">{error}</p> : null}
     </div>
   );
 }

@@ -83,7 +83,11 @@ export function PasskeyManager({
       ) : null}
 
       {state.status !== "idle" ? (
-        <p className={state.status === "error" ? "text-sm text-lagoon-ink" : "text-sm text-slate"}>
+        <p
+          className={
+            state.status === "error" ? "text-caption text-berry-ink" : "text-sm text-slate"
+          }
+        >
           {state.message}
         </p>
       ) : null}

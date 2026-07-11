@@ -42,7 +42,7 @@ export default async function ClocksPage() {
   return (
     <div className="mx-auto flex max-w-lg flex-col gap-5">
       <div>
-        <h1 className="font-sans text-2xl text-ink">{t("clocks.title")}</h1>
+        <h1 className="text-title text-ink">{t("clocks.title")}</h1>
         <p className="mt-1 text-sm text-slate">{t("clocks.subtitle")}</p>
       </div>
       <div className="rounded-lg border border-line bg-card px-4 py-3">

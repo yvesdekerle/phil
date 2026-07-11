@@ -64,7 +64,7 @@ export default async function ConseilsPage() {
 
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-8">
-      <h1 className="font-sans text-3xl text-ink">{t("tips.title")}</h1>
+      <h1 className="text-title text-ink">{t("tips.title")}</h1>
       <p className="mt-1 mb-6 text-sm text-slate">{t("tips.subtitle")}</p>
 
       <div className="flex flex-col gap-4">

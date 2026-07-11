@@ -112,7 +112,7 @@ export function CoffreRestore({ userId, userName }: { userId: string; userName: 
           Annuler
         </Button>
       </div>
-      {error ? <p className="text-sm text-lagoon-ink">{error}</p> : null}
+      {error ? <p className="text-caption text-berry-ink">{error}</p> : null}
     </div>
   );
 }

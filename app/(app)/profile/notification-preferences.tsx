@@ -38,7 +38,7 @@ export function NotificationPreferencesForm({ initial }: { initial: Notification
           <Switch id={`pref-${key}`} checked={prefs[key]} onCheckedChange={(v) => toggle(key, v)} />
         </label>
       ))}
-      {error ? <p className="text-xs text-lagoon-ink">{error}</p> : null}
+      {error ? <p className="text-caption text-berry-ink">{error}</p> : null}
     </div>
   );
 }

@@ -1,8 +1,10 @@
+import { Clock3, Compass, Lightbulb, ShieldCheck, Users } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { ListRow, ListRowChevron, ListRowContent, ListRowTitle } from "@/components/ui/list-row";
 import { getT } from "@/lib/i18n/server";
 import { parsePreferences } from "@/lib/notifications/preferences";
 import { getOwnProfile } from "@/lib/supabase/profiles";
@@ -48,12 +50,7 @@ export default async function ProfilePage() {
   return (
     <main className="flex flex-1 flex-col items-center px-4 py-12">
       <div className="w-full max-w-lg">
-        <h1 className="mb-2 text-center font-sans text-3xl text-ink">{t("profile.title")}</h1>
-        <p className="mb-6 text-center text-sm">
-          <Link href="/explorer" className="text-slate underline underline-offset-4 hover:text-ink">
-            {t("profile.explorerLink")}
-          </Link>
-        </p>
+        <h1 className="mb-6 text-title text-ink">{t("profile.title")}</h1>
 
         <Card>
           <CardHeader className="flex flex-row items-center gap-4">
@@ -85,6 +82,29 @@ export default async function ProfilePage() {
                 whatsapp: profile?.whatsapp ?? "",
               }}
             />
+          </CardContent>
+        </Card>
+
+        {/* Hub Profil (handoff §4) — rangées B6 vers les rubriques transverses */}
+        <Card className="mt-6">
+          <CardContent className="flex flex-col divide-y divide-wash py-0 [--card-spacing:--spacing(2)]">
+            {[
+              { href: "/friends", label: t("nav.friends"), Icon: Users },
+              { href: "/horloges", label: t("nav.clocks"), Icon: Clock3 },
+              { href: "/conseils", label: t("nav.tips"), Icon: Lightbulb },
+              { href: "/explorer", label: t("profileMenu.exploration"), Icon: Compass },
+              { href: "/security", label: t("security.title"), Icon: ShieldCheck },
+            ].map(({ href, label, Icon }) => (
+              <ListRow key={href} asChild interactive>
+                <Link href={href}>
+                  <Icon className="size-4 shrink-0 text-slate" aria-hidden="true" />
+                  <ListRowContent>
+                    <ListRowTitle>{label}</ListRowTitle>
+                  </ListRowContent>
+                  <ListRowChevron />
+                </Link>
+              </ListRow>
+            ))}
           </CardContent>
         </Card>
 

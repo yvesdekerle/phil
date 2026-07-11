@@ -146,7 +146,7 @@ export function CoffreAddDevice({ userId, userName }: { userId: string; userName
         <Button type="button" variant="outline" onClick={() => void start()}>
           Ajouter cet appareil via un autre appareil
         </Button>
-        {error ? <p className="text-sm text-lagoon-ink">{error}</p> : null}
+        {error ? <p className="text-caption text-berry-ink">{error}</p> : null}
       </div>
     );
   }
@@ -162,7 +162,7 @@ export function CoffreAddDevice({ userId, userName }: { userId: string; userName
           ? "Appareil approuvé — enrôlement de ta biométrie…"
           : "Scanne ce QR avec un appareil où ton coffre est déjà déverrouillé, puis approuve."}
       </p>
-      {error ? <p className="text-sm text-lagoon-ink">{error}</p> : null}
+      {error ? <p className="text-caption text-berry-ink">{error}</p> : null}
     </div>
   );
 }

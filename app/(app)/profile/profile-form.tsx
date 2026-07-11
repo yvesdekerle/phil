@@ -82,7 +82,7 @@ export function ProfileForm({ defaultValues }: { defaultValues: FormValues }) {
         <Label htmlFor="displayName">{t("profile.form.displayName")}</Label>
         <Input id="displayName" autoComplete="name" {...register("displayName")} />
         {errors.displayName ? (
-          <p className="text-sm text-lagoon-ink">{errors.displayName.message}</p>
+          <p className="text-caption text-berry-ink">{errors.displayName.message}</p>
         ) : null}
       </div>
 
@@ -124,7 +124,7 @@ export function ProfileForm({ defaultValues }: { defaultValues: FormValues }) {
         />
         <p className="text-xs text-slate">{t("profile.form.whatsappHint")}</p>
         {errors.whatsapp ? (
-          <p className="text-sm text-lagoon-ink">{errors.whatsapp.message}</p>
+          <p className="text-caption text-berry-ink">{errors.whatsapp.message}</p>
         ) : null}
       </div>
 
@@ -134,7 +134,7 @@ export function ProfileForm({ defaultValues }: { defaultValues: FormValues }) {
         </Button>
         {state.status === "success" ? <p className="text-sm text-slate">{state.message}</p> : null}
         {state.status === "error" ? (
-          <p className="text-sm text-lagoon-ink">{state.message}</p>
+          <p className="text-caption text-berry-ink">{state.message}</p>
         ) : null}
       </div>
     </form>

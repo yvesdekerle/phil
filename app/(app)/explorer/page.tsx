@@ -16,7 +16,7 @@ function Stat({ value, label, hint }: { value: string; label: string; hint?: str
     <div className="rounded-lg border border-line bg-card px-4 py-3 text-center">
       <p className="font-sans text-2xl text-lagoon-ink">{value}</p>
       <p className="text-xs text-slate">{label}</p>
-      {hint ? <p className="mt-0.5 text-[0.65rem] text-slate/70">{hint}</p> : null}
+      {hint ? <p className="mt-0.5 font-mono text-label uppercase text-slate/70">{hint}</p> : null}
     </div>
   );
 }
@@ -160,7 +160,7 @@ export default async function ExplorerPage() {
 
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-8">
-      <h1 className="font-sans text-3xl text-ink">{t("explorer.title")}</h1>
+      <h1 className="text-title text-ink">{t("explorer.title")}</h1>
       <p className="mt-1 mb-6 text-sm text-slate">
         {km > 0
           ? t("explorer.introWithKm").replace(
@@ -199,7 +199,7 @@ export default async function ExplorerPage() {
       </div>
 
       <section className="mt-8">
-        <h2 className="mb-1 font-sans text-xl text-ink">{t("explorer.mapTitle")}</h2>
+        <h2 className="mb-1 text-heading text-ink">{t("explorer.mapTitle")}</h2>
         <p className="mb-3 text-sm text-slate">{t("explorer.mapIntro")}</p>
         <CountrySuggestions suggestions={suggestions} />
         <WorldMapLazy visited={visited} />

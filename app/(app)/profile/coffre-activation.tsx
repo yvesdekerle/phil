@@ -58,7 +58,7 @@ export function CoffreActivation({
       <Button type="button" onClick={activate} disabled={pending}>
         {pending ? "Activation…" : "Activer le coffre chiffré"}
       </Button>
-      {error ? <p className="text-sm text-lagoon-ink">{error}</p> : null}
+      {error ? <p className="text-caption text-berry-ink">{error}</p> : null}
     </div>
   );
 }
