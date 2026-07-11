@@ -23,6 +23,8 @@ type TripDocument = {
   ownerName: string;
   canDelete: boolean;
   forMeOnly?: boolean;
+  /** V06e : événement auquel le document est rattaché (billet → vol…). */
+  eventTitle: string | null;
 };
 
 export default async function TripDocumentsPage({
@@ -50,6 +52,7 @@ export default async function TripDocumentsPage({
     { data: tripDocs, error: docsError },
     { data: sharedRows, error: sharesError },
     { data: me },
+    { data: eventLinks },
   ] = await Promise.all([
     supabase
       .from("documents")
@@ -71,6 +74,11 @@ export default async function TripDocumentsPage({
       .eq("trip_id", tripId)
       .eq("user_id", user.id)
       .single(),
+    // V06e : « on ne sait pas à quel événement est rattaché le document »
+    supabase
+      .from("event_documents")
+      .select("document_id, trip_events!inner(title, trip_id)")
+      .eq("trip_events.trip_id", tripId),
   ]);
   if (docsError || sharesError) {
     // Ne pas masquer une panne DB en « aucun document » (audit D16/R16).
@@ -83,6 +91,14 @@ export default async function TripDocumentsPage({
 
   const canUpload = me?.role === "OWNER" || me?.role === "EDITOR";
 
+  // Premier événement rattaché par document (un billet peut en avoir plusieurs).
+  const eventByDoc = new Map<string, string>();
+  for (const link of eventLinks ?? []) {
+    if (link.trip_events && !eventByDoc.has(link.document_id)) {
+      eventByDoc.set(link.document_id, link.trip_events.title);
+    }
+  }
+
   const isTripOwner = me?.role === "OWNER";
   const fromTrip: TripDocument[] = (tripDocs ?? []).map((d) => ({
     id: d.id,
@@ -94,6 +110,7 @@ export default async function TripDocumentsPage({
     encrypted: false,
     ownerName: d.profiles?.display_name ?? t("tripDocs.travelerFallback"),
     canDelete: isTripOwner || d.owner_id === user.id,
+    eventTitle: eventByDoc.get(d.id) ?? null,
   }));
 
   const fromVault: TripDocument[] = (sharedRows ?? [])
@@ -112,6 +129,7 @@ export default async function TripDocumentsPage({
       ownerName: r.documents.profiles?.display_name ?? t("tripDocs.travelerFallback"),
       canDelete: false, // un doc du coffre partagé se gère depuis le coffre
       forMeOnly: r.shared_with === user.id, // E09 : partage ciblé
+      eventTitle: eventByDoc.get(r.documents.id) ?? null,
     }));
 
   const owners = [...new Set([...fromTrip, ...fromVault].map((d) => d.ownerName))].sort();
@@ -240,18 +258,32 @@ export default async function TripDocumentsPage({
                   >
                     {doc.label ?? CATEGORY_LABELS[doc.category]} ·{" "}
                     {format(parseISO(doc.uploaded_at), "d MMM yyyy", { locale: dfLocale })}
+                    {doc.eventTitle ? (
+                      <span
+                        className={cn(
+                          "ml-1.5 rounded-sm px-1.5 py-0.5 font-mono text-label uppercase",
+                          doc.scope === "VAULT"
+                            ? "bg-white/10 text-lagoon-soft"
+                            : "bg-lagoon-wash text-lagoon-ink",
+                        )}
+                      >
+                        {doc.eventTitle}
+                      </span>
+                    ) : null}
                   </span>
                 </span>
               </a>
+              {/* V06e : prénom seul — la mention complète mangeait la ligne */}
               <span
                 className={cn(
                   "shrink-0 rounded-sm px-2 py-0.5 font-mono text-label uppercase",
                   doc.scope === "VAULT" ? "bg-white/10 text-lagoon-soft" : "bg-wash text-slate",
                 )}
+                title={doc.ownerName}
               >
                 {doc.scope === "VAULT"
-                  ? `${t("tripDocs.sharedBy")} ${doc.ownerName}${doc.forMeOnly ? ` ${t("tripDocs.forYou")}` : ""}`
-                  : `${t("tripDocs.addedBy")} ${doc.ownerName}`}
+                  ? `${t("tripDocs.sharedBy")} ${doc.ownerName.split(" ")[0]}${doc.forMeOnly ? ` ${t("tripDocs.forYou")}` : ""}`
+                  : `${t("tripDocs.addedBy")} ${doc.ownerName.split(" ")[0]}`}
               </span>
               <OfflineDocToggle documentId={doc.id} fileName={doc.file_name} />
               {doc.canDelete ? (
