@@ -79,17 +79,18 @@ export function MiamClient({
   return (
     <div className="flex flex-col gap-4">
       {/* Sous-vues */}
-      <nav className="flex gap-1 text-sm" aria-label={t("miam.viewsAria")}>
+      <nav
+        className="inline-flex w-fit items-center gap-1 rounded-full bg-wash p-1"
+        aria-label={t("miam.viewsAria")}
+      >
         {(["shopping", "meals"] as const).map((v) => (
           <button
             key={v}
             type="button"
             onClick={() => setView(v)}
             className={cn(
-              "rounded-full px-3 py-1",
-              view === v
-                ? "bg-lagoon-ink font-medium text-card"
-                : "text-slate hover:bg-citron/10 hover:text-ink",
+              "relative h-8 rounded-full px-3 text-ui transition-colors outline-none focus-visible:ring-2 focus-visible:ring-citron focus-visible:ring-offset-2 focus-visible:ring-offset-sand active:scale-[.98]",
+              view === v ? "bg-ink text-white" : "text-slate hover:text-ink",
             )}
           >
             {t(`miam.view.${v}`)}
@@ -101,13 +102,13 @@ export function MiamClient({
         <div className="flex flex-col gap-3">
           {shopping.length > 0 ? (
             <div className="flex items-center gap-3">
-              <div className="h-2 flex-1 overflow-hidden rounded-full bg-line/40">
+              <div className="h-2 flex-1 overflow-hidden rounded-full bg-lagoon-wash">
                 <div
-                  className="h-full rounded-full bg-lagoon-ink transition-all"
+                  className="h-full rounded-full bg-lagoon transition-all"
                   style={{ width: `${(checked / shopping.length) * 100}%` }}
                 />
               </div>
-              <span className="shrink-0 text-xs text-slate">
+              <span className="shrink-0 font-mono text-caption font-bold text-slate tabular-nums">
                 {checked}/{shopping.length}
               </span>
             </div>
@@ -117,12 +118,10 @@ export function MiamClient({
             </p>
           )}
 
-          <ul className="flex flex-col gap-1.5">
+          {/* L4e — Courses : cases carrées, colonne de droite = quantités mono-caps */}
+          <ul className="divide-y divide-wash rounded-lg border border-line bg-card">
             {shopping.map((item) => (
-              <li
-                key={item.id}
-                className="flex items-center gap-2 rounded-md border border-line/60 bg-card px-3 py-2"
-              >
+              <li key={item.id} className="flex min-h-11 items-center gap-2.5 px-3 py-1.5">
                 <input
                   type="checkbox"
                   checked={item.checked}
@@ -130,28 +129,28 @@ export function MiamClient({
                   onChange={(e) =>
                     startTransition(() => toggleShoppingItem(tripId, item.id, e.target.checked))
                   }
-                  className="size-4 accent-lagoon-ink"
+                  className="size-5 shrink-0 rounded-sm accent-lagoon-ink"
                   aria-label={`${t("miam.checkAria")} ${item.label}`}
                 />
                 <span
                   className={cn(
-                    "min-w-0 flex-1 text-sm",
+                    "min-w-0 flex-1 truncate text-body",
                     item.checked ? "text-slate line-through" : "text-ink",
                   )}
                 >
                   {item.label}
-                  {item.quantity ? (
-                    <span className="ml-1.5 rounded-full bg-citron/15 px-1.5 py-0.5 text-[0.65rem] font-medium text-mist">
-                      × {item.quantity}
-                    </span>
-                  ) : null}
                 </span>
+                {item.quantity ? (
+                  <span className="shrink-0 font-mono text-label text-mist uppercase tabular-nums">
+                    {item.quantity}
+                  </span>
+                ) : null}
                 {canManage(item.created_by) ? (
                   <button
                     type="button"
                     disabled={pending}
                     onClick={() => startTransition(() => deleteShoppingItem(tripId, item.id))}
-                    className="text-slate hover:text-lagoon-ink"
+                    className="rounded-sm text-slate transition-colors outline-none hover:text-berry-ink focus-visible:ring-2 focus-visible:ring-citron"
                     aria-label={t("miam.remove")}
                   >
                     <Trash2 className="size-4" aria-hidden="true" />

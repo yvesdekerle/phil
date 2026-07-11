@@ -172,17 +172,18 @@ export function ChecklistClient({
   return (
     <div className="flex flex-col gap-5">
       {/* Onglets */}
-      <nav className="flex gap-1 text-sm" aria-label={t("checklist.sectionsAria")}>
+      <nav
+        className="inline-flex w-fit items-center gap-1 rounded-full bg-wash p-1"
+        aria-label={t("checklist.sectionsAria")}
+      >
         {SECTION_KEYS.map((key) => (
           <button
             key={key}
             type="button"
             onClick={() => setTab(key)}
             className={cn(
-              "rounded-full px-3 py-1",
-              tab === key
-                ? "bg-lagoon-ink font-medium text-card"
-                : "text-slate hover:bg-citron/10 hover:text-ink",
+              "relative h-8 rounded-full px-3 text-ui transition-colors outline-none focus-visible:ring-2 focus-visible:ring-citron focus-visible:ring-offset-2 focus-visible:ring-offset-sand active:scale-[.98]",
+              tab === key ? "bg-ink text-white" : "text-slate hover:text-ink",
             )}
           >
             {t(`checklist.tabs.${key}`)}
@@ -192,9 +193,9 @@ export function ChecklistClient({
 
       {localItems.length > 0 ? (
         <div className="flex items-center gap-3">
-          <div className="h-2 flex-1 overflow-hidden rounded-full bg-line/40">
+          <div className="h-2 flex-1 overflow-hidden rounded-full bg-lagoon-wash">
             <div
-              className="h-full rounded-full bg-lagoon-ink transition-all"
+              className="h-full rounded-full bg-lagoon transition-all"
               style={{ width: `${localItems.length ? (doneCount / localItems.length) * 100 : 0}%` }}
             />
           </div>
@@ -248,7 +249,7 @@ export function ChecklistClient({
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={() => handleDrop(item)}
                     className={cn(
-                      "flex flex-wrap items-center gap-2 rounded-md border border-line/60 bg-card px-2 py-2",
+                      "flex min-h-11 flex-wrap items-center gap-2 rounded-md border border-line/60 bg-card px-2 py-1.5",
                       dragId === item.id && "opacity-40",
                     )}
                   >
@@ -276,23 +277,23 @@ export function ChecklistClient({
                           ),
                         )
                       }
-                      className="size-4 accent-lagoon-ink"
+                      className="size-5 shrink-0 rounded-sm accent-lagoon-ink"
                       aria-label={`${t("checklist.doneAria")} ${item.title}`}
                     />
                     <span
                       className={cn(
-                        "min-w-0 flex-1 text-sm",
+                        "min-w-0 flex-1 text-body",
                         item.done ? "text-slate line-through" : "text-ink",
                       )}
                     >
                       {item.title}
                       {item.quantity ? (
-                        <span className="ml-1.5 rounded-full bg-citron/15 px-1.5 py-0.5 text-[0.65rem] font-medium text-mist">
-                          × {item.quantity}
+                        <span className="ml-1.5 rounded-sm bg-wash px-1.5 py-0.5 font-mono text-label text-mist uppercase tabular-nums">
+                          {item.quantity}
                         </span>
                       ) : null}
                       {item.eventTitle ? (
-                        <span className="ml-1.5 rounded-full bg-citron/15 px-2 py-0.5 text-[0.65rem] text-mist">
+                        <span className="ml-1.5 rounded-sm bg-wash px-2 py-0.5 font-mono text-label text-mist uppercase">
                           {item.eventTitle}
                         </span>
                       ) : null}
@@ -305,7 +306,7 @@ export function ChecklistClient({
                           assignChecklistItem(tripId, item.id, e.target.value || null),
                         )
                       }
-                      className="rounded border border-line bg-card px-1.5 py-1 text-xs text-slate"
+                      className="rounded-md border border-line bg-card px-1.5 py-1 text-caption text-slate"
                       aria-label={t("checklist.assignAria")}
                     >
                       <option value="">{t("checklist.assignNobody")}</option>
@@ -324,7 +325,7 @@ export function ChecklistClient({
                             deleteChecklistItem(tripId, item.id, item.event_id ?? undefined),
                           )
                         }
-                        className="text-slate hover:text-lagoon-ink"
+                        className="rounded-sm text-slate transition-colors outline-none hover:text-berry-ink focus-visible:ring-2 focus-visible:ring-citron"
                         aria-label={`${t("checklist.removePrefix")} ${item.title} ${t("checklist.removeSuffix")}`}
                       >
                         <Trash2 className="size-4" aria-hidden="true" />
