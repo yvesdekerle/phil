@@ -73,11 +73,11 @@ export default async function TimelinePage({ params }: { params: Promise<{ tripI
   });
   const todayKey = eventDayKey(new Date().toISOString(), trip.default_timezone);
   const todayIdx = days.findIndex((d) => d.key === todayKey);
-  // Filets verticaux entre les jours (V06c) — la zone sous la colonne des
-  // noms est recouverte par sa cellule sticky opaque.
+  // Filets verticaux entre les jours (V06c, resserré V07b) : peints sur la
+  // piste seulement — peints sur toute la rangée, le motif répétitif débordait
+  // sous la colonne des noms (trait fantôme à 65 px, artefacts au scroll).
   const dayGrid = {
-    backgroundImage: `repeating-linear-gradient(to right, ${palette.line} 0, ${palette.line} 1px, transparent 1px, transparent ${DAY_WIDTH}px)`,
-    backgroundPosition: `${LABEL_W}px 0`,
+    backgroundImage: `repeating-linear-gradient(to right, transparent 0, transparent ${DAY_WIDTH - 1}px, ${palette.line} ${DAY_WIDTH - 1}px, ${palette.line} ${DAY_WIDTH}px)`,
   } as const;
 
   const spanOf = (e: TripEvent) => {
@@ -241,31 +241,41 @@ export default async function TimelinePage({ params }: { params: Promise<{ tripI
                 }
                 return (
                   <div key={lane} className="border-b border-line last:border-b-0">
-                    <p className="sticky left-0 z-20 w-fit px-3 pt-2 pb-1 font-mono text-label text-mist uppercase">
-                      {t(`events.type.${lane}`)}
-                    </p>
+                    {/* V07b : cellule opaque pleine largeur — la colonne des
+                        noms reste un bandeau continu, rien ne glisse dessous. */}
+                    <div
+                      className="sticky left-0 z-20 border-r border-line bg-card px-3 pt-2 pb-1"
+                      style={{ width: LABEL_W }}
+                    >
+                      <p className="font-mono text-label text-mist uppercase">
+                        {t(`events.type.${lane}`)}
+                      </p>
+                    </div>
                     {laneEvents.map(({ e, startIdx, span }) => (
-                      <div key={e.id} className="flex items-center py-0.5" style={dayGrid}>
+                      <div key={e.id} className="flex">
                         <div
-                          className="sticky left-0 z-20 flex shrink-0 items-center self-stretch border-r border-line bg-card px-3"
+                          className="sticky left-0 z-20 flex shrink-0 items-center border-r border-line bg-card px-3"
                           style={{ width: LABEL_W }}
                           title={e.title}
                         >
-                          <span className="truncate text-caption font-semibold text-slate">
+                          <span className="truncate text-body font-semibold text-slate">
                             {e.title}
                           </span>
                         </div>
-                        <div className="relative h-8" style={{ width: dayCount * DAY_WIDTH }}>
+                        <div
+                          className="relative h-9"
+                          style={{ width: dayCount * DAY_WIDTH, ...dayGrid }}
+                        >
                           <Link
                             href={`/trips/${tripId}/events/${e.id}`}
                             className={cn(
-                              "absolute inset-y-0.5 flex items-center overflow-hidden rounded-md px-2.5 outline-none focus-visible:ring-2 focus-visible:ring-citron",
+                              "absolute inset-y-1 flex items-center overflow-hidden rounded-md px-2.5 outline-none focus-visible:ring-2 focus-visible:ring-citron",
                               e.type === "TRANSPORT" &&
-                                "bg-ink-deep font-mono text-label text-white tabular-nums",
+                                "bg-ink-deep font-mono text-data text-white tabular-nums",
                               e.type === "LODGING" &&
-                                "border border-lagoon-soft bg-lagoon-wash text-caption font-semibold text-lagoon-ink",
+                                "border border-lagoon-soft bg-lagoon-wash text-body font-semibold text-lagoon-ink",
                               e.type === "ACTIVITY" &&
-                                "border border-line bg-card text-caption font-semibold text-ink transition-shadow hover:shadow-card",
+                                "border border-line bg-card text-body font-semibold text-ink transition-shadow hover:shadow-card",
                             )}
                             style={{ left: startIdx * DAY_WIDTH + 2, width: span * DAY_WIDTH - 4 }}
                           >
