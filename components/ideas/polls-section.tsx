@@ -103,7 +103,7 @@ export function PollsSection({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-medium text-ink">{t("ideas.pollSectionTitle")}</h2>
+        <h2 className="text-heading text-ink">{t("ideas.pollSectionTitle")}</h2>
         <Button type="button" variant="outline" size="sm" onClick={() => setShowForm(!showForm)}>
           {showForm ? t("ideas.cancel") : t("ideas.new")}
         </Button>
@@ -143,7 +143,7 @@ export function PollsSection({
             {formPending ? t("ideas.opening") : t("ideas.launchPoll")}
           </Button>
           {state.status === "error" ? (
-            <p className="text-xs text-lagoon-ink">{state.message}</p>
+            <p className="text-caption text-berry-ink">{state.message}</p>
           ) : null}
         </form>
       ) : null}
@@ -167,13 +167,13 @@ export function PollsSection({
           >
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
-                <p className="text-sm font-medium text-ink">{poll.question}</p>
-                <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-slate">
+                <p className="text-subhead text-ink">{poll.question}</p>
+                <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-caption text-ghost">
                   <span>
                     {voters} {voters > 1 ? t("ideas.voteMany") : t("ideas.voteOne")}
                   </span>
                   {poll.allow_multiple ? (
-                    <span className="rounded-full bg-citron/15 px-1.5 py-0.5 text-[0.65rem] text-mist">
+                    <span className="rounded-sm bg-wash px-1.5 py-0.5 font-mono text-label text-slate uppercase">
                       {t("ideas.pollAllowMultiple")}
                     </span>
                   ) : null}
@@ -217,7 +217,7 @@ export function PollsSection({
                     type="button"
                     disabled={pending}
                     onClick={() => startTransition(() => deletePoll(tripId, poll.id))}
-                    className="text-slate transition-colors hover:text-lagoon-ink"
+                    className="text-slate transition-colors hover:text-berry-ink"
                     aria-label={t("ideas.pollDelete")}
                     title={t("ideas.pollDelete")}
                   >
@@ -246,35 +246,62 @@ export function PollsSection({
                   const mine = myVotes.includes(i);
                   return (
                     <div key={option} className="flex flex-col gap-0.5">
+                      {/* L5a — option : rond 50 % (réservé au vote simple des
+                          sondages), sélection lagoon-wash + bordure lagoon-soft,
+                          piste de résultat sous le libellé. */}
                       <button
                         type="button"
                         disabled={closed}
                         onClick={() => vote(poll.id, i)}
+                        aria-pressed={mine}
                         className={cn(
-                          "relative overflow-hidden rounded-md border px-3 py-1.5 text-left text-sm transition-colors",
+                          "flex flex-col gap-1.5 rounded-lg border p-2.5 text-left transition-colors outline-none focus-visible:ring-2 focus-visible:ring-citron focus-visible:ring-offset-2 focus-visible:ring-offset-sand",
                           mine
-                            ? "border-lagoon-ink text-ink"
-                            : "border-line text-slate hover:text-ink",
+                            ? "border-[1.5px] border-lagoon-soft bg-lagoon-wash"
+                            : "border-line bg-card hover:bg-wash",
                           closed && "cursor-default",
                         )}
                       >
-                        <span
-                          className="absolute inset-y-0 left-0 bg-lagoon-ink/10"
-                          style={{ width: `${pct}%` }}
-                          aria-hidden="true"
-                        />
-                        <span className="relative flex justify-between">
-                          <span>
+                        <span className="flex w-full items-center gap-2.5">
+                          <span
+                            aria-hidden="true"
+                            className={cn(
+                              "flex size-4.5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold",
+                              mine ? "bg-lagoon text-white" : "border-[1.5px] border-ghost",
+                            )}
+                          >
+                            {mine ? "✓" : ""}
+                          </span>
+                          <span
+                            className={cn(
+                              "min-w-0 flex-1 truncate text-body text-ink",
+                              mine ? "font-bold" : "font-semibold",
+                            )}
+                          >
                             {option}
-                            {mine ? " ✓" : ""}
                           </span>
-                          <span className="text-xs">
-                            {count} · {pct}%
+                          <span className="shrink-0 font-mono text-caption font-bold text-ink tabular-nums">
+                            {count}
                           </span>
+                        </span>
+                        <span
+                          className={cn(
+                            "block h-2 w-full overflow-hidden rounded-[4px]",
+                            mine ? "bg-white" : "bg-wash",
+                          )}
+                        >
+                          <span
+                            aria-hidden="true"
+                            className={cn(
+                              "block h-full rounded-[4px]",
+                              mine ? "bg-lagoon" : "bg-ghost",
+                            )}
+                            style={{ width: `${pct}%` }}
+                          />
                         </span>
                       </button>
                       {count > 0 ? (
-                        <p className="px-1 text-[0.7rem] text-slate">
+                        <p className="px-1 text-caption text-slate">
                           {optionVotes.map((v) => nameOf(v.user_id)).join(", ")}
                         </p>
                       ) : null}
@@ -343,7 +370,7 @@ function PollEditForm({
           {t("ideas.cancel")}
         </Button>
       </div>
-      {error ? <p className="text-xs text-lagoon-ink">{error}</p> : null}
+      {error ? <p className="text-caption text-berry-ink">{error}</p> : null}
     </form>
   );
 }

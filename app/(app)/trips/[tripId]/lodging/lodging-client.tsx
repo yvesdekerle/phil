@@ -75,8 +75,8 @@ function CandidateVotes({
       <div className="flex flex-wrap items-center gap-2">
         <span
           className={cn(
-            "rounded-full px-2 py-0.5 text-xs font-medium tabular-nums",
-            score > 0 ? "bg-lagoon-ink/10 text-lagoon-ink" : "bg-ink/10 text-slate",
+            "rounded-sm px-2 py-0.5 font-mono text-label uppercase tabular-nums",
+            score > 0 ? "bg-lagoon-wash text-lagoon-ink" : "bg-wash text-slate",
           )}
           title={`${votes.length} ${t("lodging.reviews")}`}
         >
@@ -94,10 +94,10 @@ function CandidateVotes({
               value={rating}
               disabled={pending}
               className={cn(
-                "rounded-full border px-2.5 py-0.5 text-xs transition-colors",
+                "rounded-full border px-2.5 py-1 text-ui transition-colors outline-none focus-visible:ring-2 focus-visible:ring-citron focus-visible:ring-offset-2 focus-visible:ring-offset-sand",
                 myVote?.rating === rating
-                  ? "border-lagoon-ink bg-lagoon-ink text-card"
-                  : "border-line text-slate hover:text-ink",
+                  ? "border-ink bg-ink text-white"
+                  : "border-line text-slate hover:bg-wash hover:text-ink",
               )}
             >
               {labels[rating]}
@@ -125,7 +125,7 @@ function CandidateVotes({
       {votes.some((v) => v.comment || v.userId !== myId) ? (
         <ul className="mt-1.5 flex flex-col gap-0.5">
           {votes.map((v) => (
-            <li key={v.userId} className="text-xs text-slate">
+            <li key={v.userId} className="text-caption text-slate">
               <span className="font-medium text-ink">
                 {v.userId === myId ? t("lodging.you") : v.name}
               </span>{" "}
