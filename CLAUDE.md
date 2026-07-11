@@ -72,13 +72,13 @@ Le développement suit un cycle strict par ticket, piloté par `TODO.md` (source
 
 ## Identité visuelle et ton
 
-**Nom du repo GitHub suggéré** : `phil` ou `phil-app`
+**Design system : « Lagune vive » v1** (refonte PHIL-V01, 2026-07-11). Source de vérité : `tmp/design_phil_v2/README.md` §8 (+ prototypes/déclinaisons `.dc.html`). Les tokens vivent dans `app/globals.css` (`:root` + `@theme inline`) et leur miroir JS `lib/ui/colors.ts`, verrouillés par `tests/unit/palette.test.ts`.
 
-**Pistes de branding** (à affiner avec le design) :
-- Avatar / mascotte inspirée de Phileas Fogg : silhouette stylisée avec chapeau haut-de-forme, monocle ou gilet
-- Logo alternatif : un globe avec une trajectoire de voyage qui forme un "P"
-- Palette : tons chauds et nobles (bordeaux profond, beige parchemin, bleu nuit) plutôt que la palette tech bleu-blanc générique
-- Typographie : un serif élégant pour les titres (rappel du XIXe siècle) + sans-serif moderne pour le corps
+- **Couleurs — 18 rôles, aucun autre hex autorisé** : encres `ink`/`ink-deep`, textes `slate`/`mist` (`ghost` = décor seulement), fonds `sand`/`card`/`wash`, filets `line`, lavis `citron-wash`/`lagoon-wash`/`berry-wash`, accents `lagoon` (graphique, jamais sous du texte blanc), `lagoon-ink` (CTA/liens, hover `lagoon-hover`), `lagoon-soft` (texte secondaire sur fonds sombres), `citron` (indicateur actif, badge capitaine), `berry` (point de notification/social), `berry-ink` (destructif/erreurs).
+- **Typo** : Schibsted Grotesk (400/600/700/800) partout + Spline Sans Mono (données, dates, montants, labels caps, `tabular-nums`). Échelle 9 styles en tokens : `text-display/title/heading/subhead/body/ui/caption/data/label`. Interdits : graisse 500, Schibsted < 11 px.
+- **Espacement** grille 4 px (crans 4→40) ; **rayons** `rounded-sm/md/lg/xl` = 4/8/12/20 + pill ; **ombres** `shadow-card/float/modal/sheet/glow` (une carte a bordure OU ombre, jamais les deux).
+- **Composants** B1-B12 dans `components/ui/` (button, card, input, badge mono, chip, checkbox carrée — le rond 50 % est réservé au vote simple des sondages —, fab, sheet, segmented-control, list-row, page-header, skeleton, empty-state). États systématiques : hover, focus anneau `citron` 2/offset 2, active `.98`, disabled `.4`. Icônes **Lucide stroke 1.75** (16/20/24). Cibles tactiles ≥ 44 px.
+- **Nav** : mobile = barres basses (transverse Voyages·Coffre·Profil ; voyage Programme·Carte·Bourse·Plus, soulignement citron sous le label, point berry sans compteur) ; desktop ≥ 1024 = sidebar sombre 220 (marque + voyage courant + rubriques à plat) + contenu max 1200.
 - Clins d'œil discrets au roman dans les états vides : "Phil n'a encore aucun voyage en tête... 80 jours, ça commence par un premier pas", "Aucun événement aujourd'hui — même Phileas prenait des pauses"
 
 **Ton de la microcopy** :

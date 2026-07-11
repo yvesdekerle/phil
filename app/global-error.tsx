@@ -75,7 +75,7 @@ export default function GlobalError({
         }}
       >
         <h1 style={{ fontSize: "1.5rem", fontStyle: "italic", margin: 0 }}>{m.title}</h1>
-        <p style={{ fontSize: "0.9rem", color: "#6b5d4a", maxWidth: "24rem" }}>{m.body}</p>
+        <p style={{ fontSize: "0.9rem", color: palette.slate, maxWidth: "24rem" }}>{m.body}</p>
         <button
           type="button"
           onClick={reset}

@@ -154,7 +154,7 @@ export default async function TripMapPage({
       lng: p.lng,
       title: p.name,
       subtitle: p.note ?? t(`places.cat.${p.category}`),
-      color: "#c2410c",
+      color: palette.berry,
       noPath: true,
     });
   }
