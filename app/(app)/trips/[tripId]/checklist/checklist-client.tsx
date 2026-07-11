@@ -249,7 +249,10 @@ export function ChecklistClient({
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={() => handleDrop(item)}
                     className={cn(
-                      "flex min-h-11 flex-wrap items-center gap-2 rounded-md border border-line/60 bg-card px-2 py-1.5",
+                      "flex min-h-11 flex-wrap items-center gap-2 rounded-md border px-2 py-1.5",
+                      // V06g : coché = lavis lagune bien visible (le barré se
+                      // lisait « je ne le prends plus »).
+                      item.done ? "border-lagoon-soft bg-lagoon-wash" : "border-line/60 bg-card",
                       dragId === item.id && "opacity-40",
                     )}
                   >
@@ -283,7 +286,7 @@ export function ChecklistClient({
                     <span
                       className={cn(
                         "min-w-0 flex-1 text-body",
-                        item.done ? "text-slate line-through" : "text-ink",
+                        item.done ? "font-semibold text-lagoon-ink" : "text-ink",
                       )}
                     >
                       {item.title}

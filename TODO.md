@@ -1209,7 +1209,7 @@ Premier passage d'Yves sur le redesign en desktop (`tmp/design_phil_v2/retour_ph
 - [x] V06d — Carte : vue entière par défaut (re-fit des bounds après le premier layout — l'île était coupée ; le re-fit s'arrête dès que l'utilisateur touche la carte) + **fix des marqueurs éparpillés** au clic sur un lieu ou en vue jour (course d'animations : chaque clic de focus recréait `shownMarkers`, ce qui reconstruisait le layer et relançait un fitBounds animé pendant le setView ; effets marqueurs/focus séparés + fit sans animation + liste mémoïsée). *(fait le 2026-07-11)*
 - [x] V06e — Documents : afficher **l'événement rattaché** sur chaque ligne (jointure `event_documents`, chip mono lavis lagune) ; « ajouté par » réduit au prénom (nom complet en tooltip). *(fait le 2026-07-11)*
 - [x] V06f — Miam : **Repas avant Courses** (ordre des onglets + vue par défaut). *(fait le 2026-07-11)*
-- [ ] V06g — Valise : l'item coché passe en **lavis lagune** (fond `lagoon-wash`, texte `lagoon-ink`) — plus de texte barré (« barrer fait penser "je prends plus" »).
+- [x] V06g — Valise : l'item coché passe en **lavis lagune** (fond `lagoon-wash`, bordure `lagoon-soft`, texte `lagoon-ink` semi-gras) — plus de texte barré (« barrer fait penser "je prends plus" »). *(fait le 2026-07-11)*
 - [ ] V06h — À spécifier avec Yves : le bloc « Avant le départ » n'a pas sa place seule sur le Programme (« sûrement à mettre ailleurs ») ; idée d'une vraie **checklist pré-départ** (« vérifier que tout est ok avant le départ »). À articuler avec l'onglet « Avant le départ » qui existe déjà dans la Valise. Rien de codé tant que le où/quoi n'est pas tranché.
 
 ---
