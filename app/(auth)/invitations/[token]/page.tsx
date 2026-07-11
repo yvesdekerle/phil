@@ -62,7 +62,7 @@ export default async function InvitationPage({ params }: { params: Promise<{ tok
 
   return (
     <Shell label={label}>
-      <h1 className="font-sans text-2xl text-ink italic">{trip.name}</h1>
+      <h1 className="text-heading text-ink">{trip.name}</h1>
       <p className="mt-2 text-sm text-slate">
         {trip.destination} · {formatDateRange(trip.start_date, trip.end_date)}
       </p>

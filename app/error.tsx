@@ -23,7 +23,7 @@ export default function RouteError({
 
   return (
     <main className="mx-auto flex max-w-md flex-1 flex-col items-center justify-center gap-4 px-4 py-20 text-center">
-      <p className="font-sans text-2xl text-ink italic">{t("error.title")}</p>
+      <p className="text-heading text-ink">{t("error.title")}</p>
       <p className="text-sm text-slate">{t("error.body")}</p>
       <Button type="button" onClick={reset}>
         {t("error.retry")}

@@ -70,7 +70,7 @@ export default async function PublicTripPage({ params }: { params: Promise<{ tok
   return (
     <main className="mx-auto w-full max-w-2xl px-4 py-10">
       <p className="text-xs text-mist uppercase tracking-widest">{t("public.eyebrow")}</p>
-      <h1 className="mt-1 font-sans text-3xl text-ink">{trip.name}</h1>
+      <h1 className="mt-1 text-title text-ink">{trip.name}</h1>
       <p className="mt-1 text-sm text-slate">
         {trip.destination} · {dateRange}
       </p>

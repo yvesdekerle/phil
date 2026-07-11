@@ -13,11 +13,11 @@ export default async function LegalPage() {
       <Link href="/" className="text-sm text-slate underline underline-offset-4">
         {t("legal.back")}
       </Link>
-      <h1 className="mt-4 font-sans text-3xl text-ink">{t("legal.title")}</h1>
+      <h1 className="mt-4 text-title text-ink">{t("legal.title")}</h1>
 
       <div className="mt-6 flex flex-col gap-6 text-sm leading-relaxed text-slate">
         <section>
-          <h2 className="font-sans text-xl text-ink">{t("legal.publisher")}</h2>
+          <h2 className="text-heading text-ink">{t("legal.publisher")}</h2>
           <p className="mt-2">
             {t("legal.publisherBody")}
             <a href="mailto:yves.dekerle@gmail.com" className="underline underline-offset-4">
@@ -28,7 +28,7 @@ export default async function LegalPage() {
         </section>
 
         <section>
-          <h2 className="font-sans text-xl text-ink">{t("legal.hosting")}</h2>
+          <h2 className="text-heading text-ink">{t("legal.hosting")}</h2>
           <p className="mt-2">
             {t("legal.hostingApp")}
             <br />
@@ -37,12 +37,12 @@ export default async function LegalPage() {
         </section>
 
         <section>
-          <h2 className="font-sans text-xl text-ink">{t("legal.access")}</h2>
+          <h2 className="text-heading text-ink">{t("legal.access")}</h2>
           <p className="mt-2">{t("legal.accessBody")}</p>
         </section>
 
         <section>
-          <h2 className="font-sans text-xl text-ink">{t("legal.personalData")}</h2>
+          <h2 className="text-heading text-ink">{t("legal.personalData")}</h2>
           <p className="mt-2">
             {t("legal.personalDataPre")}
             <Link href="/privacy" className="underline underline-offset-4">

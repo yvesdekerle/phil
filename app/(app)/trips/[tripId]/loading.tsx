@@ -1,36 +1,30 @@
-const TAB_KEYS = ["a", "b", "c", "d", "e", "f", "g"];
+import { Skeleton } from "@/components/ui/skeleton";
 
 /**
- * Squelette de chargement d'un voyage (PHIL-R19) — affiché instantanément
- * pendant que le layout + la page se résolvent (couverture, onglets, requêtes).
- * Améliore la latence perçue sur base distante.
+ * Squelette de chargement d'un voyage (PHIL-R19, Lagune vive) — silhouette du
+ * header compact + bande de dates + cartes du jour, en blocs wash r-8.
  */
+const DAY_KEYS = ["a", "b", "c", "d", "e", "f", "g"];
+
 export default function TripLoading() {
   return (
-    <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6">
-      <div className="animate-pulse">
-        <div className="overflow-hidden rounded-lg border border-line bg-card">
-          <div className="h-40 bg-line/30 sm:h-52" />
-          <div className="flex items-end justify-between gap-3 px-5 py-4">
-            <div className="space-y-2">
-              <div className="h-7 w-48 rounded bg-line/40" />
-              <div className="h-4 w-64 rounded bg-line/25" />
-            </div>
-            <div className="h-6 w-20 rounded-full bg-line/25" />
-          </div>
-        </div>
+    <main
+      className="mx-auto w-full max-w-content flex-1 px-4 py-2 lg:px-8 lg:py-6"
+      aria-busy="true"
+    >
+      <Skeleton className="h-3 w-28" />
+      <Skeleton className="mt-2 h-7 w-40" />
 
-        <div className="mt-2 flex gap-4 overflow-hidden rounded-lg border border-line bg-card px-5 py-3">
-          {TAB_KEYS.map((k) => (
-            <div key={k} className="h-5 w-16 shrink-0 rounded bg-line/25" />
-          ))}
-        </div>
+      <div className="mt-5 flex gap-2 overflow-hidden">
+        {DAY_KEYS.map((k) => (
+          <Skeleton key={k} className="h-16 w-11 shrink-0 rounded-lg" />
+        ))}
+      </div>
 
-        <div className="mt-6 space-y-3">
-          <div className="h-24 rounded-lg bg-line/20" />
-          <div className="h-24 rounded-lg bg-line/20" />
-          <div className="h-24 rounded-lg bg-line/20" />
-        </div>
+      <div className="mt-4 flex flex-col gap-2.5">
+        <Skeleton className="h-20 rounded-lg" />
+        <Skeleton className="h-20 rounded-lg" />
+        <Skeleton className="h-20 rounded-lg" />
       </div>
     </main>
   );

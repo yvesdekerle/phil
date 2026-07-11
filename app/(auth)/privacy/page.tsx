@@ -9,7 +9,7 @@ export async function generateMetadata() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="mt-8">
-      <h2 className="font-sans text-xl text-ink">{title}</h2>
+      <h2 className="text-heading text-ink">{title}</h2>
       <div className="mt-2 flex flex-col gap-2 text-sm leading-relaxed text-slate">{children}</div>
     </section>
   );
@@ -22,7 +22,7 @@ export default async function PrivacyPage() {
       <Link href="/" className="text-sm text-slate underline underline-offset-4">
         {t("privacy.back")}
       </Link>
-      <h1 className="mt-4 font-sans text-3xl text-ink">{t("privacy.title")}</h1>
+      <h1 className="mt-4 text-title text-ink">{t("privacy.title")}</h1>
       <p className="mt-2 text-sm text-slate">{t("privacy.intro")}</p>
 
       <Section title={t("privacy.responsibleTitle")}>

@@ -69,13 +69,13 @@ export default function OfflinePage() {
 
   return (
     <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8">
-      <h1 className="font-sans text-3xl text-ink">Carnet hors ligne</h1>
+      <h1 className="text-title text-ink">Carnet hors ligne</h1>
       <p className="mt-1 mb-6 text-sm text-slate">
         Ce que Phil a rangé dans la malle avant de perdre le réseau.
       </p>
 
       {openError ? (
-        <p className="mb-4 rounded-md border border-lagoon-ink/30 bg-lagoon-ink/5 px-3 py-2 text-sm text-lagoon-ink">
+        <p className="mb-4 rounded-md border border-berry-ink/30 bg-berry-wash px-3 py-2 text-body text-berry-ink">
           {openError}
         </p>
       ) : null}
@@ -84,7 +84,7 @@ export default function OfflinePage() {
         <p className="text-sm text-slate">Ouverture de la malle…</p>
       ) : trips.length === 0 && vaultDocs.length === 0 ? (
         <div className="rounded-lg border border-dashed border-line bg-card/60 px-6 py-14 text-center">
-          <p className="font-sans text-xl text-ink italic">La malle est vide</p>
+          <p className="text-subhead text-ink">La malle est vide</p>
           <p className="mt-2 text-sm text-slate">
             Ouvre tes voyages quand tu as du réseau, ou utilise « Préparer pour offline » dans les
             paramètres d'un voyage.
@@ -94,7 +94,7 @@ export default function OfflinePage() {
         <div className="flex flex-col gap-8">
           {trips.map(({ trip, events, documents, ideas, meta }) => (
             <section key={trip.id} className="rounded-lg border border-line bg-card px-5 py-4">
-              <h2 className="font-sans text-2xl text-ink">{trip.name}</h2>
+              <h2 className="text-heading text-ink">{trip.name}</h2>
               <p className="text-sm text-slate">
                 {trip.destination} · {formatDateRange(trip.start_date, trip.end_date, dfLocale)}
               </p>
@@ -187,7 +187,7 @@ export default function OfflinePage() {
 
       {vaultDocs.length > 0 ? (
         <section className="mt-8 rounded-lg border border-line bg-card px-5 py-4">
-          <h2 className="font-sans text-2xl text-ink">Coffre</h2>
+          <h2 className="text-heading text-ink">Coffre</h2>
           <p className="text-sm text-slate">
             Tes documents chiffrés — déchiffrés sur cet appareil après Face ID / empreinte.
           </p>

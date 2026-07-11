@@ -14,40 +14,29 @@ export default async function LoginPage({
   return (
     <main className="flex flex-1 flex-col items-center justify-center px-4 py-12">
       <div className="animate-rise w-full max-w-sm">
-        {/* Billet d'embarquement */}
-        <div className="relative rounded-lg border border-line bg-card px-8 pt-10 pb-8 shadow-[0_2px_16px_rgba(15,47,56,0.08)]">
-          {/* Encoches latérales du billet */}
-          <span
-            aria-hidden="true"
-            className="absolute top-1/2 -left-2.5 size-5 -translate-y-1/2 rounded-full border-r border-line bg-sand"
-          />
-          <span
-            aria-hidden="true"
-            className="absolute top-1/2 -right-2.5 size-5 -translate-y-1/2 rounded-full border-l border-line bg-sand"
-          />
-
-          <header className="text-center">
-            <p className="font-sans text-5xl text-ink">Phil</p>
-            <p className="mt-3 text-[0.65rem] font-medium tracking-[0.18em] text-mist uppercase">
+        <div className="rounded-xl bg-card px-8 pt-10 pb-8 text-center shadow-float">
+          <header>
+            <p className="text-4xl font-extrabold tracking-tight text-ink">Phil</p>
+            <p className="mt-2 font-mono text-label tracking-widest text-mist uppercase">
               {t("login.subtitle")}
             </p>
           </header>
 
-          <div aria-hidden="true" className="my-7 border-t border-dashed border-line" />
+          <div aria-hidden="true" className="my-7 border-t border-wash" />
 
-          <h1 className="text-center font-sans text-2xl text-ink italic">{t("login.welcome")}</h1>
-          <p className="mt-2 mb-7 text-center text-sm text-slate">{t("login.connectPrompt")}</p>
+          <h1 className="text-heading text-ink">{t("login.welcome")}</h1>
+          <p className="mt-1.5 mb-7 text-body text-slate">{t("login.connectPrompt")}</p>
 
           <SignInButton next={safeNext} />
 
           {error === "auth" ? (
-            <p role="alert" className="mt-4 text-center text-sm text-lagoon-ink">
+            <p role="alert" className="mt-4 text-caption text-berry-ink">
               {t("login.authError")}
             </p>
           ) : null}
         </div>
 
-        <p className="mt-6 text-center text-xs text-slate">{t("login.tagline")}</p>
+        <p className="mt-6 text-center text-caption text-slate">{t("login.tagline")}</p>
       </div>
     </main>
   );
