@@ -58,7 +58,8 @@ export function MiamClient({
 }) {
   const t = useT();
   const locale = useLocale();
-  const [view, setView] = useState<"shopping" | "meals">("shopping");
+  // V06f : « on veut Repas en 1er » — les repas d'abord, les courses ensuite.
+  const [view, setView] = useState<"shopping" | "meals">("meals");
   const [, mealAction] = useActionState<MiamState, FormData>(addMeal, { status: "idle" });
   const [, shopAction] = useActionState<MiamState, FormData>(addShoppingItem, { status: "idle" });
   const [pending, startTransition] = useTransition();
@@ -83,7 +84,7 @@ export function MiamClient({
         className="inline-flex w-fit items-center gap-1 rounded-full bg-wash p-1"
         aria-label={t("miam.viewsAria")}
       >
-        {(["shopping", "meals"] as const).map((v) => (
+        {(["meals", "shopping"] as const).map((v) => (
           <button
             key={v}
             type="button"
