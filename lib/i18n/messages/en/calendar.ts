@@ -4,6 +4,12 @@ export const calendarEn = {
     addEvent: "Add an event",
     backToCalendar: "← Back to the calendar",
     today: "Today",
+    tomorrow: "Tomorrow",
+    freeDay: "Free day",
+    localTime: "Local time",
+    docs: "{n} docs",
+    voteCta: "Vote",
+    ideasWaiting: "Ideas are waiting for your votes",
     byRoad: "by road",
     viewToggle: {
       calendar: "Calendar",

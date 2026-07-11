@@ -56,7 +56,7 @@ export function QuickAdd({ tripId, defaultDate }: { tripId: string; defaultDate:
         {t("calendar.quickAdd.add")}
       </Button>
       {state.status === "error" ? (
-        <p className="w-full text-xs text-lagoon-ink">{state.message}</p>
+        <p className="w-full text-caption text-berry-ink">{state.message}</p>
       ) : null}
     </form>
   );

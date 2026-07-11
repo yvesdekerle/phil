@@ -1,21 +1,11 @@
 import { notFound } from "next/navigation";
 import { TripSidebar, TripTabBar } from "@/components/layout/trip-nav";
+import { TripPageHeader } from "@/components/layout/trip-page-header";
 import { TripOfflineSync } from "@/components/offline/trip-sync";
-import { CoverImage } from "@/components/trips/cover-image";
-import { Badge } from "@/components/ui/badge";
 import { getSessionUser } from "@/lib/auth/session";
-import { getDateFnsLocale, getIntlLocale, getT } from "@/lib/i18n/server";
+import { getIntlLocale, getT } from "@/lib/i18n/server";
 import { getPendingByTrip } from "@/lib/notifications/pending-server";
 import { createClient } from "@/lib/supabase/server";
-import { formatDateRange } from "@/lib/trips/format";
-import { tripStatus } from "@/lib/trips/status";
-
-const STATUS_VARIANTS: Record<string, "lagoon" | "citron" | "neutral"> = {
-  en_cours: "lagoon",
-  a_venir: "citron",
-  passe: "neutral",
-  archive: "neutral",
-};
 
 export default async function TripLayout({
   children,
@@ -33,8 +23,6 @@ export default async function TripLayout({
     // RLS : voyage inexistant ou visiteur non participant — même réponse.
     notFound();
   }
-
-  const status = tripStatus(trip);
 
   // PHIL-R19 : les deux lots de requêtes ne dépendent que de user+trip → en
   // parallèle plutôt qu'en série (la base distante rend chaque aller-retour cher).
@@ -54,7 +42,6 @@ export default async function TripLayout({
   const pending = pendingMap?.get(tripId) ?? null;
   const pendingProps = pending ? { ideas: pending.ideas, polls: pending.polls } : undefined;
   const t = await getT();
-  const dfLocale = await getDateFnsLocale();
   const il = await getIntlLocale();
   const passportExpiry = passports?.[0]?.expires_at ?? null;
   let passportWarning: { level: "danger" | "warn"; text: string } | null = null;
@@ -93,37 +80,8 @@ export default async function TripLayout({
               {passportWarning.text}
             </div>
           ) : null}
-          <header className="overflow-hidden rounded-lg border border-line bg-card print:hidden">
-            <div className="relative h-40 bg-ink-deep sm:h-52">
-              {trip.cover_image_url ? (
-                <CoverImage
-                  src={trip.cover_image_url}
-                  sizes="(max-width: 1024px) 100vw, 980px"
-                  className="object-cover"
-                  priority
-                  fallbackChar={trip.destination.charAt(0).toUpperCase()}
-                  fallbackClassName="text-6xl font-extrabold text-lagoon-soft"
-                />
-              ) : (
-                <div className="flex h-full items-center justify-center">
-                  <span className="text-6xl font-extrabold text-lagoon-soft">
-                    {trip.destination.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-              )}
-            </div>
-            <div className="flex flex-wrap items-end justify-between gap-3 px-4 py-4">
-              <div className="min-w-0">
-                <h1 className="text-title text-ink">{trip.name}</h1>
-                <p className="mt-1 font-mono text-data font-normal text-slate">
-                  {trip.destination} · {formatDateRange(trip.start_date, trip.end_date, dfLocale)}
-                </p>
-              </div>
-              <Badge variant={STATUS_VARIANTS[status]}>{t(`trips.status.${status}`)}</Badge>
-            </div>
-          </header>
-
-          <div className="py-6">{children}</div>
+          <TripPageHeader tripId={trip.id} tripName={trip.name} />
+          <div className="pb-6">{children}</div>
         </div>
       </div>
       <TripTabBar tripId={trip.id} pending={pendingProps} />

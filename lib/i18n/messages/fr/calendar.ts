@@ -4,6 +4,12 @@ export const calendarFr = {
     addEvent: "Ajouter un événement",
     backToCalendar: "← Retour au calendrier",
     today: "Aujourd'hui",
+    tomorrow: "Demain",
+    freeDay: "Journée libre",
+    localTime: "Heure locale",
+    docs: "{n} docs",
+    voteCta: "Voter",
+    ideasWaiting: "Des idées attendent vos votes",
     byRoad: "de route",
     viewToggle: {
       calendar: "Calendrier",
