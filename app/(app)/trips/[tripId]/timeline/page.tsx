@@ -6,18 +6,22 @@ import { eventDayKey, eventTime } from "@/lib/events/datetime";
 import type { TripEvent } from "@/lib/events/types";
 import { getDateFnsLocale, getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
+import { palette } from "@/lib/ui/colors";
 import { cn } from "@/lib/utils";
 
 /**
- * Timeline (PHIL-F03, refonte L2b/L2c) :
+ * Timeline (PHIL-F03, refonte L2b puis retour V06c) :
  * mobile — **ruban vertical multi-jours** : une rangée par jour (code 2
  * lettres + n° mono), rail du logement continu, chips d'événements qui
  * s'empilent (vols en livrée sombre mono), aujourd'hui lavé citron ;
- * desktop — **couloirs par catégorie** : 3 couloirs (Transport / Logement /
- * Activités) sur la grille des jours, le séjour entier sans scroller, la
- * villa en un seul bloc IN → OUT, colonne d'aujourd'hui lavée citron.
+ * desktop — **Gantt horizontal scrollable** : 155 px par jour, colonne des
+ * noms figée à gauche, en-tête des jours figé en haut, une ligne par
+ * événement (les couloirs compressés de L2c étaient illisibles sur un
+ * voyage long — retour d'Yves).
  */
 const LANES = ["TRANSPORT", "LODGING", "ACTIVITY"] as const;
+const DAY_WIDTH = 155; // px par jour — assez pour lire les libellés
+const LABEL_W = 220; // px de la colonne fixe des noms
 
 export default async function TimelinePage({ params }: { params: Promise<{ tripId: string }> }) {
   const { tripId } = await params;
@@ -68,6 +72,13 @@ export default async function TimelinePage({ params }: { params: Promise<{ tripI
     };
   });
   const todayKey = eventDayKey(new Date().toISOString(), trip.default_timezone);
+  const todayIdx = days.findIndex((d) => d.key === todayKey);
+  // Filets verticaux entre les jours (V06c) — la zone sous la colonne des
+  // noms est recouverte par sa cellule sticky opaque.
+  const dayGrid = {
+    backgroundImage: `repeating-linear-gradient(to right, ${palette.line} 0, ${palette.line} 1px, transparent 1px, transparent ${DAY_WIDTH}px)`,
+    backgroundPosition: `${LABEL_W}px 0`,
+  } as const;
 
   const spanOf = (e: TripEvent) => {
     const startIdx = differenceInCalendarDays(
@@ -188,86 +199,91 @@ export default async function TimelinePage({ params }: { params: Promise<{ tripI
             })}
           </div>
 
-          {/* Desktop — couloirs par catégorie (L2c) */}
-          <div className="relative hidden overflow-hidden rounded-lg border border-line bg-card lg:block">
-            {/* Colonne d'aujourd'hui lavée citron */}
-            {days.some((d) => d.key === todayKey) ? (
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-y-0 bg-citron/15"
-                style={{
-                  left: `calc(88px + ${days.findIndex((d) => d.key === todayKey)} * (100% - 88px) / ${dayCount})`,
-                  width: `calc((100% - 88px) / ${dayCount})`,
-                }}
-              />
-            ) : null}
-            {/* En-tête des jours */}
-            <div
-              className="relative grid border-b border-line"
-              style={{ gridTemplateColumns: `88px repeat(${dayCount}, minmax(0, 1fr))` }}
-            >
-              <div />
-              {days.map((day) => (
-                <div key={day.key} className="border-l border-wash py-1.5 text-center">
-                  <p className="font-mono text-label text-mist uppercase tabular-nums">
-                    {day.weekday}
-                  </p>
-                  <p className="font-mono text-data text-ink tabular-nums">{day.num}</p>
-                </div>
-              ))}
-            </div>
-            {LANES.map((lane) => {
-              const laneEvents = events
-                .filter((e) => e.type === lane)
-                .map((e) => ({ e, ...spanOf(e) }));
-              if (laneEvents.length === 0) {
-                return null;
-              }
-              return (
+          {/* Desktop — Gantt horizontal scrollable (V06c) */}
+          <div className="hidden max-h-[calc(100dvh-11rem)] overflow-auto rounded-lg border border-line bg-card lg:block">
+            <div className="relative" style={{ width: LABEL_W + dayCount * DAY_WIDTH }}>
+              {/* Colonne d'aujourd'hui lavée citron */}
+              {todayIdx >= 0 ? (
                 <div
-                  key={lane}
-                  className="relative grid items-start border-b border-wash py-1.5 last:border-b-0"
-                  style={{
-                    gridTemplateColumns: `88px repeat(${dayCount}, minmax(0, 1fr))`,
-                    gridAutoFlow: "row dense",
-                  }}
-                >
-                  <p className="px-3 pt-1.5 font-mono text-label text-mist uppercase">
-                    {t(`events.type.${lane}`)}
-                  </p>
-                  {laneEvents.map(({ e, startIdx, span }) => (
-                    <div
-                      key={e.id}
-                      className="min-w-0 px-0.5 py-0.5"
-                      style={{ gridColumn: `${startIdx + 2} / span ${span}` }}
-                    >
-                      {lane === "LODGING" ? (
-                        <Link
-                          href={`/trips/${tripId}/events/${e.id}`}
-                          className="block truncate rounded-md border border-lagoon-soft bg-lagoon-wash px-2 py-1.5 text-caption font-semibold text-lagoon-ink outline-none focus-visible:ring-2 focus-visible:ring-citron"
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-y-0 z-10 bg-citron/15"
+                  style={{ left: LABEL_W + todayIdx * DAY_WIDTH, width: DAY_WIDTH }}
+                />
+              ) : null}
+              {/* En-tête des jours — figé en haut, colonne des noms figée à gauche */}
+              <div className="sticky top-0 z-30 flex border-b border-line bg-card">
+                <div
+                  className="sticky left-0 z-40 shrink-0 border-r border-line bg-card"
+                  style={{ width: LABEL_W }}
+                />
+                {days.map((day) => (
+                  <div
+                    key={day.key}
+                    className={cn(
+                      "shrink-0 border-l border-wash py-1.5 text-center first-of-type:border-l-0",
+                      day.key === todayKey && "bg-citron/15",
+                    )}
+                    style={{ width: DAY_WIDTH }}
+                  >
+                    <p className="font-mono text-label text-mist uppercase tabular-nums">
+                      {day.weekday}
+                    </p>
+                    <p className="font-mono text-data text-ink tabular-nums">{day.num}</p>
+                  </div>
+                ))}
+              </div>
+              {LANES.map((lane) => {
+                const laneEvents = events
+                  .filter((e) => e.type === lane)
+                  .map((e) => ({ e, ...spanOf(e) }));
+                if (laneEvents.length === 0) {
+                  return null;
+                }
+                return (
+                  <div key={lane} className="border-b border-line last:border-b-0">
+                    <p className="sticky left-0 z-20 w-fit px-3 pt-2 pb-1 font-mono text-label text-mist uppercase">
+                      {t(`events.type.${lane}`)}
+                    </p>
+                    {laneEvents.map(({ e, startIdx, span }) => (
+                      <div key={e.id} className="flex items-center py-0.5" style={dayGrid}>
+                        <div
+                          className="sticky left-0 z-20 flex shrink-0 items-center self-stretch border-r border-line bg-card px-3"
+                          style={{ width: LABEL_W }}
+                          title={e.title}
                         >
-                          {e.title}
-                        </Link>
-                      ) : lane === "TRANSPORT" ? (
-                        <Link
-                          href={`/trips/${tripId}/events/${e.id}`}
-                          className="block truncate rounded-md bg-ink-deep px-2 py-1.5 font-mono text-label text-white tabular-nums outline-none focus-visible:ring-2 focus-visible:ring-citron"
-                        >
-                          ✈ {eventTime(e.starts_at, e.timezone)} {e.title}
-                        </Link>
-                      ) : (
-                        <Link
-                          href={`/trips/${tripId}/events/${e.id}`}
-                          className="block truncate rounded-md border border-line bg-card px-2 py-1.5 text-caption font-semibold text-ink outline-none hover:shadow-card focus-visible:ring-2 focus-visible:ring-citron"
-                        >
-                          {e.title} {eventTime(e.starts_at, e.timezone)}
-                        </Link>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              );
-            })}
+                          <span className="truncate text-caption font-semibold text-slate">
+                            {e.title}
+                          </span>
+                        </div>
+                        <div className="relative h-8" style={{ width: dayCount * DAY_WIDTH }}>
+                          <Link
+                            href={`/trips/${tripId}/events/${e.id}`}
+                            className={cn(
+                              "absolute inset-y-0.5 flex items-center overflow-hidden rounded-md px-2.5 outline-none focus-visible:ring-2 focus-visible:ring-citron",
+                              e.type === "TRANSPORT" &&
+                                "bg-ink-deep font-mono text-label text-white tabular-nums",
+                              e.type === "LODGING" &&
+                                "border border-lagoon-soft bg-lagoon-wash text-caption font-semibold text-lagoon-ink",
+                              e.type === "ACTIVITY" &&
+                                "border border-line bg-card text-caption font-semibold text-ink transition-shadow hover:shadow-card",
+                            )}
+                            style={{ left: startIdx * DAY_WIDTH + 2, width: span * DAY_WIDTH - 4 }}
+                          >
+                            <span className="truncate">
+                              {e.type === "TRANSPORT"
+                                ? `✈ ${eventTime(e.starts_at, e.timezone)} ${e.title}`
+                                : e.type === "ACTIVITY"
+                                  ? `${eventTime(e.starts_at, e.timezone)} · ${e.title}`
+                                  : e.title}
+                            </span>
+                          </Link>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </>
       )}

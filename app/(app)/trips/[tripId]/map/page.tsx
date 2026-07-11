@@ -212,45 +212,43 @@ export default async function TripMapPage({
     : null;
 
   return (
-    // Pleine largeur (PHIL-Q37b) : la carte déborde du gabarit habituel
-    <div>
-      <div className="mx-auto flex max-w-[104rem] flex-col gap-4">
-        <TripViewToggle tripId={tripId} active="carte" />
-        {/* TREK-style : liste cliquable à gauche, grande carte à droite */}
-        <TripMapExplorer
-          markers={markers}
-          departureId={departureId}
-          dayRows={dayRows}
-          heading={listHeading}
-          drawPath={!showIdeas}
-          distanceFrom={distanceFrom}
-          distanceLabel={distanceFrom?.label ?? null}
-          missing={missing}
-          filter={
-            !showIdeas && days.length > 1 ? (
-              <FilterSelect
-                key="day-filter"
-                value={activeDay ?? ""}
-                ariaLabel={t("map.dayFilter")}
-                options={[
-                  { value: "", label: t("map.wholeTrip"), href: `/trips/${tripId}/map` },
-                  ...days.map((d) => ({
-                    value: d.dayKey,
-                    label: d.label.replace(/ \d{4}$/, ""),
-                    href: `/trips/${tripId}/map?day=${d.dayKey}`,
-                  })),
-                ]}
-              />
-            ) : null
-          }
-        />
-        <TripPlaces
-          tripId={tripId}
-          places={places ?? []}
-          myId={user.id}
-          isOwner={me?.role === "OWNER"}
-        />
-      </div>
+    // Pleine largeur : TripMain élargit la page Carte à 104 rem (V06c)
+    <div className="flex flex-col gap-4">
+      <TripViewToggle tripId={tripId} active="carte" />
+      {/* TREK-style : liste cliquable à gauche, grande carte à droite */}
+      <TripMapExplorer
+        markers={markers}
+        departureId={departureId}
+        dayRows={dayRows}
+        heading={listHeading}
+        drawPath={!showIdeas}
+        distanceFrom={distanceFrom}
+        distanceLabel={distanceFrom?.label ?? null}
+        missing={missing}
+        filter={
+          !showIdeas && days.length > 1 ? (
+            <FilterSelect
+              key="day-filter"
+              value={activeDay ?? ""}
+              ariaLabel={t("map.dayFilter")}
+              options={[
+                { value: "", label: t("map.wholeTrip"), href: `/trips/${tripId}/map` },
+                ...days.map((d) => ({
+                  value: d.dayKey,
+                  label: d.label.replace(/ \d{4}$/, ""),
+                  href: `/trips/${tripId}/map?day=${d.dayKey}`,
+                })),
+              ]}
+            />
+          ) : null
+        }
+      />
+      <TripPlaces
+        tripId={tripId}
+        places={places ?? []}
+        myId={user.id}
+        isOwner={me?.role === "OWNER"}
+      />
     </div>
   );
 }

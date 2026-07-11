@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { TripMain } from "@/components/layout/trip-main";
 import { TripSidebar, TripTabBar } from "@/components/layout/trip-nav";
 import { TripPageHeader } from "@/components/layout/trip-page-header";
 import { TripOfflineSync } from "@/components/offline/trip-sync";
@@ -97,7 +98,7 @@ export default async function TripLayout({
           avatarUrl={profile?.avatar_url ?? null}
           initial={initial}
         />
-        <main className="mx-auto w-full max-w-content flex-1 px-4 pb-24 lg:px-8 lg:py-6 lg:pb-8">
+        <TripMain>
           {passportWarning ? (
             <div
               className={
@@ -110,7 +111,7 @@ export default async function TripLayout({
             </div>
           ) : null}
           {children}
-        </main>
+        </TripMain>
       </div>
       <TripTabBar tripId={trip.id} pending={pendingProps} />
     </div>
