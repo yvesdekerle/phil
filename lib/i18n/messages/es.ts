@@ -156,6 +156,15 @@ export const es: PartialMessages = {
   },
   trips: {
     title: "Tus viajes",
+    hello: "Hola {name}",
+    open: "Abrir el viaje",
+    past: "Viajes pasados",
+    nextDeparture: "Próxima salida · D-{n}",
+    now: "Ahora mismo",
+    onboard: "{n} a bordo",
+    vaultTitle: "Tu caja fuerte",
+    vaultSubtitle: "{n} documentos cifrados · bajo llave",
+    vaultSubtitleEmpty: "Guarda tus papeles a salvo",
     create: "Crear un viaje",
     emptyTitle: "Phil está listo para partir, ¿adónde vamos?",
     emptyBody:

@@ -153,6 +153,15 @@ export const fr = {
   },
   trips: {
     title: "Tes voyages",
+    hello: "Salut {name}",
+    open: "Ouvrir le voyage",
+    past: "Voyages passés",
+    nextDeparture: "Prochain départ · J-{n}",
+    now: "En ce moment",
+    onboard: "{n} à bord",
+    vaultTitle: "Ton coffre",
+    vaultSubtitle: "{n} pièces chiffrées · sous clé",
+    vaultSubtitleEmpty: "Range tes papiers à l'abri",
     create: "Créer un voyage",
     emptyTitle: "Phil est prêt à partir, où va-t-on ?",
     emptyBody:

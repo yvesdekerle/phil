@@ -154,6 +154,15 @@ export const en = {
   },
   trips: {
     title: "Your trips",
+    hello: "Hi {name}",
+    open: "Open the trip",
+    past: "Past trips",
+    nextDeparture: "Next departure · D-{n}",
+    now: "Happening now",
+    onboard: "{n} aboard",
+    vaultTitle: "Your vault",
+    vaultSubtitle: "{n} encrypted documents · under lock and key",
+    vaultSubtitleEmpty: "Store your papers somewhere safe",
     create: "Create a trip",
     emptyTitle: "Phil is ready to set off — where to?",
     emptyBody:

@@ -1170,7 +1170,7 @@ Remplacer intégralement le design v1 « Phileas » (bordeaux/parchemin, Bodoni 
 - [x] V01a — Phase 0 : tokens & polices + renommage global *(fait le 2026-07-11)*
 - [x] V01b — Phase 1 : primitives UI B1-B12 (`components/ui/*` + chip, badge, FAB, sheet, segmented, skeleton, empty-state) *(fait le 2026-07-11)*
 - [x] V01c — Phase 2 : app shell responsive (header, sidebar 220, barre d'onglets B9, grille « Plus », header voyage, renommages nav i18n) *(fait le 2026-07-11)*
-- [ ] V01d — Mes voyages + création de voyage
+- [x] V01d — Mes voyages + création de voyage *(fait le 2026-07-11)* — carte héro (r-20, shadow-float, badge « Prochain départ · J-n »/« En ce moment », pied « Ouvrir le voyage »), rangées « Voyages passés » compactes, carte d'accès Coffre sombre (compte des pièces), header kicker « Salut {prénom} », point berry sans compteur ; formulaire : erreurs en berry-ink, sélecteur de template en B12. Écart : pile d'avatars du proto remplacée par « n à bord » mono (pas d'avatars dans la requête liste).
 - [ ] V01e — Journal : Aperçu + Calendrier + vue jour (segmented control)
 - [ ] V01f — Journal : Timeline (ruban mono `ME 05`) + Carte (marqueurs recolorés)
 - [ ] V01g — Bourse : Suivi (héro sombre + barres) / Dépenses (registre B7, FAB + sheet) / Équilibre
