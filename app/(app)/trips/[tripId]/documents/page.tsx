@@ -23,6 +23,8 @@ type TripDocument = {
   ownerName: string;
   canDelete: boolean;
   forMeOnly?: boolean;
+  /** V06e : événement auquel le document est rattaché (billet → vol…). */
+  eventTitle: string | null;
 };
 
 export default async function TripDocumentsPage({
@@ -50,6 +52,7 @@ export default async function TripDocumentsPage({
     { data: tripDocs, error: docsError },
     { data: sharedRows, error: sharesError },
     { data: me },
+    { data: eventLinks },
   ] = await Promise.all([
     supabase
       .from("documents")
@@ -71,6 +74,11 @@ export default async function TripDocumentsPage({
       .eq("trip_id", tripId)
       .eq("user_id", user.id)
       .single(),
+    // V06e : « on ne sait pas à quel événement est rattaché le document »
+    supabase
+      .from("event_documents")
+      .select("document_id, trip_events!inner(title, trip_id)")
+      .eq("trip_events.trip_id", tripId),
   ]);
   if (docsError || sharesError) {
     // Ne pas masquer une panne DB en « aucun document » (audit D16/R16).
@@ -83,6 +91,14 @@ export default async function TripDocumentsPage({
 
   const canUpload = me?.role === "OWNER" || me?.role === "EDITOR";
 
+  // Premier événement rattaché par document (un billet peut en avoir plusieurs).
+  const eventByDoc = new Map<string, string>();
+  for (const link of eventLinks ?? []) {
+    if (link.trip_events && !eventByDoc.has(link.document_id)) {
+      eventByDoc.set(link.document_id, link.trip_events.title);
+    }
+  }
+
   const isTripOwner = me?.role === "OWNER";
   const fromTrip: TripDocument[] = (tripDocs ?? []).map((d) => ({
     id: d.id,
@@ -94,6 +110,7 @@ export default async function TripDocumentsPage({
     encrypted: false,
     ownerName: d.profiles?.display_name ?? t("tripDocs.travelerFallback"),
     canDelete: isTripOwner || d.owner_id === user.id,
+    eventTitle: eventByDoc.get(d.id) ?? null,
   }));
 
   const fromVault: TripDocument[] = (sharedRows ?? [])
@@ -112,6 +129,7 @@ export default async function TripDocumentsPage({
       ownerName: r.documents.profiles?.display_name ?? t("tripDocs.travelerFallback"),
       canDelete: false, // un doc du coffre partagé se gère depuis le coffre
       forMeOnly: r.shared_with === user.id, // E09 : partage ciblé
+      eventTitle: eventByDoc.get(r.documents.id) ?? null,
     }));
 
   const owners = [...new Set([...fromTrip, ...fromVault].map((d) => d.ownerName))].sort();
@@ -137,7 +155,7 @@ export default async function TripDocumentsPage({
   return (
     <div className="flex flex-col gap-5">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-encre-douce">{t("tripDocs.subtitle")}</p>
+        <p className="text-sm text-slate">{t("tripDocs.subtitle")}</p>
         {canUpload ? (
           <Button asChild>
             <Link href={`/trips/${tripId}/documents/new`}>{t("tripDocs.add")}</Link>
@@ -164,10 +182,10 @@ export default async function TripDocumentsPage({
           <Link
             href={filterHref(activeCategory, null)}
             className={cn(
-              "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+              "inline-flex h-8 items-center rounded-full border px-3 text-ui transition-colors outline-none focus-visible:ring-2 focus-visible:ring-citron focus-visible:ring-offset-2 focus-visible:ring-offset-sand",
               !owner
-                ? "border-laiton bg-laiton text-papier"
-                : "border-laiton-clair bg-papier text-encre-douce hover:text-encre",
+                ? "border-ink bg-ink text-white"
+                : "border-line bg-card text-slate hover:bg-wash hover:text-ink",
             )}
           >
             {t("tripDocs.allTravelers")}
@@ -177,10 +195,10 @@ export default async function TripDocumentsPage({
               key={o}
               href={filterHref(activeCategory, o)}
               className={cn(
-                "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                "inline-flex h-8 items-center rounded-full border px-3 text-ui transition-colors outline-none focus-visible:ring-2 focus-visible:ring-citron focus-visible:ring-offset-2 focus-visible:ring-offset-sand",
                 owner === o
-                  ? "border-laiton bg-laiton text-papier"
-                  : "border-laiton-clair bg-papier text-encre-douce hover:text-encre",
+                  ? "border-ink bg-ink text-white"
+                  : "border-line bg-card text-slate hover:bg-wash hover:text-ink",
               )}
             >
               {o}
@@ -190,16 +208,20 @@ export default async function TripDocumentsPage({
       ) : null}
 
       {documents.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-6 py-14 text-center">
-          <p className="font-display text-xl text-encre italic">{t("tripDocs.emptyTitle")}</p>
-          <p className="max-w-sm text-sm text-encre-douce">{t("tripDocs.emptyBody")}</p>
+        <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-line bg-card/60 px-6 py-14 text-center">
+          <p className="text-subhead text-ink">{t("tripDocs.emptyTitle")}</p>
+          <p className="max-w-sm text-body text-slate">{t("tripDocs.emptyBody")}</p>
         </div>
       ) : (
         <ul className="flex flex-col gap-2">
           {documents.map((doc) => (
             <li
               key={doc.id}
-              className="flex items-center gap-3 rounded-lg border border-laiton-clair bg-papier px-4 py-3"
+              className={cn(
+                "flex min-h-14 items-center gap-3 rounded-lg px-4 py-2.5",
+                // L6a : un document venu du coffre garde sa livrée sombre
+                doc.scope === "VAULT" ? "bg-ink-deep" : "border border-line bg-card",
+              )}
             >
               <a
                 href={
@@ -209,30 +231,59 @@ export default async function TripDocumentsPage({
                 }
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex min-w-0 flex-1 items-center gap-4"
+                className="flex min-w-0 flex-1 items-center gap-4 rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-citron"
               >
-                <CategoryIcon category={doc.category} />
+                <CategoryIcon
+                  category={doc.category}
+                  className={
+                    doc.scope === "VAULT"
+                      ? "border-white/15 bg-white/10 text-lagoon-soft"
+                      : undefined
+                  }
+                />
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm font-medium text-encre">
+                  <span
+                    className={cn(
+                      "block truncate text-subhead",
+                      doc.scope === "VAULT" ? "text-white" : "text-ink",
+                    )}
+                  >
                     {doc.file_name}
                   </span>
-                  <span className="block text-xs text-encre-douce">
+                  <span
+                    className={cn(
+                      "block text-caption",
+                      doc.scope === "VAULT" ? "text-lagoon-soft" : "text-slate",
+                    )}
+                  >
                     {doc.label ?? CATEGORY_LABELS[doc.category]} ·{" "}
                     {format(parseISO(doc.uploaded_at), "d MMM yyyy", { locale: dfLocale })}
+                    {doc.eventTitle ? (
+                      <span
+                        className={cn(
+                          "ml-1.5 rounded-sm px-1.5 py-0.5 font-mono text-label uppercase",
+                          doc.scope === "VAULT"
+                            ? "bg-white/10 text-lagoon-soft"
+                            : "bg-lagoon-wash text-lagoon-ink",
+                        )}
+                      >
+                        {doc.eventTitle}
+                      </span>
+                    ) : null}
                   </span>
                 </span>
               </a>
+              {/* V06e : prénom seul — la mention complète mangeait la ligne */}
               <span
                 className={cn(
-                  "shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium",
-                  doc.scope === "VAULT"
-                    ? "bg-laiton/15 text-laiton"
-                    : "bg-encre-douce/10 text-encre-douce",
+                  "shrink-0 rounded-sm px-2 py-0.5 font-mono text-label uppercase",
+                  doc.scope === "VAULT" ? "bg-white/10 text-lagoon-soft" : "bg-wash text-slate",
                 )}
+                title={doc.ownerName}
               >
                 {doc.scope === "VAULT"
-                  ? `${t("tripDocs.sharedBy")} ${doc.ownerName}${doc.forMeOnly ? ` ${t("tripDocs.forYou")}` : ""}`
-                  : `${t("tripDocs.addedBy")} ${doc.ownerName}`}
+                  ? `${t("tripDocs.sharedBy")} ${doc.ownerName.split(" ")[0]}${doc.forMeOnly ? ` ${t("tripDocs.forYou")}` : ""}`
+                  : `${t("tripDocs.addedBy")} ${doc.ownerName.split(" ")[0]}`}
               </span>
               <OfflineDocToggle documentId={doc.id} fileName={doc.file_name} />
               {doc.canDelete ? (

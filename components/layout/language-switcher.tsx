@@ -33,7 +33,7 @@ export function LanguageSwitcher() {
       }}
       aria-label={t("nav.language")}
       title={t("nav.language")}
-      className="h-8 cursor-pointer rounded-full border border-laiton-clair bg-papier px-2 text-sm text-encre transition-colors hover:border-laiton focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-laiton disabled:opacity-60"
+      className="h-8 cursor-pointer rounded-full border border-line bg-card px-2 text-sm text-ink transition-colors hover:border-line focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mist disabled:opacity-60"
     >
       {locales.map((l) => (
         <option key={l} value={l}>

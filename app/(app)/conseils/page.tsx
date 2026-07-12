@@ -64,8 +64,8 @@ export default async function ConseilsPage() {
 
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-8">
-      <h1 className="font-display text-3xl text-encre">{t("tips.title")}</h1>
-      <p className="mt-1 mb-6 text-sm text-encre-douce">{t("tips.subtitle")}</p>
+      <h1 className="text-title text-ink">{t("tips.title")}</h1>
+      <p className="mt-1 mb-6 text-sm text-slate">{t("tips.subtitle")}</p>
 
       <div className="flex flex-col gap-4">
         {SECTIONS.map((section) => {
@@ -73,16 +73,16 @@ export default async function ConseilsPage() {
           return (
             <section
               key={section.title}
-              className="rounded-lg border border-laiton-clair bg-papier px-5 py-4"
+              className="rounded-lg border border-line bg-card px-5 py-4"
             >
-              <h2 className="mb-2 flex items-center gap-2 text-sm font-medium text-encre">
-                <Icon className="size-4 text-laiton" aria-hidden="true" />
+              <h2 className="mb-2 flex items-center gap-2 text-sm font-medium text-ink">
+                <Icon className="size-4 text-mist" aria-hidden="true" />
                 {section.title}
               </h2>
               <ul className="flex flex-col gap-1.5">
                 {section.tips.map((tip) => (
-                  <li key={tip} className="flex gap-2 text-sm text-encre-douce">
-                    <span className="text-laiton">—</span>
+                  <li key={tip} className="flex gap-2 text-sm text-slate">
+                    <span className="text-mist">—</span>
                     <span>{tip}</span>
                   </li>
                 ))}
@@ -92,8 +92,8 @@ export default async function ConseilsPage() {
         })}
       </div>
 
-      <p className="mt-6 text-sm text-encre-douce">
-        <Link href="/trips" className="underline underline-offset-4 hover:text-encre">
+      <p className="mt-6 text-sm text-slate">
+        <Link href="/trips" className="underline underline-offset-4 hover:text-ink">
           {t("tips.back")}
         </Link>
       </p>

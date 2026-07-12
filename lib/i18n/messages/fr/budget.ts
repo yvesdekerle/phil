@@ -50,6 +50,12 @@ export const budgetFr = {
       sharesAria: "Parts",
       exactAria: "Montant exact",
       saving: "Enregistrement…",
+      editExpense: "Modifier la dépense",
+    },
+    detail: {
+      title: "Détail de la dépense",
+      split: "Répartition",
+      openAria: "Voir la dépense",
     },
     csv: {
       date: "Date",
@@ -81,6 +87,8 @@ export const budgetFr = {
     },
     balance: {
       owedToYou: "On te doit",
+      toReceive: "À recevoir",
+      toPay: "À régler",
       youOwe: "Tu dois",
       settled: "Tu es à l'équilibre — les comptes sont bons.",
       nextPayerPrefix: "La prochaine dépense devrait être payée par",

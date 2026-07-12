@@ -58,8 +58,8 @@ export function InviteSection({
   }
 
   return (
-    <section className="flex flex-col gap-4 rounded-lg border border-laiton-clair bg-papier px-5 py-4">
-      <h2 className="text-sm font-medium text-encre">{t("participants.invite.title")}</h2>
+    <section className="flex flex-col gap-4 rounded-lg border border-line bg-card px-5 py-4">
+      <h2 className="text-sm font-medium text-ink">{t("participants.invite.title")}</h2>
 
       <form onSubmit={submit} className="flex flex-wrap items-end gap-3">
         <div className="flex min-w-52 flex-1 flex-col gap-2">
@@ -93,7 +93,7 @@ export function InviteSection({
         <div className="flex flex-wrap items-center gap-3">
           <p
             className={
-              state.status === "error" ? "text-sm text-bordeaux" : "text-sm text-encre-douce"
+              state.status === "error" ? "text-caption text-berry-ink" : "text-body text-slate"
             }
           >
             {state.message}
@@ -120,11 +120,11 @@ export function InviteSection({
             return (
               <li
                 key={inv.id}
-                className="flex flex-wrap items-center gap-2 rounded-md border border-laiton-clair/60 bg-parchemin/50 px-3 py-2 text-sm"
+                className="flex flex-wrap items-center gap-2 rounded-md border border-line/60 bg-sand/50 px-3 py-2 text-sm"
               >
-                <span className="min-w-0 flex-1 truncate text-encre">
+                <span className="min-w-0 flex-1 truncate text-ink">
                   {inv.invited_email}{" "}
-                  <span className="text-xs text-encre-douce">
+                  <span className="text-xs text-slate">
                     (
                     {inv.role === "EDITOR"
                       ? t("participants.editorLower")

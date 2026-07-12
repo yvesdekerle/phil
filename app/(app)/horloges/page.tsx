@@ -42,14 +42,14 @@ export default async function ClocksPage() {
   return (
     <div className="mx-auto flex max-w-lg flex-col gap-5">
       <div>
-        <h1 className="font-display text-2xl text-encre">{t("clocks.title")}</h1>
-        <p className="mt-1 text-sm text-encre-douce">{t("clocks.subtitle")}</p>
+        <h1 className="text-title text-ink">{t("clocks.title")}</h1>
+        <p className="mt-1 text-sm text-slate">{t("clocks.subtitle")}</p>
       </div>
-      <div className="rounded-lg border border-laiton-clair bg-papier px-4 py-3">
+      <div className="rounded-lg border border-line bg-card px-4 py-3">
         <HomeTimezonePicker value={homeTimezone} />
       </div>
       <WorldClocks clocks={clocks} />
-      {clocks.length === 1 ? <p className="text-sm text-encre-douce">{t("clocks.empty")}</p> : null}
+      {clocks.length === 1 ? <p className="text-sm text-slate">{t("clocks.empty")}</p> : null}
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { asCategory, EXPENSE_CATEGORIES, type ExpenseCategory } from "@/lib/budg
 import { getRates, toBase } from "@/lib/budget/rates";
 import { getIntlLocale, getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
+import { cn } from "@/lib/utils";
 import { PurseNav } from "../purse-nav";
 
 type Slice = { label: string; amount: number };
@@ -16,29 +17,36 @@ async function Bars({
   slices,
   total,
   currency,
+  tone = "lagoon",
 }: {
   slices: Slice[];
   total: number;
   currency: string;
+  /** L3a : catégories en lagune, phases (avant/pendant) en encre. */
+  tone?: "lagoon" | "ink";
 }) {
   const t = await getT();
   const il = await getIntlLocale();
-  const visible = slices.filter((s) => s.amount > 0);
-  if (visible.length === 0) {
-    return <p className="text-sm text-encre-douce">{t("budget.tracking.nothingYet")}</p>;
+  if (slices.every((s) => s.amount === 0)) {
+    return <p className="text-body text-slate">{t("budget.tracking.nothingYet")}</p>;
   }
   return (
-    <div className="flex flex-col gap-1.5">
-      {visible.map((s) => (
-        <div key={s.label} className="flex items-center gap-2 text-sm">
-          <span className="w-24 shrink-0 text-encre">{s.label}</span>
-          <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-laiton-clair/30">
+    <div className="flex flex-col gap-2">
+      {slices.map((s) => (
+        <div
+          key={s.label}
+          className={cn("flex items-center gap-2.5", s.amount === 0 && "opacity-55")}
+        >
+          <span className="w-24 shrink-0 truncate text-ui text-ink">{s.label}</span>
+          <div className="h-[9px] flex-1 overflow-hidden rounded-[5px] bg-lagoon-wash">
             <div
-              className="h-full rounded-full bg-bordeaux/80"
-              style={{ width: `${total > 0 ? Math.max((s.amount / total) * 100, 2) : 0}%` }}
+              className={cn("h-full rounded-[5px]", tone === "ink" ? "bg-ink" : "bg-lagoon")}
+              style={{
+                width: `${total > 0 && s.amount > 0 ? Math.max((s.amount / total) * 100, 2) : 0}%`,
+              }}
             />
           </div>
-          <span className="w-28 shrink-0 text-right text-encre-douce tabular-nums">
+          <span className="w-28 shrink-0 text-right font-mono text-caption font-bold text-ink tabular-nums">
             {fmt(s.amount, currency, il)}
           </span>
         </div>
@@ -133,7 +141,7 @@ export default async function ExpenseTrackingPage({
       <PurseNav tripId={tripId} active="suivi" closed={Boolean(trip?.purse_closed_at)} />
 
       {expenses.length === 0 ? (
-        <p className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-4 py-10 text-center text-sm text-encre-douce">
+        <p className="rounded-lg border border-dashed border-line bg-card/60 px-4 py-10 text-center text-sm text-slate">
           {t("budget.tracking.empty")}
         </p>
       ) : (
@@ -160,38 +168,60 @@ export default async function ExpenseTrackingPage({
             }));
 
           return (
-            <section key={currency} className="flex flex-col gap-5">
-              <div className="rounded-lg border border-laiton-clair bg-papier px-4 py-3">
-                <h2 className="mb-3 flex items-baseline justify-between text-sm font-medium text-encre">
-                  <span>
+            <section key={currency} className="flex flex-col gap-4">
+              <div className="rounded-lg border border-line bg-card p-4">
+                <h2 className="mb-3 flex items-baseline justify-between gap-3">
+                  <span className="text-subhead text-ink">
                     {t("budget.tracking.tripTitle")} ({currency})
                   </span>
-                  <span className="text-encre-douce">
-                    {t("budget.tracking.total")} {fmt(total, currency, il)}
+                  <span className="font-mono text-data text-ink tabular-nums">
+                    {fmt(total, currency, il)}
                   </span>
                 </h2>
                 <Bars slices={byCategory((e) => e.amount)} total={total} currency={currency} />
-                <h3 className="mt-4 mb-2 text-xs font-medium text-laiton uppercase tracking-wide">
+                <h3 className="mt-4 mb-2 border-t border-wash pt-3 font-mono text-label text-mist uppercase">
                   {t("budget.tracking.phases")}
                 </h3>
-                <Bars slices={byPhase((e) => e.amount)} total={total} currency={currency} />
+                <Bars
+                  slices={byPhase((e) => e.amount)}
+                  total={total}
+                  currency={currency}
+                  tone="ink"
+                />
               </div>
 
-              <div className="rounded-lg border border-laiton-clair bg-papier px-4 py-3">
-                <h2 className="mb-3 flex items-baseline justify-between text-sm font-medium text-encre">
-                  <span>
-                    {t("budget.tracking.myExpenses")} ({currency})
-                  </span>
-                  <span className="text-encre-douce">
-                    {t("budget.tracking.myShare")} {fmt(myTotal, currency, il)}{" "}
-                    {t("budget.tracking.advanced")} {fmt(myPaid, currency, il)}
-                  </span>
+              <div className="rounded-lg border border-line bg-card p-4">
+                <h2 className="mb-3 text-subhead text-ink">
+                  {t("budget.tracking.myExpenses")} ({currency})
                 </h2>
+                <div className="mb-4 grid grid-cols-2 gap-2.5">
+                  <div className="rounded-lg border border-line bg-sand px-3 py-2.5">
+                    <p className="font-mono text-label text-slate uppercase">
+                      {t("budget.tracking.myShare")}
+                    </p>
+                    <p className="mt-0.5 font-mono text-base font-bold text-ink tabular-nums">
+                      {fmt(myTotal, currency, il)}
+                    </p>
+                  </div>
+                  <div className="rounded-lg border border-line bg-sand px-3 py-2.5">
+                    <p className="font-mono text-label text-slate uppercase">
+                      {t("budget.tracking.advanced")}
+                    </p>
+                    <p className="mt-0.5 font-mono text-base font-bold text-ink tabular-nums">
+                      {fmt(myPaid, currency, il)}
+                    </p>
+                  </div>
+                </div>
                 <Bars slices={byCategory((e) => e.myShare)} total={myTotal} currency={currency} />
-                <h3 className="mt-4 mb-2 text-xs font-medium text-laiton uppercase tracking-wide">
+                <h3 className="mt-4 mb-2 border-t border-wash pt-3 font-mono text-label text-mist uppercase">
                   {t("budget.tracking.phases")}
                 </h3>
-                <Bars slices={byPhase((e) => e.myShare)} total={myTotal} currency={currency} />
+                <Bars
+                  slices={byPhase((e) => e.myShare)}
+                  total={myTotal}
+                  currency={currency}
+                  tone="ink"
+                />
               </div>
             </section>
           );

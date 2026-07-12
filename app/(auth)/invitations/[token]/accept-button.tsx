@@ -21,7 +21,7 @@ export function AcceptButton({ token }: { token: string }) {
         {pending ? t("invitations.boarding") : t("invitations.join")}
       </Button>
       {state.status === "error" ? (
-        <p role="alert" className="text-sm text-bordeaux">
+        <p role="alert" className="text-sm text-lagoon-ink">
           {state.message}
         </p>
       ) : null}

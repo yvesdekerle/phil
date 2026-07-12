@@ -104,23 +104,23 @@ export default async function IdeaMatchPage({ params }: { params: Promise<{ trip
   return (
     // PHIL-U07 : sur mobile, le match est **plein écran** (immersif façon Yallah,
     // couvre le chrome du voyage) ; inline dans la page sur ≥ sm.
-    <div className="fixed inset-0 z-[1100] overflow-y-auto bg-parchemin px-4 pt-6 pb-10 sm:static sm:z-auto sm:overflow-visible sm:bg-transparent sm:p-0">
+    <div className="fixed inset-0 z-[1100] overflow-y-auto bg-sand px-4 pt-6 pb-10 sm:static sm:z-auto sm:overflow-visible sm:bg-transparent sm:p-0">
       <div className="mx-auto flex max-w-2xl flex-col gap-6">
         <RealtimeRefresh tables={["trip_ideas", "idea_votes"]} />
         <div>
           <Link
             href={`/trips/${tripId}/ideas`}
-            className="mb-2 inline-flex items-center gap-1.5 text-sm text-encre-douce underline-offset-4 hover:text-encre"
+            className="mb-2 inline-flex items-center gap-1.5 text-sm text-slate underline-offset-4 hover:text-ink"
           >
             <ArrowLeft className="size-4" aria-hidden="true" />
             {t("ideas.match.back")}
           </Link>
-          <h1 className="font-display text-2xl text-encre">{t("ideas.match.title")}</h1>
-          <p className="mt-1 text-sm text-encre-douce">{t("ideas.match.intro")}</p>
+          <h1 className="font-sans text-2xl text-ink">{t("ideas.match.title")}</h1>
+          <p className="mt-1 text-sm text-slate">{t("ideas.match.intro")}</p>
         </div>
 
         {all.length === 0 ? (
-          <p className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-4 py-10 text-center text-sm text-encre-douce">
+          <p className="rounded-lg border border-dashed border-line bg-card/60 px-4 py-10 text-center text-sm text-slate">
             {t("ideas.match.noneYet")}
           </p>
         ) : (

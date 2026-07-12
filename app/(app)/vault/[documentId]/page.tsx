@@ -89,13 +89,13 @@ export default async function VaultDocumentPage({
       <div className="mb-6 flex items-start gap-4">
         <CategoryIcon category={doc.category} />
         <div className="min-w-0 flex-1">
-          <h1 className="truncate font-display text-2xl text-encre">{doc.file_name}</h1>
-          <p className="mt-1 text-sm text-encre-douce">
+          <h1 className="truncate font-sans text-2xl text-ink">{doc.file_name}</h1>
+          <p className="mt-1 text-sm text-slate">
             {doc.label ?? categoryLabel(t, doc.category)} · {t("vault.addedOn")}{" "}
             {format(parseISO(doc.uploaded_at), "d MMMM yyyy", { locale: dfLocale })} ·{" "}
             {(doc.size_bytes / 1024 / 1024).toFixed(1)} {t("vault.detail.sizeUnit")}
           </p>
-          <p className="mt-0.5 text-xs text-encre-douce">
+          <p className="mt-0.5 text-xs text-slate">
             {doc.expires_at
               ? `${t("vault.detail.expiresOnPrefix")} ${format(parseISO(doc.expires_at), "d MMMM yyyy", { locale: dfLocale })}`
               : t("vault.detail.noExpiry")}
@@ -141,7 +141,7 @@ export default async function VaultDocumentPage({
         </div>
       ) : null}
 
-      <div className="overflow-hidden rounded-lg border border-laiton-clair bg-papier">
+      <div className="overflow-hidden rounded-lg border border-line bg-card">
         {doc.encrypted ? (
           <EncryptedDocumentViewer
             sourceUrl={recipient ? recipient.sourceUrl : `/api/documents/${doc.id}/view`}
@@ -159,16 +159,16 @@ export default async function VaultDocumentPage({
           // biome-ignore lint/performance/noImgElement: flux authentifié via l'API, next/image ne peut pas optimiser ce endpoint privé
           <img src={viewUrl} alt={doc.file_name} className="mx-auto max-h-[70vh] w-auto" />
         ) : (
-          <div className="px-6 py-12 text-center text-sm text-encre-douce">
+          <div className="px-6 py-12 text-center text-sm text-slate">
             {t("vault.detail.previewUnavailable")}{" "}
-            <a href={viewUrl} className="text-bordeaux underline underline-offset-4">
+            <a href={viewUrl} className="text-lagoon-ink underline underline-offset-4">
               {t("vault.detail.openFile")}
             </a>
           </div>
         )}
       </div>
 
-      <p className="mt-4 text-center text-xs text-encre-douce">{t("vault.detail.auditNote")}</p>
+      <p className="mt-4 text-center text-xs text-slate">{t("vault.detail.auditNote")}</p>
     </main>
   );
 }

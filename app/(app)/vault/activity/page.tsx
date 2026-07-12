@@ -98,8 +98,8 @@ export default async function VaultActivityPage({
       className={cn(
         "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
         active
-          ? "border-bordeaux bg-bordeaux text-papier"
-          : "border-laiton-clair bg-papier text-encre hover:bg-parchemin",
+          ? "border-lagoon-ink bg-lagoon-ink text-card"
+          : "border-line bg-card text-ink hover:bg-sand",
       )}
     >
       {label}
@@ -110,12 +110,12 @@ export default async function VaultActivityPage({
     <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8">
       <Link
         href="/vault"
-        className="text-sm text-encre-douce underline underline-offset-4 hover:text-encre"
+        className="text-sm text-slate underline underline-offset-4 hover:text-ink"
       >
         {t("vault.backLink")}
       </Link>
-      <h1 className="mt-3 font-display text-3xl text-encre">{t("vault.activity.title")}</h1>
-      <p className="mt-1 mb-6 text-sm text-encre-douce">{t("vault.activity.subtitle")}</p>
+      <h1 className="mt-3 font-sans text-3xl text-ink">{t("vault.activity.title")}</h1>
+      <p className="mt-1 mb-6 text-sm text-slate">{t("vault.activity.subtitle")}</p>
 
       <div className="mb-3 flex flex-wrap items-center gap-1.5">
         {chip(buildHref({ action: undefined }), t("vault.activity.allActions"), !action)}
@@ -136,27 +136,27 @@ export default async function VaultActivityPage({
       ) : null}
 
       {(entries ?? []).length === 0 ? (
-        <div className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-6 py-14 text-center">
-          <p className="font-display text-xl text-encre italic">{t("vault.activity.emptyTitle")}</p>
-          <p className="mt-2 text-sm text-encre-douce">{t("vault.activity.emptyBody")}</p>
+        <div className="rounded-lg border border-dashed border-line bg-card/60 px-6 py-14 text-center">
+          <p className="font-sans text-xl text-ink italic">{t("vault.activity.emptyTitle")}</p>
+          <p className="mt-2 text-sm text-slate">{t("vault.activity.emptyBody")}</p>
         </div>
       ) : (
         <ul className="flex flex-col gap-1.5">
           {(entries ?? []).map((entry) => (
             <li
               key={entry.id}
-              className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-md border border-laiton-clair/60 bg-papier px-4 py-2.5 text-sm"
+              className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-md border border-line/60 bg-card px-4 py-2.5 text-sm"
             >
-              <span className="w-40 shrink-0 text-xs text-encre-douce tabular-nums">
+              <span className="w-40 shrink-0 text-xs text-slate tabular-nums">
                 {format(parseISO(entry.accessed_at), "d MMM yyyy · HH:mm", { locale: dfLocale })}
               </span>
-              <span className="shrink-0 rounded-full bg-encre/10 px-2 py-0.5 text-xs font-medium text-encre">
+              <span className="shrink-0 rounded-full bg-ink/10 px-2 py-0.5 text-xs font-medium text-ink">
                 {ACTION_LABELS[entry.action] ?? entry.action}
               </span>
-              <span className="min-w-0 flex-1 truncate text-encre">
+              <span className="min-w-0 flex-1 truncate text-ink">
                 {entry.documents?.file_name ?? t("vault.activity.deletedDocument")}
               </span>
-              <span className="shrink-0 text-xs text-encre-douce">
+              <span className="shrink-0 text-xs text-slate">
                 {t("vault.activity.by")}{" "}
                 {entry.profiles?.display_name ?? t("vault.activity.unknownUser")}
               </span>

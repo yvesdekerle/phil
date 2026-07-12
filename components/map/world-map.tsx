@@ -8,8 +8,8 @@ import { useT } from "@/components/i18n/provider";
 import { palette } from "@/lib/ui/colors";
 
 /** Palette Phil pour les pays visités — teinte stable par pays. */
-const VISITED_COLORS = [palette.bordeaux, palette.laiton, palette.encre, palette.vert];
-const UNVISITED = "#efe6d5"; // beige parchemin clair (hors tokens) : "à visiter"
+const VISITED_COLORS = [palette.lagoonInk, palette.mist, palette.ink, palette.lagoon];
+const UNVISITED = palette.wash; // lavis neutre : "à visiter"
 
 function colorFor(code: string): string {
   let h = 0;
@@ -49,7 +49,7 @@ export function WorldMap({ visited }: { visited: string[] }) {
       maxZoom: 6,
       worldCopyJump: true,
     }).setView([20, 10], 2);
-    el.style.background = "#f7f1e3";
+    el.style.background = palette.sand;
 
     let layer: L.GeoJSON | null = null;
     fetch("/geo/countries.geojson")
@@ -60,8 +60,8 @@ export function WorldMap({ visited }: { visited: string[] }) {
         }
         const styleOf = (code: string): L.PathOptions =>
           visitedRef.current.has(code)
-            ? { fillColor: colorFor(code), fillOpacity: 0.85, color: "#f7f1e3", weight: 0.7 }
-            : { fillColor: UNVISITED, fillOpacity: 1, color: palette.laitonClair, weight: 0.7 };
+            ? { fillColor: colorFor(code), fillOpacity: 0.85, color: palette.sand, weight: 0.7 }
+            : { fillColor: UNVISITED, fillOpacity: 1, color: palette.line, weight: 0.7 };
 
         layer = L.geoJSON(geojson, {
           style: (f) => styleOf(f?.properties.code ?? ""),
@@ -109,7 +109,7 @@ export function WorldMap({ visited }: { visited: string[] }) {
     <div
       ref={containerRef}
       role="application"
-      className="h-[420px] w-full overflow-hidden rounded-lg border border-laiton-clair"
+      className="h-[420px] w-full overflow-hidden rounded-lg border border-line"
       aria-label={t("map.worldAria")}
     />
   );

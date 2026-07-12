@@ -9,7 +9,7 @@ import { TRANSPORT_MODES } from "@/lib/events/transport";
  * document du coffre. Sans clé, la fonctionnalité est simplement désactivée.
  */
 
-const GEMINI_MODEL = process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
+const GEMINI_MODEL = process.env.GEMINI_MODEL ?? "gemini-3.1-flash-lite";
 
 const DATETIME_LOCAL = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
 

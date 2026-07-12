@@ -50,6 +50,12 @@ export const budgetEn = {
       sharesAria: "Shares",
       exactAria: "Exact amount",
       saving: "Saving…",
+      editExpense: "Edit the expense",
+    },
+    detail: {
+      title: "Expense details",
+      split: "Split",
+      openAria: "View the expense",
     },
     csv: {
       date: "Date",
@@ -81,6 +87,8 @@ export const budgetEn = {
     },
     balance: {
       owedToYou: "You're owed",
+      toReceive: "To receive",
+      toPay: "To settle",
       youOwe: "You owe",
       settled: "You're all square — the accounts add up.",
       nextPayerPrefix: "The next expense should be paid by",

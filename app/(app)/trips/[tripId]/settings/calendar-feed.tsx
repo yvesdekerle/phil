@@ -10,11 +10,11 @@ export function CalendarFeed({ url }: { url: string }) {
   const [copied, setCopied] = useState(false);
 
   return (
-    <div className="flex flex-col gap-2 rounded-lg border border-laiton-clair bg-papier px-5 py-4">
-      <p className="text-sm font-medium text-encre">{t("settings.calendar.title")}</p>
-      <p className="text-xs text-encre-douce">{t("settings.calendar.desc")}</p>
+    <div className="flex flex-col gap-2 rounded-lg border border-line bg-card px-5 py-4">
+      <p className="text-sm font-medium text-ink">{t("settings.calendar.title")}</p>
+      <p className="text-xs text-slate">{t("settings.calendar.desc")}</p>
       <div className="flex flex-wrap items-center gap-2">
-        <code className="min-w-0 flex-1 truncate rounded-md border border-laiton-clair/60 bg-parchemin/50 px-2 py-1.5 text-xs text-encre-douce">
+        <code className="min-w-0 flex-1 truncate rounded-md border border-line/60 bg-sand/50 px-2 py-1.5 text-xs text-slate">
           {url}
         </code>
         <Button

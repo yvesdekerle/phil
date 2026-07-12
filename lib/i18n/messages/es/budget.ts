@@ -50,6 +50,12 @@ export const budgetEs = {
       sharesAria: "Partes",
       exactAria: "Importe exacto",
       saving: "Guardando…",
+      editExpense: "Editar el gasto",
+    },
+    detail: {
+      title: "Detalle del gasto",
+      split: "Reparto",
+      openAria: "Ver el gasto",
     },
     csv: {
       date: "Fecha",
@@ -81,6 +87,8 @@ export const budgetEs = {
     },
     balance: {
       owedToYou: "Te deben",
+      toReceive: "Por recibir",
+      toPay: "Por pagar",
       youOwe: "Debes",
       settled: "Estás en equilibrio — las cuentas están saldadas.",
       nextPayerPrefix: "El próximo gasto debería pagarlo",

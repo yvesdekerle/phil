@@ -91,7 +91,7 @@ export function IdeaMatchDeck({ tripId, ideas }: { tripId: string; ideas: SwipeI
 
   if (!top && !exit) {
     return (
-      <p className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-4 py-10 text-center text-sm text-encre-douce">
+      <p className="rounded-lg border border-dashed border-line bg-card/60 px-4 py-10 text-center text-body text-slate">
         {t("ideas.match.deckEmpty")}
       </p>
     );
@@ -123,28 +123,28 @@ export function IdeaMatchDeck({ tripId, ideas }: { tripId: string; ideas: SwipeI
         <VerdictButton
           onClick={() => commit("NO", { x: 0, y: 0 })}
           label={t("ideas.match.no")}
-          className="text-bordeaux"
+          className="text-lagoon-ink"
         >
           <X aria-hidden="true" />
         </VerdictButton>
         <VerdictButton
           onClick={() => commit("MAYBE", { x: 0, y: 0 })}
           label={t("ideas.match.maybe")}
-          className="text-laiton"
+          className="text-mist"
         >
           <Check aria-hidden="true" />
         </VerdictButton>
         <VerdictButton
           onClick={() => commit("SUPER", { x: 0, y: 0 })}
           label={t("ideas.match.super")}
-          className="text-bleu-nuit"
+          className="text-ink-deep"
         >
           <Star aria-hidden="true" />
         </VerdictButton>
         <VerdictButton
           onClick={() => commit("YES", { x: 0, y: 0 })}
           label={t("ideas.match.yes")}
-          className="text-vert"
+          className="text-lagoon"
         >
           <Heart aria-hidden="true" />
         </VerdictButton>
@@ -154,12 +154,12 @@ export function IdeaMatchDeck({ tripId, ideas }: { tripId: string; ideas: SwipeI
         type="button"
         onClick={undo}
         disabled={history.length === 0}
-        className="flex items-center gap-1.5 text-xs text-encre-douce underline-offset-4 hover:text-encre disabled:no-underline disabled:opacity-40"
+        className="flex items-center gap-1.5 text-caption text-slate underline-offset-4 hover:text-ink disabled:no-underline disabled:opacity-40"
       >
         <RotateCcw className="size-3.5" aria-hidden="true" />
         {t("ideas.match.undo")}
       </button>
-      <p className="text-center text-xs text-encre-douce">{t("ideas.match.hint")}</p>
+      <p className="text-center text-caption text-slate">{t("ideas.match.hint")}</p>
     </div>
   );
 }
@@ -213,7 +213,7 @@ function VerdictButton({
       aria-label={label}
       title={label}
       className={cn(
-        "flex size-12 items-center justify-center rounded-full border border-laiton-clair bg-papier shadow-sm transition-transform hover:scale-110",
+        "flex size-12 items-center justify-center rounded-full border border-line bg-card shadow-sm transition-transform hover:scale-110",
         className,
       )}
     >
@@ -230,24 +230,24 @@ function IdeaCardFace({ idea, behind }: { idea: SwipeIdea; behind?: boolean }) {
   return (
     <div
       className={cn(
-        "absolute inset-0 flex flex-col justify-end overflow-hidden rounded-2xl border border-laiton-clair bg-gradient-to-br from-parchemin to-papier p-5 shadow-lg",
+        "absolute inset-0 flex flex-col justify-end overflow-hidden rounded-2xl border border-line bg-gradient-to-br from-sand to-card p-5 shadow-lg",
         behind && "scale-95 opacity-60",
       )}
     >
-      <h3 className="font-display text-2xl text-encre">{idea.title}</h3>
+      <h3 className="font-sans text-2xl text-ink">{idea.title}</h3>
       {idea.locationName ? (
-        <p className="mt-0.5 text-sm text-encre-douce">📍 {idea.locationName}</p>
+        <p className="mt-0.5 text-body text-slate">📍 {idea.locationName}</p>
       ) : null}
       {idea.description ? (
-        <p className="mt-2 line-clamp-3 text-sm text-encre-douce">{idea.description}</p>
+        <p className="mt-2 line-clamp-3 text-body text-slate">{idea.description}</p>
       ) : null}
       {meta.length > 0 ? (
-        <p className="mt-2 text-xs text-encre-douce">{meta.join("  ·  ")}</p>
+        <p className="mt-2 text-caption text-slate">{meta.join("  ·  ")}</p>
       ) : null}
       {idea.tags.length > 0 ? (
         <div className="mt-3 flex flex-wrap gap-1.5">
           {idea.tags.map((tag) => (
-            <span key={tag} className="rounded-full bg-laiton/15 px-2 py-0.5 text-xs text-laiton">
+            <span key={tag} className="rounded-md bg-wash px-2 py-0.5 text-caption text-slate">
               #{tag}
             </span>
           ))}

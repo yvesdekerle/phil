@@ -33,7 +33,7 @@ export function SheetForm({ tripId, defaults }: { tripId: string; defaults: Valu
           name="emergencyContacts"
           defaultValue={defaults.emergencyContacts}
           rows={3}
-          className="rounded-md border border-laiton-clair bg-papier px-3 py-2 text-sm text-encre"
+          className="rounded-md border border-line bg-card px-3 py-2 text-sm text-ink"
           placeholder={t("emergency.form.contactsPlaceholder")}
         />
       </div>
@@ -66,7 +66,7 @@ export function SheetForm({ tripId, defaults }: { tripId: string; defaults: Valu
           name="notes"
           defaultValue={defaults.notes}
           rows={2}
-          className="rounded-md border border-laiton-clair bg-papier px-3 py-2 text-sm text-encre"
+          className="rounded-md border border-line bg-card px-3 py-2 text-sm text-ink"
         />
       </div>
       <div className="flex items-center gap-3">
@@ -76,7 +76,7 @@ export function SheetForm({ tripId, defaults }: { tripId: string; defaults: Valu
         {state.status !== "idle" ? (
           <p
             className={
-              state.status === "error" ? "text-sm text-bordeaux" : "text-sm text-encre-douce"
+              state.status === "error" ? "text-caption text-berry-ink" : "text-body text-slate"
             }
           >
             {state.message}

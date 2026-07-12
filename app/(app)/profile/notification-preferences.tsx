@@ -34,11 +34,11 @@ export function NotificationPreferencesForm({ initial }: { initial: Notification
           htmlFor={`pref-${key}`}
           className="flex cursor-pointer items-center justify-between gap-4"
         >
-          <span className="text-sm text-encre">{t(PREFERENCE_LABELS[key])}</span>
+          <span className="text-sm text-ink">{t(PREFERENCE_LABELS[key])}</span>
           <Switch id={`pref-${key}`} checked={prefs[key]} onCheckedChange={(v) => toggle(key, v)} />
         </label>
       ))}
-      {error ? <p className="text-xs text-bordeaux">{error}</p> : null}
+      {error ? <p className="text-caption text-berry-ink">{error}</p> : null}
     </div>
   );
 }

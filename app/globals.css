@@ -2,82 +2,76 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@custom-variant dark (&:is(.dark *));
-
 :root {
-  /* Palette Phil — tons chauds et nobles, esprit carnet de voyage XIXe */
-  --parchemin: #f4eee1;
-  --papier: #fbf8f1;
-  --encre: #1f2a44;
-  --encre-douce: #5a6379;
-  --bordeaux: #6e1f2e;
-  --bordeaux-fonce: #571723;
-  --laiton: #a98a54;
-  --laiton-clair: #d9c9a3;
-  --vert: #3f7a5a;
-  --bleu-nuit: #2b3a67;
-  /* Tokens shadcn/ui remappés sur la palette Phil */
-  --background: var(--parchemin);
-  --foreground: var(--encre);
-  --card: var(--papier);
-  --card-foreground: var(--encre);
-  --popover: var(--papier);
-  --popover-foreground: var(--encre);
-  --primary: var(--bordeaux);
-  --primary-foreground: var(--papier);
-  --secondary: #ece4d2;
-  --secondary-foreground: var(--encre);
-  --muted: #ece4d2;
-  --muted-foreground: var(--encre-douce);
-  --accent: #ece4d2;
-  --accent-foreground: var(--encre);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: var(--laiton-clair);
-  --input: var(--laiton-clair);
-  --ring: var(--laiton);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  /* Design system « Lagune vive » v1 — 18 rôles de couleur (+ hover primaire).
+     Source de vérité : tmp/design_phil_v2/README.md §8a. Aucun autre hex
+     n'est autorisé dans l'app (« valeurs magiques »). */
+  /* Encres & textes */
+  --ink: #0f2f38;
+  --ink-deep: #081e24;
+  --slate: #5c7078;
+  --mist: #6c7e84;
+  --ghost: #93a3a8; /* décor uniquement (points, traits) — jamais de texte */
+  /* Fonds & structure */
+  --sand: #fbf9f4;
+  --card: #ffffff; /* rôle « card » du DS — sert aussi de token shadcn */
+  --wash: #f1efe8;
+  --line: #e7e2d6;
+  --citron-wash: #fff8df;
+  /* Accents & sémantique */
+  --lagoon: #00a7b5; /* accent graphique — jamais sous du texte blanc */
+  --lagoon-ink: #00727c; /* CTA, liens, texte lagune */
+  --lagoon-soft: #9ed4d9; /* texte secondaire sur fonds sombres */
+  --lagoon-wash: #e0f2f3;
+  --lagoon-hover: #00616a; /* hover du bouton primaire */
+  --citron: #f6d33c; /* indicateur actif, badge capitaine */
+  --berry: #d8548c; /* point de notification, accents sociaux (décor) */
+  --berry-ink: #c23d75; /* destructif + texte berry */
+  --berry-wash: #fdeef4;
+
+  /* Tokens shadcn/ui remappés sur les rôles Lagune vive */
+  --background: var(--sand);
+  --foreground: var(--ink);
+  --card-foreground: var(--ink);
+  --popover: var(--card);
+  --popover-foreground: var(--ink);
+  --primary: var(--lagoon-ink);
+  --primary-foreground: var(--card);
+  --secondary: var(--wash);
+  --secondary-foreground: var(--ink);
+  --muted: var(--wash);
+  --muted-foreground: var(--slate);
+  --accent: var(--wash);
+  --accent-foreground: var(--ink);
+  --destructive: var(--berry-ink);
+  --border: var(--line);
+  --input: var(--line);
+  --ring: var(--citron);
+  --radius: 0.75rem; /* r-12 — rayon de carte */
 }
 
 @theme inline {
-  --color-parchemin: var(--parchemin);
-  --color-papier: var(--papier);
-  --color-encre: var(--encre);
-  --color-encre-douce: var(--encre-douce);
-  --color-bordeaux: var(--bordeaux);
-  --color-bordeaux-fonce: var(--bordeaux-fonce);
-  --color-laiton: var(--laiton);
-  --color-laiton-clair: var(--laiton-clair);
-  --color-vert: var(--vert);
-  --color-bleu-nuit: var(--bleu-nuit);
-  --font-sans: var(--font-figtree);
-  --font-display: var(--font-bodoni);
-  --font-heading: var(--font-figtree);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
+  /* Couleurs — 18 rôles Lagune vive */
+  --color-ink: var(--ink);
+  --color-ink-deep: var(--ink-deep);
+  --color-slate: var(--slate);
+  --color-mist: var(--mist);
+  --color-ghost: var(--ghost);
+  --color-sand: var(--sand);
+  --color-card: var(--card);
+  --color-wash: var(--wash);
+  --color-line: var(--line);
+  --color-citron-wash: var(--citron-wash);
+  --color-lagoon: var(--lagoon);
+  --color-lagoon-ink: var(--lagoon-ink);
+  --color-lagoon-soft: var(--lagoon-soft);
+  --color-lagoon-wash: var(--lagoon-wash);
+  --color-lagoon-hover: var(--lagoon-hover);
+  --color-citron: var(--citron);
+  --color-berry: var(--berry);
+  --color-berry-ink: var(--berry-ink);
+  --color-berry-wash: var(--berry-wash);
+  /* Tokens sémantiques shadcn */
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -93,16 +87,136 @@
   --color-popover-foreground: var(--popover-foreground);
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
   --color-foreground: var(--foreground);
   --color-background: var(--background);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* Typographie — Schibsted Grotesk (tout le texte) + Spline Sans Mono
+     (données, dates, heures, labels caps — avec tabular-nums) */
+  --font-sans: var(--font-schibsted);
+  --font-mono: var(--font-spline-mono);
+
+  /* Échelle typo — 9 styles (taille/interligne ; graisse et letter-spacing inclus).
+     display/title/heading/subhead/body en Schibsted ; data/label en mono. */
+  --text-display: 1.75rem; /* 28/32 · 800 */
+  --text-display--line-height: 2rem;
+  --text-display--letter-spacing: -0.02em;
+  --text-display--font-weight: 800;
+  --text-title: 1.5rem; /* 24/28 · 800 */
+  --text-title--line-height: 1.75rem;
+  --text-title--letter-spacing: -0.02em;
+  --text-title--font-weight: 800;
+  --text-heading: 1rem; /* 16/22 · 700 */
+  --text-heading--line-height: 1.375rem;
+  --text-heading--letter-spacing: -0.01em;
+  --text-heading--font-weight: 700;
+  --text-subhead: 0.875rem; /* 14/19 · 700 */
+  --text-subhead--line-height: 1.1875rem;
+  --text-subhead--font-weight: 700;
+  --text-body: 0.8125rem; /* 13/19 · 400 (600 en emphase) */
+  --text-body--line-height: 1.1875rem;
+  --text-ui: 0.75rem; /* 12/16 · 600 — labels, boutons secondaires, onglets */
+  --text-ui--line-height: 1rem;
+  --text-ui--font-weight: 600;
+  --text-caption: 0.6875rem; /* 11/15 — plancher Schibsted */
+  --text-caption--line-height: 0.9375rem;
+  --text-data: 0.75rem; /* 12/16 mono · 700 — montants, dates, heures */
+  --text-data--line-height: 1rem;
+  --text-data--font-weight: 700;
+  --text-label: 0.625rem; /* 10/14 mono · 600 caps — plancher absolu */
+  --text-label--line-height: 0.875rem;
+  --text-label--letter-spacing: 0.06em;
+  --text-label--font-weight: 600;
+
+  /* Conteneurs — contenu max 1200 (desktop ≥ 1024 : sidebar 220 fixe) */
+  --container-content: 75rem;
+
+  /* Rayons — 5 tokens : rounded-sm=r-4 · rounded-md=r-8 (chip/champ) ·
+     rounded-lg=r-12 (carte) · rounded-xl=r-20 (sheet/modale) · rounded-full=pill */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1.25rem;
+
+  /* Ombres — 4 tokens (+ variante sheet, y inversé pour les sheets mobiles).
+     Règle : une carte a bordure OU ombre, jamais les deux. */
+  --shadow-card: 0 2px 6px rgba(15, 47, 56, 0.08);
+  --shadow-float: 0 10px 26px rgba(15, 47, 56, 0.14);
+  --shadow-modal: 0 22px 50px rgba(15, 47, 56, 0.28);
+  --shadow-sheet: 0 -10px 30px rgba(15, 47, 56, 0.25);
+  --shadow-glow: 0 10px 26px rgba(0, 167, 181, 0.35);
+
+  /* Sheets mobiles — montent du bas en ~0.28s ease (handoff §6) */
+  --animate-sheet-up: sheet-up 0.28s ease both;
+  --animate-sheet-down: sheet-down 0.28s ease both;
+}
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes sheet-down {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+
+/* Coffre — cadre de scan Face ID (prototype : verrouillé → scan → ouvert) */
+@keyframes ring-pulse {
+  0%,
+  100% {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(1.04);
+  }
+}
+
+@keyframes scan-move {
+  0%,
+  100% {
+    top: 18%;
+  }
+  50% {
+    top: 78%;
+  }
+}
+
+@keyframes dot-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.animate-ring-pulse {
+  animation: ring-pulse 1.8s ease-in-out infinite;
+}
+.animate-scan-move {
+  animation: scan-move 1.5s ease-in-out infinite;
+}
+.animate-dot-blink {
+  animation: dot-blink 1s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-ring-pulse,
+  .animate-scan-move,
+  .animate-dot-blink {
+    animation: none;
+  }
 }
 
 @keyframes rise {
@@ -176,40 +290,6 @@
   }
 }
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
-}
-
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -219,5 +299,9 @@
   }
   html {
     @apply font-sans;
+  }
+  /* Icônes Lucide : stroke 1.75 partout (handoff §8a) */
+  svg.lucide {
+    stroke-width: 1.75;
   }
 }

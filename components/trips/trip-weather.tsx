@@ -41,9 +41,9 @@ export async function WeatherStrip({
   return (
     <section
       aria-label={`Météo à ${destination}`}
-      className="rounded-lg border border-laiton-clair bg-papier px-4 py-3"
+      className="rounded-lg border border-line bg-card px-4 py-3"
     >
-      <h2 className="mb-2 text-xs font-medium text-laiton uppercase tracking-wide">
+      <h2 className="mb-2 text-xs font-medium text-mist uppercase tracking-wide">
         Météo à {destination}
       </h2>
       <ul className="scrollbar-none flex gap-1 overflow-x-auto">
@@ -53,15 +53,15 @@ export async function WeatherStrip({
             className="flex min-w-16 flex-col items-center gap-0.5 rounded-md px-2 py-1.5 text-center"
             title={weatherLabel(d.code)}
           >
-            <span className="text-xs text-encre-douce capitalize">
+            <span className="text-xs text-slate capitalize">
               {format(new Date(`${d.date}T12:00:00`), "EEE d", { locale: dfLocale })}
             </span>
-            <WeatherIcon code={d.code} className="size-5 text-encre" />
-            <span className="text-xs text-encre tabular-nums">
-              {d.tMax}° <span className="text-encre-douce">/ {d.tMin}°</span>
+            <WeatherIcon code={d.code} className="size-5 text-ink" />
+            <span className="text-xs text-ink tabular-nums">
+              {d.tMax}° <span className="text-slate">/ {d.tMin}°</span>
             </span>
             {d.precipProb !== null && d.precipProb >= 30 ? (
-              <span className="text-[0.65rem] text-encre-douce">☂ {d.precipProb}%</span>
+              <span className="text-[0.65rem] text-slate">☂ {d.precipProb}%</span>
             ) : null}
           </li>
         ))}
@@ -73,7 +73,7 @@ export async function WeatherStrip({
 /** Ligne météo d'une journée (vue jour + hero Aujourd'hui). */
 export function WeatherLine({ day }: { day: DailyForecast }) {
   return (
-    <span className="inline-flex items-center gap-1.5 text-sm text-encre-douce">
+    <span className="inline-flex items-center gap-1.5 text-sm text-slate">
       <WeatherIcon code={day.code} className="size-4" />
       {weatherLabel(day.code)}, {day.tMax}° / {day.tMin}°
       {day.precipProb !== null && day.precipProb >= 30 ? ` · ☂ ${day.precipProb}%` : ""}

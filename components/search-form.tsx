@@ -22,7 +22,7 @@ export function SearchForm({
         value ? <input key={name} type="hidden" name={name} value={value} /> : null,
       )}
       <Search
-        className="pointer-events-none absolute top-2 left-2.5 size-4 text-encre-douce"
+        className="pointer-events-none absolute top-2 left-2.5 size-4 text-slate"
         aria-hidden="true"
       />
       <input
@@ -30,7 +30,7 @@ export function SearchForm({
         name="q"
         defaultValue={q ?? ""}
         placeholder={placeholder}
-        className="h-8 w-full rounded-full border border-laiton-clair bg-papier pr-3 pl-8 text-sm text-encre placeholder:text-encre-douce/70 focus:outline-none focus:ring-1 focus:ring-laiton"
+        className="h-8 w-full rounded-full border border-line bg-card pr-3 pl-8 text-sm text-ink placeholder:text-slate/70 focus:outline-none focus:ring-1 focus:ring-citron"
       />
     </form>
   );

@@ -103,7 +103,7 @@ export function PollsSection({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-medium text-encre">{t("ideas.pollSectionTitle")}</h2>
+        <h2 className="text-heading text-ink">{t("ideas.pollSectionTitle")}</h2>
         <Button type="button" variant="outline" size="sm" onClick={() => setShowForm(!showForm)}>
           {showForm ? t("ideas.cancel") : t("ideas.new")}
         </Button>
@@ -112,7 +112,7 @@ export function PollsSection({
       {showForm ? (
         <form
           action={formAction}
-          className="flex flex-col gap-2 rounded-lg border border-laiton-clair bg-parchemin/50 p-3"
+          className="flex flex-col gap-2 rounded-lg border border-line bg-sand/50 p-3"
         >
           <input type="hidden" name="tripId" value={tripId} />
           <Input
@@ -126,15 +126,15 @@ export function PollsSection({
             rows={3}
             required
             placeholder={t("ideas.optionsPlaceholder")}
-            className="rounded-md border border-laiton-clair bg-papier px-3 py-2 text-sm text-encre"
+            className="rounded-md border border-line bg-card px-3 py-2 text-sm text-ink"
           />
-          <p className="text-xs text-encre-douce">{t("ideas.optionsHint")}</p>
+          <p className="text-xs text-slate">{t("ideas.optionsHint")}</p>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-            <label className="flex items-center gap-2 text-sm text-encre">
-              <input type="checkbox" name="allowMultiple" className="size-4 accent-bordeaux" />
+            <label className="flex items-center gap-2 text-sm text-ink">
+              <input type="checkbox" name="allowMultiple" className="size-4 accent-lagoon-ink" />
               {t("ideas.pollAllowMultiple")}
             </label>
-            <div className="flex items-center gap-2 text-sm text-encre-douce">
+            <div className="flex items-center gap-2 text-sm text-slate">
               <label htmlFor="poll-closes-at">{t("ideas.pollClosesLabel")}</label>
               <Input id="poll-closes-at" name="closesAt" type="date" className="h-8 w-40 text-sm" />
             </div>
@@ -143,13 +143,13 @@ export function PollsSection({
             {formPending ? t("ideas.opening") : t("ideas.launchPoll")}
           </Button>
           {state.status === "error" ? (
-            <p className="text-xs text-bordeaux">{state.message}</p>
+            <p className="text-caption text-berry-ink">{state.message}</p>
           ) : null}
         </form>
       ) : null}
 
       {optimisticPolls.length === 0 && !showForm ? (
-        <p className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-4 py-8 text-center text-sm text-encre-douce">
+        <p className="rounded-lg border border-dashed border-line bg-card/60 px-4 py-8 text-center text-sm text-slate">
           {t("ideas.pollsEmpty")}
         </p>
       ) : null}
@@ -163,17 +163,17 @@ export function PollsSection({
         return (
           <article
             key={poll.id}
-            className="flex flex-col gap-1.5 rounded-lg border border-laiton-clair bg-papier px-4 py-3"
+            className="flex flex-col gap-1.5 rounded-lg border border-line bg-card px-4 py-3"
           >
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
-                <p className="text-sm font-medium text-encre">{poll.question}</p>
-                <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-encre-douce">
+                <p className="text-subhead text-ink">{poll.question}</p>
+                <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-caption text-ghost">
                   <span>
                     {voters} {voters > 1 ? t("ideas.voteMany") : t("ideas.voteOne")}
                   </span>
                   {poll.allow_multiple ? (
-                    <span className="rounded-full bg-laiton/15 px-1.5 py-0.5 text-[0.65rem] text-laiton">
+                    <span className="rounded-sm bg-wash px-1.5 py-0.5 font-mono text-label text-slate uppercase">
                       {t("ideas.pollAllowMultiple")}
                     </span>
                   ) : null}
@@ -186,13 +186,13 @@ export function PollsSection({
                   ) : null}
                 </p>
               </div>
-              <span className="flex shrink-0 items-center gap-2 text-xs text-encre-douce">
+              <span className="flex shrink-0 items-center gap-2 text-xs text-slate">
                 {!closed && canManage ? (
                   <button
                     type="button"
                     disabled={pending}
                     onClick={() => startTransition(() => closePoll(tripId, poll.id))}
-                    className="underline underline-offset-4 hover:text-encre"
+                    className="underline underline-offset-4 hover:text-ink"
                   >
                     {t("ideas.close")}
                   </button>
@@ -205,7 +205,7 @@ export function PollsSection({
                       setEditError(null);
                       setEditingId(editingId === poll.id ? null : poll.id);
                     }}
-                    className="text-encre-douce transition-colors hover:text-encre"
+                    className="text-slate transition-colors hover:text-ink"
                     aria-label={t("ideas.pollEdit")}
                     title={t("ideas.pollEdit")}
                   >
@@ -217,7 +217,7 @@ export function PollsSection({
                     type="button"
                     disabled={pending}
                     onClick={() => startTransition(() => deletePoll(tripId, poll.id))}
-                    className="text-encre-douce transition-colors hover:text-bordeaux"
+                    className="text-slate transition-colors hover:text-berry-ink"
                     aria-label={t("ideas.pollDelete")}
                     title={t("ideas.pollDelete")}
                   >
@@ -246,35 +246,62 @@ export function PollsSection({
                   const mine = myVotes.includes(i);
                   return (
                     <div key={option} className="flex flex-col gap-0.5">
+                      {/* L5a — option : rond 50 % (réservé au vote simple des
+                          sondages), sélection lagoon-wash + bordure lagoon-soft,
+                          piste de résultat sous le libellé. */}
                       <button
                         type="button"
                         disabled={closed}
                         onClick={() => vote(poll.id, i)}
+                        aria-pressed={mine}
                         className={cn(
-                          "relative overflow-hidden rounded-md border px-3 py-1.5 text-left text-sm transition-colors",
+                          "flex flex-col gap-1.5 rounded-lg border p-2.5 text-left transition-colors outline-none focus-visible:ring-2 focus-visible:ring-citron focus-visible:ring-offset-2 focus-visible:ring-offset-sand",
                           mine
-                            ? "border-bordeaux text-encre"
-                            : "border-laiton-clair text-encre-douce hover:text-encre",
+                            ? "border-[1.5px] border-lagoon-soft bg-lagoon-wash"
+                            : "border-line bg-card hover:bg-wash",
                           closed && "cursor-default",
                         )}
                       >
-                        <span
-                          className="absolute inset-y-0 left-0 bg-bordeaux/10"
-                          style={{ width: `${pct}%` }}
-                          aria-hidden="true"
-                        />
-                        <span className="relative flex justify-between">
-                          <span>
+                        <span className="flex w-full items-center gap-2.5">
+                          <span
+                            aria-hidden="true"
+                            className={cn(
+                              "flex size-4.5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold",
+                              mine ? "bg-lagoon text-white" : "border-[1.5px] border-ghost",
+                            )}
+                          >
+                            {mine ? "✓" : ""}
+                          </span>
+                          <span
+                            className={cn(
+                              "min-w-0 flex-1 truncate text-body text-ink",
+                              mine ? "font-bold" : "font-semibold",
+                            )}
+                          >
                             {option}
-                            {mine ? " ✓" : ""}
                           </span>
-                          <span className="text-xs">
-                            {count} · {pct}%
+                          <span className="shrink-0 font-mono text-caption font-bold text-ink tabular-nums">
+                            {count}
                           </span>
+                        </span>
+                        <span
+                          className={cn(
+                            "block h-2 w-full overflow-hidden rounded-[4px]",
+                            mine ? "bg-white" : "bg-wash",
+                          )}
+                        >
+                          <span
+                            aria-hidden="true"
+                            className={cn(
+                              "block h-full rounded-[4px]",
+                              mine ? "bg-lagoon" : "bg-ghost",
+                            )}
+                            style={{ width: `${pct}%` }}
+                          />
                         </span>
                       </button>
                       {count > 0 ? (
-                        <p className="px-1 text-[0.7rem] text-encre-douce">
+                        <p className="px-1 text-caption text-slate">
                           {optionVotes.map((v) => nameOf(v.user_id)).join(", ")}
                         </p>
                       ) : null}
@@ -317,7 +344,7 @@ function PollEditForm({
           optionsText.split("\n").map((o) => o.trim()),
         );
       }}
-      className="flex flex-col gap-2 rounded-md border border-laiton-clair bg-parchemin/40 p-2.5"
+      className="flex flex-col gap-2 rounded-md border border-line bg-sand/40 p-2.5"
     >
       <Input
         value={question}
@@ -331,10 +358,10 @@ function PollEditForm({
         onChange={(e) => setOptionsText(e.target.value)}
         rows={Math.max(2, poll.options.length)}
         required
-        className="rounded-md border border-laiton-clair bg-papier px-3 py-2 text-sm text-encre"
+        className="rounded-md border border-line bg-card px-3 py-2 text-sm text-ink"
         aria-label={t("ideas.optionsPlaceholder")}
       />
-      <p className="text-xs text-encre-douce">{t("ideas.pollEditHint")}</p>
+      <p className="text-xs text-slate">{t("ideas.pollEditHint")}</p>
       <div className="flex items-center gap-2">
         <Button type="submit" size="sm" disabled={pending}>
           {t("ideas.pollEditSave")}
@@ -343,7 +370,7 @@ function PollEditForm({
           {t("ideas.cancel")}
         </Button>
       </div>
-      {error ? <p className="text-xs text-bordeaux">{error}</p> : null}
+      {error ? <p className="text-caption text-berry-ink">{error}</p> : null}
     </form>
   );
 }

@@ -34,10 +34,10 @@ export async function TripReadiness({ tripId }: { tripId: string }) {
   const ready = items.filter((i) => i.done).length;
 
   return (
-    <section className="rounded-lg border border-laiton-clair bg-papier px-4 py-3">
+    <section className="rounded-lg border border-line bg-card px-4 py-3">
       <div className="mb-2 flex items-center justify-between">
-        <p className="text-sm font-medium text-encre">{t("readiness.title")}</p>
-        <span className="text-xs text-encre-douce">
+        <p className="text-sm font-medium text-ink">{t("readiness.title")}</p>
+        <span className="text-xs text-slate">
           {ready}/{items.length}
         </span>
       </div>
@@ -48,14 +48,14 @@ export async function TripReadiness({ tripId }: { tripId: string }) {
             className={cn(
               "flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs",
               item.done
-                ? "border-vert/30 bg-vert/10 text-encre"
-                : "border-laiton-clair bg-parchemin/40 text-encre-douce",
+                ? "border-lagoon/30 bg-lagoon/10 text-ink"
+                : "border-line bg-sand/40 text-slate",
             )}
           >
             {item.done ? (
-              <Check className="size-3.5 text-vert" aria-hidden="true" />
+              <Check className="size-3.5 text-lagoon" aria-hidden="true" />
             ) : (
-              <Circle className="size-3.5 text-laiton" aria-hidden="true" />
+              <Circle className="size-3.5 text-mist" aria-hidden="true" />
             )}
             {t(`readiness.${item.key}`)}
           </li>

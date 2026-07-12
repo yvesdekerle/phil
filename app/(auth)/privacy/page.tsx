@@ -9,10 +9,8 @@ export async function generateMetadata() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="mt-8">
-      <h2 className="font-display text-xl text-encre">{title}</h2>
-      <div className="mt-2 flex flex-col gap-2 text-sm leading-relaxed text-encre-douce">
-        {children}
-      </div>
+      <h2 className="text-heading text-ink">{title}</h2>
+      <div className="mt-2 flex flex-col gap-2 text-sm leading-relaxed text-slate">{children}</div>
     </section>
   );
 }
@@ -21,11 +19,11 @@ export default async function PrivacyPage() {
   const t = await getT();
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-10">
-      <Link href="/" className="text-sm text-encre-douce underline underline-offset-4">
+      <Link href="/" className="text-sm text-slate underline underline-offset-4">
         {t("privacy.back")}
       </Link>
-      <h1 className="mt-4 font-display text-3xl text-encre">{t("privacy.title")}</h1>
-      <p className="mt-2 text-sm text-encre-douce">{t("privacy.intro")}</p>
+      <h1 className="mt-4 text-title text-ink">{t("privacy.title")}</h1>
+      <p className="mt-2 text-sm text-slate">{t("privacy.intro")}</p>
 
       <Section title={t("privacy.responsibleTitle")}>
         <p>
@@ -39,19 +37,17 @@ export default async function PrivacyPage() {
 
       <Section title={t("privacy.dataTitle")}>
         <p>
-          <strong className="text-encre">{t("privacy.accountLabel")}</strong> —{" "}
+          <strong className="text-ink">{t("privacy.accountLabel")}</strong> —{" "}
           {t("privacy.accountBody")}
         </p>
         <p>
-          <strong className="text-encre">{t("privacy.tripsLabel")}</strong> —{" "}
-          {t("privacy.tripsBody")}
+          <strong className="text-ink">{t("privacy.tripsLabel")}</strong> — {t("privacy.tripsBody")}
         </p>
         <p>
-          <strong className="text-encre">{t("privacy.vaultLabel")}</strong> —{" "}
-          {t("privacy.vaultBody")}
+          <strong className="text-ink">{t("privacy.vaultLabel")}</strong> — {t("privacy.vaultBody")}
         </p>
         <p>
-          <strong className="text-encre">{t("privacy.passkeysLabel")}</strong> —{" "}
+          <strong className="text-ink">{t("privacy.passkeysLabel")}</strong> —{" "}
           {t("privacy.passkeysBody")}
         </p>
       </Section>
@@ -82,7 +78,7 @@ export default async function PrivacyPage() {
         <p>{t("privacy.cookiesBody")}</p>
       </Section>
 
-      <p className="mt-10 text-xs text-encre-douce">{t("privacy.updated")}</p>
+      <p className="mt-10 text-xs text-slate">{t("privacy.updated")}</p>
     </main>
   );
 }

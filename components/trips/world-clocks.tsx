@@ -23,7 +23,7 @@ export function WorldClocks({ clocks }: { clocks: ClockEntry[] }) {
   }, []);
 
   if (!now) {
-    return <p className="text-sm text-encre-douce">{t("clocksExtra.winding")}</p>;
+    return <p className="text-sm text-slate">{t("clocksExtra.winding")}</p>;
   }
 
   // Décalage UTC en heures (au quart d'heure près)
@@ -53,21 +53,17 @@ export function WorldClocks({ clocks }: { clocks: ClockEntry[] }) {
           <li
             key={`${c.timezone}-${c.label}`}
             className={cn(
-              "flex items-baseline gap-4 rounded-lg border bg-papier px-5 py-3",
-              c.isHome ? "border-laiton" : "border-laiton-clair",
+              "flex items-baseline gap-4 rounded-lg border bg-card px-5 py-3",
+              c.isHome ? "border-line" : "border-line",
             )}
           >
-            <span className="font-display text-3xl text-encre tabular-nums">
-              {timeIn(c.timezone)}
-            </span>
+            <span className="font-sans text-3xl text-ink tabular-nums">{timeIn(c.timezone)}</span>
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-sm font-medium text-encre">
+              <span className="block truncate text-sm font-medium text-ink">
                 {c.label}
-                {c.isHome ? (
-                  <span className="text-encre-douce"> {t("clocks.homeSuffix")}</span>
-                ) : null}
+                {c.isHome ? <span className="text-slate"> {t("clocks.homeSuffix")}</span> : null}
               </span>
-              <span className="block text-xs text-encre-douce">
+              <span className="block text-xs text-slate">
                 {dayIn(c.timezone)} · UTC{c.offset >= 0 ? "+" : ""}
                 {c.offset}
                 {!c.isHome && diff !== 0

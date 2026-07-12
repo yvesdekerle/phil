@@ -42,13 +42,13 @@ export async function BadgesGrid({ badges }: { badges: Badge[] }) {
   const unlockedCount = badges.filter((b) => b.unlocked).length;
   return (
     <section className="mt-8">
-      <h2 className="mb-1 font-display text-xl text-encre">
+      <h2 className="mb-1 font-sans text-xl text-ink">
         {t("explorer.badgesTitle")}{" "}
-        <span className="text-sm text-encre-douce">
+        <span className="text-sm text-slate">
           ({unlockedCount}/{badges.length})
         </span>
       </h2>
-      <p className="mb-3 text-sm text-encre-douce">{t("explorer.badgesIntro")}</p>
+      <p className="mb-3 text-sm text-slate">{t("explorer.badgesIntro")}</p>
       <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {badges.map((b) => {
           const Icon = ICONS[b.icon as keyof typeof ICONS] ?? Award;
@@ -58,8 +58,8 @@ export async function BadgesGrid({ badges }: { badges: Badge[] }) {
               className={cn(
                 "rounded-lg border px-3 py-3",
                 b.unlocked
-                  ? "border-laiton bg-gradient-to-br from-papier to-parchemin"
-                  : "border-laiton-clair/60 bg-papier/60 opacity-70",
+                  ? "border-line bg-gradient-to-br from-card to-sand"
+                  : "border-line/60 bg-card/60 opacity-70",
               )}
             >
               <div className="flex items-center gap-2">
@@ -67,8 +67,8 @@ export async function BadgesGrid({ badges }: { badges: Badge[] }) {
                   className={cn(
                     "flex size-9 shrink-0 items-center justify-center rounded-full border",
                     b.unlocked
-                      ? "border-laiton bg-laiton/15 text-bordeaux"
-                      : "border-laiton-clair text-encre-douce/60",
+                      ? "border-line bg-citron/15 text-lagoon-ink"
+                      : "border-line text-slate/60",
                   )}
                 >
                   <Icon className="size-4.5" aria-hidden="true" />
@@ -77,19 +77,19 @@ export async function BadgesGrid({ badges }: { badges: Badge[] }) {
                   <span
                     className={cn(
                       "block truncate text-sm font-medium",
-                      b.unlocked ? "text-encre" : "text-encre-douce",
+                      b.unlocked ? "text-ink" : "text-slate",
                     )}
                   >
                     {b.name}
                   </span>
                   {!b.unlocked ? (
-                    <span className="block text-[0.65rem] text-encre-douce tabular-nums">
+                    <span className="block text-[0.65rem] text-slate tabular-nums">
                       {b.value}/{b.target}
                     </span>
                   ) : null}
                 </span>
               </div>
-              <p className="mt-1.5 text-xs text-encre-douce">{b.description}</p>
+              <p className="mt-1.5 text-xs text-slate">{b.description}</p>
             </li>
           );
         })}

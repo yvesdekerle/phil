@@ -45,7 +45,7 @@ export function PairApprove({ pairingId }: { pairingId: string }) {
 
   if (done) {
     return (
-      <p className="text-center text-sm text-encre">
+      <p className="text-center text-sm text-ink">
         ✓ Appareil approuvé. Retourne sur le nouvel appareil : il finalise tout seul.
       </p>
     );
@@ -53,14 +53,14 @@ export function PairApprove({ pairingId }: { pairingId: string }) {
 
   return (
     <div className="flex flex-col items-center gap-3 text-center">
-      <p className="text-sm text-encre-douce">
+      <p className="text-sm text-slate">
         Autorise ce nouvel appareil à accéder à ton coffre. Ta clé maîtresse lui sera transmise
         chiffrée — le serveur ne la voit jamais.
       </p>
       <Button type="button" onClick={approve} disabled={pending}>
         {pending ? "Approbation…" : "Approuver ce nouvel appareil"}
       </Button>
-      {error ? <p className="text-sm text-bordeaux">{error}</p> : null}
+      {error ? <p className="text-sm text-lagoon-ink">{error}</p> : null}
     </div>
   );
 }

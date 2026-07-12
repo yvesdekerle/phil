@@ -128,6 +128,7 @@ export const checklistEn = {
     scheduled: "Planned",
     plan: "Plan",
     link: "Link",
+    locate: "See on the map",
     proposedBy: "suggested by",
     removeVoteAria: "Take back my vote",
     voteAria: "Vote for this idea",

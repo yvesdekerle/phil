@@ -108,7 +108,7 @@ export function TransportForm({
           }}
           placeholder={t("events.transport.titlePlaceholder")}
         />
-        <p className="text-xs text-encre-douce">{t("events.transport.titleHint")}</p>
+        <p className="text-xs text-slate">{t("events.transport.titleHint")}</p>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -156,7 +156,9 @@ export function TransportForm({
         <Button type="submit" disabled={pending}>
           {pending ? t("events.transport.submitting") : t("events.transport.submit")}
         </Button>
-        {state.status === "error" ? <p className="text-sm text-bordeaux">{state.message}</p> : null}
+        {state.status === "error" ? (
+          <p className="text-caption text-berry-ink">{state.message}</p>
+        ) : null}
       </div>
     </form>
   );

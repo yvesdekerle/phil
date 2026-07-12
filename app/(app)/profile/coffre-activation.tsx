@@ -50,7 +50,7 @@ export function CoffreActivation({
   };
 
   if (done) {
-    return <p className="text-sm text-encre">✓ Coffre chiffré activé sur cet appareil.</p>;
+    return <p className="text-sm text-ink">✓ Coffre chiffré activé sur cet appareil.</p>;
   }
 
   return (
@@ -58,7 +58,7 @@ export function CoffreActivation({
       <Button type="button" onClick={activate} disabled={pending}>
         {pending ? "Activation…" : "Activer le coffre chiffré"}
       </Button>
-      {error ? <p className="text-sm text-bordeaux">{error}</p> : null}
+      {error ? <p className="text-caption text-berry-ink">{error}</p> : null}
     </div>
   );
 }

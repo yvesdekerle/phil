@@ -41,7 +41,7 @@ export function DeleteDocButton({
           variant="ghost"
           size="sm"
           aria-label={`${t("tripDocs.delete")} ${fileName}`}
-          className="text-bordeaux hover:text-bordeaux-fonce"
+          className="text-lagoon-ink hover:text-lagoon-hover"
         >
           <Trash2 aria-hidden="true" />
         </Button>
@@ -54,7 +54,7 @@ export function DeleteDocButton({
           <AlertDialogDescription>{t("tripDocs.confirmBody")}</AlertDialogDescription>
         </AlertDialogHeader>
         {error ? (
-          <p role="alert" className="text-sm text-bordeaux">
+          <p role="alert" className="text-sm text-lagoon-ink">
             {error}
           </p>
         ) : null}

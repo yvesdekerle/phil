@@ -90,9 +90,9 @@ export function PrepareOfflineButton({ tripId }: { tripId: string }) {
   }
 
   return (
-    <div className="flex flex-col gap-2 rounded-lg border border-laiton-clair bg-papier px-5 py-4">
-      <p className="text-sm font-medium text-encre">{t("offline.prepareTitle")}</p>
-      <p className="text-xs text-encre-douce">{t("offline.prepareHint")}</p>
+    <div className="flex flex-col gap-2 rounded-lg border border-line bg-card px-5 py-4">
+      <p className="text-sm font-medium text-ink">{t("offline.prepareTitle")}</p>
+      <p className="text-xs text-slate">{t("offline.prepareHint")}</p>
       <div className="flex flex-wrap items-center gap-3">
         <Button type="button" variant="outline" disabled={pending} onClick={prepare}>
           {pending ? t("offline.preparing") : t("offline.prepare")}
@@ -100,9 +100,9 @@ export function PrepareOfflineButton({ tripId }: { tripId: string }) {
         <Button type="button" disabled={pending} onClick={prepareAll}>
           {t("offline.prepareAll")}
         </Button>
-        {fullStatus ? <p className="text-xs text-encre-douce">{fullStatus}</p> : null}
+        {fullStatus ? <p className="text-xs text-slate">{fullStatus}</p> : null}
         {last ? (
-          <p className="text-xs text-encre-douce">
+          <p className="text-xs text-slate">
             {t("offline.syncedAt")}{" "}
             {new Intl.DateTimeFormat(il, { dateStyle: "short", timeStyle: "short" }).format(
               new Date(last.syncedAt),
@@ -114,7 +114,7 @@ export function PrepareOfflineButton({ tripId }: { tripId: string }) {
               .replace("{ideas}", String(last.ideaCount))}
           </p>
         ) : null}
-        {error ? <p className="text-xs text-bordeaux">{error}</p> : null}
+        {error ? <p className="text-xs text-lagoon-ink">{error}</p> : null}
       </div>
     </div>
   );

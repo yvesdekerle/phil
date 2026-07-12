@@ -26,6 +26,10 @@ export type MapMarker = {
   noPath?: boolean;
 };
 
+/** Cadrage commun : tout le voyage visible, sans animation (V06d — animer le
+ * fit pendant qu'un setView de focus court éparpillait les marqueurs). */
+const FIT_OPTIONS: L.FitBoundsOptions = { padding: [36, 36], maxZoom: 13, animate: false };
+
 /** Carte Leaflet + OSM (PHIL-N01, style Polarsteps PHIL-Q15). */
 export function TripMap({
   markers,
@@ -47,13 +51,19 @@ export function TripMap({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
+  const markersRef = useRef(new Map<string, L.Marker>());
+  const boundsRef = useRef<L.LatLngBounds | null>(null);
+  // Vrai dès que l'utilisateur (geste ou focus) a choisi son cadrage : les
+  // re-fit automatiques déclenchés par un resize ne doivent plus le lui voler.
+  const userAdjustedRef = useRef(false);
   const t = useT();
 
   useEffect(() => {
-    if (!containerRef.current) {
+    const el = containerRef.current;
+    if (!el) {
       return;
     }
-    const map = L.map(containerRef.current, { scrollWheelZoom: true });
+    const map = L.map(el, { scrollWheelZoom: true });
     mapRef.current = map;
     // Fond CARTO Voyager (PHIL-Q37c) : lisible et épuré, sans le fouillis des
     // frontières administratives d'OSM.
@@ -63,24 +73,37 @@ export function TripMap({
       subdomains: "abcd",
       maxZoom: 20,
     }).addTo(map);
+    const markInteraction = () => {
+      userAdjustedRef.current = true;
+    };
+    el.addEventListener("pointerdown", markInteraction);
+    el.addEventListener("wheel", markInteraction);
     // La colonne carte est haute/responsive/sticky : recalcule la taille des
     // tuiles quand le conteneur change de dimensions (évite les tuiles grises),
     // et une fois après le premier paint (init en grille/flex à largeur tardive).
+    // V06d : re-cadre au passage — le fitBounds initial part sur une taille
+    // provisoire et coupait l'île en vue par défaut.
     // `removed` : la carte peut être démontée (navigation) avant que le rAF ou
     // le ResizeObserver ne s'exécute — invalidateSize planterait alors.
     let removed = false;
     const resize = () => {
-      if (!removed) {
-        map.invalidateSize();
+      if (removed) {
+        return;
+      }
+      map.invalidateSize();
+      if (!userAdjustedRef.current && boundsRef.current) {
+        map.fitBounds(boundsRef.current, FIT_OPTIONS);
       }
     };
     const raf = requestAnimationFrame(resize);
     const observer = new ResizeObserver(resize);
-    observer.observe(containerRef.current);
+    observer.observe(el);
     return () => {
       removed = true;
       cancelAnimationFrame(raf);
       observer.disconnect();
+      el.removeEventListener("pointerdown", markInteraction);
+      el.removeEventListener("wheel", markInteraction);
       map.remove();
       mapRef.current = null;
     };
@@ -93,6 +116,7 @@ export function TripMap({
     }
     const layer = L.layerGroup().addTo(map);
     const byId = new Map<string, L.Marker>();
+    markersRef.current = byId;
 
     const sorted = [...markers].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
@@ -102,14 +126,14 @@ export function TripMap({
       const points = pathMarkers.map((m) => [m.lat, m.lng] as [number, number]);
       if (points.length > 1) {
         L.polyline(points, {
-          color: palette.papier,
+          color: palette.card,
           weight: 7,
           opacity: 0.9,
           lineJoin: "round",
           lineCap: "round",
         }).addTo(layer);
         L.polyline(points, {
-          color: palette.bordeaux,
+          color: palette.lagoonInk,
           weight: 3.5,
           opacity: 0.9,
           lineJoin: "round",
@@ -124,14 +148,14 @@ export function TripMap({
       const size = m.thumbUrl ? 44 : m.house ? 28 : 26;
       const iconHtml = (highlighted: boolean) => {
         const shadow = highlighted
-          ? `box-shadow:0 0 0 3px ${palette.bordeaux},0 3px 12px rgba(31,42,68,.5);`
-          : "box-shadow:0 2px 8px rgba(31,42,68,.45);";
-        const base = `border-radius:9999px;border:2.5px solid ${palette.papier};${shadow}display:flex;align-items:center;justify-content:center;`;
+          ? `box-shadow:0 0 0 3px ${palette.lagoonInk},0 3px 12px rgba(15,47,56,.5);`
+          : "box-shadow:0 2px 8px rgba(15,47,56,.45);";
+        const base = `border-radius:9999px;border:2.5px solid ${palette.card};${shadow}display:flex;align-items:center;justify-content:center;`;
         return m.thumbUrl
-          ? `<div style="${base}width:44px;height:44px;background:${palette.papier} url('${m.thumbUrl}') center/cover"></div>`
+          ? `<div style="${base}width:44px;height:44px;background:${palette.card} url('${m.thumbUrl}') center/cover"></div>`
           : m.house
-            ? `<div style="${base}width:28px;height:28px;background:${m.color};color:${palette.papier}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></svg></div>`
-            : `<div style="${base}width:26px;height:26px;background:${m.color};color:${palette.papier};font:700 12px/1 system-ui">${m.label ? escapeHtml(m.label) : ""}</div>`;
+            ? `<div style="${base}width:28px;height:28px;background:${m.color};color:${palette.card}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></svg></div>`
+            : `<div style="${base}width:26px;height:26px;background:${m.color};color:${palette.card};font:700 12px/1 system-ui">${m.label ? escapeHtml(m.label) : ""}</div>`;
       };
       const makeIcon = (highlighted: boolean) =>
         L.divIcon({
@@ -143,10 +167,10 @@ export function TripMap({
       const icon = makeIcon(false);
       const distance =
         distanceFrom && (m.lat !== distanceFrom.lat || m.lng !== distanceFrom.lng)
-          ? `<br/><span style="color:${palette.encreDouce}">${haversineKm(distanceFrom, m).toFixed(1)} km ${t("map.from")} ${escapeHtml(distanceFrom.label)}</span>`
+          ? `<br/><span style="color:${palette.slate}">${haversineKm(distanceFrom, m).toFixed(1)} km ${t("map.from")} ${escapeHtml(distanceFrom.label)}</span>`
           : "";
       const link = m.href
-        ? `<br/><a href="${m.href}" style="color:${palette.bordeaux}">${t("map.viewDetails")}</a>`
+        ? `<br/><a href="${m.href}" style="color:${palette.lagoonInk}">${t("map.viewDetails")}</a>`
         : "";
       const marker = L.marker([m.lat, m.lng], { icon })
         .bindPopup(
@@ -160,34 +184,42 @@ export function TripMap({
     }
 
     if (sorted.length > 0) {
-      map.fitBounds(L.latLngBounds(sorted.map((m) => [m.lat, m.lng])), {
-        padding: [36, 36],
-        maxZoom: 13,
-      });
+      boundsRef.current = L.latLngBounds(sorted.map((m) => [m.lat, m.lng]));
+      userAdjustedRef.current = false;
+      map.fitBounds(boundsRef.current, FIT_OPTIONS);
     } else {
+      boundsRef.current = null;
       map.setView([0, 0], 2);
-    }
-
-    // PHIL-Q14/Q37c : focus depuis la grille photos ou un clic dans la liste
-    void focusNonce; // dépendance : force le re-zoom même sur le même lieu
-    if (focusId) {
-      const target = byId.get(focusId);
-      const m = markers.find((x) => x.id === focusId);
-      if (target && m) {
-        map.setView([m.lat, m.lng], Math.max(map.getZoom(), 12));
-        target.openPopup();
-      }
     }
 
     return () => {
       layer.remove();
     };
-  }, [markers, drawPath, distanceFrom, focusId, focusNonce, t]);
+  }, [markers, drawPath, distanceFrom, t]);
+
+  // PHIL-Q14/Q37c : focus depuis la grille photos ou un clic dans la liste.
+  // Effet séparé du rendu des marqueurs (V06d) : reconstruire le layer et
+  // relancer un fitBounds animé pendant le setView du focus éparpillait les
+  // pastilles n'importe où sur la carte.
+  useEffect(() => {
+    void focusNonce; // dépendance : force le re-zoom même sur le même lieu
+    const map = mapRef.current;
+    if (!map || !focusId) {
+      return;
+    }
+    const target = markersRef.current.get(focusId);
+    const m = markers.find((x) => x.id === focusId);
+    if (target && m) {
+      userAdjustedRef.current = true;
+      map.setView([m.lat, m.lng], Math.max(map.getZoom(), 12));
+      target.openPopup();
+    }
+  }, [focusId, focusNonce, markers]);
 
   return (
     <div
       ref={containerRef}
-      className={cn(heightClass, "w-full overflow-hidden rounded-lg border border-laiton-clair")}
+      className={cn(heightClass, "w-full overflow-hidden rounded-lg border border-line")}
     />
   );
 }

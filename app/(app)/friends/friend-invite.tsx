@@ -58,7 +58,7 @@ export function FriendInvite({
       </Button>
       {state.status !== "idle" ? (
         <p
-          className={`w-full text-right text-xs ${state.status === "error" ? "text-bordeaux" : "text-encre-douce"}`}
+          className={`w-full text-right text-xs ${state.status === "error" ? "text-lagoon-ink" : "text-slate"}`}
         >
           {state.message}
         </p>

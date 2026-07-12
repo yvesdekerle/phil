@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Bodoni_Moda, Figtree } from "next/font/google";
+import { Schibsted_Grotesk, Spline_Sans_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
 import { CookieNotice } from "@/components/cookie-notice";
@@ -12,15 +12,14 @@ import { getLocale, getT } from "@/lib/i18n/server";
 import { palette } from "@/lib/ui/colors";
 import { cn } from "@/lib/utils";
 
-const figtree = Figtree({
-  variable: "--font-figtree",
+const schibsted = Schibsted_Grotesk({
+  variable: "--font-schibsted",
   subsets: ["latin"],
 });
 
-const bodoni = Bodoni_Moda({
-  variable: "--font-bodoni",
+const splineMono = Spline_Sans_Mono({
+  variable: "--font-spline-mono",
   subsets: ["latin"],
-  style: ["normal", "italic"],
 });
 
 export const metadata: Metadata = {
@@ -37,7 +36,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport = {
-  themeColor: palette.parchemin,
+  themeColor: palette.sand,
 };
 
 export default async function RootLayout({
@@ -50,7 +49,7 @@ export default async function RootLayout({
   return (
     <html
       lang={locale}
-      className={cn("h-full antialiased font-sans", figtree.variable, bodoni.variable)}
+      className={cn("h-full antialiased font-sans", schibsted.variable, splineMono.variable)}
     >
       <body className="min-h-full flex flex-col font-sans">
         <I18nProvider locale={locale} dict={completeMessages(locale)}>
@@ -62,13 +61,13 @@ export default async function RootLayout({
 
           {/* Conteneur qui grandit : pousse le footer en bas même sur les pages courtes */}
           <div className="flex flex-1 flex-col">{children}</div>
-          <footer className="border-t border-laiton-clair/50 px-4 py-4 text-center text-xs text-encre-douce">
+          <footer className="border-t border-line/50 px-4 py-4 text-center text-xs text-slate">
             {t("footer.tagline")} ·{" "}
-            <a href="/privacy" className="underline underline-offset-4 hover:text-encre">
+            <a href="/privacy" className="underline underline-offset-4 hover:text-ink">
               {t("footer.privacy")}
             </a>{" "}
             ·{" "}
-            <a href="/legal" className="underline underline-offset-4 hover:text-encre">
+            <a href="/legal" className="underline underline-offset-4 hover:text-ink">
               {t("footer.legal")}
             </a>
           </footer>

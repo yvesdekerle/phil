@@ -45,17 +45,17 @@ export default async function ImportReservationPage({
     <div className="mx-auto flex max-w-lg flex-col gap-5">
       <Link
         href={`/trips/${tripId}/events/new`}
-        className="text-sm text-encre-douce underline underline-offset-4 hover:text-encre"
+        className="text-sm text-slate underline underline-offset-4 hover:text-ink"
       >
         {t("events.import.backManual")}
       </Link>
       <div>
-        <h1 className="font-display text-2xl text-encre">{t("events.import.title")}</h1>
-        <p className="mt-1 text-sm text-encre-douce">{t("events.import.intro")}</p>
+        <h1 className="text-title text-ink">{t("events.import.title")}</h1>
+        <p className="mt-1 text-sm text-slate">{t("events.import.intro")}</p>
       </div>
       {(drafts ?? []).length > 0 && !activeDraft ? (
-        <section className="rounded-lg border border-laiton bg-laiton/5 px-4 py-3">
-          <h2 className="mb-2 text-sm font-medium text-encre">
+        <section className="rounded-lg border border-line bg-citron/5 px-4 py-3">
+          <h2 className="mb-2 text-sm font-medium text-ink">
             {t("events.import.emailToValidate")} ({(drafts ?? []).length})
           </h2>
           <ul className="flex flex-col gap-2">
@@ -63,9 +63,9 @@ export default async function ImportReservationPage({
               const extracted = d.extracted as ExtractedReservation;
               return (
                 <li key={d.id} className="flex flex-wrap items-center gap-2 text-sm">
-                  <span className="min-w-0 flex-1 truncate text-encre">
+                  <span className="min-w-0 flex-1 truncate text-ink">
                     {extracted?.title ?? d.subject ?? t("events.import.defaultReservation")}
-                    <span className="ml-1.5 text-xs text-encre-douce">
+                    <span className="ml-1.5 text-xs text-slate">
                       {t("events.import.from")} {d.sender}
                     </span>
                   </span>
@@ -102,7 +102,7 @@ export default async function ImportReservationPage({
           }
         />
       ) : (
-        <p className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-4 py-8 text-center text-sm text-encre-douce">
+        <p className="rounded-lg border border-dashed border-line bg-card/60 px-4 py-8 text-center text-sm text-slate">
           {t("events.import.notConfigured")}
         </p>
       )}

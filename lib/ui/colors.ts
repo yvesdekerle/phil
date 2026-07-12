@@ -1,27 +1,39 @@
 /**
- * Palette Phil — miroir JS des tokens couleur de `app/globals.css` (source de
- * vérité, PHIL-R20 / audit A9). À utiliser dans les contextes **hors
- * CSS/Tailwind** où l'on manipule une couleur en JavaScript : SVG/canvas,
- * marqueurs Leaflet, styles inline, e-mails (React Email), `manifest.ts`,
- * `theme-color`. En `className`, préférer **toujours** les classes Tailwind
- * (`text-bordeaux`, `bg-papier`, `border-laiton-clair`, …) qui pointent sur ces
- * mêmes variables CSS.
+ * Palette « Lagune vive » — miroir JS des tokens couleur de `app/globals.css`
+ * (source de vérité : tmp/design_phil_v2/README.md §8a). À utiliser dans les
+ * contextes **hors CSS/Tailwind** où l'on manipule une couleur en JavaScript :
+ * SVG/canvas, marqueurs Leaflet, styles inline, e-mails (React Email),
+ * `manifest.ts`, `theme-color`. En `className`, préférer **toujours** les
+ * classes Tailwind (`text-ink`, `bg-sand`, `border-line`, …) qui pointent sur
+ * ces mêmes variables CSS.
  *
  * ⚠️ Toute modification d'une valeur doit rester synchronisée avec la variable
  * CSS `--<token>` correspondante dans `app/globals.css`. Le test
  * `tests/unit/palette.test.ts` verrouille cet invariant.
  */
 export const palette = {
-  parchemin: "#f4eee1",
-  papier: "#fbf8f1",
-  encre: "#1f2a44",
-  encreDouce: "#5a6379",
-  bordeaux: "#6e1f2e",
-  bordeauxFonce: "#571723",
-  laiton: "#a98a54",
-  laitonClair: "#d9c9a3",
-  vert: "#3f7a5a",
-  bleuNuit: "#2b3a67",
+  /* Encres & textes */
+  ink: "#0f2f38",
+  inkDeep: "#081e24",
+  slate: "#5c7078",
+  mist: "#6c7e84",
+  ghost: "#93a3a8",
+  /* Fonds & structure */
+  sand: "#fbf9f4",
+  card: "#ffffff",
+  wash: "#f1efe8",
+  line: "#e7e2d6",
+  citronWash: "#fff8df",
+  /* Accents & sémantique */
+  lagoon: "#00a7b5",
+  lagoonInk: "#00727c",
+  lagoonSoft: "#9ed4d9",
+  lagoonWash: "#e0f2f3",
+  lagoonHover: "#00616a",
+  citron: "#f6d33c",
+  berry: "#d8548c",
+  berryInk: "#c23d75",
+  berryWash: "#fdeef4",
 } as const;
 
 export type PaletteColor = keyof typeof palette;

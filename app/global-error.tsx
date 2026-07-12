@@ -69,21 +69,21 @@ export default function GlobalError({
           gap: "1rem",
           padding: "2rem",
           textAlign: "center",
-          background: palette.parchemin,
-          color: palette.encre,
+          background: palette.sand,
+          color: palette.ink,
           fontFamily: "system-ui, sans-serif",
         }}
       >
         <h1 style={{ fontSize: "1.5rem", fontStyle: "italic", margin: 0 }}>{m.title}</h1>
-        <p style={{ fontSize: "0.9rem", color: "#6b5d4a", maxWidth: "24rem" }}>{m.body}</p>
+        <p style={{ fontSize: "0.9rem", color: palette.slate, maxWidth: "24rem" }}>{m.body}</p>
         <button
           type="button"
           onClick={reset}
           style={{
             border: "none",
             borderRadius: "9999px",
-            background: palette.bordeaux,
-            color: palette.parchemin,
+            background: palette.lagoonInk,
+            color: palette.sand,
             padding: "0.5rem 1.25rem",
             fontSize: "0.9rem",
             cursor: "pointer",

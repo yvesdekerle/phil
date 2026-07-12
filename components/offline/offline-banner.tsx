@@ -16,7 +16,7 @@ export function OfflineBanner() {
   }
 
   return (
-    <div className="sticky top-0 z-50 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 border-b border-encre/20 bg-encre px-4 py-2 text-center text-sm text-papier">
+    <div className="sticky top-0 z-50 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 border-b border-berry-ink/20 bg-berry-wash px-4 py-2 text-center text-body text-berry-ink">
       <span>{t("offline.bannerText")}</span>
       {pathname !== "/offline" ? (
         <Link href="/offline" className="underline underline-offset-4">

@@ -72,15 +72,13 @@ export default async function NewEventPage({
     <main className="mx-auto w-full max-w-lg flex-1 px-4 py-8">
       <Link
         href={`/trips/${tripId}`}
-        className="text-sm text-encre-douce underline underline-offset-4 hover:text-encre"
+        className="text-sm text-slate underline underline-offset-4 hover:text-ink"
       >
         {t("calendar.backToCalendar")}
       </Link>
-      <h1 className="mt-3 mb-2 text-center font-display text-3xl text-encre">
-        {t("events.new.title")}
-      </h1>
+      <h1 className="mt-3 mb-2 text-center text-title text-ink">{t("events.new.title")}</h1>
       <div className="mb-6 flex flex-col items-center gap-2">
-        <p className="text-center text-sm text-encre-douce">{t("events.new.importPrompt")}</p>
+        <p className="text-center text-sm text-slate">{t("events.new.importPrompt")}</p>
         <Link
           href={`/trips/${tripId}/events/import`}
           className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
@@ -98,8 +96,8 @@ export default async function NewEventPage({
             className={cn(
               "rounded-full border px-4 py-1.5 text-sm font-medium transition-colors",
               activeType === tabType
-                ? "border-bordeaux bg-bordeaux text-papier"
-                : "border-laiton-clair bg-papier text-encre-douce hover:text-encre",
+                ? "border-lagoon-ink bg-lagoon-ink text-card"
+                : "border-line bg-card text-slate hover:text-ink",
             )}
           >
             {t(`events.type.${tabType}`)}

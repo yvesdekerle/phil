@@ -108,8 +108,8 @@ export function EncryptedDocumentViewer({
       );
     }
     return (
-      <div className="px-6 py-12 text-center text-sm text-encre-douce">
-        <a href={url} download={fileName} className="text-bordeaux underline underline-offset-4">
+      <div className="px-6 py-12 text-center text-sm text-slate">
+        <a href={url} download={fileName} className="text-lagoon-ink underline underline-offset-4">
           Télécharger le fichier déchiffré
         </a>
       </div>
@@ -120,7 +120,7 @@ export function EncryptedDocumentViewer({
     <div className="flex flex-col items-center gap-3 px-6 py-12 text-center">
       {needsUnlock ? (
         <>
-          <p className="text-sm text-encre-douce">
+          <p className="text-sm text-slate">
             Document chiffré de bout en bout. Déverrouille-le avec Face ID / empreinte pour
             l'afficher.
           </p>
@@ -129,9 +129,9 @@ export function EncryptedDocumentViewer({
           </Button>
         </>
       ) : (
-        <p className="text-sm text-encre-douce">Ouverture du document…</p>
+        <p className="text-sm text-slate">Ouverture du document…</p>
       )}
-      {error ? <p className="text-sm text-bordeaux">{error}</p> : null}
+      {error ? <p className="text-sm text-lagoon-ink">{error}</p> : null}
     </div>
   );
 }

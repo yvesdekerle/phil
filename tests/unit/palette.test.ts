@@ -12,16 +12,25 @@ const CSS = readFileSync(join(process.cwd(), "app/globals.css"), "utf8");
 
 /** Nom camelCase du token JS → variable CSS `--kebab-case`. */
 const CSS_VAR: Record<keyof typeof palette, string> = {
-  parchemin: "--parchemin",
-  papier: "--papier",
-  encre: "--encre",
-  encreDouce: "--encre-douce",
-  bordeaux: "--bordeaux",
-  bordeauxFonce: "--bordeaux-fonce",
-  laiton: "--laiton",
-  laitonClair: "--laiton-clair",
-  vert: "--vert",
-  bleuNuit: "--bleu-nuit",
+  ink: "--ink",
+  inkDeep: "--ink-deep",
+  slate: "--slate",
+  mist: "--mist",
+  ghost: "--ghost",
+  sand: "--sand",
+  card: "--card",
+  wash: "--wash",
+  line: "--line",
+  citronWash: "--citron-wash",
+  lagoon: "--lagoon",
+  lagoonInk: "--lagoon-ink",
+  lagoonSoft: "--lagoon-soft",
+  lagoonWash: "--lagoon-wash",
+  lagoonHover: "--lagoon-hover",
+  citron: "--citron",
+  berry: "--berry",
+  berryInk: "--berry-ink",
+  berryWash: "--berry-wash",
 };
 
 function cssValue(variable: string): string | null {

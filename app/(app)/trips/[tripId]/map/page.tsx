@@ -14,9 +14,9 @@ import { createClient } from "@/lib/supabase/server";
 import { palette } from "@/lib/ui/colors";
 
 const TYPE_COLORS: Record<string, string> = {
-  TRANSPORT: palette.encre,
-  LODGING: palette.vert, // vert wagon : les hébergements se repèrent au premier coup d'œil
-  ACTIVITY: palette.bordeaux,
+  TRANSPORT: palette.ink,
+  LODGING: palette.lagoon, // vert wagon : les hébergements se repèrent au premier coup d'œil
+  ACTIVITY: palette.lagoonInk,
 };
 
 /** Cartes du voyage (PHIL-N01) : programme jour par jour, ou idées. */
@@ -87,7 +87,7 @@ export default async function TripMapPage({
       lng: i.location_lng as number,
       title: i.title,
       subtitle: i.location_name ?? undefined,
-      color: palette.bordeaux,
+      color: palette.lagoonInk,
     }));
     // L'hébergement en repère sur la carte des idées
     if (lodgingOfDay) {
@@ -97,7 +97,7 @@ export default async function TripMapPage({
         lng: lodgingOfDay.location_lng as number,
         title: lodgingOfDay.title,
         subtitle: t("map.lodging"),
-        color: palette.vert,
+        color: palette.lagoon,
         house: true,
       });
     }
@@ -116,7 +116,7 @@ export default async function TripMapPage({
       title: e.title,
       subtitle: `${eventTime(e.starts_at, e.timezone)}${e.location_name ? ` · ${e.location_name}` : ""}`,
       href: `/trips/${tripId}/events/${e.id}`,
-      color: TYPE_COLORS[e.type] ?? palette.bordeaux,
+      color: TYPE_COLORS[e.type] ?? palette.lagoonInk,
       order: idx,
       house: e.type === "LODGING",
       label: e.type === "LODGING" ? undefined : String(++step),
@@ -137,7 +137,7 @@ export default async function TripMapPage({
             lng: homeCoords.lng,
             title: `${t("map.departure")} : ${from}`,
             subtitle: t("map.departureSubtitle"),
-            color: palette.encre,
+            color: palette.ink,
             order: -1,
             house: true,
           });
@@ -154,7 +154,7 @@ export default async function TripMapPage({
       lng: p.lng,
       title: p.name,
       subtitle: p.note ?? t(`places.cat.${p.category}`),
-      color: "#c2410c",
+      color: palette.berry,
       noPath: true,
     });
   }
@@ -212,45 +212,43 @@ export default async function TripMapPage({
     : null;
 
   return (
-    // Pleine largeur (PHIL-Q37b) : la carte déborde du gabarit habituel
-    <div className="relative left-1/2 right-1/2 -mx-[50vw] w-screen px-4 sm:px-6 lg:px-8">
-      <div className="mx-auto flex max-w-[104rem] flex-col gap-4">
-        <TripViewToggle tripId={tripId} active="carte" />
-        {/* TREK-style : liste cliquable à gauche, grande carte à droite */}
-        <TripMapExplorer
-          markers={markers}
-          departureId={departureId}
-          dayRows={dayRows}
-          heading={listHeading}
-          drawPath={!showIdeas}
-          distanceFrom={distanceFrom}
-          distanceLabel={distanceFrom?.label ?? null}
-          missing={missing}
-          filter={
-            !showIdeas && days.length > 1 ? (
-              <FilterSelect
-                key="day-filter"
-                value={activeDay ?? ""}
-                ariaLabel={t("map.dayFilter")}
-                options={[
-                  { value: "", label: t("map.wholeTrip"), href: `/trips/${tripId}/map` },
-                  ...days.map((d) => ({
-                    value: d.dayKey,
-                    label: d.label.replace(/ \d{4}$/, ""),
-                    href: `/trips/${tripId}/map?day=${d.dayKey}`,
-                  })),
-                ]}
-              />
-            ) : null
-          }
-        />
-        <TripPlaces
-          tripId={tripId}
-          places={places ?? []}
-          myId={user.id}
-          isOwner={me?.role === "OWNER"}
-        />
-      </div>
+    // Pleine largeur : TripMain élargit la page Carte à 104 rem (V06c)
+    <div className="flex flex-col gap-4">
+      <TripViewToggle tripId={tripId} active="carte" />
+      {/* TREK-style : liste cliquable à gauche, grande carte à droite */}
+      <TripMapExplorer
+        markers={markers}
+        departureId={departureId}
+        dayRows={dayRows}
+        heading={listHeading}
+        drawPath={!showIdeas}
+        distanceFrom={distanceFrom}
+        distanceLabel={distanceFrom?.label ?? null}
+        missing={missing}
+        filter={
+          !showIdeas && days.length > 1 ? (
+            <FilterSelect
+              key="day-filter"
+              value={activeDay ?? ""}
+              ariaLabel={t("map.dayFilter")}
+              options={[
+                { value: "", label: t("map.wholeTrip"), href: `/trips/${tripId}/map` },
+                ...days.map((d) => ({
+                  value: d.dayKey,
+                  label: d.label.replace(/ \d{4}$/, ""),
+                  href: `/trips/${tripId}/map?day=${d.dayKey}`,
+                })),
+              ]}
+            />
+          ) : null
+        }
+      />
+      <TripPlaces
+        tripId={tripId}
+        places={places ?? []}
+        myId={user.id}
+        isOwner={me?.role === "OWNER"}
+      />
     </div>
   );
 }

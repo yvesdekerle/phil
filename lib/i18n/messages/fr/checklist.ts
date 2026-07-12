@@ -135,6 +135,7 @@ export const checklistFr = {
     scheduled: "Planifié",
     plan: "Planifier",
     link: "Lien",
+    locate: "Voir sur la carte",
     proposedBy: "proposé par",
     // Boutons vote / écarter
     removeVoteAria: "Retirer ma voix",

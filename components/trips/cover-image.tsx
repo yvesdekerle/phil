@@ -47,7 +47,7 @@ export function CoverImage({
   sizes,
   className,
   fallbackChar,
-  fallbackClassName = "font-display text-4xl text-laiton italic",
+  fallbackClassName = "font-sans text-4xl text-mist italic",
   priority,
 }: {
   src: string;

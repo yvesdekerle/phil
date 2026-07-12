@@ -7,9 +7,10 @@ import { cn } from "@/lib/utils";
 type TripView = "calendar" | "timeline" | "carte";
 
 /**
- * Bascule Calendrier / Timeline / Carte (PHIL-Q36 + carte intégrée au Journal).
- * Calendrier et Timeline mémorisent la vue d'atterrissage du voyage dans un
- * cookie lu côté serveur ; la Carte est une vue « coup d'œil », non mémorisée.
+ * Sous-vues du Programme (PHIL-Q36 + carte intégrée) — onglets texte soulignés
+ * citron SOUS le mot (déclinaison L2a). Calendrier et Timeline mémorisent la
+ * vue d'atterrissage dans un cookie lu côté serveur ; la Carte est une vue
+ * « coup d'œil », non mémorisée.
  */
 export function TripViewToggle({ tripId, active }: { tripId: string; active: TripView }) {
   const router = useRouter();
@@ -39,10 +40,10 @@ export function TripViewToggle({ tripId, active }: { tripId: string; active: Tri
       onClick={() => go(view)}
       aria-pressed={active === view}
       className={cn(
-        "rounded-full px-3 py-1 text-sm transition-colors",
+        "relative pb-2 transition-colors outline-none after:absolute after:inset-x-0 after:bottom-0 after:h-[2.5px] after:rounded-[3px] after:bg-citron after:opacity-0 after:transition-opacity focus-visible:ring-2 focus-visible:ring-citron focus-visible:ring-offset-2 focus-visible:ring-offset-sand",
         active === view
-          ? "bg-bordeaux font-medium text-papier"
-          : "text-encre-douce hover:text-encre",
+          ? "text-body font-bold text-ink after:opacity-100"
+          : "text-ui font-normal text-mist hover:text-ink",
       )}
     >
       {label}
@@ -50,7 +51,7 @@ export function TripViewToggle({ tripId, active }: { tripId: string; active: Tri
   );
 
   return (
-    <div className="inline-flex w-fit items-center gap-0.5 rounded-full border border-laiton-clair bg-papier p-0.5">
+    <div className="flex w-fit items-end gap-4">
       {seg("calendar", t("calendar.viewToggle.calendar"))}
       {seg("timeline", t("calendar.viewToggle.timeline"))}
       {seg("carte", t("calendar.viewToggle.map"))}

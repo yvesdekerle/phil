@@ -222,13 +222,13 @@ export function UploadForm({
         }}
         className={cn(
           "flex flex-col items-center gap-2 rounded-lg border-2 border-dashed px-6 py-10 text-center transition-colors",
-          dragging ? "border-laiton bg-laiton-clair/20" : "border-laiton-clair bg-papier/60",
+          dragging ? "border-line bg-line/20" : "border-line bg-card/60",
         )}
       >
         {file ? (
           <>
-            <p className="text-sm font-medium text-encre">{file.name}</p>
-            <p className="text-xs text-encre-douce">
+            <p className="text-sm font-medium text-ink">{file.name}</p>
+            <p className="text-xs text-slate">
               {(file.size / 1024 / 1024).toFixed(1)} {t("documents.upload.sizeUnit")}
             </p>
             <Button
@@ -247,11 +247,11 @@ export function UploadForm({
           </>
         ) : (
           <>
-            <p className="text-sm text-encre-douce">{t("documents.upload.dropHint")}</p>
+            <p className="text-sm text-slate">{t("documents.upload.dropHint")}</p>
             <Button type="button" variant="outline" onClick={() => inputRef.current?.click()}>
               {t("documents.upload.browse")}
             </Button>
-            <p className="text-xs text-encre-douce">{t("documents.upload.fileConstraints")}</p>
+            <p className="text-xs text-slate">{t("documents.upload.fileConstraints")}</p>
           </>
         )}
         <input
@@ -317,7 +317,7 @@ export function UploadForm({
             id="doc-event"
             value={eventId}
             onChange={(e) => setEventId(e.target.value)}
-            className="rounded-md border border-laiton-clair bg-papier px-3 py-2 text-sm"
+            className="rounded-md border border-line bg-card px-3 py-2 text-sm"
           >
             <option value="">{t("documents.upload.noEvent")}</option>
             {events.map((ev) => (
@@ -330,7 +330,7 @@ export function UploadForm({
       ) : null}
 
       <div className="flex flex-col gap-2">
-        {mrzStatus ? <p className="text-xs text-laiton">{mrzStatus}</p> : null}
+        {mrzStatus ? <p className="text-xs text-mist">{mrzStatus}</p> : null}
         <Label htmlFor="expiresAt">{t("documents.upload.expiryOptional")}</Label>
         <Input
           id="expiresAt"
@@ -356,7 +356,7 @@ export function UploadForm({
         <Button type="submit" disabled={busy || !file}>
           {busy ? pendingLabel : submitLabel}
         </Button>
-        {error ? <p className="text-sm text-bordeaux">{error}</p> : null}
+        {error ? <p className="text-sm text-lagoon-ink">{error}</p> : null}
       </div>
     </form>
   );

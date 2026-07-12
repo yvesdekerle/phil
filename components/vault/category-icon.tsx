@@ -37,7 +37,7 @@ export function CategoryIcon({
   return (
     <span
       className={cn(
-        "flex size-10 shrink-0 items-center justify-center rounded-md border border-laiton-clair bg-parchemin text-laiton",
+        "flex size-10 shrink-0 items-center justify-center rounded-md border border-line bg-sand text-mist",
         className,
       )}
     >

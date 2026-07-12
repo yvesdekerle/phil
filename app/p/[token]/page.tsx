@@ -12,9 +12,9 @@ import { palette } from "@/lib/ui/colors";
 import { areUuids } from "@/lib/validation";
 
 const MARKER_COLORS: Record<string, string> = {
-  TRANSPORT: palette.encre,
-  LODGING: palette.laiton,
-  ACTIVITY: palette.bordeaux,
+  TRANSPORT: palette.ink,
+  LODGING: palette.mist,
+  ACTIVITY: palette.lagoonInk,
 };
 
 /**
@@ -57,7 +57,7 @@ export default async function PublicTripPage({ params }: { params: Promise<{ tok
       lng: e.location_lng as number,
       title: e.title,
       subtitle: t(`events.type.${e.type}`),
-      color: MARKER_COLORS[e.type] ?? palette.bordeaux,
+      color: MARKER_COLORS[e.type] ?? palette.lagoonInk,
       order: i,
     }));
 
@@ -69,9 +69,9 @@ export default async function PublicTripPage({ params }: { params: Promise<{ tok
 
   return (
     <main className="mx-auto w-full max-w-2xl px-4 py-10">
-      <p className="text-xs text-laiton uppercase tracking-widest">{t("public.eyebrow")}</p>
-      <h1 className="mt-1 font-display text-3xl text-encre">{trip.name}</h1>
-      <p className="mt-1 text-sm text-encre-douce">
+      <p className="text-xs text-mist uppercase tracking-widest">{t("public.eyebrow")}</p>
+      <h1 className="mt-1 text-title text-ink">{trip.name}</h1>
+      <p className="mt-1 text-sm text-slate">
         {trip.destination} · {dateRange}
       </p>
 
@@ -83,29 +83,29 @@ export default async function PublicTripPage({ params }: { params: Promise<{ tok
 
       <section className="mt-8 flex flex-col gap-6">
         {days.length === 0 ? (
-          <p className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-6 py-10 text-center text-sm text-encre-douce">
+          <p className="rounded-lg border border-dashed border-line bg-card/60 px-6 py-10 text-center text-sm text-slate">
             {t("public.emptyItinerary")}
           </p>
         ) : (
           days.map((day) => (
             <section key={day.dayKey}>
-              <h2 className="mb-2 text-sm font-medium text-encre-douce capitalize">{day.label}</h2>
+              <h2 className="mb-2 text-sm font-medium text-slate capitalize">{day.label}</h2>
               <ul className="flex flex-col gap-2">
                 {day.events.map((event) => (
                   <li
                     key={event.id}
-                    className="flex items-center gap-3 rounded-lg border border-laiton-clair bg-papier px-4 py-3"
+                    className="flex items-center gap-3 rounded-lg border border-line bg-card px-4 py-3"
                   >
-                    <span className="w-14 shrink-0 text-sm font-medium text-encre tabular-nums">
+                    <span className="w-14 shrink-0 text-sm font-medium text-ink tabular-nums">
                       {eventTime(event.starts_at, event.timezone)}
                     </span>
                     <EventTypeIcon type={event.type} />
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm font-medium text-encre">
+                      <span className="block truncate text-sm font-medium text-ink">
                         {event.title}
                       </span>
                       {event.location_name ? (
-                        <span className="block truncate text-xs text-encre-douce">
+                        <span className="block truncate text-xs text-slate">
                           {event.location_name}
                         </span>
                       ) : null}
@@ -118,7 +118,7 @@ export default async function PublicTripPage({ params }: { params: Promise<{ tok
         )}
       </section>
 
-      <footer className="mt-10 border-t border-laiton-clair/50 pt-4 text-center text-xs text-encre-douce">
+      <footer className="mt-10 border-t border-line/50 pt-4 text-center text-xs text-slate">
         {t("public.footer")}
       </footer>
     </main>

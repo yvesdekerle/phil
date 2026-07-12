@@ -157,26 +157,26 @@ export default async function DayViewPage({
     <div className="mx-auto max-w-2xl">
       <Link
         href={`/trips/${tripId}`}
-        className="text-sm text-encre-douce underline underline-offset-4 hover:text-encre"
+        className="text-sm text-slate underline underline-offset-4 hover:text-ink"
       >
         {t("calendar.backToCalendar")}
       </Link>
-      <h1 className="mt-2 font-display text-2xl text-encre capitalize">{label}</h1>
+      <h1 className="mt-2 font-sans text-2xl text-ink capitalize">{label}</h1>
       {dayWeather ? (
         <p className="mt-1">
           <WeatherLine day={dayWeather} />
         </p>
       ) : null}
       {visitSuggestion ? (
-        <div className="mt-2 rounded-md border border-laiton/50 bg-laiton/5 px-3 py-2">
-          <p className="mb-0.5 text-[0.65rem] font-medium text-laiton uppercase tracking-wide">
+        <div className="mt-2 rounded-md border border-line/50 bg-citron/5 px-3 py-2">
+          <p className="mb-0.5 text-[0.65rem] font-medium text-mist uppercase tracking-wide">
             {t("calendar.day.visitOrderLabel")}
           </p>
-          <p className="text-xs text-encre">
+          <p className="text-xs text-ink">
             {dayLodging ? t("calendar.day.fromLodging") : ""}
             {visitSuggestion.order.map((s) => s.title).join(" → ")}
           </p>
-          <p className="text-[0.65rem] text-encre-douce">
+          <p className="text-[0.65rem] text-slate">
             ≈ {Math.round(visitSuggestion.suggestedKm)} {t("calendar.day.kmUnit")}{" "}
             {t("calendar.day.insteadOf")} {Math.round(visitSuggestion.currentKm)}{" "}
             {t("calendar.day.asCrowFlies")}
@@ -184,20 +184,19 @@ export default async function DayViewPage({
         </div>
       ) : null}
       {travelLegs.length > 0 ? (
-        <div className="mt-2 rounded-md border border-laiton-clair/60 bg-papier px-3 py-2">
-          <p className="mb-0.5 text-[0.65rem] font-medium text-laiton uppercase tracking-wide">
+        <div className="mt-2 rounded-md border border-line/60 bg-card px-3 py-2">
+          <p className="mb-0.5 text-[0.65rem] font-medium text-mist uppercase tracking-wide">
             {t("calendar.day.travelLegsLabel")}
           </p>
           {travelLegs.map((leg) => (
-            <p key={`${leg.from}-${leg.to}`} className="text-xs text-encre-douce">
-              {leg.from} → {leg.to} :{" "}
-              <span className="text-encre">{formatMinutes(leg.minutes)}</span>
+            <p key={`${leg.from}-${leg.to}`} className="text-xs text-slate">
+              {leg.from} → {leg.to} : <span className="text-ink">{formatMinutes(leg.minutes)}</span>
               {" · "}
               <a
                 href={leg.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-0.5 text-bordeaux underline underline-offset-2 hover:opacity-80"
+                className="inline-flex items-center gap-0.5 text-lagoon-ink underline underline-offset-2 hover:opacity-80"
               >
                 <Navigation className="size-3" aria-hidden="true" /> {t("calendar.day.directions")}
               </a>
@@ -208,20 +207,20 @@ export default async function DayViewPage({
       <div className="mb-4" />
 
       {dayEvents.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-6 py-14 text-center">
-          <p className="font-display text-xl text-encre italic">{t("calendar.day.freeDayTitle")}</p>
-          <p className="mt-2 text-sm text-encre-douce">{t("calendar.day.freeDayBody")}</p>
+        <div className="rounded-lg border border-dashed border-line bg-card/60 px-6 py-14 text-center">
+          <p className="font-sans text-xl text-ink italic">{t("calendar.day.freeDayTitle")}</p>
+          <p className="mt-2 text-sm text-slate">{t("calendar.day.freeDayBody")}</p>
         </div>
       ) : (
-        <div className="relative rounded-lg border border-laiton-clair bg-papier">
+        <div className="relative rounded-lg border border-line bg-card">
           {/* Grille des heures */}
           {hours.map((h) => (
             <div
               key={h}
-              className="flex items-start gap-3 border-b border-laiton-clair/30 last:border-b-0"
+              className="flex items-start gap-3 border-b border-line/30 last:border-b-0"
               style={{ height: HOUR_HEIGHT }}
             >
-              <span className="w-12 shrink-0 pt-1 pl-2 text-xs text-encre-douce tabular-nums">
+              <span className="w-12 shrink-0 pt-1 pl-2 text-xs text-slate tabular-nums">
                 {String(h).padStart(2, "0")}h
               </span>
             </div>
@@ -235,19 +234,19 @@ export default async function DayViewPage({
                   key={event.id}
                   href={`/trips/${tripId}/events/${event.id}`}
                   className={cn(
-                    "absolute right-0 left-0 flex items-start gap-2 overflow-hidden rounded-md border px-3 py-1.5 transition-shadow hover:shadow-[0_2px_12px_rgba(31,42,68,0.15)]",
-                    event.type === "TRANSPORT" && "border-encre/30 bg-encre/5",
-                    event.type === "LODGING" && "border-laiton bg-laiton/10",
-                    event.type === "ACTIVITY" && "border-bordeaux/30 bg-bordeaux/5",
+                    "absolute right-0 left-0 flex items-start gap-2 overflow-hidden rounded-md border px-3 py-1.5 transition-shadow hover:shadow-[0_2px_12px_rgba(15,47,56,0.15)]",
+                    event.type === "TRANSPORT" && "border-ink/30 bg-ink/5",
+                    event.type === "LODGING" && "border-line bg-citron/10",
+                    event.type === "ACTIVITY" && "border-lagoon-ink/30 bg-lagoon-ink/5",
                   )}
                   style={{ top, height, minHeight: 40 }}
                 >
                   <EventTypeIcon type={event.type} className="mt-0.5 size-6 shrink-0" />
                   <span className="min-w-0">
-                    <span className="block truncate text-sm font-medium text-encre">
+                    <span className="block truncate text-sm font-medium text-ink">
                       {event.title}
                     </span>
-                    <span className="block text-xs text-encre-douce">
+                    <span className="block text-xs text-slate">
                       {eventTime(event.starts_at, event.timezone)}
                       {event.ends_at ? ` → ${eventTime(event.ends_at, event.timezone)}` : ""}
                       {event.location_name ? ` · ${event.location_name}` : ""}

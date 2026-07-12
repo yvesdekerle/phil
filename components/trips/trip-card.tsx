@@ -1,3 +1,5 @@
+import { differenceInCalendarDays } from "date-fns";
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { CoverImage } from "@/components/trips/cover-image";
 import { getDateFnsLocale, getT } from "@/lib/i18n/server";
@@ -5,78 +7,121 @@ import { formatDateRange } from "@/lib/trips/format";
 import { type Trip, tripStatus } from "@/lib/trips/status";
 import { cn } from "@/lib/utils";
 
-const STATUS_STYLES: Record<string, string> = {
-  en_cours: "bg-bordeaux text-papier",
-  a_venir: "bg-laiton text-papier",
-  passe: "bg-encre-douce/15 text-encre-douce",
-  archive: "bg-encre-douce/15 text-encre-douce",
-};
+/**
+ * Carte de la liste des voyages (prototype « Mes voyages ») : carte héro
+ * (r-20, ombre float sans bordure, badge mono sur la photo, pied « Ouvrir le
+ * voyage »). Nouveauté = point berry, jamais de compteur.
+ * V07c : les voyages passés gardent le même format mais en grisé — photo
+ * désaturée (la couleur revient au survol), textes éteints, bordure au lieu
+ * de l'ombre.
+ */
+
+function PendingDot({ label }: { label: string }) {
+  return (
+    <span
+      role="img"
+      aria-label={label}
+      className="absolute top-3.5 right-4 size-2.5 rounded-full bg-berry ring-2 ring-white"
+    />
+  );
+}
 
 export async function TripCard({
   trip,
   participantCount,
   pendingCount = 0,
+  past = false,
 }: {
   trip: Trip;
   participantCount: number;
   pendingCount?: number;
+  /** Voyage passé/archivé : même carte, livrée grisée. */
+  past?: boolean;
 }) {
   const status = tripStatus(trip);
-  const isPast = status === "passe" || status === "archive";
   const t = await getT();
   const dfLocale = await getDateFnsLocale();
+
+  const daysToGo = differenceInCalendarDays(new Date(trip.start_date), new Date());
+  const overlay =
+    status === "en_cours"
+      ? t("trips.now")
+      : status === "a_venir" && daysToGo >= 0
+        ? t("trips.nextDeparture").replace("{n}", String(daysToGo))
+        : null;
 
   return (
     <Link
       href={`/trips/${trip.id}`}
       className={cn(
-        "group block overflow-hidden rounded-lg border border-laiton-clair bg-papier shadow-[0_2px_12px_rgba(31,42,68,0.06)] transition-shadow hover:shadow-[0_4px_20px_rgba(31,42,68,0.12)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-laiton",
-        isPast && "opacity-75",
+        "group block overflow-hidden rounded-xl bg-card transition-all outline-none hover:-translate-y-px focus-visible:ring-2 focus-visible:ring-citron focus-visible:ring-offset-2 focus-visible:ring-offset-sand",
+        past ? "border border-line" : "shadow-float",
       )}
     >
-      <div className="relative h-36 overflow-hidden bg-encre">
+      <div
+        className={cn(
+          "relative h-44 overflow-hidden bg-gradient-to-br from-lagoon to-lagoon-ink",
+          past && "grayscale transition-[filter] duration-500 group-hover:grayscale-0",
+        )}
+      >
         {trip.cover_image_url ? (
           <CoverImage
             src={trip.cover_image_url}
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            sizes="(max-width: 1024px) 100vw, 590px"
             className="object-cover transition-transform duration-500 group-hover:scale-105"
             fallbackChar={trip.destination.charAt(0).toUpperCase()}
+            fallbackClassName="text-4xl font-extrabold text-white/80"
           />
         ) : (
           <div className="flex h-full items-center justify-center">
-            <span className="font-display text-4xl text-laiton italic">
+            <span className="text-4xl font-extrabold text-white/80">
               {trip.destination.charAt(0).toUpperCase()}
             </span>
           </div>
         )}
-        <span
-          className={cn(
-            "absolute top-3 right-3 rounded-full px-2.5 py-0.5 text-xs font-medium",
-            STATUS_STYLES[status],
-          )}
-        >
-          {t(`trips.status.${status}`)}
-        </span>
-        {pendingCount > 0 ? (
-          <span
-            role="img"
-            className="absolute top-3 left-3 flex min-w-5 items-center justify-center rounded-full bg-bordeaux px-1.5 py-0.5 text-xs font-semibold text-papier shadow-sm"
-            aria-label={t("pending.tripAria").replace("{n}", String(pendingCount))}
-            title={t("pending.tripAria").replace("{n}", String(pendingCount))}
-          >
-            {pendingCount}
+        {overlay ? (
+          <span className="absolute top-3.5 left-4 rounded-full bg-ink-deep/35 px-2.5 py-1 font-mono text-label tracking-widest text-white uppercase tabular-nums">
+            {overlay}
           </span>
+        ) : null}
+        {pendingCount > 0 ? (
+          <PendingDot label={t("pending.tripAria").replace("{n}", String(pendingCount))} />
         ) : null}
       </div>
 
-      <div className="px-4 py-3.5">
-        <h2 className="font-display text-xl text-encre">{trip.name}</h2>
-        <p className="mt-0.5 text-sm text-encre-douce">{trip.destination}</p>
-        <div className="mt-2.5 flex items-center justify-between text-xs text-encre-douce">
-          <span>{formatDateRange(trip.start_date, trip.end_date, dfLocale)}</span>
-          <span>
-            {participantCount} {participantCount > 1 ? t("trips.travelers") : t("trips.traveler")}
+      <div className="p-4">
+        <h2
+          className={cn("text-xl font-extrabold tracking-tight", past ? "text-slate" : "text-ink")}
+        >
+          {trip.name}
+        </h2>
+        <div className="mt-1.5 flex items-center gap-2">
+          <span
+            className={cn(
+              "font-mono text-data uppercase tabular-nums",
+              past ? "text-mist" : "text-slate",
+            )}
+          >
+            {formatDateRange(trip.start_date, trip.end_date, dfLocale)}
           </span>
+          <span aria-hidden="true" className="size-[3px] rounded-full bg-ghost" />
+          <span
+            className={cn(
+              "font-mono text-data uppercase tabular-nums",
+              past ? "text-mist" : "text-slate",
+            )}
+          >
+            {t("trips.onboard").replace("{n}", String(participantCount))}
+          </span>
+        </div>
+        <div className="mt-3.5 flex items-center justify-between border-t border-wash pt-3.5">
+          <span className={cn("text-body font-semibold", past ? "text-slate" : "text-lagoon-ink")}>
+            {t("trips.open")}
+          </span>
+          <ArrowRight
+            aria-hidden="true"
+            className={cn("size-4.5", past ? "text-slate" : "text-lagoon-ink")}
+          />
         </div>
       </div>
     </Link>

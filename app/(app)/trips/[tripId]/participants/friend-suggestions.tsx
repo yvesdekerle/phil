@@ -44,12 +44,12 @@ export function FriendSuggestions({
   const shown = filtered.slice(safePage * PAGE_SIZE, safePage * PAGE_SIZE + PAGE_SIZE);
 
   return (
-    <div className="rounded-lg border border-laiton-clair bg-papier px-4 py-3">
+    <div className="rounded-lg border border-line bg-card px-4 py-3">
       <div className="mb-2 flex items-center justify-between gap-3">
-        <h3 className="text-sm font-medium text-encre">{t("participants.suggestions.title")}</h3>
+        <h3 className="text-sm font-medium text-ink">{t("participants.suggestions.title")}</h3>
         <Link
           href="/friends"
-          className="shrink-0 text-xs text-encre-douce underline underline-offset-4 hover:text-encre"
+          className="shrink-0 text-xs text-slate underline underline-offset-4 hover:text-ink"
         >
           {t("participants.suggestions.addFriend")} →
         </Link>
@@ -68,11 +68,11 @@ export function FriendSuggestions({
       ) : null}
 
       {friends.length === 0 ? (
-        <p className="py-1 text-sm text-encre-douce">{t("participants.suggestions.empty")}</p>
+        <p className="py-1 text-sm text-slate">{t("participants.suggestions.empty")}</p>
       ) : shown.length === 0 ? (
-        <p className="py-1 text-sm text-encre-douce">{t("participants.suggestions.noMatch")}</p>
+        <p className="py-1 text-sm text-slate">{t("participants.suggestions.noMatch")}</p>
       ) : (
-        <ul className="flex flex-col divide-y divide-laiton-clair/50">
+        <ul className="flex flex-col divide-y divide-line/50">
           {shown.map((f) => {
             const done = invited.has(f.userId);
             return (
@@ -83,14 +83,14 @@ export function FriendSuggestions({
                     alt=""
                     width={32}
                     height={32}
-                    className="rounded-full border border-laiton-clair"
+                    className="rounded-full border border-line"
                   />
                 ) : (
-                  <span className="flex size-8 items-center justify-center rounded-full border border-laiton-clair bg-parchemin text-sm text-laiton">
+                  <span className="flex size-8 items-center justify-center rounded-full border border-line bg-sand text-sm text-mist">
                     {f.name.charAt(0).toUpperCase()}
                   </span>
                 )}
-                <span className="min-w-0 flex-1 truncate text-sm text-encre">{f.name}</span>
+                <span className="min-w-0 flex-1 truncate text-sm text-ink">{f.name}</span>
                 <button
                   type="button"
                   disabled={pending || done}
@@ -103,7 +103,7 @@ export function FriendSuggestions({
                       }
                     })
                   }
-                  className="shrink-0 rounded-full border border-laiton-clair px-3 py-1 text-xs font-medium text-encre-douce transition-colors hover:border-bordeaux hover:text-bordeaux disabled:opacity-60"
+                  className="shrink-0 rounded-full border border-line px-3 py-1 text-xs font-medium text-slate transition-colors hover:bg-wash hover:text-ink disabled:opacity-60"
                 >
                   {done ? t("participants.suggestions.invited") : t("participants.suggestions.add")}
                 </button>
@@ -114,12 +114,12 @@ export function FriendSuggestions({
       )}
 
       {pageCount > 1 ? (
-        <div className="mt-2 flex items-center justify-end gap-3 text-xs text-encre-douce">
+        <div className="mt-2 flex items-center justify-end gap-3 text-xs text-slate">
           <button
             type="button"
             disabled={safePage === 0}
             onClick={() => setPage((p) => Math.max(0, p - 1))}
-            className="rounded-full border border-laiton-clair p-1 transition-colors hover:border-laiton hover:text-encre disabled:opacity-40"
+            className="rounded-full border border-line p-1 transition-colors hover:border-line hover:text-ink disabled:opacity-40"
             aria-label={t("participants.suggestions.prev")}
           >
             <ChevronLeft className="size-4" aria-hidden="true" />
@@ -131,7 +131,7 @@ export function FriendSuggestions({
             type="button"
             disabled={safePage >= pageCount - 1}
             onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
-            className="rounded-full border border-laiton-clair p-1 transition-colors hover:border-laiton hover:text-encre disabled:opacity-40"
+            className="rounded-full border border-line p-1 transition-colors hover:border-line hover:text-ink disabled:opacity-40"
             aria-label={t("participants.suggestions.next")}
           >
             <ChevronRight className="size-4" aria-hidden="true" />
@@ -140,9 +140,7 @@ export function FriendSuggestions({
       ) : null}
 
       {state.status !== "idle" && state.message ? (
-        <p
-          className={`mt-2 text-xs ${state.status === "error" ? "text-bordeaux" : "text-encre-douce"}`}
-        >
+        <p className={`mt-2 text-xs ${state.status === "error" ? "text-berry-ink" : "text-slate"}`}>
           {state.message}
         </p>
       ) : null}

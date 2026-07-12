@@ -1,21 +1,14 @@
 import { notFound } from "next/navigation";
+import { TripMain } from "@/components/layout/trip-main";
+import { TripSidebar, TripTabBar } from "@/components/layout/trip-nav";
+import { TripPageHeader } from "@/components/layout/trip-page-header";
 import { TripOfflineSync } from "@/components/offline/trip-sync";
-import { CoverImage } from "@/components/trips/cover-image";
-import { TripTabs } from "@/components/trips/trip-tabs";
 import { getSessionUser } from "@/lib/auth/session";
 import { getDateFnsLocale, getIntlLocale, getT } from "@/lib/i18n/server";
 import { getPendingByTrip } from "@/lib/notifications/pending-server";
+import { getOwnProfile } from "@/lib/supabase/profiles";
 import { createClient } from "@/lib/supabase/server";
 import { formatDateRange } from "@/lib/trips/format";
-import { tripStatus } from "@/lib/trips/status";
-import { cn } from "@/lib/utils";
-
-const STATUS_STYLES: Record<string, string> = {
-  en_cours: "bg-bordeaux text-papier",
-  a_venir: "bg-laiton text-papier",
-  passe: "bg-encre-douce/15 text-encre-douce",
-  archive: "bg-encre-douce/15 text-encre-douce",
-};
 
 export default async function TripLayout({
   children,
@@ -34,27 +27,33 @@ export default async function TripLayout({
     notFound();
   }
 
-  const status = tripStatus(trip);
-
-  // PHIL-R19 : les deux lots de requêtes ne dépendent que de user+trip → en
-  // parallèle plutôt qu'en série (la base distante rend chaque aller-retour cher).
-  // PHIL-U02 : pastilles « à voter » sur les onglets. PHIL-N04 : validité passeport.
-  const [pendingMap, { data: passports }] = await Promise.all([
-    user ? getPendingByTrip(supabase, user.id, [tripId]) : Promise.resolve(null),
-    supabase
-      .from("documents")
-      .select("expires_at")
-      .eq("owner_id", user?.id ?? "")
-      .eq("category", "passport")
-      .is("deleted_at", null)
-      .not("expires_at", "is", null)
-      .order("expires_at", { ascending: false })
-      .limit(1),
-  ]);
+  // PHIL-R19 : requêtes indépendantes en parallèle (la base distante rend
+  // chaque aller-retour cher). PHIL-U02 : pastilles « à voter ».
+  // PHIL-N04 : validité passeport.
+  const [pendingMap, { data: passports }, profile, { count: participantCount }] = await Promise.all(
+    [
+      user ? getPendingByTrip(supabase, user.id, [tripId]) : Promise.resolve(null),
+      supabase
+        .from("documents")
+        .select("expires_at")
+        .eq("owner_id", user?.id ?? "")
+        .eq("category", "passport")
+        .is("deleted_at", null)
+        .not("expires_at", "is", null)
+        .order("expires_at", { ascending: false })
+        .limit(1),
+      getOwnProfile(supabase),
+      supabase
+        .from("trip_participants")
+        .select("user_id", { count: "exact", head: true })
+        .eq("trip_id", tripId),
+    ],
+  );
   const pending = pendingMap?.get(tripId) ?? null;
+  const pendingProps = pending ? { ideas: pending.ideas, polls: pending.polls } : undefined;
   const t = await getT();
-  const dfLocale = await getDateFnsLocale();
   const il = await getIntlLocale();
+  const dfLocale = await getDateFnsLocale();
   const passportExpiry = passports?.[0]?.expires_at ?? null;
   let passportWarning: { level: "danger" | "warn"; text: string } | null = null;
   if (passportExpiry) {
@@ -75,61 +74,46 @@ export default async function TripLayout({
     }
   }
 
+  const initial = (profile?.display_name ?? "?").charAt(0).toUpperCase();
+  const tripMeta = `${formatDateRange(trip.start_date, trip.end_date, dfLocale)} · ${t(
+    "trips.onboard",
+  ).replace("{n}", String(participantCount ?? 1))}`;
+
   return (
-    <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6">
+    <div className="flex w-full flex-1 flex-col lg:flex-row">
       <TripOfflineSync tripId={trip.id} />
-      {passportWarning ? (
-        <div
-          className={
-            passportWarning.level === "danger"
-              ? "mb-4 rounded-lg border border-bordeaux/40 bg-bordeaux/10 px-4 py-2.5 text-sm text-bordeaux"
-              : "mb-4 rounded-lg border border-laiton bg-laiton/10 px-4 py-2.5 text-sm text-encre"
-          }
-        >
-          {passportWarning.text}
-        </div>
-      ) : null}
-      <header className="overflow-hidden rounded-lg border border-laiton-clair bg-papier print:hidden">
-        <div className="relative h-40 bg-encre sm:h-52">
-          {trip.cover_image_url ? (
-            <CoverImage
-              src={trip.cover_image_url}
-              sizes="(max-width: 1024px) 100vw, 1024px"
-              className="object-cover"
-              priority
-              fallbackChar={trip.destination.charAt(0).toUpperCase()}
-              fallbackClassName="font-display text-6xl text-laiton italic"
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center">
-              <span className="font-display text-6xl text-laiton italic">
-                {trip.destination.charAt(0).toUpperCase()}
-              </span>
-            </div>
-          )}
-        </div>
-        <div className="flex flex-wrap items-end justify-between gap-3 px-5 py-4">
-          <div>
-            <h1 className="font-display text-3xl text-encre">{trip.name}</h1>
-            <p className="mt-1 text-sm text-encre-douce">
-              {trip.destination} · {formatDateRange(trip.start_date, trip.end_date, dfLocale)}
-            </p>
-          </div>
-          <span className={cn("rounded-full px-3 py-1 text-xs font-medium", STATUS_STYLES[status])}>
-            {t(`trips.status.${status}`)}
-          </span>
-        </div>
-      </header>
-
-      {/* PHIL-Q37c : le menu du voyage reste collé en haut au défilement */}
-      <nav className="sticky top-2 z-[1001] mt-2 rounded-lg border border-laiton-clair bg-papier px-5 shadow-[0_2px_10px_rgba(31,42,68,0.05)] print:hidden">
-        <TripTabs
+      <TripSidebar
+        tripId={trip.id}
+        tripName={trip.name}
+        tripMeta={tripMeta}
+        pending={pendingProps}
+        avatarUrl={profile?.avatar_url ?? null}
+        initial={initial}
+        userName={profile?.display_name ?? initial}
+      />
+      <div className="flex min-w-0 flex-1 flex-col">
+        <TripPageHeader
           tripId={trip.id}
-          pending={pending ? { ideas: pending.ideas, polls: pending.polls } : undefined}
+          tripName={trip.name}
+          avatarUrl={profile?.avatar_url ?? null}
+          initial={initial}
         />
-      </nav>
-
-      <div className="py-6">{children}</div>
-    </main>
+        <TripMain>
+          {passportWarning ? (
+            <div
+              className={
+                passportWarning.level === "danger"
+                  ? "mb-4 rounded-lg border border-berry-ink/30 bg-berry-wash px-4 py-2.5 text-body text-berry-ink"
+                  : "mb-4 rounded-lg border border-line bg-citron-wash px-4 py-2.5 text-body text-ink"
+              }
+            >
+              {passportWarning.text}
+            </div>
+          ) : null}
+          {children}
+        </TripMain>
+      </div>
+      <TripTabBar tripId={trip.id} pending={pendingProps} />
+    </div>
   );
 }

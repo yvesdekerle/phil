@@ -43,13 +43,13 @@ export function CoffreRecovery({ hasRecovery }: { hasRecovery: boolean }) {
   if (code) {
     return (
       <div className="flex flex-col gap-2">
-        <p className="text-sm font-medium text-encre">
+        <p className="text-sm font-medium text-ink">
           Note ce code et range-le en lieu sûr — il ne sera plus affiché.
         </p>
-        <code className="rounded border border-laiton-clair bg-parchemin px-3 py-2 text-center font-mono text-lg tracking-widest text-encre">
+        <code className="rounded border border-line bg-sand px-3 py-2 text-center font-mono text-lg tracking-widest text-ink">
           {code}
         </code>
-        <p className="text-xs text-encre-douce">
+        <p className="text-xs text-slate">
           Il permet de récupérer ton coffre si tu perds tous tes appareils.
         </p>
       </div>
@@ -58,7 +58,7 @@ export function CoffreRecovery({ hasRecovery }: { hasRecovery: boolean }) {
 
   return (
     <div className="flex flex-col items-start gap-2">
-      <p className="text-sm text-encre-douce">
+      <p className="text-sm text-slate">
         {done
           ? "Un code de secours est configuré. Tu peux en régénérer un (l'ancien sera remplacé)."
           : "Optionnel : un code de secours pour récupérer ton coffre si tu perds tous tes appareils."}
@@ -70,7 +70,7 @@ export function CoffreRecovery({ hasRecovery }: { hasRecovery: boolean }) {
             ? "Régénérer un code de secours"
             : "Générer un code de secours"}
       </Button>
-      {error ? <p className="text-sm text-bordeaux">{error}</p> : null}
+      {error ? <p className="text-caption text-berry-ink">{error}</p> : null}
     </div>
   );
 }

@@ -44,19 +44,17 @@ export default async function SecurityPage() {
     <main className="mx-auto w-full max-w-lg flex-1 px-4 py-8">
       <Link
         href="/profile"
-        className="text-sm text-encre-douce underline underline-offset-4 hover:text-encre"
+        className="text-sm text-slate underline underline-offset-4 hover:text-ink"
       >
         {t("security.back")}
       </Link>
-      <h1 className="mt-3 mb-2 text-center font-display text-3xl text-encre">
-        {t("security.title")}
-      </h1>
+      <h1 className="mt-3 mb-2 text-center text-title text-ink">{t("security.title")}</h1>
 
       {coffreKey ? (
         <Card className="mt-6">
           <CardContent className="flex flex-col items-start gap-3 pt-6">
-            <p className="text-sm font-medium text-encre">{t("security.e2eeTitle")}</p>
-            <p className="text-sm text-encre-douce">{t("security.e2eeBody")}</p>
+            <p className="text-sm font-medium text-ink">{t("security.e2eeTitle")}</p>
+            <p className="text-sm text-slate">{t("security.e2eeBody")}</p>
             <Button asChild variant="outline">
               <Link href="/profile">{t("security.e2eeCta")}</Link>
             </Button>
@@ -64,10 +62,10 @@ export default async function SecurityPage() {
         </Card>
       ) : (
         <>
-          <p className="mb-6 text-center text-sm text-encre-douce">{t("security.nudge")}</p>
+          <p className="mb-6 text-center text-sm text-slate">{t("security.nudge")}</p>
           <Card>
             <CardHeader>
-              <p className="text-sm font-medium text-encre">{t("security.passkeysTitle")}</p>
+              <p className="text-sm font-medium text-ink">{t("security.passkeysTitle")}</p>
             </CardHeader>
             <CardContent>
               <PasskeyManager passkeys={passkeys} />

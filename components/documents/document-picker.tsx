@@ -81,7 +81,7 @@ export function DocumentPicker({ tripId, attachedIds, onAttach }: Props) {
   const renderList = (docs: PickableDocument[], emptyHint: string, vaultHint: boolean) => (
     <div className="flex max-h-72 flex-col gap-2 overflow-y-auto py-1">
       {docs.length === 0 ? (
-        <p className="px-2 py-6 text-center text-sm text-encre-douce">{emptyHint}</p>
+        <p className="px-2 py-6 text-center text-sm text-slate">{emptyHint}</p>
       ) : (
         docs.map((doc) => {
           const alreadyAttached = attachedIds.includes(doc.id);
@@ -91,13 +91,13 @@ export function DocumentPicker({ tripId, attachedIds, onAttach }: Props) {
               type="button"
               disabled={pending || alreadyAttached}
               onClick={() => attach(doc.id)}
-              className="flex items-center justify-between gap-3 rounded-md border border-laiton-clair bg-papier px-3 py-2.5 text-left text-sm transition-colors hover:bg-parchemin disabled:opacity-50"
+              className="flex items-center justify-between gap-3 rounded-md border border-line bg-card px-3 py-2.5 text-left text-sm transition-colors hover:bg-sand disabled:opacity-50"
             >
               <span className="min-w-0">
-                <span className="block truncate font-medium text-encre">{doc.file_name}</span>
-                <span className="text-xs text-encre-douce">{categoryLabel(t, doc.category)}</span>
+                <span className="block truncate font-medium text-ink">{doc.file_name}</span>
+                <span className="text-xs text-slate">{categoryLabel(t, doc.category)}</span>
               </span>
-              <span className="shrink-0 text-xs text-encre-douce">
+              <span className="shrink-0 text-xs text-slate">
                 {alreadyAttached
                   ? t("documents.picker.alreadyAttached")
                   : vaultHint
@@ -135,7 +135,7 @@ export function DocumentPicker({ tripId, attachedIds, onAttach }: Props) {
           </TabsContent>
           <TabsContent value="vault">
             {renderList(vaultDocs, t("documents.picker.emptyVault"), true)}
-            <p className="px-1 pt-1 text-xs text-encre-douce">
+            <p className="px-1 pt-1 text-xs text-slate">
               {t("documents.picker.vaultNote")}{" "}
               <Link href="/vault/new" className="underline underline-offset-4">
                 {t("documents.picker.addToVault")}
@@ -143,7 +143,7 @@ export function DocumentPicker({ tripId, attachedIds, onAttach }: Props) {
             </p>
           </TabsContent>
         </Tabs>
-        {error ? <p className="text-sm text-bordeaux">{error}</p> : null}
+        {error ? <p className="text-sm text-lagoon-ink">{error}</p> : null}
       </DialogContent>
     </Dialog>
   );

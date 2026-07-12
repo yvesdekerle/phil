@@ -25,9 +25,9 @@ export default async function NewDocumentPage() {
 
   return (
     <main className="mx-auto w-full max-w-lg flex-1 px-4 py-8">
-      <h1 className="mb-2 text-center font-display text-3xl text-encre">{t("vault.new.title")}</h1>
-      <p className="mb-2 text-center text-sm text-encre-douce">{t("vault.new.subtitle")}</p>
-      <p className="mb-6 text-center text-xs text-encre-douce">
+      <h1 className="mb-2 text-center font-sans text-3xl text-ink">{t("vault.new.title")}</h1>
+      <p className="mb-2 text-center text-sm text-slate">{t("vault.new.subtitle")}</p>
+      <p className="mb-6 text-center text-xs text-slate">
         {t("vault.new.hintBefore")} <strong>{t("vault.new.hintTripDocs")}</strong>{" "}
         {t("vault.new.hintAfter")}
       </p>

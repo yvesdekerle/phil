@@ -56,15 +56,15 @@ export default async function LodgingPage({ params }: { params: Promise<{ tripId
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <h1 className="font-display text-2xl text-encre">{t("lodging.pageTitle")}</h1>
-        <p className="mt-1 text-sm text-encre-douce">{t("lodging.pageIntro")}</p>
+        <h1 className="font-sans text-2xl text-ink">{t("lodging.pageTitle")}</h1>
+        <p className="mt-1 text-sm text-slate">{t("lodging.pageIntro")}</p>
       </div>
 
       {/* Hébergements réservés (les nuits du calendrier) */}
       <section className="flex flex-col gap-2">
-        <h2 className="text-sm font-medium text-encre">{t("lodging.bookedTitle")}</h2>
+        <h2 className="text-sm font-medium text-ink">{t("lodging.bookedTitle")}</h2>
         {(booked ?? []).length === 0 ? (
-          <p className="rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-4 py-6 text-center text-sm text-encre-douce">
+          <p className="rounded-lg border border-dashed border-line bg-card/60 px-4 py-6 text-center text-sm text-slate">
             {t("lodging.bookedEmpty")}
           </p>
         ) : (
@@ -73,12 +73,12 @@ export default async function LodgingPage({ params }: { params: Promise<{ tripId
               <li key={e.id}>
                 <Link
                   href={`/trips/${tripId}/events/${e.id}`}
-                  className="flex items-center gap-3 rounded-lg border border-laiton-clair bg-papier px-4 py-3 transition-shadow hover:shadow-[0_2px_12px_rgba(31,42,68,0.08)]"
+                  className="flex items-center gap-3 rounded-lg border border-line bg-card px-4 py-3 transition-shadow hover:shadow-[0_2px_12px_rgba(15,47,56,0.08)]"
                 >
                   <EventTypeIcon type="LODGING" className="size-7 shrink-0" />
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-medium text-encre">{e.title}</span>
-                    <span className="block truncate text-xs text-encre-douce">
+                    <span className="block truncate text-sm font-medium text-ink">{e.title}</span>
+                    <span className="block truncate text-xs text-slate">
                       {formatInTimeZone(e.starts_at, e.timezone, "d MMM", { locale: dfLocale })}
                       {e.ends_at
                         ? ` → ${formatInTimeZone(e.ends_at, e.timezone, "d MMM", { locale: dfLocale })}`
@@ -96,8 +96,8 @@ export default async function LodgingPage({ params }: { params: Promise<{ tripId
       {/* Hébergements candidats (avant le départ : comparer et trancher) */}
       <section className="flex flex-col gap-2">
         <div>
-          <h2 className="text-sm font-medium text-encre">{t("lodging.title")}</h2>
-          <p className="mt-0.5 text-xs text-encre-douce">{t("lodging.subtitle")}</p>
+          <h2 className="text-sm font-medium text-ink">{t("lodging.title")}</h2>
+          <p className="mt-0.5 text-xs text-slate">{t("lodging.subtitle")}</p>
         </div>
         <LodgingClient
           tripId={tripId}

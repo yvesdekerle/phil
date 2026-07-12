@@ -89,12 +89,12 @@ export function CoverPosition({ tripId, src }: { tripId: string; src: string }) 
   };
 
   return (
-    <div className="flex flex-col gap-2 rounded-lg border border-laiton-clair bg-papier px-5 py-4">
-      <p className="text-sm font-medium text-encre">{t("settings.cover.frameTitle")}</p>
-      <p className="text-xs text-encre-douce">{t("settings.cover.frameHint")}</p>
+    <div className="flex flex-col gap-2 rounded-lg border border-line bg-card px-5 py-4">
+      <p className="text-sm font-medium text-ink">{t("settings.cover.frameTitle")}</p>
+      <p className="text-xs text-slate">{t("settings.cover.frameHint")}</p>
       <div
         ref={boxRef}
-        className="relative w-full touch-none select-none overflow-hidden rounded-lg border border-laiton-clair bg-encre"
+        className="relative w-full touch-none select-none overflow-hidden rounded-lg border border-line bg-ink"
         style={{
           aspectRatio: nat ? `${nat.w} / ${nat.h}` : String(BANNER_ASPECT),
           cursor: nat && range > 0 ? "grab" : "default",
@@ -115,28 +115,28 @@ export function CoverPosition({ tripId, src }: { tripId: string; src: string }) 
             {vertical ? (
               <>
                 <div
-                  className="pointer-events-none absolute inset-x-0 top-0 bg-encre/60"
+                  className="pointer-events-none absolute inset-x-0 top-0 bg-ink/60"
                   style={{ height: `${startPct}%` }}
                 />
                 <div
-                  className="pointer-events-none absolute inset-x-0 bottom-0 bg-encre/60"
+                  className="pointer-events-none absolute inset-x-0 bottom-0 bg-ink/60"
                   style={{ height: `${range - startPct}%` }}
                 />
               </>
             ) : (
               <>
                 <div
-                  className="pointer-events-none absolute inset-y-0 left-0 bg-encre/60"
+                  className="pointer-events-none absolute inset-y-0 left-0 bg-ink/60"
                   style={{ width: `${startPct}%` }}
                 />
                 <div
-                  className="pointer-events-none absolute inset-y-0 right-0 bg-encre/60"
+                  className="pointer-events-none absolute inset-y-0 right-0 bg-ink/60"
                   style={{ width: `${range - startPct}%` }}
                 />
               </>
             )}
             <div
-              className="pointer-events-none absolute rounded-sm border-2 border-papier shadow-[0_0_0_1px_rgba(31,42,68,0.4)]"
+              className="pointer-events-none absolute rounded-sm border-2 border-card shadow-[0_0_0_1px_rgba(15,47,56,0.4)]"
               style={
                 vertical
                   ? { left: 0, right: 0, top: `${startPct}%`, height: `${cropPct}%` }
@@ -156,7 +156,7 @@ export function CoverPosition({ tripId, src }: { tripId: string; src: string }) 
         >
           {t("settings.cover.frameSave")}
         </Button>
-        {saved ? <p className="text-xs text-encre-douce">{t("settings.cover.done")}</p> : null}
+        {saved ? <p className="text-xs text-slate">{t("settings.cover.done")}</p> : null}
       </div>
     </div>
   );

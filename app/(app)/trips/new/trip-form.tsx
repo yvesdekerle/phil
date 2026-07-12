@@ -80,14 +80,14 @@ export function TripForm({ defaultTimezone }: { defaultTimezone: string }) {
             type="button"
             onClick={() => setTemplate("")}
             className={cn(
-              "rounded-md border px-3 py-2.5 text-left text-sm transition-colors",
+              "rounded-md border px-3 py-2.5 text-left text-body transition-colors outline-none focus-visible:ring-2 focus-visible:ring-citron focus-visible:ring-offset-2 focus-visible:ring-offset-sand active:scale-[.98]",
               template === ""
-                ? "border-bordeaux bg-bordeaux/5"
-                : "border-laiton-clair bg-papier hover:bg-parchemin",
+                ? "border-lagoon-ink bg-lagoon-wash"
+                : "border-line bg-card hover:bg-wash",
             )}
           >
-            <span className="block font-medium text-encre">{t("newTrip.blank")}</span>
-            <span className="text-xs text-encre-douce">{t("newTrip.blankDesc")}</span>
+            <span className="block text-body font-semibold text-ink">{t("newTrip.blank")}</span>
+            <span className="text-caption text-slate">{t("newTrip.blankDesc")}</span>
           </button>
           {TRIP_TEMPLATES.map((tpl) => (
             <button
@@ -95,19 +95,19 @@ export function TripForm({ defaultTimezone }: { defaultTimezone: string }) {
               type="button"
               onClick={() => setTemplate(tpl.key)}
               className={cn(
-                "rounded-md border px-3 py-2.5 text-left text-sm transition-colors",
+                "rounded-md border px-3 py-2.5 text-left text-body transition-colors outline-none focus-visible:ring-2 focus-visible:ring-citron focus-visible:ring-offset-2 focus-visible:ring-offset-sand active:scale-[.98]",
                 template === tpl.key
-                  ? "border-bordeaux bg-bordeaux/5"
-                  : "border-laiton-clair bg-papier hover:bg-parchemin",
+                  ? "border-lagoon-ink bg-lagoon-wash"
+                  : "border-line bg-card hover:bg-wash",
               )}
             >
-              <span className="block font-medium text-encre">{tpl.name}</span>
-              <span className="text-xs text-encre-douce">{tpl.description}</span>
+              <span className="block text-body font-semibold text-ink">{tpl.name}</span>
+              <span className="text-caption text-slate">{tpl.description}</span>
             </button>
           ))}
         </div>
         {template ? (
-          <p className="text-xs text-encre-douce">
+          <p className="text-caption text-slate">
             {t("newTrip.templateHint").replace(
               "{count}",
               String(TRIP_TEMPLATES.find((tpl) => tpl.key === template)?.ideas.length ?? 0),
@@ -118,7 +118,7 @@ export function TripForm({ defaultTimezone }: { defaultTimezone: string }) {
       <div className="flex flex-col gap-2">
         <Label htmlFor="name">{t("newTrip.name")}</Label>
         <Input id="name" placeholder={t("newTrip.namePlaceholder")} {...register("name")} />
-        {errors.name ? <p className="text-sm text-bordeaux">{errors.name.message}</p> : null}
+        {errors.name ? <p className="text-caption text-berry-ink">{errors.name.message}</p> : null}
       </div>
 
       <div className="flex flex-col gap-2">
@@ -129,7 +129,7 @@ export function TripForm({ defaultTimezone }: { defaultTimezone: string }) {
           {...register("destination")}
         />
         {errors.destination ? (
-          <p className="text-sm text-bordeaux">{errors.destination.message}</p>
+          <p className="text-caption text-berry-ink">{errors.destination.message}</p>
         ) : null}
       </div>
 
@@ -138,14 +138,14 @@ export function TripForm({ defaultTimezone }: { defaultTimezone: string }) {
           <Label htmlFor="startDate">{t("newTrip.startDate")}</Label>
           <Input id="startDate" type="date" {...register("startDate")} />
           {errors.startDate ? (
-            <p className="text-sm text-bordeaux">{errors.startDate.message}</p>
+            <p className="text-caption text-berry-ink">{errors.startDate.message}</p>
           ) : null}
         </div>
         <div className="flex flex-col gap-2">
           <Label htmlFor="endDate">{t("newTrip.endDate")}</Label>
           <Input id="endDate" type="date" {...register("endDate")} />
           {errors.endDate ? (
-            <p className="text-sm text-bordeaux">{errors.endDate.message}</p>
+            <p className="text-caption text-berry-ink">{errors.endDate.message}</p>
           ) : null}
         </div>
       </div>
@@ -159,7 +159,7 @@ export function TripForm({ defaultTimezone }: { defaultTimezone: string }) {
           {...register("coverImageUrl")}
         />
         {errors.coverImageUrl ? (
-          <p className="text-sm text-bordeaux">{errors.coverImageUrl.message}</p>
+          <p className="text-caption text-berry-ink">{errors.coverImageUrl.message}</p>
         ) : null}
       </div>
 
@@ -170,14 +170,16 @@ export function TripForm({ defaultTimezone }: { defaultTimezone: string }) {
           value={watch("timezone")}
           onValueChange={(v) => setValue("timezone", v)}
         />
-        <p className="text-xs text-encre-douce">{t("newTrip.timezoneHint")}</p>
+        <p className="text-caption text-slate">{t("newTrip.timezoneHint")}</p>
       </div>
 
       <div className="flex items-center gap-4">
         <Button type="submit" disabled={pending}>
           {pending ? t("newTrip.submitting") : t("newTrip.submit")}
         </Button>
-        {state.status === "error" ? <p className="text-sm text-bordeaux">{state.message}</p> : null}
+        {state.status === "error" ? (
+          <p className="text-caption text-berry-ink">{state.message}</p>
+        ) : null}
       </div>
     </form>
   );

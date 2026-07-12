@@ -1,9 +1,9 @@
-import { Sparkles } from "lucide-react";
+import { ChevronRight, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { IdeaCard } from "@/components/ideas/idea-card";
+import { IdeasMap, IdeasMapFocusProvider } from "@/components/ideas/ideas-map";
 import type { MapMarker } from "@/components/map/trip-map";
-import { TripMapLazy } from "@/components/map/trip-map-lazy";
 import { RealtimeRefresh } from "@/components/realtime-refresh";
 import { SearchForm } from "@/components/search-form";
 import { Button } from "@/components/ui/button";
@@ -81,10 +81,7 @@ export default async function TripIdeasPage({
     (i) => i.status === "POOL" && !(i.idea_votes ?? []).some((v) => v.user_id === user.id),
   ).length;
 
-  // PHIL-Q37c : carte des idées géolocalisées + logements, distances depuis le logement choisi
-  const locatedIdeas = (ideasData ?? []).filter(
-    (i) => i.location_lat != null && i.location_lng != null,
-  );
+  // PHIL-Q37c : logement de référence pour les distances
   const selectedLodging =
     (lodgings ?? []).find((l) => l.id === lodging) ?? (lodgings ?? [])[0] ?? null;
   const distanceFrom = selectedLodging
@@ -94,55 +91,6 @@ export default async function TripIdeasPage({
         label: selectedLodging.title,
       }
     : null;
-
-  // Distance à vol d'oiseau + temps de trajet (OSRM) depuis le logement choisi
-  const distances = new Map<string, { text: string; title: string }>();
-  if (selectedLodging) {
-    const a = {
-      lat: selectedLodging.location_lat as number,
-      lng: selectedLodging.location_lng as number,
-    };
-    const legs = await Promise.all(
-      locatedIdeas.map(async (i) => {
-        const b = { lat: i.location_lat as number, lng: i.location_lng as number };
-        const km = haversineKm(a, b);
-        if (km < 0.3) return null;
-        const minutes = await getTravelMinutes(a, b);
-        const text = `≈ ${km.toFixed(km < 10 ? 1 : 0)} km${
-          minutes !== null && minutes >= 3 ? ` · ${formatMinutes(minutes)}` : ""
-        }`;
-        return { id: i.id, text };
-      }),
-    );
-    const title = t("ideas.distanceFrom").replace("{name}", selectedLodging.title);
-    for (const leg of legs) {
-      if (leg) distances.set(leg.id, { text: leg.text, title });
-    }
-  }
-
-  const mapMarkers: MapMarker[] = [
-    ...(lodgings ?? []).map(
-      (l): MapMarker => ({
-        id: l.id,
-        lat: l.location_lat as number,
-        lng: l.location_lng as number,
-        title: l.title,
-        subtitle: t("map.lodging"),
-        color: palette.vert,
-        house: true,
-      }),
-    ),
-    ...locatedIdeas.map(
-      (i): MapMarker => ({
-        id: i.id,
-        lat: i.location_lat as number,
-        lng: i.location_lng as number,
-        title: i.title,
-        subtitle: i.location_name ?? undefined,
-        color: palette.bordeaux,
-      }),
-    ),
-  ];
 
   let ideas: IdeaWithMeta[] = (ideasData ?? []).map((row) => {
     const votes = (row.idea_votes ?? []) as { user_id: string; verdict: string }[];
@@ -185,6 +133,61 @@ export default async function TripIdeasPage({
     ideas = [...ideas].sort((a, b) => b.voteCount - a.voteCount);
   }
 
+  // V07d : idées géolocalisées numérotées dans l'ordre d'affichage — la
+  // pastille de la carte d'idée répond au marqueur du même numéro sur la carte.
+  const locatedIdeas = ideas.filter((i) => i.location_lat != null && i.location_lng != null);
+  const ideaNumbers = new Map(locatedIdeas.map((i, idx) => [i.id, idx + 1]));
+
+  // Distance à vol d'oiseau + temps de trajet (OSRM) depuis le logement choisi
+  const distances = new Map<string, { text: string; title: string }>();
+  if (selectedLodging) {
+    const a = {
+      lat: selectedLodging.location_lat as number,
+      lng: selectedLodging.location_lng as number,
+    };
+    const legs = await Promise.all(
+      locatedIdeas.map(async (i) => {
+        const b = { lat: i.location_lat as number, lng: i.location_lng as number };
+        const km = haversineKm(a, b);
+        if (km < 0.3) return null;
+        const minutes = await getTravelMinutes(a, b);
+        const text = `≈ ${km.toFixed(km < 10 ? 1 : 0)} km${
+          minutes !== null && minutes >= 3 ? ` · ${formatMinutes(minutes)}` : ""
+        }`;
+        return { id: i.id, text };
+      }),
+    );
+    const title = t("ideas.distanceFrom").replace("{name}", selectedLodging.title);
+    for (const leg of legs) {
+      if (leg) distances.set(leg.id, { text: leg.text, title });
+    }
+  }
+
+  const mapMarkers: MapMarker[] = [
+    ...(lodgings ?? []).map(
+      (l): MapMarker => ({
+        id: l.id,
+        lat: l.location_lat as number,
+        lng: l.location_lng as number,
+        title: l.title,
+        subtitle: t("map.lodging"),
+        color: palette.lagoon,
+        house: true,
+      }),
+    ),
+    ...locatedIdeas.map(
+      (i): MapMarker => ({
+        id: i.id,
+        lat: i.location_lat as number,
+        lng: i.location_lng as number,
+        title: i.title,
+        subtitle: i.location_name ?? undefined,
+        color: palette.lagoonInk,
+        label: String(ideaNumbers.get(i.id)),
+      }),
+    ),
+  ];
+
   const filterHref = (s: string | null, t: string | null, d = showDismissed) => {
     const p = new URLSearchParams();
     if (s && s !== "votes") p.set("sort", s);
@@ -205,143 +208,160 @@ export default async function TripIdeasPage({
   };
 
   return (
-    <div className="flex flex-col gap-5">
-      {/* PHIL-Q03 : votes en direct */}
-      <RealtimeRefresh tables={["idea_votes"]} />
+    <IdeasMapFocusProvider>
+      <div className="flex flex-col gap-5">
+        {/* PHIL-Q03 : votes en direct */}
+        <RealtimeRefresh tables={["idea_votes"]} />
 
-      {(lodgings ?? []).length > 1 && selectedLodging ? (
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs text-encre-douce">{t("ideas.distancesLabel")}</span>
-          <FilterSelect
-            value={selectedLodging.id}
-            ariaLabel={t("ideas.lodgingFilter")}
-            options={(lodgings ?? []).map((l) => ({
-              value: l.id,
-              label: l.title,
-              href: lodgingHref(l.id),
-            }))}
-          />
-        </div>
-      ) : null}
-
-      {mapMarkers.length > 0 ? (
-        <TripMapLazy markers={mapMarkers} distanceFrom={distanceFrom} heightClass="h-[24rem]" />
-      ) : null}
-
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-encre-douce">{t("ideas.intro")}</p>
-        {canPropose ? (
-          <Button asChild>
-            <Link href={`/trips/${tripId}/ideas/new`}>{t("ideas.propose")}</Link>
-          </Button>
+        {(lodgings ?? []).length > 1 && selectedLodging ? (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs text-slate">{t("ideas.distancesLabel")}</span>
+            <FilterSelect
+              value={selectedLodging.id}
+              ariaLabel={t("ideas.lodgingFilter")}
+              options={(lodgings ?? []).map((l) => ({
+                value: l.id,
+                label: l.title,
+                href: lodgingHref(l.id),
+              }))}
+            />
+          </div>
         ) : null}
-      </div>
 
-      {/* PHIL-U07 : lance le swipe façon Tinder/Bumble sur les idées du voyage. */}
-      <Link
-        href={`/trips/${tripId}/ideas/match`}
-        className="group flex items-center justify-between gap-3 rounded-xl border border-bordeaux/30 bg-gradient-to-br from-bordeaux/10 to-laiton/10 px-4 py-3.5 transition-colors hover:border-bordeaux/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-laiton"
-      >
-        <span className="flex items-center gap-3">
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-bordeaux text-papier">
-            <Sparkles className="size-5" aria-hidden="true" />
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-slate">{t("ideas.intro")}</p>
+          {canPropose ? (
+            <Button asChild>
+              <Link href={`/trips/${tripId}/ideas/new`}>{t("ideas.propose")}</Link>
+            </Button>
+          ) : null}
+        </div>
+
+        {/* PHIL-U07 : lance le swipe façon Tinder/Bumble sur les idées du voyage. */}
+        <Link
+          href={`/trips/${tripId}/ideas/match`}
+          className="flex items-center gap-3.5 rounded-lg bg-gradient-to-br from-lagoon-ink to-ink p-4 shadow-float transition-all outline-none hover:-translate-y-px focus-visible:ring-2 focus-visible:ring-citron focus-visible:ring-offset-2 focus-visible:ring-offset-sand"
+        >
+          <span
+            aria-hidden="true"
+            className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-white/15 text-white"
+          >
+            <Sparkles className="size-5" />
           </span>
-          <span className="flex flex-col">
-            <span className="font-display text-lg text-encre">{t("ideas.match.cta")}</span>
-            <span className="text-xs text-encre-douce">
+          <span className="min-w-0 flex-1">
+            <span className="block text-subhead font-extrabold text-white">
+              {t("ideas.match.cta")}
+            </span>
+            <span className="mt-0.5 block text-caption text-lagoon-soft">
               {toSwipeCount > 0
                 ? t("ideas.match.ctaCount").replace("{n}", String(toSwipeCount))
                 : t("ideas.match.ctaDone")}
             </span>
           </span>
-        </span>
-        <span className="shrink-0 font-display text-2xl text-bordeaux transition-transform group-hover:translate-x-0.5">
-          →
-        </span>
-      </Link>
-
-      <SearchForm
-        action={`/trips/${tripId}/ideas`}
-        q={q}
-        placeholder={t("ideas.searchPlaceholder")}
-        hidden={{ sort, tag, dismissed, lodging }}
-      />
-
-      <div className="flex flex-wrap items-center gap-2">
-        <Link
-          href={filterHref(null, tag ?? null)}
-          className={cn(
-            "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
-            sortBy === "votes"
-              ? "border-bordeaux bg-bordeaux text-papier"
-              : "border-laiton-clair bg-papier text-encre-douce hover:text-encre",
-          )}
-        >
-          {t("ideas.sortVotes")}
+          <ChevronRight aria-hidden="true" className="size-5 shrink-0 text-lagoon-soft" />
         </Link>
-        <Link
-          href={filterHref("recent", tag ?? null)}
-          className={cn(
-            "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
-            sortBy === "recent"
-              ? "border-bordeaux bg-bordeaux text-papier"
-              : "border-laiton-clair bg-papier text-encre-douce hover:text-encre",
-          )}
-        >
-          {t("ideas.sortRecent")}
-        </Link>
-        {allTags.length > 0 ? <span className="mx-1 text-laiton-clair">·</span> : null}
-        {allTags.map((t) => (
+
+        <SearchForm
+          action={`/trips/${tripId}/ideas`}
+          q={q}
+          placeholder={t("ideas.searchPlaceholder")}
+          hidden={{ sort, tag, dismissed, lodging }}
+        />
+
+        <div className="flex flex-wrap items-center gap-2">
           <Link
-            key={t}
-            href={filterHref(sortBy === "recent" ? "recent" : null, tag === t ? null : t)}
+            href={filterHref(null, tag ?? null)}
             className={cn(
-              "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
-              tag === t
-                ? "border-laiton bg-laiton text-papier"
-                : "border-laiton-clair bg-papier text-encre-douce hover:text-encre",
+              "inline-flex h-8 items-center rounded-full border px-3 text-ui transition-colors outline-none focus-visible:ring-2 focus-visible:ring-citron focus-visible:ring-offset-2 focus-visible:ring-offset-sand",
+              sortBy === "votes"
+                ? "border-ink bg-ink text-white"
+                : "border-line bg-card text-slate hover:bg-wash hover:text-ink",
             )}
           >
-            #{t}
+            {t("ideas.sortVotes")}
           </Link>
-        ))}
-        <span className="flex-1" />
-        <Link
-          href={filterHref(sortBy === "recent" ? "recent" : null, tag ?? null, !showDismissed)}
-          className={cn(
-            "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
-            showDismissed
-              ? "border-encre bg-encre text-papier"
-              : "border-laiton-clair bg-papier text-encre-douce hover:text-encre",
-          )}
-        >
-          {showDismissed ? t("ideas.backToIdeas") : t("ideas.seeDismissed")}
-        </Link>
-      </div>
-
-      {ideas.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-laiton-clair bg-papier/60 px-6 py-14 text-center">
-          <p className="font-display text-xl text-encre italic">{t("ideas.emptyTitle")}</p>
-          <p className="max-w-sm text-sm text-encre-douce">{t("ideas.emptyBody")}</p>
-          {canPropose ? (
-            <Button asChild className="mt-1">
-              <Link href={`/trips/${tripId}/ideas/new`}>{t("ideas.propose")}</Link>
-            </Button>
-          ) : null}
-        </div>
-      ) : (
-        <div className="flex flex-col gap-3">
-          {ideas.map((idea) => (
-            <IdeaCard
-              key={idea.id}
-              idea={idea}
-              tripId={tripId}
-              canPlan={canPropose}
-              distance={distances.get(idea.id) ?? null}
-            />
+          <Link
+            href={filterHref("recent", tag ?? null)}
+            className={cn(
+              "inline-flex h-8 items-center rounded-full border px-3 text-ui transition-colors outline-none focus-visible:ring-2 focus-visible:ring-citron focus-visible:ring-offset-2 focus-visible:ring-offset-sand",
+              sortBy === "recent"
+                ? "border-ink bg-ink text-white"
+                : "border-line bg-card text-slate hover:bg-wash hover:text-ink",
+            )}
+          >
+            {t("ideas.sortRecent")}
+          </Link>
+          {allTags.length > 0 ? <span className="mx-1 text-line">·</span> : null}
+          {allTags.map((t) => (
+            <Link
+              key={t}
+              href={filterHref(sortBy === "recent" ? "recent" : null, tag === t ? null : t)}
+              className={cn(
+                "inline-flex h-8 items-center rounded-full border px-3 text-ui transition-colors outline-none focus-visible:ring-2 focus-visible:ring-citron focus-visible:ring-offset-2 focus-visible:ring-offset-sand",
+                tag === t
+                  ? "border-line bg-citron text-card"
+                  : "border-line bg-card text-slate hover:bg-wash hover:text-ink",
+              )}
+            >
+              #{t}
+            </Link>
           ))}
+          <span className="flex-1" />
+          <Link
+            href={filterHref(sortBy === "recent" ? "recent" : null, tag ?? null, !showDismissed)}
+            className={cn(
+              "inline-flex h-8 items-center rounded-full border px-3 text-ui transition-colors outline-none focus-visible:ring-2 focus-visible:ring-citron focus-visible:ring-offset-2 focus-visible:ring-offset-sand",
+              showDismissed
+                ? "border-ink bg-ink text-card"
+                : "border-line bg-card text-slate hover:bg-wash hover:text-ink",
+            )}
+          >
+            {showDismissed ? t("ideas.backToIdeas") : t("ideas.seeDismissed")}
+          </Link>
         </div>
-      )}
-    </div>
+
+        {/* V07d : liste large à gauche, carte sticky à droite (façon Carte, mais
+          la liste garde la place des actions) ; en mobile la carte est au-dessus. */}
+        <div
+          className={
+            mapMarkers.length > 0
+              ? "flex flex-col gap-4 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:items-start xl:grid-cols-[minmax(0,1fr)_minmax(0,30rem)]"
+              : undefined
+          }
+        >
+          {mapMarkers.length > 0 ? (
+            <div className="lg:sticky lg:top-4 lg:order-2">
+              <IdeasMap markers={mapMarkers} distanceFrom={distanceFrom} />
+            </div>
+          ) : null}
+          <div className="lg:order-1">
+            {ideas.length === 0 ? (
+              <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-line bg-card/60 px-6 py-14 text-center">
+                <p className="font-sans text-xl text-ink italic">{t("ideas.emptyTitle")}</p>
+                <p className="max-w-sm text-sm text-slate">{t("ideas.emptyBody")}</p>
+                {canPropose ? (
+                  <Button asChild className="mt-1">
+                    <Link href={`/trips/${tripId}/ideas/new`}>{t("ideas.propose")}</Link>
+                  </Button>
+                ) : null}
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {ideas.map((idea) => (
+                  <IdeaCard
+                    key={idea.id}
+                    idea={idea}
+                    tripId={tripId}
+                    canPlan={canPropose}
+                    distance={distances.get(idea.id) ?? null}
+                    mapNumber={ideaNumbers.get(idea.id) ?? null}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </IdeasMapFocusProvider>
   );
 }

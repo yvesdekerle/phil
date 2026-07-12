@@ -19,9 +19,9 @@ export default async function NewTripPage() {
   const profile = await getOwnProfile(supabase);
 
   return (
-    <main className="mx-auto w-full max-w-lg flex-1 px-4 py-8">
-      <h1 className="mb-2 text-center font-display text-3xl text-encre">{t("newTrip.title")}</h1>
-      <p className="mb-6 text-center text-sm text-encre-douce">{t("newTrip.subtitle")}</p>
+    <main className="mx-auto w-full max-w-lg flex-1 px-4 py-6">
+      <h1 className="text-title text-ink">{t("newTrip.title")}</h1>
+      <p className="mt-1 mb-6 text-body text-slate">{t("newTrip.subtitle")}</p>
       <Card>
         <CardContent>
           <TripForm defaultTimezone={profile?.timezone ?? "Europe/Paris"} />

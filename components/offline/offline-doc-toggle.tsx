@@ -64,11 +64,11 @@ export function OfflineDocToggle({
         )}
       </Button>
       {offline ? (
-        <span className="rounded-full bg-encre/10 px-2 py-0.5 text-xs font-medium text-encre">
+        <span className="rounded-full bg-ink/10 px-2 py-0.5 text-xs font-medium text-ink">
           {t("offline.offlineBadge")}
         </span>
       ) : null}
-      {error ? <span className="text-xs text-bordeaux">{error}</span> : null}
+      {error ? <span className="text-xs text-lagoon-ink">{error}</span> : null}
     </span>
   );
 }

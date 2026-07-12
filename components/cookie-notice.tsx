@@ -40,8 +40,8 @@ export function CookieNotice() {
   }
 
   return (
-    <div className="fixed inset-x-4 bottom-4 z-50 mx-auto flex max-w-xl flex-wrap items-center gap-3 rounded-lg border border-laiton-clair bg-papier px-4 py-3 shadow-[0_4px_20px_rgba(31,42,68,0.15)]">
-      <p className="min-w-0 flex-1 text-sm text-encre-douce">
+    <div className="fixed inset-x-4 bottom-4 z-50 mx-auto flex max-w-xl flex-wrap items-center gap-3 rounded-lg border border-line bg-card px-4 py-3 shadow-[0_4px_20px_rgba(15,47,56,0.15)]">
+      <p className="min-w-0 flex-1 text-sm text-slate">
         {t("misc.cookieText")}{" "}
         <Link href="/privacy" className="underline underline-offset-4">
           {t("misc.cookieLearnMore")}

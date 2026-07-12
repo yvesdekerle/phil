@@ -2,6 +2,7 @@ import { MessageCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getT } from "@/lib/i18n/server";
 import { createClient } from "@/lib/supabase/server";
@@ -101,7 +102,7 @@ export default async function TripParticipantsPage({
           return (
             <li
               key={p.user_id}
-              className="flex flex-wrap items-center gap-3 rounded-lg border border-laiton-clair bg-papier px-4 py-3"
+              className="flex flex-wrap items-center gap-3 rounded-lg border border-line bg-card px-4 py-3"
             >
               {profile?.avatar_url ? (
                 <Image
@@ -109,29 +110,29 @@ export default async function TripParticipantsPage({
                   alt=""
                   width={36}
                   height={36}
-                  className="rounded-full border border-laiton-clair"
+                  className="rounded-full border border-line"
                 />
               ) : (
-                <span className="flex size-9 items-center justify-center rounded-full border border-laiton-clair bg-parchemin text-sm text-laiton">
+                <span className="flex size-9 items-center justify-center rounded-full border border-line bg-sand text-sm text-mist">
                   {name.charAt(0).toUpperCase()}
                 </span>
               )}
-              <span className="min-w-0 flex-1 text-sm font-medium text-encre">
+              <span className="min-w-0 flex-1 text-subhead text-ink">
                 {name}
-                {isMe ? <span className="text-encre-douce">{t("participants.you")}</span> : null}
+                {isMe ? <span className="text-slate">{t("participants.you")}</span> : null}
                 {profile?.whatsapp ? (
                   waContactLink(profile.whatsapp) ? (
                     <a
                       href={waContactLink(profile.whatsapp) ?? undefined}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mt-0.5 flex items-center gap-1 text-xs font-normal text-encre-douce hover:text-encre hover:underline"
+                      className="mt-0.5 flex items-center gap-1 text-xs font-normal text-slate hover:text-ink hover:underline"
                     >
                       <MessageCircle className="size-3.5" aria-hidden="true" />
                       {profile.whatsapp}
                     </a>
                   ) : (
-                    <span className="mt-0.5 flex items-center gap-1 text-xs font-normal text-encre-douce">
+                    <span className="mt-0.5 flex items-center gap-1 text-xs font-normal text-slate">
                       <MessageCircle className="size-3.5" aria-hidden="true" />
                       {profile.whatsapp}
                     </span>
@@ -145,8 +146,13 @@ export default async function TripParticipantsPage({
                   userName={name}
                   role={p.role}
                 />
+              ) : p.role === "OWNER" ? (
+                // B5 — badge capitaine (ink/citron), unique par équipage
+                <Badge variant="captain">{roleLabels[p.role]}</Badge>
               ) : (
-                <span className="text-xs text-encre-douce">{roleLabels[p.role] ?? p.role}</span>
+                <span className="font-mono text-label text-slate uppercase">
+                  {roleLabels[p.role] ?? p.role}
+                </span>
               )}
             </li>
           );
@@ -163,7 +169,7 @@ export default async function TripParticipantsPage({
         <LeaveTripButton tripId={tripId} />
         <Link
           href={`/trips/${tripId}/emergency`}
-          className="text-sm text-encre-douce underline underline-offset-4 hover:text-encre"
+          className="text-sm text-slate underline underline-offset-4 hover:text-ink"
         >
           {t("participants.emergencyLink")}
         </Link>

@@ -1,20 +1,23 @@
+import { CalendarDays, Plus } from "lucide-react";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { TodayHero } from "@/components/calendar/today-hero";
 import { TripViewToggle } from "@/components/calendar/trip-view-toggle";
 import { TripReadiness } from "@/components/trips/trip-readiness";
-import { WeatherLine, WeatherStrip } from "@/components/trips/trip-weather";
+import { WeatherStrip } from "@/components/trips/trip-weather";
 import { Button } from "@/components/ui/button";
-import { eventDayKey, eventTime } from "@/lib/events/datetime";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Fab } from "@/components/ui/fab";
+import { eventDayKey, formatInTimezone } from "@/lib/events/datetime";
 import type { TripEvent } from "@/lib/events/types";
 import { navigateUrl } from "@/lib/geo/directions";
 import { ensureTripCoords } from "@/lib/geo/locate";
 import { formatMinutes, getTravelMinutes } from "@/lib/geo/travel-time";
 import { getT } from "@/lib/i18n/server";
+import { getPendingByTrip } from "@/lib/notifications/pending-server";
 import { createClient } from "@/lib/supabase/server";
 import { type DailyForecast, getDailyForecast } from "@/lib/weather/open-meteo";
-import { CalendarDays } from "./calendar-days";
+import { ProgrammeClient } from "./programme-client";
 import { QuickAdd } from "./quick-add";
 
 export default async function TripCalendarPage({
@@ -40,7 +43,7 @@ export default async function TripCalendarPage({
   const [{ data: eventsData }, { data: me }, { data: trip }] = await Promise.all([
     supabase
       .from("trip_events")
-      .select("*")
+      .select("*, event_documents(count)")
       .eq("trip_id", tripId)
       .order("starts_at", { ascending: true }),
     supabase
@@ -58,23 +61,15 @@ export default async function TripCalendarPage({
       .single(),
   ]);
 
-  const events = (eventsData ?? []) as TripEvent[];
+  const events = (eventsData ?? []) as (TripEvent & { event_documents: { count: number }[] })[];
   const canEdit = me?.role === "OWNER" || me?.role === "EDITOR";
   // "Aujourd'hui" dans le fuseau du voyage
   const todayKey = trip ? eventDayKey(new Date().toISOString(), trip.default_timezone) : null;
 
-  // PHIL-N10 : vue « Aujourd'hui » pendant le voyage
+  // PHIL-N10 : événement en cours / prochain départ pendant le voyage
   const nowIso = new Date().toISOString();
   const tripOngoing =
     trip && trip.start_date <= nowIso.slice(0, 10) && nowIso.slice(0, 10) <= trip.end_date;
-  const heroOf = (e: TripEvent) => ({
-    id: e.id,
-    title: e.title,
-    type: e.type,
-    startsAt: e.starts_at,
-    time: eventTime(e.starts_at, e.timezone),
-    location: e.location_address ?? e.location_name,
-  });
   const currentEvent = tripOngoing
     ? (events.find(
         (e) => e.starts_at <= nowIso && e.ends_at !== null && (e.ends_at as string) >= nowIso,
@@ -94,6 +89,12 @@ export default async function TripCalendarPage({
     }
   }
   const todayWeather = weatherDays.find((d) => d.date === todayKey) ?? null;
+  // « SAM 08 · 29° » (déclinaison L2a) — jour courant dans le fuseau du voyage
+  const headerMeta = trip
+    ? `${formatInTimezone(nowIso, trip.default_timezone, "EEE dd").replace(".", "").toUpperCase()}${
+        todayWeather ? ` · ${todayWeather.tMax}°` : ""
+      }`
+    : null;
 
   // PHIL-P05 : temps de route entre l'événement en cours et le prochain départ
   let travelToNext: string | null = null;
@@ -122,49 +123,79 @@ export default async function TripCalendarPage({
         : null
     : null;
 
-  return (
-    // Pleine largeur comme Timeline/Carte (PHIL-Q37c) : évite le saut de gabarit
-    // au changement de vue du Journal.
-    <div className="relative left-1/2 right-1/2 -mx-[50vw] w-screen px-4 sm:px-6 lg:px-8">
-      <div className="mx-auto flex max-w-[104rem] flex-col gap-6">
-        {tripOngoing && todayKey ? (
-          <TodayHero
-            tripId={tripId}
-            current={currentEvent ? heroOf(currentEvent) : null}
-            next={nextEvent ? heroOf(nextEvent) : null}
-            dayKey={todayKey}
-            weather={todayWeather ? <WeatherLine day={todayWeather} /> : undefined}
-            travelToNext={travelToNext}
-            navigateToNext={navigateToNext}
-          />
-        ) : null}
-        {trip ? <WeatherStrip days={weatherDays} destination={trip.destination} /> : null}
-        {/* PHIL-U01 : préparatifs, tant que le voyage n'est pas passé */}
-        {trip && trip.end_date >= nowIso.slice(0, 10) ? <TripReadiness tripId={tripId} /> : null}
-        <div className="flex items-center justify-between gap-3">
-          <TripViewToggle tripId={tripId} active="calendar" />
-          {canEdit ? (
-            <Button asChild>
-              <Link href={`/trips/${tripId}/events/new`}>{t("calendar.addEvent")}</Link>
-            </Button>
-          ) : null}
-        </div>
+  // PHIL-U02 : la journée libre de demain propose d'aller voter les idées
+  const pendingMap = await getPendingByTrip(supabase, user.id, [tripId]);
+  const hasPendingIdeas = (pendingMap.get(tripId)?.ideas ?? 0) > 0;
 
-        {canEdit && trip ? (
-          <QuickAdd
-            tripId={tripId}
-            defaultDate={
-              tripOngoing && todayKey
-                ? todayKey
-                : trip.start_date >= nowIso.slice(0, 10)
-                  ? trip.start_date
-                  : trip.end_date
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex items-end justify-between gap-3 border-b border-line">
+        <TripViewToggle tripId={tripId} active="calendar" />
+        {headerMeta ? (
+          <span className="pb-2 font-mono text-caption font-semibold text-lagoon-ink uppercase tabular-nums">
+            {headerMeta}
+          </span>
+        ) : null}
+      </div>
+
+      {/* PHIL-U01 : préparatifs, tant que le voyage n'est pas passé */}
+      {trip && trip.end_date >= nowIso.slice(0, 10) ? <TripReadiness tripId={tripId} /> : null}
+      {trip && !tripOngoing ? (
+        <WeatherStrip days={weatherDays} destination={trip.destination} />
+      ) : null}
+
+      {trip ? (
+        events.length === 0 ? (
+          <EmptyState
+            icon={<CalendarDays />}
+            title={t("calendar.emptyTitle")}
+            description={t("calendar.emptyBody")}
+            action={
+              canEdit ? (
+                <Button asChild>
+                  <Link href={`/trips/${tripId}/events/new`}>{t("calendar.addEvent")}</Link>
+                </Button>
+              ) : undefined
             }
           />
-        ) : null}
+        ) : (
+          <ProgrammeClient
+            tripId={tripId}
+            events={events}
+            todayKey={todayKey}
+            tripStart={trip.start_date}
+            tripEnd={trip.end_date}
+            canEdit={canEdit}
+            currentEventId={currentEvent?.id ?? null}
+            nextEventId={nextEvent?.id ?? null}
+            travelToNext={travelToNext}
+            navigateToNext={navigateToNext}
+            hasPendingIdeas={hasPendingIdeas}
+          >
+            <QuickAdd
+              tripId={tripId}
+              defaultDate={
+                tripOngoing && todayKey
+                  ? todayKey
+                  : trip.start_date >= nowIso.slice(0, 10)
+                    ? trip.start_date
+                    : trip.end_date
+              }
+            />
+          </ProgrammeClient>
+        )
+      ) : null}
 
-        <CalendarDays tripId={tripId} events={events} todayKey={todayKey} canEdit={canEdit} />
-      </div>
+      {canEdit ? (
+        <Fab
+          asChild
+          className="fixed right-4 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-40 lg:right-8 lg:bottom-6 print:hidden"
+        >
+          <Link href={`/trips/${tripId}/events/new`} aria-label={t("calendar.addEvent")}>
+            <Plus className="size-6" aria-hidden="true" />
+          </Link>
+        </Fab>
+      ) : null}
     </div>
   );
 }
