@@ -1225,6 +1225,9 @@ Deuxième passage d'Yves sur le redesign en desktop (captures timeline/dépenses
 - [x] V07e — Dépenses : **voir la répartition d'une dépense et la modifier** (clic sur la ligne → feuille détail : montant, payeur, bénéficiaires et part de chacun ; formulaire pré-rempli pour créateur/payeur/capitaine tant que la Bourse est ouverte, lecture seule sinon ; règlements non éditables). Migrations `20260711172000` + `20260711173000` (appliquées au dev le 2026-07-11) : policy UPDATE sur `expenses`, insert des bénéficiaires élargi au payeur/capitaine (aligné sur le DELETE), RPC transactionnelle `update_expense_with_beneficiaries` (security invoker). `pnpm verify:rls` : 30/30 ✓. *(fait le 2026-07-11)*
 - [ ] V07f — Étendre `scripts/verify-rls.ts` à la Bourse : les policies `expenses`/`expense_beneficiaries` (select/insert/update/delete, cercle créateur/payeur/capitaine) n'ont jamais été couvertes par le script — découvert en V07e.
 
+### [ ] PHIL-V08 — Onboarding coffre : proposer l'activation à la création du compte + relance à la connexion
+Demande Yves (2026-07-12, après son enrôlement passkey en prod) : l'activation du coffre (passkey Face ID/Touch ID) n'est découvrable que via Profil → Sécurité du coffre — personne ne la trouvera seul. À faire : (1) **à la création du compte**, proposer l'activation du coffre dans le parcours d'accueil ; (2) **à la connexion**, si l'utilisateur n'a pas de passkey, relancer par une invite discrète (bannière/carte à fermer, jamais bloquante — cadence de rappel à définir pour ne pas harceler). Penser au cas multi-appareils (coffre déjà activé ailleurs mais pas de passkey sur cet appareil → proposer l'ajout d'appareil via QR, T01 Phase 5) et à l'i18n fr/en/es.
+
 ---
 
 ## Backlog — différé volontairement (ne pas traiter sans demande explicite)
